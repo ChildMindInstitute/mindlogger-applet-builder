@@ -2,6 +2,7 @@
   <v-container>
     <v-layout
       wrap
+      column
     >
       <v-form
         ref="form"
@@ -19,19 +20,37 @@
           label="Description"
           required
         ></v-text-field>
-        <ul>
-          <li v-for="activity in activities" v-bind:key="activity.id">
-            {{ activity.name }}
-          </li>
-          <v-btn @click="addActivity">New Activity</v-btn>
-        </ul>
+        <v-list>
+          <v-subheader>
+            Activities
+          </v-subheader>
+          <v-list-item v-for="activity in activities" v-bind:key="activity.id">
+            <v-list-item-content>
+              <v-list-item-title v-text="activity.name"></v-list-item-title>
+            </v-list-item-content>
+            <v-list-item-action>
+              <v-btn icon>
+                <v-icon color="grey lighten-1">mdi-pencil-outline</v-icon>
+              </v-btn>
+            </v-list-item-action>
+            <v-list-item-action>
+              <v-btn icon>
+                <v-icon color="grey lighten-1">mdi-delete</v-icon>
+              </v-btn>
+            </v-list-item-action>
+          </v-list-item>
+          <v-list-item @click="addActivity">
+            <v-icon color="grey lighten-1">mdi-plus</v-icon>
+          </v-list-item>
+        </v-list>
       </v-form>
+      <v-btn style="margin: 10px;" color="primary">Save Activity Set</v-btn>
     </v-layout>
     <v-dialog
       v-model="dialog"
-      width="500"
+      width="800"
     >
-      <ActivityBuilder v-on:closeModal="onCloseModal"/>
+      <ActivityBuilder v-on:closeModal="onCloseActivityModal"/>
       
     </v-dialog>
   </v-container>
@@ -53,7 +72,7 @@ export default {
         v => !!v || 'This field is required',
       ],
       lazy: false,
-      dialog: true
+      dialog: false
     }),
 
     methods: {
@@ -62,20 +81,17 @@ export default {
           this.snackbar = true
         }
       },
-      reset () {
-        this.$refs.form.reset()
-      },
-      resetValidation () {
-        this.$refs.form.resetValidation()
-      },
       addActivity () {
-        console.log('clicked')
         this.dialog = true;
-        this.activities.push(5)
       },
-      onCloseModal() {
-        console.log('recieved close')
+      onCloseActivityModal(response) {
         this.dialog = false;
+        if (response) {
+          this.onNewActivity(response)
+        }
+      },
+      onNewActivity(activity) {
+        this.activities.push(activity)
       }
     },
 };

@@ -22,9 +22,12 @@
           required
         ></v-text-field>
         <v-select
-          :items="itemTypes"
-          label="Item Type"
+          v-model="inputType"
+          :items="inputTypes"
+          label="Input Type"
         ></v-select>
+        <RadioBuilder v-if="inputType === 'radio'"/>
+        <TextBuilder v-if="inputType === 'text'"/>
       </v-form>
     </v-card-text>
     <v-divider></v-divider>
@@ -49,17 +52,25 @@
 </template>
 
 <script>
+import RadioBuilder from './ItemBuilders/RadioBuilder.vue';
+import TextBuilder from './ItemBuilders/TextBuilder.vue';
+
 export default {
+  components: {
+    RadioBuilder,
+    TextBuilder
+  },
   data: () => ({
     name: '',
     question: '',
     description: '',
+    inputType: '',
     items: [],
     textRules: [
       v => !!v || 'This field is required',
     ],
     lazy: false,
-    itemTypes: ['radio', 'text']
+    inputTypes: ['radio', 'text']
   }),
   methods: {
     validate () {

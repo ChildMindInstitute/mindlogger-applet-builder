@@ -24,13 +24,24 @@
             label="Activity Description"
             required
           ></v-text-field>
-          Items
-          <ul>
-            <li v-for="item in items" v-bind:key="item.id">
-              {{ item.name }}
-            </li>
-            <li style="text-decoration: underline;" @click="addItem">Add new item</li>
-          </ul>
+          <v-subheader>
+            Items
+          </v-subheader>
+          <v-list>
+            <v-list-item v-for="(item, index) in items" v-bind:key="item.id">
+              <v-list-item-content>
+                <v-list-item-title v-text="item.name"></v-list-item-title>
+              </v-list-item-content>
+              <v-list-item-action>
+                <v-btn icon @click="deleteItem(index)">
+                  <v-icon color="grey lighten-1">mdi-delete</v-icon>
+                </v-btn>
+              </v-list-item-action>
+            </v-list-item>
+            <v-list-item @click="addItem">
+              <v-icon color="grey lighten-1">mdi-plus</v-icon>
+            </v-list-item>
+          </v-list>
         </v-form>
         <v-alert
           style="margin-top: 12px;"
@@ -62,7 +73,6 @@
     </v-card>
     <v-dialog
       v-model="dialog"
-      width="800"
     >
       <ItemBuilder v-on:closeItemModal="onCloseItemModal"/>
       
@@ -102,11 +112,14 @@ export default {
       onCloseItemModal(response) {
         this.dialog = false;
         if (response) {
-          this.onNewItem(response)
+          this.onNewItem(response);
         }
       },
       onNewItem(item) {
-        this.items.push(item)
+        this.items.push(item);
+      },
+      deleteItem(index) {
+        this.items.splice(index, 1);
       },
       onClickSaveActivity() {
         if (this.isActivityValid()) {

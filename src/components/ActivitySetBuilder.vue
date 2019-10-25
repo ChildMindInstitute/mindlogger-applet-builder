@@ -11,30 +11,25 @@
         <v-text-field
           v-model="name"
           :rules="textRules"
-          label="Name"
+          label="Activity Set Name"
           required
         ></v-text-field>
         <v-text-field
           v-model="description"
           :rules="textRules"
-          label="Description"
+          label="Activity Set Description"
           required
         ></v-text-field>
         <v-list>
           <v-subheader>
             Activities
           </v-subheader>
-          <v-list-item v-for="activity in activities" v-bind:key="activity.id">
+          <v-list-item v-for="(activity, index) in activities" v-bind:key="activity.id">
             <v-list-item-content>
               <v-list-item-title v-text="activity.name"></v-list-item-title>
             </v-list-item-content>
             <v-list-item-action>
-              <v-btn icon>
-                <v-icon color="grey lighten-1">mdi-pencil-outline</v-icon>
-              </v-btn>
-            </v-list-item-action>
-            <v-list-item-action>
-              <v-btn icon>
+              <v-btn icon @click="deleteActivity(index)">
                 <v-icon color="grey lighten-1">mdi-delete</v-icon>
               </v-btn>
             </v-list-item-action>
@@ -92,6 +87,9 @@ export default {
       },
       onNewActivity(activity) {
         this.activities.push(activity)
+      },
+      deleteActivity(index) {
+        this.activities.splice(index, 1);
       }
     },
 };

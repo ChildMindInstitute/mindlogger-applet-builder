@@ -27,7 +27,7 @@
           label="Input Type"
         ></v-select>
         <RadioBuilder v-if="inputType === 'radio'" v-on:updateOptions="updateOptions" />
-        <TextBuilder v-if="inputType === 'text'"/>
+        <TextBuilder v-if="inputType === 'text'" v-on:update="updateResponseOptions"/>
       </v-form>
     </v-card-text>
     <v-divider></v-divider>
@@ -70,7 +70,8 @@ export default {
       v => !!v || 'This field is required',
     ],
     lazy: false,
-    inputTypes: ['radio', 'text']
+    inputTypes: ['radio', 'text'],
+    responseOptions: {}
   }),
   methods: {
     validate () {
@@ -84,6 +85,9 @@ export default {
         'description': this.description,
         'inputType': this.inputType
       })
+    },
+    updateResponseOptions(options) {
+      this.responseOptions = options;
     },
     updateOptions(newOptions) {
       this.options = newOptions;

@@ -26,7 +26,7 @@
           :items="inputTypes"
           label="Input Type"
         ></v-select>
-        <RadioBuilder v-if="inputType === 'radio'"/>
+        <RadioBuilder v-if="inputType === 'radio'" v-on:updateOptions="updateOptions" />
         <TextBuilder v-if="inputType === 'text'"/>
       </v-form>
     </v-card-text>
@@ -65,7 +65,7 @@ export default {
     question: '',
     description: '',
     inputType: '',
-    items: [],
+    options: [],
     textRules: [
       v => !!v || 'This field is required',
     ],
@@ -81,8 +81,90 @@ export default {
     onSaveItem() {
       this.$emit('closeItemModal', {
         'name': this.name,
-        'description': this.description
+        'description': this.description,
+        'inputType': this.inputType
       })
+    },
+    updateOptions(newOptions) {
+      this.options = newOptions;
+      console.log(this.options);
+    },
+    buildItemSchema() {
+      return {
+        "@type": [
+          "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/schemas/Field"
+        ],
+        "http://schema.org/question": [
+          {
+            "@language": "en",
+            "@value": this.question
+          }
+        ],
+        "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/terms/valueconstraints": [
+          {
+            "@type": [
+              "http://www.w3.org/2001/XMLSchema#anyURI"
+            ],
+            "http://schema.org/itemListElement": [
+              {
+                "@list": this.options
+              }
+            ],
+            "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/terms/multipleChoice": [
+              {
+                "@type": "http://schema.org/Boolean",
+                "@value": false
+              }
+            ],
+            "http://schema.org/maxValue": [
+              {
+                "@value": 1
+              }
+            ],
+            "http://schema.org/minValue": [
+              {
+                "@value": 0
+              }
+            ]
+          }
+        ],
+        "http://schema.org/description": [
+          {
+            "@language": "en",
+            "@value": this.question
+          }
+        ],
+        "http://schema.org/schemaVersion": [
+          {
+            "@language": "en",
+            "@value": "0.0.1"
+          }
+        ],
+        "http://schema.org/version": [
+          {
+            "@language": "en",
+            "@value": "0.0.1"
+          }
+        ],
+        "http://www.w3.org/2004/02/skos/core#altLabel": [
+          {
+            "@language": "en",
+            "@value": this.question
+          }
+        ],
+        "http://www.w3.org/2004/02/skos/core#prefLabel": [
+          {
+            "@language": "en",
+            "@value": "Nightmares"
+          }
+        ],
+        "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/terms/inputType": [
+          {
+            "@type": "http://www.w3.org/2001/XMLSchema#string",
+            "@value": this.inputType
+          }
+        ]
+      };
     },
     onDiscardItem() {
       this.$emit('closeItemModal', null)

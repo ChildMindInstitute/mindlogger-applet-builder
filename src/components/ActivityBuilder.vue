@@ -31,7 +31,18 @@
             <v-list-item v-for="(item, index) in items" v-bind:key="item.id">
               <v-list-item-content>
                 <v-list-item-title v-text="item.name"></v-list-item-title>
+                <v-list-item-subtitle v-text="item.inputType"></v-list-item-subtitle>
               </v-list-item-content>
+              <v-list-item-action>
+                <v-btn icon @click="editItem(index)">
+                  <v-icon color="grey lighten-1">mdi-pencil</v-icon>
+                </v-btn>
+              </v-list-item-action>
+              <v-list-item-action>
+                <v-btn icon @click="duplicateItem(index)">
+                  <v-icon color="grey lighten-1">mdi-content-copy</v-icon>
+                </v-btn>
+              </v-list-item-action>
               <v-list-item-action>
                 <v-btn icon @click="deleteItem(index)">
                   <v-icon color="grey lighten-1">mdi-delete</v-icon>
@@ -77,6 +88,12 @@
       <ItemBuilder v-on:closeItemModal="onCloseItemModal"/>
       
     </v-dialog>
+    <v-dialog
+      v-model="editDialog"
+    >
+      <ItemBuilder v-on:closeItemModal="onCloseItemModal" />
+      
+    </v-dialog>
   </div>
 </template>
 
@@ -97,7 +114,9 @@ export default {
       ],
       lazy: false,
       dialog: false,
-      error: ''
+      editDialog: false,
+      error: '',
+      editIndex: 0,
     }),
 
     methods: {
@@ -116,7 +135,16 @@ export default {
         }
       },
       onNewItem(item) {
+        console.log(item);
         this.items.push(item);
+      },
+      editItem(index) {
+        this.editIndex = index;
+        this.editDialog = true;
+        return index;
+      },
+      duplicateItem(index) {
+        this.items.push(this.items[index]);
       },
       deleteItem(index) {
         this.items.splice(index, 1);

@@ -9,7 +9,7 @@
     <v-card-text>
       <v-form
         ref="form"
-        :lazy-validation="lazy"
+        :lazy-validation="false"
       >
         <v-text-field
           v-model="name"
@@ -74,7 +74,6 @@ export default {
     textRules: [
       v => !!v || 'This field is required',
     ],
-    lazy: false,
     inputTypes: ['radio', 'text'],
     responseOptions: {}
   }),
@@ -106,7 +105,7 @@ export default {
             "https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/EmaHBNMorning/ema_morning_context"
         ],
         "@type": "reproschema:Field",
-        "@id": "sleeping_aids",
+        "@id": this.name,
         "skos:prefLabel": this.name,
         "skos:altLabel": this.name,
         "schema:description": this.description,
@@ -120,7 +119,7 @@ export default {
             "@type": "xsd:anyURI",
             "multipleChoice": false,
             "schema:minValue": 0,
-            "schema:maxValue": this.options.length,
+            "schema:maxValue": this.options.length - 1,
             "choices": choices
         }
       };

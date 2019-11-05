@@ -92,12 +92,12 @@ export default {
     }),
 
   methods: {
-    validate () {
+    validate() {
       if (this.$refs.form.validate()) {
         this.snackbar = true
       }
     },
-    addActivity () {
+    addActivity() {
       this.dialog = true;
     },
     onCloseActivityModal(response) {
@@ -110,6 +110,7 @@ export default {
       this.activities.push(activity)
     },
     editActivity(index) {
+      // todo
       return index;
     },
     duplicateActivity(index) {
@@ -119,12 +120,9 @@ export default {
       this.activities.splice(index, 1);
     },
     onClickSaveActivitySet() {
-      this.downloadSchema();
-      /*
       if (this.isActivitySetValid()) {
         this.downloadSchema();
       }
-      */
     },
     isActivitySetValid() {
       if (!this.name) {
@@ -146,7 +144,6 @@ export default {
         'variableName': activity.name,
         'isAbout': activity.name
       }));
-
       return variableMap;
     },
     getActivityOrder() {
@@ -177,7 +174,7 @@ export default {
             "https://raw.githubusercontent.com/ReproNim/reproschema/master/protocols/ema-hbn/ema-hbn_context"
         ],
         "@type": "reproschema:ActivitySet",
-        "@id": this.name,
+        "@id": `${this.name}_schema`,
         "skos:prefLabel": this.name,
         "skos:altLabel": this.name,
         "schema:description": this.description,
@@ -217,34 +214,27 @@ export default {
       const activityContextArray = this.activities.map(activity => activity.context);
       return activityContextArray;
     },
-    getItemSchemaArray() {
-      let arr = [];
-      this.activities.forEach(function(activity) {
-        arr.push(...activity.itemSchemaArray);
-      })
-      return arr;
-    },
     downloadSchema() {
       const schemaObj = this.getSchema();
       const contextObj = this.getContext();
-      //const itemSchemaArray = this.getItemSchemaArray();
-      
-      console.log(' --- schema:');
-      console.log(schemaObj);
 
       var JSZip = require("jszip");
       var zip = new JSZip();
-      zip.folder("protocols").file("schema", JSON.stringify(schemaObj));
-      zip.folder("protocols").file("context", JSON.stringify(contextObj));
+
+      zip.folder("protocols").file("schema", JSON.stringify(schemaObj, null, 2));
+      zip.folder("protocols").file("context", JSON.stringify(contextObj, null, 2));
 
       this.activities.forEach(function(activity) {
-        zip.folder(activity.name).file(`${activity.name}_schema`, JSON.stringify(activity.schema));
-        zip.folder(activity.name).file(`${activity.name}_context`, JSON.stringify(activity.context));
+        zip.folder(`activities/${activity.name}`).file(`${activity.name}_schema`, JSON.stringify(activity.schema, null, 2));
+        zip.folder(`activities/${activity.name}`).file(`${activity.name}_context`, JSON.stringify(activity.context, null, 2));
+        activity.itemArray.forEach(function(item) {
+          zip.folder(`activities/${activity.name}/items`).file(`${item.name}`, JSON.stringify(item.schema, null, 2));
+        })
       });
 
       zip.generateAsync({type:"blob"})
       .then(function (blob) {
-          saveAs(blob, "hello.zip");
+          saveAs(blob, `$schema.zip`);
       });
     }
   }

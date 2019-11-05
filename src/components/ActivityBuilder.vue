@@ -10,7 +10,7 @@
       <v-card-text>
         <v-form
           ref="form"
-          :lazy-validation="lazy"
+          :lazy-validation="false"
         >
           <v-text-field
             v-model="name"
@@ -24,6 +24,15 @@
             label="Activity Description"
             required
           ></v-text-field>
+          <v-text-field
+            v-model="preamble"
+            label="Preamble"
+            required
+          ></v-text-field>
+          <v-switch
+            v-model="shuffleActivityOrder"
+            label="Shuffle"
+          ></v-switch>
           <v-subheader>
             Items
           </v-subheader>
@@ -108,11 +117,12 @@ export default {
   data: () => ({
       name: '',
       description: '',
+      preamble: '',
+      shuffleActivityOrder: false,
       items: [],
       textRules: [
         v => !!v || 'This field is required',
       ],
-      lazy: false,
       dialog: false,
       editDialog: false,
       error: '',
@@ -194,7 +204,7 @@ export default {
           "schema:description": this.description,
           "schema:schemaVersion": "0.0.1",
           "schema:version": "0.0.1",
-          "preamble": "",
+          "preamble": this.preamble,
           "scoringLogic": {
           },
           "repronim:timeUnit": "yearmonthdate",
@@ -224,13 +234,13 @@ export default {
       saveActivity() {
         const schema = this.getSchema();
         const context = this.getContext();
-        const itemSchemaArray = this.items.map(item => item.schema);
+        const items = this.items;
         this.$emit('closeModal', {
           'name': this.name,
           'description': this.description,
           'schema': schema,
           'context': context,
-          'itemSchemaArray': itemSchemaArray
+          'itemArray': items
         });
       },
       onDiscardActivity() {

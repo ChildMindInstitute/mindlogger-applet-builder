@@ -17,6 +17,11 @@
           required
         ></v-text-field>
         <v-text-field
+          v-model="description"
+          label="Description"
+          required
+        ></v-text-field>
+        <v-text-field
           v-model="question"
           label="Question"
           required
@@ -79,96 +84,54 @@ export default {
         this.snackbar = true
       }
     },
-    onSaveItem() {
-      this.$emit('closeItemModal', {
-        'name': this.name,
-        'description': this.description,
-        'inputType': this.inputType
-      })
-    },
     updateResponseOptions(options) {
       this.responseOptions = options;
     },
     updateOptions(newOptions) {
       this.options = newOptions;
-      console.log(this.options);
     },
-    buildItemSchema() {
+    getChoices() {
+      const choices = this.options.map((option, index) => ({
+        "@type": "schema:Boolean",
+        "schema:name": option,
+        "schema:value": index
+      }));
+      
+      return choices;
+    },
+    getSchema() {
+      const choices = this.getChoices();
       return {
-        "@type": [
-          "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/schemas/Field"
+        "@context": [ "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic",
+            "https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/EmaHBNMorning/ema_morning_context"
         ],
-        "http://schema.org/question": [
-          {
-            "@language": "en",
-            "@value": this.question
-          }
-        ],
-        "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/terms/valueconstraints": [
-          {
-            "@type": [
-              "http://www.w3.org/2001/XMLSchema#anyURI"
-            ],
-            "http://schema.org/itemListElement": [
-              {
-                "@list": this.options
-              }
-            ],
-            "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/terms/multipleChoice": [
-              {
-                "@type": "http://schema.org/Boolean",
-                "@value": false
-              }
-            ],
-            "http://schema.org/maxValue": [
-              {
-                "@value": 1
-              }
-            ],
-            "http://schema.org/minValue": [
-              {
-                "@value": 0
-              }
-            ]
-          }
-        ],
-        "http://schema.org/description": [
-          {
-            "@language": "en",
-            "@value": this.question
-          }
-        ],
-        "http://schema.org/schemaVersion": [
-          {
-            "@language": "en",
-            "@value": "0.0.1"
-          }
-        ],
-        "http://schema.org/version": [
-          {
-            "@language": "en",
-            "@value": "0.0.1"
-          }
-        ],
-        "http://www.w3.org/2004/02/skos/core#altLabel": [
-          {
-            "@language": "en",
-            "@value": this.question
-          }
-        ],
-        "http://www.w3.org/2004/02/skos/core#prefLabel": [
-          {
-            "@language": "en",
-            "@value": "Nightmares"
-          }
-        ],
-        "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/terms/inputType": [
-          {
-            "@type": "http://www.w3.org/2001/XMLSchema#string",
-            "@value": this.inputType
-          }
-        ]
+        "@type": "reproschema:Field",
+        "@id": "sleeping_aids",
+        "skos:prefLabel": this.name,
+        "skos:altLabel": this.name,
+        "schema:description": this.description,
+        "schema:schemaVersion": "0.0.1",
+        "schema:version": "0.0.1",
+        "question": this.question,
+        "ui": {
+            "inputType": this.inputType
+        },
+        "responseOptions": {
+            "@type": "xsd:anyURI",
+            "multipleChoice": false,
+            "schema:minValue": 0,
+            "schema:maxValue": this.options.length,
+            "choices": choices
+        }
       };
+    },
+    onSaveItem() {
+      const schema = this.getSchema();
+      this.$emit('closeItemModal', {
+        'name': this.name,
+        'inputType': this.inputType,
+        'schema': schema
+      })
     },
     onDiscardItem() {
       this.$emit('closeItemModal', null)

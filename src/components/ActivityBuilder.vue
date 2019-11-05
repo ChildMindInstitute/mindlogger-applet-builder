@@ -169,15 +169,72 @@ export default {
         }
         return true;
       },
+      getItemVisibility() {
+        const visibilityObj = {}
+        this.items.forEach(function(item) {
+          visibilityObj[item.name] = true;
+        });
+        return visibilityObj;
+      },
+      getItemOrder() {
+        const itemNamesArray = this.items.map(item => item.name)
+        return itemNamesArray;
+      },
+      getSchema() {
+        const visibility = this.getItemVisibility();
+        const itemOrder = this.getItemOrder();
+        return {
+          "@context": [ "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic",
+              "https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/EmaHBNMorning/ema_morning_context"
+          ],
+          "@type": "reproschema:Activity",
+          "@id": this.name,
+          "skos:prefLabel": this.name,
+          "skos:altLabel": this.name,
+          "schema:description": this.description,
+          "schema:schemaVersion": "0.0.1",
+          "schema:version": "0.0.1",
+          "preamble": "",
+          "scoringLogic": {
+          },
+          "repronim:timeUnit": "yearmonthdate",
+          "ui": {
+              "order": itemOrder,
+              "shuffle": false,
+              "visibility": visibility
+          }
+        };
+      },
+      getContext() {
+        const activityName = this.name;
+        const contextObj = {
+          "@version": 1.1
+        };
+        contextObj[activityName] = `https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/${activityName}/items/`;
+        this.items.forEach(function(item) {
+          contextObj[item.name] = {
+            '@id': `morning:${item.name}`,
+            '@type': '@id'
+          };
+        });
+        return {
+          "@context": contextObj
+        };
+      },
       saveActivity() {
+        const schema = this.getSchema();
+        const context = this.getContext();
+        const itemSchemaArray = this.items.map(item => item.schema);
         this.$emit('closeModal', {
           'name': this.name,
           'description': this.description,
-          'items': this.items
-        })
+          'schema': schema,
+          'context': context,
+          'itemSchemaArray': itemSchemaArray
+        });
       },
       onDiscardActivity() {
-        this.$emit('closeModal', null)
+        this.$emit('closeModal', null);
       }
     },
 };

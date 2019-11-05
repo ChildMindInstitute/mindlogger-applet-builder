@@ -3,7 +3,7 @@
     <v-subheader>
       Options
     </v-subheader>
-    <v-list-item v-for="(option, index) in optionNames" v-bind:key="index">
+    <v-list-item v-for="(option, index) in options" v-bind:key="index">
       <v-list-item-content>
         <v-list-item-title v-text="option"></v-list-item-title>
       </v-list-item-content>
@@ -39,7 +39,6 @@
 export default {
   data: () => ({
     nextOption: '',
-    optionNames: [],
     options: [],
     valid: true,
     textRules: [
@@ -51,29 +50,12 @@ export default {
       this.$refs.form.resetValidation()
     },
     addOption() {
-      this.optionNames.push(this.nextOption);
-      this.options.push({
-        "@type": [
-          "http://schema.org/Boolean"
-        ],
-        "http://schema.org/name": [
-          {
-            "@language": "en",
-            "@value": this.nextOption
-          }
-        ],
-        "http://schema.org/value": [
-          {
-            "@value": this.options.length
-          }
-        ]
-      });
+      this.options.push(this.nextOption);
       this.$emit('updateOptions', this.options)
       this.nextOption = '';
       this.resetValidation();
     },
     deleteOption(index) {
-      this.optionNames.splice(index, 1);
       this.options.splice(index, 1);
     }
   }

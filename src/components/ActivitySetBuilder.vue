@@ -57,7 +57,7 @@
       >
         {{this.error}}
       </v-alert>
-      <v-btn style="margin-top: 18px;" color="primary" @click="onClickSaveActivitySet">Save Activity Set</v-btn>
+      <v-btn style="margin-top: 18px;" color="primary" @click="onClickSaveActivitySet">Download Activity Set</v-btn>
     </v-layout>
     <v-dialog
       v-model="dialog"
@@ -72,6 +72,8 @@
 <script>
 
 import ActivityBuilder from './ActivityBuilder.vue';
+import { saveAs } from 'file-saver';
+
 
 export default {
   components: {
@@ -117,9 +119,12 @@ export default {
       this.activities.splice(index, 1);
     },
     onClickSaveActivitySet() {
+      this.downloadSchema();
+      /*
       if (this.isActivitySetValid()) {
-        this.getSchema();
+        this.downloadSchema();
       }
+      */
     },
     isActivitySetValid() {
       if (!this.name) {
@@ -136,118 +141,111 @@ export default {
       }
       return true;
     },
+    getVariableMap() {
+      const variableMap = this.activities.map(activity => ({
+        'variableName': activity.name,
+        'isAbout': activity.name
+      }));
+
+      return variableMap;
+    },
+    getActivityOrder() {
+      const activityNamesArray = this.activities.map(activity => activity.name)
+      return activityNamesArray;
+    },
+    getActivityDisplayNames() {
+      const displayNamesObj = {};
+      this.activities.forEach(function(activity) {
+        displayNamesObj[activity.name] = activity.name;
+      });
+      return displayNamesObj;
+    },
+    getActivityVisibility() {
+      const visibilityObj = {}
+      this.activities.forEach(function(activity) {
+        visibilityObj[activity.name] = true;
+      });
+      return visibilityObj;
+    },
     getSchema() {
+      const variableMap = this.getVariableMap();
+      const activityDisplayNames = this.getActivityDisplayNames();
+      const activityOrder = this.getActivityOrder();
+      const activityVisibility = this.getActivityVisibility();
       const schema = {
-        "@id": "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/activity-sets/ema-hbn/ema-hbn_schema", 
-        "@type": [
-          "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/schemas/ActivitySet"
+        "@context": [ "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic",
+            "https://raw.githubusercontent.com/ReproNim/reproschema/master/protocols/ema-hbn/ema-hbn_context"
         ],
-        "http://schema.org/description": [
-          {
-            "@language": "en",
-            "@value": this.description
-          }
-        ],
-        "http://schema.org/schemaVersion": [
-          {
-            "@language": "en",
-            "@value": "0.0.1"
-          }
-        ],
-        "http://schema.org/version": [
-          {
-            "@language": "en",
-            "@value": "0.0.1"
-          }
-        ],
-        "http://www.w3.org/2004/02/skos/core#altLabel": [
-          {
-            "@language": "en",
-            "@value": this.name
-          }
-        ],
-        "http://www.w3.org/2004/02/skos/core#prefLabel": [
-          {
-            "@language": "en",
-            "@value": this.name
-          }
-        ],
-        "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/terms/variableMap": [
-          {
-            "@list": [
-              {
-                "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/terms/isAbout": [
-                  {
-                    "@id": "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/activities/EmaHBNMorning/ema_morning_schema"
-                  }
-                ],
-                "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/terms/variableName": [
-                  {
-                    "@language": "en",
-                    "@value": "ema_morning"
-                  }
-                ]
-              },
-              {
-                "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/terms/isAbout": [
-                  {
-                    "@id": "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/activities/EmaHBNEvening/ema_evening_schema"
-                  }
-                ],
-                "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/terms/variableName": [
-                  {
-                    "@language": "en",
-                    "@value": "ema_evening"
-                  }
-                ]
-              }
-            ]
-          }
-        ],
-        "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/terms/activity_display_name": [
-          {
-            "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/activities/EmaHBNEvening/ema_evening_schema": [
-              {
-                "@id": "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/activity-sets/ema-hbn/Evening"
-              }
-            ],
-            "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/activities/EmaHBNMorning/ema_morning_schema": [
-              {
-                "@id": "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/activity-sets/ema-hbn/Morning"
-              }
-            ]
-          }
-        ],
-        "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/terms/order": [
-          {
-            "@list": [
-              {
-                "@id": "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/activities/EmaHBNMorning/ema_morning_schema"
-              },
-              {
-                "@id": "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/activities/EmaHBNEvening/ema_evening_schema"
-              }
-            ]
-          }
-        ],
-        "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/terms/shuffle": [
-          {
-            "@type": "http://schema.org/Boolean",
-            "@value": false
-          }
-        ],
-        "https://raw.githubusercontent.com/ReproNim/schema-standardization/master/terms/visibility": [
-          {
-            "@value": true,
-            "@index": "ema_evening"
-          },
-          {
-            "@value": true,
-            "@index": "ema_morning"
-          }
-        ]
+        "@type": "reproschema:ActivitySet",
+        "@id": this.name,
+        "skos:prefLabel": this.name,
+        "skos:altLabel": this.name,
+        "schema:description": this.description,
+        "schema:schemaVersion": "0.0.1",
+        "schema:version": "0.0.1",
+        "schema:about": this.description,
+        "variableMap": variableMap,
+        "ui": {
+            "order": activityOrder,
+            "shuffle": false,
+            "activity_display_name": activityDisplayNames,
+            "visibility": activityVisibility
+        }
       };
-      console.log(schema);
+      return schema;
+    },
+    getContext() {
+      const contextObj = {
+        '@version': 1.1,
+        'activity_path': 'https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/',
+      };
+      this.activities.forEach(function(activity) {
+        contextObj[activity.name] = {
+          '@id': `activity_path:${activity.name}/${activity.name}_schema`,
+          '@type': '@id'
+        };
+      });
+      return {
+        "@context": contextObj
+      };
+    },
+    getActivitySchemaArray() {
+      const activitySchemaArray = this.activities.map(activity => activity.name);
+      return activitySchemaArray;
+    },
+    getActivityContextArray() {
+      const activityContextArray = this.activities.map(activity => activity.context);
+      return activityContextArray;
+    },
+    getItemSchemaArray() {
+      let arr = [];
+      this.activities.forEach(function(activity) {
+        arr.push(...activity.itemSchemaArray);
+      })
+      return arr;
+    },
+    downloadSchema() {
+      const schemaObj = this.getSchema();
+      const contextObj = this.getContext();
+      //const itemSchemaArray = this.getItemSchemaArray();
+      
+      console.log(' --- schema:');
+      console.log(schemaObj);
+
+      var JSZip = require("jszip");
+      var zip = new JSZip();
+      zip.folder("protocols").file("schema", JSON.stringify(schemaObj));
+      zip.folder("protocols").file("context", JSON.stringify(contextObj));
+
+      this.activities.forEach(function(activity) {
+        zip.folder(activity.name).file(`${activity.name}_schema`, JSON.stringify(activity.schema));
+        zip.folder(activity.name).file(`${activity.name}_context`, JSON.stringify(activity.context));
+      });
+
+      zip.generateAsync({type:"blob"})
+      .then(function (blob) {
+          saveAs(blob, "hello.zip");
+      });
     }
   }
 }

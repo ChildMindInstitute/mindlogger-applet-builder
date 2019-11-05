@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "core-js": "^3.3.2",
+    "file-saver": "^2.0.2",
+    "jszip": "^3.2.2",
     "vue": "^2.6.10",
     "vuetify": "^2.1.0"
   },

@@ -98,8 +98,24 @@ export default {
       
       return choices;
     },
+    getResponseOptions() {
+      if (this.inputType === 'radio') {
+        
+        const choices = this.getChoices();
+        return {
+            "@type": "xsd:anyURI",
+            "multipleChoice": false,
+            "schema:minValue": 0,
+            "schema:maxValue": this.options.length - 1,
+            "choices": choices
+        };
+      }
+      if (this.inputType === 'text') {
+        return this.responseOptions;
+      }
+    },
     getSchema() {
-      const choices = this.getChoices();
+      const responseOptions = this.getResponseOptions();
       return {
         "@context": [ "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic",
             "https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/EmaHBNMorning/ema_morning_context"
@@ -115,13 +131,7 @@ export default {
         "ui": {
             "inputType": this.inputType
         },
-        "responseOptions": {
-            "@type": "xsd:anyURI",
-            "multipleChoice": false,
-            "schema:minValue": 0,
-            "schema:maxValue": this.options.length - 1,
-            "choices": choices
-        }
+        "responseOptions": responseOptions
       };
     },
     onSaveItem() {

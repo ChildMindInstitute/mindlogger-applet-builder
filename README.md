@@ -1,29 +1,29 @@
 # applet-builder
 
-## Project setup
+## Installation
 ```
-npm install
-```
-
-### Compiles and hot-reloads for development
-```
-npm run serve
+npm install applet-builder
 ```
 
-### Compiles and minifies for production
+## Usage
+
+### In template
 ```
-npm run build
+<ActivitySetBuilder/>
 ```
 
-### Run your tests
+### In script
 ```
-npm run test
+import Components from 'applet-builder';
+
+...
+
+export default {
+
+  components: {
+    ...Components
+  },
+
+...
 ```
 
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).

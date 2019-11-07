@@ -76,6 +76,7 @@ import { saveAs } from 'file-saver';
 
 
 export default {
+  name: 'activity-set-builder',
   components: {
     ActivityBuilder
   },
@@ -234,7 +235,7 @@ export default {
 
       zip.generateAsync({type:"blob"})
       .then(function (blob) {
-          saveAs(blob, `$schema.zip`);
+          saveAs(blob, 'schema.zip');
       });
     }
   }

@@ -34,6 +34,7 @@
         <RadioBuilder
           v-if="inputType === 'radio'"
           @updateOptions="updateOptions"
+          @updateMultipleChoice="updateMultipleChoice"
         />
         <TextBuilder
           v-if="inputType === 'text'"
@@ -76,6 +77,7 @@ export default {
     question: '',
     description: '',
     inputType: '',
+    multipleChoice: false,
     options: [],
     textRules: [
       v => !!v || 'This field is required',
@@ -91,6 +93,9 @@ export default {
     },
     updateResponseOptions(options) {
       this.responseOptions = options;
+    },
+    updateMultipleChoice() {
+      this.multipleChoice = !this.isMultipleChoice;
     },
     updateOptions(newOptions) {
       this.options = newOptions;
@@ -110,7 +115,7 @@ export default {
         const choices = this.getChoices();
         return {
             "@type": "xsd:anyURI",
-            "multipleChoice": false,
+            "multipleChoice": this.multipleChoice,
             "schema:minValue": 0,
             "schema:maxValue": this.options.length - 1,
             "choices": choices

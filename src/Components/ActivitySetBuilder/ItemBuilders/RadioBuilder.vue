@@ -1,51 +1,57 @@
 <template>
-  <v-list>
-    <v-subheader>
-      Options
-    </v-subheader>
-    <v-list-tile
-      v-for="(option, index) in options"
-      :key="index"
-    >
-      <v-list-tile-content>
-        <v-list-tile-title v-text="option" />
-      </v-list-tile-content>
-      <v-list-tile-action>
-        <v-btn
-          icon
-          @click="deleteOption(index)"
-        >
-          <v-icon color="grey lighten-1">
-            delete
-          </v-icon>
-        </v-btn>
-      </v-list-tile-action>
-    </v-list-tile>
-    <v-list-tile>
-      <v-form
-        ref="form"
-        v-model="valid"
+  <v-form
+    ref="form"
+    v-model="valid"
+  >
+    <v-switch
+      v-model="isMultipleChoice"
+      label="Multiple Choice"
+      @change="updateMultipleChoice"
+    />
+    <v-list>
+      <v-subheader>
+        Options
+      </v-subheader>
+      <v-list-tile
+        v-for="(option, index) in options"
+        :key="index"
       >
+        <v-list-tile-content>
+          <v-list-tile-title v-text="option" />
+        </v-list-tile-content>
+        <v-list-tile-action>
+          <v-btn
+            icon
+            @click="deleteOption(index)"
+          >
+            <v-icon color="grey lighten-1">
+              delete
+            </v-icon>
+          </v-btn>
+        </v-list-tile-action>
+      </v-list-tile>
+      <v-list-tile>
         <v-text-field
           v-model="nextOption"
           :rules="textRules"
           label="Option Text"
         />
-      </v-form>
-      <v-icon
-        color="grey lighten-1"
-        :disabled="!valid"
-        @click="addOption"
-      >
-        add
-      </v-icon>
-    </v-list-tile>
-  </v-list>
+        <v-icon
+          color="grey lighten-1"
+          :disabled="!valid"
+          @click="addOption"
+        >
+          add
+        </v-icon>
+      </v-list-tile>
+    </v-list>
+  </v-form>
 </template>
 
 <script>
 export default {
   data: () => ({
+    isMultipleChoice: false,
     nextOption: '',
     options: [],
     valid: true,
@@ -65,7 +71,10 @@ export default {
     },
     deleteOption(index) {
       this.options.splice(index, 1);
-    }
+    },
+    updateMultipleChoice() {
+      this.$emit('updateMultipleChoice', null);
+    },
   }
 }
 </script>

@@ -17,71 +17,81 @@
             :rules="textRules"
             label="Activity Name"
             required
-          ></v-text-field>
+          />
           <v-text-field
             v-model="description"
             :rules="textRules"
             label="Activity Description"
             required
-          ></v-text-field>
+          />
           <v-text-field
             v-model="preamble"
             label="Preamble"
             required
-          ></v-text-field>
+          />
           <v-switch
             v-model="shuffleActivityOrder"
             label="Shuffle"
-          ></v-switch>
+          />
           <v-subheader>
             Items
           </v-subheader>
           <v-list>
-            <v-list-item v-for="(item, index) in items" v-bind:key="item.id">
-              <v-list-item-content>
-                <v-list-item-title v-text="item.name"></v-list-item-title>
-                <v-list-item-subtitle v-text="item.inputType"></v-list-item-subtitle>
-              </v-list-item-content>
-              <v-list-item-action>
-                <v-btn icon @click="editItem(index)">
-                  <v-icon color="grey lighten-1">mdi-pencil</v-icon>
+            <v-list-tile
+              v-for="(item, index) in items"
+              :key="item.id"
+            >
+              <v-list-tile-content>
+                <v-list-tile-title v-text="item.name" />
+                <v-list-tile-sub-title v-text="item.inputType" />
+              </v-list-tile-content>
+              <v-list-tile-action>
+                <v-btn
+                  icon
+                  @click="duplicateItem(index)"
+                >
+                  <v-icon color="grey lighten-1">
+                    content_copy
+                  </v-icon>
                 </v-btn>
-              </v-list-item-action>
-              <v-list-item-action>
-                <v-btn icon @click="duplicateItem(index)">
-                  <v-icon color="grey lighten-1">mdi-content-copy</v-icon>
+              </v-list-tile-action>
+              <v-list-tile-action>
+                <v-btn
+                  icon
+                  @click="deleteItem(index)"
+                >
+                  <v-icon color="grey lighten-1">
+                    delete
+                  </v-icon>
                 </v-btn>
-              </v-list-item-action>
-              <v-list-item-action>
-                <v-btn icon @click="deleteItem(index)">
-                  <v-icon color="grey lighten-1">mdi-delete</v-icon>
-                </v-btn>
-              </v-list-item-action>
-            </v-list-item>
-            <v-list-item @click="addItem">
-              <v-icon color="grey lighten-1">mdi-plus</v-icon>
-            </v-list-item>
+              </v-list-tile-action>
+            </v-list-tile>
+            <v-list-tile @click="addItem">
+              <v-icon color="grey lighten-1">
+                add
+              </v-icon>
+            </v-list-tile>
           </v-list>
         </v-form>
         <v-alert
-          style="margin-top: 12px;"
-          v-if="this.error"
+          style="margin-top: 12px; width: 100%"
+          :value="error"
           type="error"
         >
-          {{this.error}}
+          {{ error }}
         </v-alert>
       </v-card-text>
-      <v-divider></v-divider>
+      <v-divider />
 
       <v-card-actions>
         <v-btn
-          color="danger"
-          text
+          outline
+          color="primary"
           @click="onDiscardActivity"
         >
           Discard
         </v-btn>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn
           color="primary"
           text
@@ -94,14 +104,7 @@
     <v-dialog
       v-model="dialog"
     >
-      <ItemBuilder v-on:closeItemModal="onCloseItemModal"/>
-      
-    </v-dialog>
-    <v-dialog
-      v-model="editDialog"
-    >
-      <ItemBuilder v-on:closeItemModal="onCloseItemModal" />
-      
+      <ItemBuilder @closeItemModal="onCloseItemModal" />
     </v-dialog>
   </div>
 </template>
@@ -124,9 +127,7 @@ export default {
         v => !!v || 'This field is required',
       ],
       dialog: false,
-      editDialog: false,
       error: '',
-      editIndex: 0,
     }),
 
     methods: {
@@ -145,13 +146,7 @@ export default {
         }
       },
       onNewItem(item) {
-        console.log(item);
         this.items.push(item);
-      },
-      editItem(index) {
-        this.editIndex = index;
-        this.editDialog = true;
-        return index;
       },
       duplicateItem(index) {
         this.items.push(this.items[index]);
@@ -195,7 +190,7 @@ export default {
         const itemOrder = this.getItemOrder();
         return {
           "@context": [ "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic",
-              "https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/EmaHBNMorning/ema_morning_context"
+              "https://raw.githubusercontent.com/YOUR-ACTIVITY-CONTEXT-FILE"
           ],
           "@type": "reproschema:Activity",
           "@id": this.name,
@@ -220,7 +215,7 @@ export default {
         const contextObj = {
           "@version": 1.1
         };
-        contextObj[activityName] = `https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/${activityName}/items/`;
+        contextObj[activityName] = `https://raw.githubusercontent.com/YOUR-PATH-TO-ITEM-FOLDER`;
         this.items.forEach(function(item) {
           contextObj[item.name] = {
             '@id': `morning:${item.name}`,

@@ -13,58 +13,81 @@
           :rules="textRules"
           label="Activity Set Name"
           required
-        ></v-text-field>
+        />
         <v-text-field
           v-model="description"
           :rules="textRules"
           label="Activity Set Description"
           required
-        ></v-text-field>
+        />
         <v-list>
           <v-subheader>
             Activities
           </v-subheader>
-          <v-list-item v-for="(activity, index) in activities" v-bind:key="activity.id">
-            <v-list-item-content>
-              <v-list-item-title v-text="activity.name"></v-list-item-title>
-              <v-list-item-subtitle v-text="activity.description"></v-list-item-subtitle>
-            </v-list-item-content>
-            <v-list-item-action>
-              <v-btn icon @click="editActivity(index)">
-                <v-icon color="grey lighten-1">mdi-pencil</v-icon>
+          <v-list-tile
+            v-for="(activity, index) in activities"
+            :key="activity.id"
+          >
+            <v-list-tile-content>
+              <v-list-tile-title v-text="activity.name" />
+              <v-list-tile-sub-title v-text="activity.description" />
+            </v-list-tile-content>  
+            <v-list-tile-action>
+              <v-btn
+                icon
+                @click="duplicateActivity(index)"
+              >
+                <v-icon color="grey lighten-1">
+                  content_copy
+                </v-icon>
               </v-btn>
-            </v-list-item-action>
-            <v-list-item-action>
-              <v-btn icon @click="duplicateActivity(index)">
-                <v-icon color="grey lighten-1">mdi-content-copy</v-icon>
+            </v-list-tile-action>
+            <v-list-tile-action>
+              <v-btn
+                icon
+                @click="deleteActivity(index)"
+              >
+                <v-icon color="grey lighten-1">
+                  delete
+                </v-icon>
               </v-btn>
-            </v-list-item-action>
-            <v-list-item-action>
-              <v-btn icon @click="deleteActivity(index)">
-                <v-icon color="grey lighten-1">mdi-delete</v-icon>
-              </v-btn>
-            </v-list-item-action>
-          </v-list-item>
-          <v-list-item @click="addActivity">
-            <v-icon color="grey lighten-1">mdi-plus</v-icon>
-          </v-list-item>
+            </v-list-tile-action>
+          </v-list-tile>
+          <v-list-tile @click="addActivity">
+            <v-icon color="grey lighten-1">
+              add
+            </v-icon>
+          </v-list-tile>
         </v-list>
       </v-form>
       <v-alert
-        style="margin-top: 12px;"
-        v-if="this.error"
+        style="margin-top: 12px; width: 100%"
+        :value="error"
         type="error"
       >
-        {{this.error}}
+        {{ error }}
       </v-alert>
-      <v-btn style="margin-top: 18px;" color="primary" @click="onClickSaveActivitySet">Download Activity Set</v-btn>
+      <div>
+        <v-btn
+          color="primary"
+          @click="onClickSaveActivitySet"
+        >
+          Download
+        </v-btn>
+        <v-btn
+          outline
+          color="primary"
+          @click="closeBuilder"
+        >
+          Discard
+        </v-btn>
+      </div>
     </v-layout>
     <v-dialog
       v-model="dialog"
       width="800"
     >
-      <ActivityBuilder v-on:closeModal="onCloseActivityModal"/>
-      
+      <ActivityBuilder @closeModal="onCloseActivityModal" />
     </v-dialog>
   </v-container>
 </template>
@@ -76,7 +99,6 @@ import { saveAs } from 'file-saver';
 
 
 export default {
-  name: 'activity-set-builder',
   components: {
     ActivityBuilder
   },
@@ -109,10 +131,6 @@ export default {
     },
     onNewActivity(activity) {
       this.activities.push(activity)
-    },
-    editActivity(index) {
-      // todo
-      return index;
     },
     duplicateActivity(index) {
       this.activities.push(this.activities[index]);
@@ -172,7 +190,7 @@ export default {
       const activityVisibility = this.getActivityVisibility();
       const schema = {
         "@context": [ "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic",
-            "https://raw.githubusercontent.com/ReproNim/reproschema/master/protocols/ema-hbn/ema-hbn_context"
+            "https://raw.githubusercontent.com/YOUR-ACTIVITY-SET-CONTEXT-FILE"
         ],
         "@type": "reproschema:ActivitySet",
         "@id": `${this.name}_schema`,
@@ -237,6 +255,10 @@ export default {
       .then(function (blob) {
           saveAs(blob, 'schema.zip');
       });
+      this.closeBuilder();
+    },
+    closeBuilder() {
+      this.$emit('closeBuilder', null);
     }
   }
 }

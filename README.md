@@ -1,8 +1,8 @@
-# applet-builder
+# activity-set-builder
 
 ## Installation
 ```
-npm install applet-builder
+npm install activity-set-builder
 ```
 
 ## Usage
@@ -14,7 +14,7 @@ npm install applet-builder
 
 ### In script
 ```
-import Components from 'applet-builder';
+import Components from 'activity-set-builder';
 
 ...
 
@@ -26,4 +26,3 @@ export default {
 
 ...
 ```
-

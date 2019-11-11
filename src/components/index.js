@@ -1,4 +1,4 @@
-import ActivitySetBuilder from './ActivitySetBuilder.vue';
+import ActivitySetBuilder from './ActivitySetBuilder/ActivitySetBuilder.vue';
 
 const install = Vue => {
   Vue.component('activity-set-builder', ActivitySetBuilder)

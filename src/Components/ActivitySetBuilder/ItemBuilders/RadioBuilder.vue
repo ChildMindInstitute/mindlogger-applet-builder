@@ -3,20 +3,28 @@
     <v-subheader>
       Options
     </v-subheader>
-    <v-list-item v-for="(option, index) in options" v-bind:key="index">
-      <v-list-item-content>
-        <v-list-item-title v-text="option"></v-list-item-title>
-      </v-list-item-content>
-      <v-list-item-action>
-        <v-btn icon @click="deleteOption(index)">
-          <v-icon color="grey lighten-1">mdi-delete</v-icon>
+    <v-list-tile
+      v-for="(option, index) in options"
+      :key="index"
+    >
+      <v-list-tile-content>
+        <v-list-tile-title v-text="option" />
+      </v-list-tile-content>
+      <v-list-tile-action>
+        <v-btn
+          icon
+          @click="deleteOption(index)"
+        >
+          <v-icon color="grey lighten-1">
+            delete
+          </v-icon>
         </v-btn>
-      </v-list-item-action>
-    </v-list-item>
-    <v-list-item>
+      </v-list-tile-action>
+    </v-list-tile>
+    <v-list-tile>
       <v-form
-        v-model="valid"
         ref="form"
+        v-model="valid"
       >
         <v-text-field
           v-model="nextOption"
@@ -26,12 +34,12 @@
       </v-form>
       <v-icon
         color="grey lighten-1"
-        @click="addOption"
         :disabled="!valid"
+        @click="addOption"
       >
-        mdi-plus
+        add
       </v-icon>
-    </v-list-item>
+    </v-list-tile>
   </v-list>
 </template>
 

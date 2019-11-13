@@ -2,6 +2,10 @@
 
 A Vue component that can be used to design and export standardized Activity Sets.
 
+## Source Code
+
+[https://github.com/henryrossiter/Activity-Set-Builder](https://github.com/henryrossiter/Activity-Set-Builder "Source Code")
+
 ## Installation
 ```
 npm install activity-set-builder
@@ -34,3 +38,8 @@ export default {
 
 ...
 ```
+
+Supported Item Types:
+- Radio - single choice
+- Radio - multiple choice
+- Text

@@ -45,6 +45,16 @@
             <v-list-tile-action>
               <v-btn
                 icon
+                @click="editActivity(index)"
+              >
+                <v-icon color="grey lighten-1">
+                  edit
+                </v-icon>
+              </v-btn>
+            </v-list-tile-action>
+            <v-list-tile-action>
+              <v-btn
+                icon
                 @click="deleteActivity(index)"
               >
                 <v-icon color="grey lighten-1">
@@ -87,7 +97,7 @@
       v-model="dialog"
       width="800"
     >
-      <ActivityBuilder @closeModal="onCloseActivityModal" />
+      <ActivityBuilder @closeModal="onCloseActivityModal" v-bind:initialData="initialData" :key="componentKey" />
     </v-dialog>
   </v-container>
 </template>
@@ -103,24 +113,32 @@ export default {
     ActivityBuilder
   },
   data: () => ({
-      name: '',
-      description: '',
-      activities: [],
-      textRules: [
-        v => !!v || 'This field is required',
-      ],
-      lazy: false,
-      dialog: false,
-      error: ''
-    }),
-
+    name: '',
+    description: '',
+    activities: [],
+    textRules: [
+      v => !!v || 'This field is required',
+    ],
+    lazy: false,
+    dialog: false,
+    error: '',
+    initialData: {},
+    componentKey: 0,
+    editIndex: -1
+  }),
   methods: {
     validate() {
       if (this.$refs.form.validate()) {
         this.snackbar = true
       }
     },
+    forceUpdate() {
+      this.componentKey += 1;
+    },
     addActivity() {
+      this.editIndex = -1;
+      this.initialData = {};
+      this.forceUpdate();
       this.dialog = true;
     },
     onCloseActivityModal(response) {
@@ -130,10 +148,21 @@ export default {
       }
     },
     onNewActivity(activity) {
-      this.activities.push(activity)
+      if (this.editIndex >= 0 && this.editIndex < this.activities.length) {
+        this.activities[this.editIndex] = activity;
+      } else {
+        this.activities.push(activity);
+      }
     },
     duplicateActivity(index) {
       this.activities.push(this.activities[index]);
+    },
+    editActivity(index) {
+      this.editIndex = index;
+      this.initialData = this.activities[index];
+      console.log(this.initialData)
+      this.forceUpdate();
+      this.dialog = true;
     },
     deleteActivity(index) {
       this.activities.splice(index, 1);

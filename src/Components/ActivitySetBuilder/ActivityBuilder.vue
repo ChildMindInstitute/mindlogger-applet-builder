@@ -112,136 +112,147 @@
 <script>
 
 import ItemBuilder from './ItemBuilder.vue';
+import { string } from 'prop-types';
 
 export default {
   components: {
     ItemBuilder
   },
-  data: () => ({
-      name: '',
-      description: '',
-      preamble: '',
-      shuffleActivityOrder: false,
-      items: [],
+  props: {
+    initialData: {
+      type: Object,
+      required: true
+    }
+  },
+  data: function () {
+    return {
+      name: this.initialData.name || '',
+      description: this.initialData.description || '',
+      preamble: this.initialData.preamble || '',
+      shuffleActivityOrder: this.initialData.shffle || false,
+      items: this.initialData.items || [],
       textRules: [
         v => !!v || 'This field is required',
       ],
       dialog: false,
       error: '',
-    }),
-
-    methods: {
-      validate () {
-        if (this.$refs.form.validate()) {
-          this.snackbar = true
-        }
-      },
-      addItem () {
-        this.dialog = true;
-      },
-      onCloseItemModal(response) {
-        this.dialog = false;
-        if (response) {
-          this.onNewItem(response);
-        }
-      },
-      onNewItem(item) {
-        this.items.push(item);
-      },
-      duplicateItem(index) {
-        this.items.push(this.items[index]);
-      },
-      deleteItem(index) {
-        this.items.splice(index, 1);
-      },
-      onClickSaveActivity() {
-        if (this.isActivityValid()) {
-          this.saveActivity();
-        }
-      },
-      isActivityValid() {
-        if (!this.name) {
-          this.error = 'Activity Name is required';
-          return false;
-        } else if (!this.description) {
-          this.error = 'Activity Description is required';
-          return false;
-        } else if (this.items.length == 0) {
-          this.error = 'Activities must contain at least one item';
-          return false;
-        } else {
-          this.error = '';
-        }
-        return true;
-      },
-      getItemVisibility() {
-        const visibilityObj = {}
-        this.items.forEach(function(item) {
-          visibilityObj[item.name] = true;
-        });
-        return visibilityObj;
-      },
-      getItemOrder() {
-        const itemNamesArray = this.items.map(item => item.name)
-        return itemNamesArray;
-      },
-      getSchema() {
-        const visibility = this.getItemVisibility();
-        const itemOrder = this.getItemOrder();
-        return {
-          "@context": [ "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic",
-              "https://raw.githubusercontent.com/YOUR-ACTIVITY-CONTEXT-FILE"
-          ],
-          "@type": "reproschema:Activity",
-          "@id": this.name,
-          "skos:prefLabel": this.name,
-          "skos:altLabel": this.name,
-          "schema:description": this.description,
-          "schema:schemaVersion": "0.0.1",
-          "schema:version": "0.0.1",
-          "preamble": this.preamble,
-          "scoringLogic": {
-          },
-          "repronim:timeUnit": "yearmonthdate",
-          "ui": {
-              "order": itemOrder,
-              "shuffle": false,
-              "visibility": visibility
-          }
-        };
-      },
-      getContext() {
-        const activityName = this.name;
-        const contextObj = {
-          "@version": 1.1
-        };
-        contextObj[activityName] = `https://raw.githubusercontent.com/YOUR-PATH-TO-ITEM-FOLDER`;
-        this.items.forEach(function(item) {
-          contextObj[item.name] = {
-            '@id': `morning:${item.name}`,
-            '@type': '@id'
-          };
-        });
-        return {
-          "@context": contextObj
-        };
-      },
-      saveActivity() {
-        const schema = this.getSchema();
-        const context = this.getContext();
-        const items = this.items;
-        this.$emit('closeModal', {
-          'name': this.name,
-          'description': this.description,
-          'schema': schema,
-          'context': context,
-          'itemArray': items
-        });
-      },
-      onDiscardActivity() {
-        this.$emit('closeModal', null);
+    }
+  },
+  methods: {
+    validate () {
+      if (this.$refs.form.validate()) {
+        this.snackbar = true
       }
     },
+    addItem () {
+      this.dialog = true;
+    },
+    onCloseItemModal(response) {
+      this.dialog = false;
+      if (response) {
+        this.onNewItem(response);
+      }
+    },
+    onNewItem(item) {
+      this.items.push(item);
+    },
+    duplicateItem(index) {
+      this.items.push(this.items[index]);
+    },
+    deleteItem(index) {
+      this.items.splice(index, 1);
+    },
+    onClickSaveActivity() {
+      console.log(this.initialData);
+      if (this.isActivityValid()) {
+        this.saveActivity();
+      }
+    },
+    isActivityValid() {
+      if (!this.name) {
+        this.error = 'Activity Name is required';
+        return false;
+      } else if (!this.description) {
+        this.error = 'Activity Description is required';
+        return false;
+      } else if (this.items.length == 0) {
+        this.error = 'Activities must contain at least one item';
+        return false;
+      } else {
+        this.error = '';
+      }
+      return true;
+    },
+    getItemVisibility() {
+      const visibilityObj = {}
+      this.items.forEach(function(item) {
+        visibilityObj[item.name] = true;
+      });
+      return visibilityObj;
+    },
+    getItemOrder() {
+      const itemNamesArray = this.items.map(item => item.name)
+      return itemNamesArray;
+    },
+    getSchema() {
+      const visibility = this.getItemVisibility();
+      const itemOrder = this.getItemOrder();
+      return {
+        "@context": [ "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic",
+            "https://raw.githubusercontent.com/YOUR-ACTIVITY-CONTEXT-FILE"
+        ],
+        "@type": "reproschema:Activity",
+        "@id": this.name,
+        "skos:prefLabel": this.name,
+        "skos:altLabel": this.name,
+        "schema:description": this.description,
+        "schema:schemaVersion": "0.0.1",
+        "schema:version": "0.0.1",
+        "preamble": this.preamble,
+        "scoringLogic": {
+        },
+        "repronim:timeUnit": "yearmonthdate",
+        "ui": {
+            "order": itemOrder,
+            "shuffle": false,
+            "visibility": visibility
+        }
+      };
+    },
+    getContext() {
+      const activityName = this.name;
+      const contextObj = {
+        "@version": 1.1
+      };
+      contextObj[activityName] = `https://raw.githubusercontent.com/YOUR-PATH-TO-ITEM-FOLDER`;
+      this.items.forEach(function(item) {
+        contextObj[item.name] = {
+          '@id': `morning:${item.name}`,
+          '@type': '@id'
+        };
+      });
+      return {
+        "@context": contextObj
+      };
+    },
+    saveActivity() {
+      const schema = this.getSchema();
+      const context = this.getContext();
+      const items = this.items;
+      this.$emit('closeModal', {
+        'name': this.name,
+        'description': this.description,
+        'preamble': this.preamble,
+        'shuffle': this.shuffleActivityOrder,
+        'schema': schema,
+        'context': context,
+        'items': items
+      });
+    },
+    onDiscardActivity() {
+      this.$emit('closeModal', null);
+    }
+  },
 };
 </script>
 

@@ -97,7 +97,7 @@
       v-model="dialog"
       width="800"
     >
-      <ActivityBuilder @closeModal="onCloseActivityModal" v-bind:initialData="initialData" :key="componentKey" />
+      <ActivityBuilder @closeModal="onCloseActivityModal" v-bind:initialActivityData="initialActivityData" :key="componentKey" />
     </v-dialog>
   </v-container>
 </template>
@@ -122,7 +122,7 @@ export default {
     lazy: false,
     dialog: false,
     error: '',
-    initialData: {},
+    initialActivityData: {},
     componentKey: 0,
     editIndex: -1
   }),
@@ -137,7 +137,7 @@ export default {
     },
     addActivity() {
       this.editIndex = -1;
-      this.initialData = {};
+      this.initialActivityData = {};
       this.forceUpdate();
       this.dialog = true;
     },
@@ -159,8 +159,7 @@ export default {
     },
     editActivity(index) {
       this.editIndex = index;
-      this.initialData = this.activities[index];
-      console.log(this.initialData)
+      this.initialActivityData = this.activities[index];
       this.forceUpdate();
       this.dialog = true;
     },

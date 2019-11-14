@@ -4,7 +4,7 @@
       class="headline grey lighten-2"
       primary-title
     >
-      New Item
+      Edit Item
     </v-card-title>
     <v-card-text>
       <v-form
@@ -72,19 +72,27 @@ export default {
     RadioBuilder,
     TextBuilder
   },
-  data: () => ({
-    name: '',
-    question: '',
-    description: '',
-    inputType: '',
-    multipleChoice: false,
-    options: [],
-    textRules: [
-      v => !!v || 'This field is required',
-    ],
-    inputTypes: ['radio', 'text'],
-    responseOptions: {}
-  }),
+  props: {
+    initialItemData: {
+      type: Object,
+      required: true
+    }
+  },
+  data: function () {
+    return {
+      name: this.initialItemData.name || '',
+      question: this.initialItemData.question || '',
+      description: this.initialItemData.description || '',
+      inputType: this.initialItemData.inputType || '',
+      multipleChoice: this.initialItemData.multipleChoice || false,
+      options: this.initialItemData.options || [],
+      responseOptions: this.initialItemData.responseOptions || {},
+      textRules: [
+        v => !!v || 'This field is required',
+      ],
+      inputTypes: ['radio', 'text']
+    };
+  },
   methods: {
     validate () {
       if (this.$refs.form.validate()) {
@@ -111,7 +119,6 @@ export default {
     },
     getResponseOptions() {
       if (this.inputType === 'radio') {
-        
         const choices = this.getChoices();
         return {
             "@type": "xsd:anyURI",
@@ -149,7 +156,12 @@ export default {
       const schema = this.getSchema();
       this.$emit('closeItemModal', {
         'name': this.name,
+        'question': this.question,
+        'description': this.description,
         'inputType': this.inputType,
+        'multipleChoice': this.multipleChoice,
+        'options': this.options,
+        'responseOptions': this.responseOptions,
         'schema': schema
       })
     },

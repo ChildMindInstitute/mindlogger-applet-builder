@@ -5,7 +5,7 @@
         class="headline grey lighten-2"
         primary-title
       >
-        New Activity
+        Edit Activity
       </v-card-title>
       <v-card-text>
         <v-form
@@ -58,6 +58,16 @@
               <v-list-tile-action>
                 <v-btn
                   icon
+                  @click="editItem(index)"
+                >
+                  <v-icon color="grey lighten-1">
+                    edit
+                  </v-icon>
+                </v-btn>
+              </v-list-tile-action>
+              <v-list-tile-action>
+                <v-btn
+                  icon
                   @click="deleteItem(index)"
                 >
                   <v-icon color="grey lighten-1">
@@ -104,7 +114,7 @@
     <v-dialog
       v-model="dialog"
     >
-      <ItemBuilder @closeItemModal="onCloseItemModal" />
+      <ItemBuilder @closeItemModal="onCloseItemModal" v-bind:initialItemData="initialItemData" :key="componentKey" />
     </v-dialog>
   </div>
 </template>
@@ -119,23 +129,26 @@ export default {
     ItemBuilder
   },
   props: {
-    initialData: {
+    initialActivityData: {
       type: Object,
       required: true
     }
   },
   data: function () {
     return {
-      name: this.initialData.name || '',
-      description: this.initialData.description || '',
-      preamble: this.initialData.preamble || '',
-      shuffleActivityOrder: this.initialData.shffle || false,
-      items: this.initialData.items || [],
+      name: this.initialActivityData.name || '',
+      description: this.initialActivityData.description || '',
+      preamble: this.initialActivityData.preamble || '',
+      shuffleActivityOrder: this.initialActivityData.shffle || false,
+      items: this.initialActivityData.items || [],
       textRules: [
         v => !!v || 'This field is required',
       ],
       dialog: false,
       error: '',
+      componentKey: 0,
+      initialItemData: {},
+      editIndex: -1
     }
   },
   methods: {
@@ -144,7 +157,13 @@ export default {
         this.snackbar = true
       }
     },
+    forceUpdate() {
+      this.componentKey += 1;
+    },
     addItem () {
+      this.editIndex = -1;
+      this.initialItemData = {};
+      this.forceUpdate();
       this.dialog = true;
     },
     onCloseItemModal(response) {
@@ -154,16 +173,25 @@ export default {
       }
     },
     onNewItem(item) {
+      if (this.editIndex >= 0 && this.editIndex < this.items.length) {
+        this.items[this.editIndex] = item;
+      } else {
       this.items.push(item);
+      }
     },
     duplicateItem(index) {
       this.items.push(this.items[index]);
+    },
+    editItem(index) {
+      this.editIndex = index;
+      this.initialItemData = this.items[index];
+      this.forceUpdate();
+      this.dialog = true;
     },
     deleteItem(index) {
       this.items.splice(index, 1);
     },
     onClickSaveActivity() {
-      console.log(this.initialData);
       if (this.isActivityValid()) {
         this.saveActivity();
       }

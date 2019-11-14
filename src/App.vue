@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <activity-set-builder/>
+    <activity-set-builder />
   </v-app>
 </template>
 

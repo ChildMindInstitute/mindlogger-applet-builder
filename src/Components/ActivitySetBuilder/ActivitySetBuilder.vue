@@ -97,7 +97,11 @@
       v-model="dialog"
       width="800"
     >
-      <ActivityBuilder @closeModal="onCloseActivityModal" v-bind:initialActivityData="initialActivityData" :key="componentKey" />
+      <ActivityBuilder
+        :key="componentKey"
+        :initial-activity-data="initialActivityData"
+        @closeModal="onCloseActivityModal"
+      />
     </v-dialog>
   </v-container>
 </template>

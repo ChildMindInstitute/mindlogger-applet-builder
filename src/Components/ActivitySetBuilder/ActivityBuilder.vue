@@ -114,7 +114,11 @@
     <v-dialog
       v-model="dialog"
     >
-      <ItemBuilder @closeItemModal="onCloseItemModal" v-bind:initialItemData="initialItemData" :key="componentKey" />
+      <ItemBuilder
+        :key="componentKey"
+        :initial-item-data="initialItemData"
+        @closeItemModal="onCloseItemModal"
+      />
     </v-dialog>
   </div>
 </template>

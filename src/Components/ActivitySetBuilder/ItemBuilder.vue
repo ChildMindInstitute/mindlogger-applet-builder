@@ -33,6 +33,7 @@
         />
         <RadioBuilder
           v-if="inputType === 'radio'"
+          :initial-options="options"
           @updateOptions="updateOptions"
           @updateMultipleChoice="updateMultipleChoice"
         />
@@ -90,7 +91,7 @@ export default {
       textRules: [
         v => !!v || 'This field is required',
       ],
-      inputTypes: ['radio', 'text']
+      inputTypes: ['radio', 'text'],
     };
   },
   methods: {
@@ -99,11 +100,11 @@ export default {
         this.snackbar = true
       }
     },
-    updateResponseOptions(options) {
-      this.responseOptions = options;
+    updateResponseOptions(newResponseOptions) {
+      this.responseOptions = newResponseOptions;
     },
     updateMultipleChoice() {
-      this.multipleChoice = !this.isMultipleChoice;
+      this.multipleChoice = !this.multipleChoice;
     },
     updateOptions(newOptions) {
       this.options = newOptions;
@@ -114,7 +115,6 @@ export default {
         "schema:name": option,
         "schema:value": index
       }));
-      
       return choices;
     },
     getResponseOptions() {

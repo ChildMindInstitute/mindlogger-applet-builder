@@ -50,15 +50,23 @@
 
 <script>
 export default {
-  data: () => ({
-    isMultipleChoice: false,
-    nextOption: '',
-    options: [],
-    valid: true,
-    textRules: [
-      v => !!v || 'Radio options cannot be empty',
-    ],
-  }),
+  props: {
+    initialOptions: {
+      type: Array,
+      required: true
+    }
+  },
+  data: function () {
+    return {
+      isMultipleChoice: false,
+      nextOption: '',
+      options: this.initialOptions || [],
+      valid: true,
+      textRules: [
+        v => !!v || 'Radio options cannot be empty',
+      ]
+    };
+  },
   methods: {
     resetValidation () {
       this.$refs.form.resetValidation()

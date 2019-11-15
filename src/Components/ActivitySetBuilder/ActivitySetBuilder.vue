@@ -157,6 +157,7 @@ export default {
       } else {
         this.activities.push(activity);
       }
+      console.log(this.activities);
     },
     duplicateActivity(index) {
       this.activities.push(this.activities[index]);
@@ -257,14 +258,6 @@ export default {
         "@context": contextObj
       };
     },
-    getActivitySchemaArray() {
-      const activitySchemaArray = this.activities.map(activity => activity.name);
-      return activitySchemaArray;
-    },
-    getActivityContextArray() {
-      const activityContextArray = this.activities.map(activity => activity.context);
-      return activityContextArray;
-    },
     downloadSchema() {
       const schemaObj = this.getSchema();
       const contextObj = this.getContext();
@@ -278,9 +271,9 @@ export default {
       this.activities.forEach(function(activity) {
         zip.folder(`activities/${activity.name}`).file(`${activity.name}_schema`, JSON.stringify(activity.schema, null, 2));
         zip.folder(`activities/${activity.name}`).file(`${activity.name}_context`, JSON.stringify(activity.context, null, 2));
-        activity.itemArray.forEach(function(item) {
+        activity.items.forEach(function(item) {
           zip.folder(`activities/${activity.name}/items`).file(`${item.name}`, JSON.stringify(item.schema, null, 2));
-        })
+        });
       });
 
       zip.generateAsync({type:"blob"})

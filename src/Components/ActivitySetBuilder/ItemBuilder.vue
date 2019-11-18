@@ -41,6 +41,10 @@
           v-if="inputType === 'text'"
           @update="updateResponseOptions"
         />
+        <SliderBuilder
+          v-if="inputType === 'slider'"
+          @updateOptions="updateOptions"
+        />
       </v-form>
     </v-card-text>
     <v-divider />
@@ -67,11 +71,13 @@
 <script>
 import RadioBuilder from './ItemBuilders/RadioBuilder.vue';
 import TextBuilder from './ItemBuilders/TextBuilder.vue';
+import SliderBuilder from './ItemBuilders/SliderBuilder.vue';
 
 export default {
   components: {
     RadioBuilder,
-    TextBuilder
+    TextBuilder,
+    SliderBuilder
   },
   props: {
     initialItemData: {
@@ -91,7 +97,7 @@ export default {
       textRules: [
         v => !!v || 'This field is required',
       ],
-      inputTypes: ['radio', 'text'],
+      inputTypes: ['radio', 'text', 'slider'],
     };
   },
   methods: {
@@ -108,8 +114,21 @@ export default {
     },
     updateOptions(newOptions) {
       this.options = newOptions;
+      console.log(newOptions);
     },
-    getChoices() {
+    getSliderChoices() {
+      const n = this.options.numOptions;
+      const choices = [];
+      var i;
+      for (i = 0; i < n; i++) {
+        choices.push({
+          "schema:name": i.toString(),
+          "schema:value": i
+        });
+      }
+      return choices;
+    },
+    getRadioChoices() {
       const choices = this.options.map((option, index) => ({
         "@type": "schema:Boolean",
         "schema:name": option,
@@ -119,7 +138,7 @@ export default {
     },
     getResponseOptions() {
       if (this.inputType === 'radio') {
-        const choices = this.getChoices();
+        const choices = this.getRadioChoices();
         return {
             "@type": "xsd:anyURI",
             "multipleChoice": this.multipleChoice,
@@ -130,6 +149,15 @@ export default {
       }
       if (this.inputType === 'text') {
         return this.responseOptions;
+      }
+      if (this.inputType === 'slider') {
+        const choices = this.getSliderChoices();
+        return {
+            "@type": "xsd:integer",
+            "schema:minValue": this.options.minValue,
+            "schema:maxValue": this.options.maxValue,
+            "choices": choices
+        };
       }
     },
     getSchema() {

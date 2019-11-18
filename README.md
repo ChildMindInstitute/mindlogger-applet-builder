@@ -43,3 +43,4 @@ Supported Item Types:
 - Radio - single choice
 - Radio - multiple choice
 - Text
+- Slider

@@ -7,6 +7,7 @@
       v-model="maxResponseLength"
       label="Maximum response length"
       type="number"
+      :rules="maxLengthRules"
       @change="update"
     />
     <v-switch
@@ -27,6 +28,9 @@ export default {
     textRules: [
       v => !!v || 'Radio options cannot be empty',
     ],
+    maxLengthRules: [
+      v => (v > 0 && v % 1 ===0) || 'Max response length must be a positive integer',
+    ]
   }),
   methods: {
     update () {

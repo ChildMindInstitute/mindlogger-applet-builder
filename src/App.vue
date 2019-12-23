@@ -1,28 +1,40 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
+  <v-app>
+    <activity-set-builder />
+  </v-app>
 </template>
 
+<style>
+
+.primary {
+  background-color: #005fa3 !important;
+  border-color: #005fa3 !important;
+}
+
+</style>
+
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+
+import ActivitySetBuilder from './components/ActivitySetBuilder/ActivitySetBuilder.vue';
 
 export default {
-  name: 'app',
+  name: 'App',
   components: {
-    HelloWorld
-  }
+    ActivitySetBuilder
+  },
 }
 </script>
 
+<style lang="scss">
+  @import url('https://fonts.googleapis.com/css?family=IBM+Plex+Sans:300,400');
+</style>
+
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+
+body, html, #app {
+  font-family: 'IBM Plex Sans', sans-serif !important;
+  width: 100%;
+  height: 100%;
 }
+
 </style>

@@ -135,7 +135,7 @@ export default {
       textRules: [
         v => !!v || 'This field is required',
       ],
-      inputTypes: ['radio', 'text', 'slider', 'photo', 'video', 'timeRange', 'date', 'drawing', 'audioRecord', 'audioImageRecordBuilder'],
+      inputTypes: ['radio', 'text', 'slider', 'photo', 'video', 'timeRange', 'date', 'drawing', 'audioRecord', 'audioImageRecord'],
     };
   },
   methods: {

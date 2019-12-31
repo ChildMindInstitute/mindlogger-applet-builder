@@ -43,6 +43,7 @@
         />
         <SliderBuilder
           v-if="inputType === 'slider'"
+          :initial-item-data="initialItemData"
           @updateOptions="updateOptions"
         />
         <VideoBuilder
@@ -56,6 +57,17 @@
         />
         <DateBuilder
           v-if="inputType === 'date'"
+        />
+        <DrawingBuilder
+          v-if="inputType === 'drawing'"
+        />
+        <AudioRecordBuilder
+          v-if="inputType === 'audioRecord'"
+          @update="updateResponseOptions"
+        />
+        <AudioImageRecordBuilder
+          v-if="inputType === 'audioImageRecord'"
+          @update="updateResponseOptions"
         />
       </v-form>
     </v-card-text>
@@ -87,6 +99,9 @@ import VideoBuilder from './ItemBuilders/VideoBuilder.vue';
 import PhotoBuilder from './ItemBuilders/PhotoBuilder.vue';
 import TimeRangeBuilder from './ItemBuilders/TimeRangeBuilder.vue';
 import DateBuilder from './ItemBuilders/DateBuilder.vue';
+import DrawingBuilder from './ItemBuilders/DrawingBuilder.vue';
+import AudioRecordBuilder from './ItemBuilders/AudioRecordBuilder.vue';
+import AudioImageRecordBuilder from './ItemBuilders/AudioImageRecordBuilder.vue';
 
 
 export default {
@@ -97,7 +112,10 @@ export default {
     VideoBuilder,
     PhotoBuilder,
     TimeRangeBuilder,
-    DateBuilder
+    DateBuilder,
+    DrawingBuilder,
+    AudioRecordBuilder,
+    AudioImageRecordBuilder,
   },
   props: {
     initialItemData: {
@@ -117,7 +135,7 @@ export default {
       textRules: [
         v => !!v || 'This field is required',
       ],
-      inputTypes: ['radio', 'text', 'slider', 'photo', 'video', 'timeRange', 'date'],
+      inputTypes: ['radio', 'text', 'slider', 'photo', 'video', 'timeRange', 'date', 'drawing', 'audioRecord', 'audioImageRecordBuilder'],
     };
   },
   methods: {
@@ -215,16 +233,28 @@ export default {
     },
     onSaveItem() {
       const schema = this.getSchema();
-      this.$emit('closeItemModal', {
+      const itemObj = {
         'name': this.name,
         'question': this.question,
         'description': this.description,
         'inputType': this.inputType,
-        'multipleChoice': this.multipleChoice,
-        'options': this.options,
-        'responseOptions': this.responseOptions,
         'schema': schema
-      })
+      };
+
+      if (this.inputType === 'radio') {
+        itemObj.multipleChoice = this.multipleChoice;
+        itemObj.options = this.options;
+        itemObj.responseOptions = this.responseOptions;
+      } else if (this.inputType === 'text') {
+        itemObj.responseOptions = this.responseOptions;
+      } else if (this.inputType === 'slider') {
+        itemObj.responseOptions = this.responseOptions;
+      } else if (this.inputType === 'audioRecord') {
+        itemObj.responseOptions = this.responseOptions;
+      } else if (this.inputType === 'audioImageRecord') {
+        itemObj.responseOptions = this.responseOptions;
+      }
+      this.$emit('closeItemModal', itemObj);
     },
     onDiscardItem() {
       this.$emit('closeItemModal', null)

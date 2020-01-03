@@ -69,6 +69,10 @@
           v-if="inputType === 'audioImageRecord'"
           @update="updateResponseOptions"
         />
+        <GeolocationBuilder
+          v-if="inputType === 'geolocation'"
+          @update="updateResponseOptions"
+        />
       </v-form>
     </v-card-text>
     <v-divider />
@@ -102,7 +106,7 @@ import DateBuilder from './ItemBuilders/DateBuilder.vue';
 import DrawingBuilder from './ItemBuilders/DrawingBuilder.vue';
 import AudioRecordBuilder from './ItemBuilders/AudioRecordBuilder.vue';
 import AudioImageRecordBuilder from './ItemBuilders/AudioImageRecordBuilder.vue';
-
+import GeolocationBuilder from './ItemBuilders/GeolocationBuilder.vue';
 
 export default {
   components: {
@@ -116,6 +120,7 @@ export default {
     DrawingBuilder,
     AudioRecordBuilder,
     AudioImageRecordBuilder,
+    GeolocationBuilder,
   },
   props: {
     initialItemData: {
@@ -135,7 +140,7 @@ export default {
       textRules: [
         v => !!v || 'This field is required',
       ],
-      inputTypes: ['radio', 'text', 'slider', 'photo', 'video', 'timeRange', 'date', 'drawing', 'audioRecord', 'audioImageRecord'],
+      inputTypes: ['radio', 'text', 'slider', 'photo', 'video', 'timeRange', 'date', 'drawing', 'audioRecord', 'audioImageRecord', 'geolocation'],
     };
   },
   methods: {
@@ -252,6 +257,8 @@ export default {
       } else if (this.inputType === 'audioRecord') {
         itemObj.responseOptions = this.responseOptions;
       } else if (this.inputType === 'audioImageRecord') {
+        itemObj.responseOptions = this.responseOptions;
+      } else if (this.inputType === 'geolocation') {
         itemObj.responseOptions = this.responseOptions;
       }
       this.$emit('closeItemModal', itemObj);

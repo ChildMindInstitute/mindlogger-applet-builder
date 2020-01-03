@@ -1,6 +1,6 @@
 {
   "name": "activity-set-builder",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": false,
   "main": "./dist/activity-set-builder.common.js",
   "scripts": {

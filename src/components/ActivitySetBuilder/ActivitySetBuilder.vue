@@ -171,7 +171,6 @@ export default {
       } else {
         this.activities.push(activity);
       }
-      console.log(this.activities);
     },
     duplicateActivity(index) {
       this.activities.push(this.activities[index]);

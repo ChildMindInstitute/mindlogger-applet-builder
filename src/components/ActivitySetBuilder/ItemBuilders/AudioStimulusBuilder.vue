@@ -60,7 +60,6 @@ export default {
         "schema:transcript": this.transcript,
       };
       this.$emit('updateMedia', media);
-      console.log('updated');
     },
   }
 }

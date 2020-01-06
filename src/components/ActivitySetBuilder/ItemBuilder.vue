@@ -162,11 +162,9 @@ export default {
       this.responseOptions = newResponseOptions;
     },
     updateInputOptions(newInputOptions) {
-      console.log('updating input optios');
       this.inputOptions = newInputOptions;
     },
     updateMedia(newMedia) {
-      console.log('updating media');
       this.media = newMedia;
     },
     updateMultipleChoice() {
@@ -174,7 +172,6 @@ export default {
     },
     updateOptions(newOptions) {
       this.options = newOptions;
-      console.log(newOptions);
     },
     getSliderChoices() {
       const n = this.options.numOptions;

@@ -73,6 +73,11 @@
           v-if="inputType === 'geolocation'"
           @update="updateResponseOptions"
         />
+        <AudioStimulusBuilder
+          v-if="inputType === 'audioStimulus'"
+          @updateInputOptions="updateInputOptions"
+          @updateMedia="updateMedia"
+        />
       </v-form>
     </v-card-text>
     <v-divider />
@@ -107,6 +112,7 @@ import DrawingBuilder from './ItemBuilders/DrawingBuilder.vue';
 import AudioRecordBuilder from './ItemBuilders/AudioRecordBuilder.vue';
 import AudioImageRecordBuilder from './ItemBuilders/AudioImageRecordBuilder.vue';
 import GeolocationBuilder from './ItemBuilders/GeolocationBuilder.vue';
+import AudioStimulusBuilder from './ItemBuilders/AudioStimulusBuilder.vue';
 
 export default {
   components: {
@@ -121,6 +127,7 @@ export default {
     AudioRecordBuilder,
     AudioImageRecordBuilder,
     GeolocationBuilder,
+    AudioStimulusBuilder,
   },
   props: {
     initialItemData: {
@@ -137,10 +144,12 @@ export default {
       multipleChoice: this.initialItemData.multipleChoice || false,
       options: this.initialItemData.options || [],
       responseOptions: this.initialItemData.responseOptions || {},
+      inputOptions: this.initialItemData.inputOptions || {},
+      media: this.initialItemData.media || {},
       textRules: [
         v => !!v || 'This field is required',
       ],
-      inputTypes: ['radio', 'text', 'slider', 'photo', 'video', 'timeRange', 'date', 'drawing', 'audioRecord', 'audioImageRecord', 'geolocation'],
+      inputTypes: ['radio', 'text', 'slider', 'photo', 'video', 'timeRange', 'date', 'drawing', 'audioRecord', 'audioImageRecord', 'geolocation', 'audioStimulus'],
     };
   },
   methods: {
@@ -151,6 +160,14 @@ export default {
     },
     updateResponseOptions(newResponseOptions) {
       this.responseOptions = newResponseOptions;
+    },
+    updateInputOptions(newInputOptions) {
+      console.log('updating input optios');
+      this.inputOptions = newInputOptions;
+    },
+    updateMedia(newMedia) {
+      console.log('updating media');
+      this.media = newMedia;
     },
     updateMultipleChoice() {
       this.multipleChoice = !this.multipleChoice;
@@ -213,11 +230,26 @@ export default {
         return {};
       }
     },
+    getInputOptions() {
+      if (this.inputType === 'audioStimulus') {
+        return this.inputOptions;
+      }
+      return {};
+    },
+    getMedia() {
+      if (this.inputType === 'audioStimulus') {
+        return this.media;
+      }
+      return {};
+    },
     getSchema() {
       const responseOptions = this.getResponseOptions();
+      const inputOptions = this.getInputOptions();
+      const media = this.getMedia();
       const schema = {
-        "@context": [ "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic",
-            "https://raw.githubusercontent.com/YOUR-ACTIVITY-CONTEXT-FILE"
+        "@context": [
+          "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic",
+          "https://raw.githubusercontent.com/YOUR-ACTIVITY-CONTEXT-FILE"
         ],
         "@type": "reproschema:Field",
         "@id": this.name,
@@ -228,16 +260,23 @@ export default {
         "schema:version": "0.0.1",
         "question": this.question,
         "ui": {
-            "inputType": this.inputType
+          "inputType": this.inputType
         },
       };
       if (Object.keys(responseOptions).length !== 0) {
         schema["responseOptions"] = responseOptions;
       }
+      if (this.inputType === 'audioStimulus') {
+        schema["inputOptions"] = inputOptions;
+      }
+      if (this.inputType === 'audioStimulus') {
+        schema["media"] = media;
+      }
       return schema;
     },
     onSaveItem() {
       const schema = this.getSchema();
+
       const itemObj = {
         'name': this.name,
         'question': this.question,
@@ -260,6 +299,9 @@ export default {
         itemObj.responseOptions = this.responseOptions;
       } else if (this.inputType === 'geolocation') {
         itemObj.responseOptions = this.responseOptions;
+      } else if (this.inputType === 'audioStimulus') {
+        itemObj.inputOptions === this.inputOptions;
+        itemObj.media = this.media;
       }
       this.$emit('closeItemModal', itemObj);
     },

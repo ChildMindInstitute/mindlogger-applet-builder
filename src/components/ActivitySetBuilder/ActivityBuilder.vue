@@ -123,6 +123,38 @@
   </div>
 </template>
 
+<style scoped>
+.v-input--switch__track {
+    border-radius: 8px;
+    width: 36px;
+    height: 14px;
+    left: 2px;
+    position: absolute;
+    opacity: 0.6;
+    right: 2px;
+    top: calc(50% - 7px);
+}
+
+.v-input--switch__thumb {
+    border-radius: 50%;
+    top: calc(50% - 10px);
+    height: 20px;
+    position: relative;
+    width: 20px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-transition: 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
+    transition: 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
+}
+</style>
+
 <script>
 
 import ItemBuilder from './ItemBuilder.vue';
@@ -143,7 +175,7 @@ export default {
       name: this.initialActivityData.name || '',
       description: this.initialActivityData.description || '',
       preamble: this.initialActivityData.preamble || '',
-      shuffleActivityOrder: this.initialActivityData.shffle || false,
+      shuffleActivityOrder: this.initialActivityData.shuffle || false,
       items: this.initialActivityData.items || [],
       textRules: [
         v => !!v || 'This field is required',
@@ -151,7 +183,9 @@ export default {
       dialog: false,
       error: '',
       componentKey: 0,
-      initialItemData: {},
+      initialItemData: {
+        options: {},
+      },
       editIndex: -1
     }
   },

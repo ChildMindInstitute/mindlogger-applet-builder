@@ -24,11 +24,17 @@
 
 <script>
 export default {
+  props: {
+    initialItemData: {
+      type: Object,
+      required: true
+    }
+  },
   data: function () {
     return {
-      numOptions: 5,
-      minValue: '',
-      maxValue: '',
+      numOptions: this.initialItemData.numOptions || 5,
+      minValue: this.initialItemData.minValue || '',
+      maxValue: this.initialItemData.maxValue || '',
       valid: true,
       textRules: [
         v => !!v || 'Radio options cannot be empty',

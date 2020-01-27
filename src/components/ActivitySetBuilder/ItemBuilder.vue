@@ -43,6 +43,7 @@
         />
         <SliderBuilder
           v-if="inputType === 'slider'"
+          :initial-item-data="options"
           @updateOptions="updateOptions"
         />
         <VideoBuilder
@@ -56,6 +57,26 @@
         />
         <DateBuilder
           v-if="inputType === 'date'"
+        />
+        <DrawingBuilder
+          v-if="inputType === 'drawing'"
+        />
+        <AudioRecordBuilder
+          v-if="inputType === 'audioRecord'"
+          @update="updateResponseOptions"
+        />
+        <AudioImageRecordBuilder
+          v-if="inputType === 'audioImageRecord'"
+          @update="updateResponseOptions"
+        />
+        <GeolocationBuilder
+          v-if="inputType === 'geolocation'"
+          @update="updateResponseOptions"
+        />
+        <AudioStimulusBuilder
+          v-if="inputType === 'audioStimulus'"
+          @updateInputOptions="updateInputOptions"
+          @updateMedia="updateMedia"
         />
       </v-form>
     </v-card-text>
@@ -87,7 +108,11 @@ import VideoBuilder from './ItemBuilders/VideoBuilder.vue';
 import PhotoBuilder from './ItemBuilders/PhotoBuilder.vue';
 import TimeRangeBuilder from './ItemBuilders/TimeRangeBuilder.vue';
 import DateBuilder from './ItemBuilders/DateBuilder.vue';
-
+import DrawingBuilder from './ItemBuilders/DrawingBuilder.vue';
+import AudioRecordBuilder from './ItemBuilders/AudioRecordBuilder.vue';
+import AudioImageRecordBuilder from './ItemBuilders/AudioImageRecordBuilder.vue';
+import GeolocationBuilder from './ItemBuilders/GeolocationBuilder.vue';
+import AudioStimulusBuilder from './ItemBuilders/AudioStimulusBuilder.vue';
 
 export default {
   components: {
@@ -97,7 +122,12 @@ export default {
     VideoBuilder,
     PhotoBuilder,
     TimeRangeBuilder,
-    DateBuilder
+    DateBuilder,
+    DrawingBuilder,
+    AudioRecordBuilder,
+    AudioImageRecordBuilder,
+    GeolocationBuilder,
+    AudioStimulusBuilder,
   },
   props: {
     initialItemData: {
@@ -114,10 +144,12 @@ export default {
       multipleChoice: this.initialItemData.multipleChoice || false,
       options: this.initialItemData.options || [],
       responseOptions: this.initialItemData.responseOptions || {},
+      inputOptions: this.initialItemData.inputOptions || {},
+      media: this.initialItemData.media || {},
       textRules: [
         v => !!v || 'This field is required',
       ],
-      inputTypes: ['radio', 'text', 'slider', 'photo', 'video', 'timeRange', 'date'],
+      inputTypes: ['radio', 'text', 'slider', 'photo', 'video', 'timeRange', 'date', 'drawing', 'audioRecord', 'audioImageRecord', 'geolocation', 'audioStimulus'],
     };
   },
   methods: {
@@ -129,12 +161,17 @@ export default {
     updateResponseOptions(newResponseOptions) {
       this.responseOptions = newResponseOptions;
     },
+    updateInputOptions(newInputOptions) {
+      this.inputOptions = newInputOptions;
+    },
+    updateMedia(newMedia) {
+      this.media = newMedia;
+    },
     updateMultipleChoice() {
       this.multipleChoice = !this.multipleChoice;
     },
     updateOptions(newOptions) {
       this.options = newOptions;
-      console.log(newOptions);
     },
     getSliderChoices() {
       const n = this.options.numOptions;
@@ -190,11 +227,26 @@ export default {
         return {};
       }
     },
+    getInputOptions() {
+      if (this.inputType === 'audioStimulus') {
+        return this.inputOptions;
+      }
+      return {};
+    },
+    getMedia() {
+      if (this.inputType === 'audioStimulus') {
+        return this.media;
+      }
+      return {};
+    },
     getSchema() {
       const responseOptions = this.getResponseOptions();
+      const inputOptions = this.getInputOptions();
+      const media = this.getMedia();
       const schema = {
-        "@context": [ "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic",
-            "https://raw.githubusercontent.com/YOUR-ACTIVITY-CONTEXT-FILE"
+        "@context": [
+          "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic",
+          "https://raw.githubusercontent.com/YOUR-ACTIVITY-CONTEXT-FILE"
         ],
         "@type": "reproschema:Field",
         "@id": this.name,
@@ -205,26 +257,51 @@ export default {
         "schema:version": "0.0.1",
         "question": this.question,
         "ui": {
-            "inputType": this.inputType
+          "inputType": this.inputType
         },
       };
       if (Object.keys(responseOptions).length !== 0) {
         schema["responseOptions"] = responseOptions;
       }
+      if (this.inputType === 'audioStimulus') {
+        schema["inputOptions"] = inputOptions;
+      }
+      if (this.inputType === 'audioStimulus') {
+        schema["media"] = media;
+      }
       return schema;
     },
     onSaveItem() {
       const schema = this.getSchema();
-      this.$emit('closeItemModal', {
+
+      const itemObj = {
         'name': this.name,
         'question': this.question,
         'description': this.description,
         'inputType': this.inputType,
-        'multipleChoice': this.multipleChoice,
         'options': this.options,
-        'responseOptions': this.responseOptions,
         'schema': schema
-      })
+      };
+
+      if (this.inputType === 'radio') {
+        itemObj.multipleChoice = this.multipleChoice;
+        itemObj.options = this.options;
+        itemObj.responseOptions = this.responseOptions;
+      } else if (this.inputType === 'text') {
+        itemObj.responseOptions = this.responseOptions;
+      } else if (this.inputType === 'slider') {
+        itemObj.responseOptions = this.responseOptions;
+      } else if (this.inputType === 'audioRecord') {
+        itemObj.responseOptions = this.responseOptions;
+      } else if (this.inputType === 'audioImageRecord') {
+        itemObj.responseOptions = this.responseOptions;
+      } else if (this.inputType === 'geolocation') {
+        itemObj.responseOptions = this.responseOptions;
+      } else if (this.inputType === 'audioStimulus') {
+        itemObj.inputOptions === this.inputOptions;
+        itemObj.media = this.media;
+      }
+      this.$emit('closeItemModal', itemObj);
     },
     onDiscardItem() {
       this.$emit('closeItemModal', null)

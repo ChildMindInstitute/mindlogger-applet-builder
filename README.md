@@ -1,4 +1,4 @@
-# applet-builder-upgrade
+# activity-set-builder
 
 ## Project setup
 ```

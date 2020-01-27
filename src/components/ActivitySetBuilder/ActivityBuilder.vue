@@ -183,7 +183,9 @@ export default {
       dialog: false,
       error: '',
       componentKey: 0,
-      initialItemData: {},
+      initialItemData: {
+        options: {},
+      },
       editIndex: -1
     }
   },

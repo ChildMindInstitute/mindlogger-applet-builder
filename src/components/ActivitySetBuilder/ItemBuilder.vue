@@ -43,7 +43,7 @@
         />
         <SliderBuilder
           v-if="inputType === 'slider'"
-          :initial-item-data="initialItemData"
+          :initial-item-data="options"
           @updateOptions="updateOptions"
         />
         <VideoBuilder
@@ -279,6 +279,7 @@ export default {
         'question': this.question,
         'description': this.description,
         'inputType': this.inputType,
+        'options': this.options,
         'schema': schema
       };
 

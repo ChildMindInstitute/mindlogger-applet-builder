@@ -1,5 +1,5 @@
 {
-  "name": "activity-set-builder",
+  "name": "protocol-builder",
   "version": "0.1.7",
   "private": false,
   "main": "./dist/activity-set-builder.common.js",

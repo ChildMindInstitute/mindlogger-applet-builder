@@ -11,13 +11,13 @@
         <v-text-field
           v-model="name"
           :rules="textRules"
-          label="Activity Set Name"
+          label="Protocol Name"
           required
         />
         <v-text-field
           v-model="description"
           :rules="textRules"
-          label="Activity Set Description"
+          label="Protocol Description"
           required
         />
         <v-list>
@@ -191,13 +191,13 @@ export default {
     },
     isActivitySetValid() {
       if (!this.name) {
-        this.error = 'Activity Set Name is required';
+        this.error = 'Protocol Name is required';
         return false;
       } else if (!this.description) {
-        this.error = 'Activity Set Description is required';
+        this.error = 'Protocol Description is required';
         return false;
       } else if (this.activities.length == 0) {
-        this.error = 'Activity Set must contain at least one activity';
+        this.error = 'Protocol must contain at least one activity';
         return false;
       } else {
         this.error = '';

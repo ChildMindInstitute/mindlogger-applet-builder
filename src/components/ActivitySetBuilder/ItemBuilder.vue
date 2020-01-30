@@ -33,9 +33,8 @@
         />
         <RadioBuilder
           v-if="inputType === 'radio'"
-          :initial-options="options"
+          :initial-item-data="options"
           @updateOptions="updateOptions"
-          @updateMultipleChoice="updateMultipleChoice"
         />
         <TextBuilder
           v-if="inputType === 'text'"
@@ -167,9 +166,6 @@ export default {
     updateMedia(newMedia) {
       this.media = newMedia;
     },
-    updateMultipleChoice() {
-      this.multipleChoice = !this.multipleChoice;
-    },
     updateOptions(newOptions) {
       this.options = newOptions;
     },
@@ -186,7 +182,7 @@ export default {
       return choices;
     },
     getRadioChoices() {
-      const choices = this.options.map((option, index) => ({
+      const choices = this.options.options.map((option, index) => ({
         "@type": "schema:Boolean",
         "schema:name": option,
         "schema:value": index
@@ -200,7 +196,7 @@ export default {
           "@type": "xsd:anyURI",
           "multipleChoice": this.multipleChoice,
           "schema:minValue": 0,
-          "schema:maxValue": this.options.length - 1,
+          "schema:maxValue": choices.length - 1,
           "choices": choices,
         };
       }
@@ -284,8 +280,6 @@ export default {
       };
 
       if (this.inputType === 'radio') {
-        itemObj.multipleChoice = this.multipleChoice;
-        itemObj.options = this.options;
         itemObj.responseOptions = this.responseOptions;
       } else if (this.inputType === 'text') {
         itemObj.responseOptions = this.responseOptions;

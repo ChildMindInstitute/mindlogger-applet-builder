@@ -6,7 +6,7 @@
     <v-switch
       v-model="isMultipleChoice"
       label="Multiple Choice"
-      @change="updateMultipleChoice"
+      @change="update"
     />
     <v-list>
       <v-subheader>
@@ -35,6 +35,7 @@
           v-model="nextOption"
           :rules="textRules"
           label="Option Text"
+          @change="update"
         />
         <v-icon
           color="grey lighten-1"
@@ -51,16 +52,16 @@
 <script>
 export default {
   props: {
-    initialOptions: {
-      type: Array,
+    initialItemData: {
+      type: Object,
       required: true
     }
   },
   data: function () {
     return {
-      isMultipleChoice: false,
-      nextOption: '',
-      options: this.initialOptions || [],
+      isMultipleChoice: this.initialItemData.isMultipleChoice || false,
+      nextOption: this.initialItemData.nextOption || '',
+      options: this.initialItemData.options || [],
       valid: true,
       textRules: [
         v => !!v || 'Radio options cannot be empty',
@@ -73,16 +74,22 @@ export default {
     },
     addOption() {
       this.options.push(this.nextOption);
-      this.$emit('updateOptions', this.options)
       this.nextOption = '';
       this.resetValidation();
+      this.update();
     },
     deleteOption(index) {
       this.options.splice(index, 1);
+      this.update();
     },
-    updateMultipleChoice() {
-      this.$emit('updateMultipleChoice', null);
-    },
+    update() {
+      const responseOptions = {
+        'isMultipleChoice': this.isMultipleChoice,
+        'nextOption': this.nextOption,
+        'options': this.options,
+      };
+      this.$emit('updateOptions', responseOptions);
+    }
   }
 }
 </script>

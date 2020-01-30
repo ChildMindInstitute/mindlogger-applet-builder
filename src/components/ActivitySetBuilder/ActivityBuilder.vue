@@ -200,7 +200,9 @@ export default {
     },
     addItem () {
       this.editIndex = -1;
-      this.initialItemData = {};
+      this.initialItemData = {
+        options: {},
+      };
       this.forceUpdate();
       this.dialog = true;
     },

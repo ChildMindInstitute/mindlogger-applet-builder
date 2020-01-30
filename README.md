@@ -1,4 +1,4 @@
-# activity-set-builder
+# Protocol Builder
 
 ## Project setup
 ```

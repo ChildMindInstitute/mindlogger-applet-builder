@@ -18,7 +18,7 @@
       @change="update"
     />
     <v-switch
-      v-model="isResponseRequired"
+      v-model="requiredValue"
       label="Response required"
       @change="update"
     />
@@ -27,18 +27,26 @@
 
 <script>
 export default {
-  data: () => ({
-    minValue: 0,
-    maxValue: 3000,
-    isResponseRequired: true,
-    valid: true,
-    minValueRules: [
-      v => (v > 0 && v % 1 === 0) || 'Min response length must be a positive integer',
-    ],
-    maxValueRules: [
-      v => (v > 0 && v % 1 === 0) || 'Max response length must be a positive integer',
-    ]
-  }),
+  props: {
+    initialItemData: {
+      type: Object,
+      required: true
+    }
+  },
+  data: function () {
+    return {
+      minValue: this.initialItemData['schema:minValue'] || 0,
+      maxValue: this.initialItemData['schema:maxValue'] || 3000,
+      requiredValue: this.initialItemData.requiredValue || true,
+      valid: true,
+      minValueRules: [
+        v => (v > 0 && v % 1 === 0) || 'Min response length must be a positive integer',
+      ],
+      maxValueRules: [
+        v => (v > 0 && v % 1 === 0) || 'Max response length must be a positive integer',
+      ]
+    };
+  },
   methods: {
     update () {
       const responseOptions = {
@@ -46,7 +54,7 @@ export default {
         'schema:maxValue': this.maxValue,
         'requiredValue': true,
       };
-      this.$emit('update', responseOptions);
+      this.$emit('updateOptions', responseOptions);
     },
   }
 }

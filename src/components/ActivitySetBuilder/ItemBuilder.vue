@@ -63,11 +63,13 @@
         />
         <AudioRecordBuilder
           v-if="inputType === 'audioRecord'"
-          @update="updateResponseOptions"
+          :initial-item-data="options"
+          @updateOptions="updateOptions"
         />
         <AudioImageRecordBuilder
           v-if="inputType === 'audioImageRecord'"
-          @update="updateResponseOptions"
+          :initial-item-data="options"
+          @updateOptions="updateOptions"
         />
         <GeolocationBuilder
           v-if="inputType === 'geolocation'"
@@ -219,6 +221,9 @@ export default {
           "requiredValue": true,
           "schema:maxValue": "new Date()"
         };
+      }
+      if (this.inputType === 'audioRecord' || this.inputType === 'audioImageRecord') {
+        return this.options;
       }
       else {
         return {};

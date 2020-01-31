@@ -38,7 +38,8 @@
         />
         <TextBuilder
           v-if="inputType === 'text'"
-          @update="updateResponseOptions"
+          :initial-item-data="options"
+          @updateOptions="updateOptions"
         />
         <SliderBuilder
           v-if="inputType === 'slider'"
@@ -201,7 +202,7 @@ export default {
         };
       }
       if (this.inputType === 'text') {
-        return this.responseOptions;
+        return this.options;
       }
       if (this.inputType === 'slider') {
         const choices = this.getSliderChoices();

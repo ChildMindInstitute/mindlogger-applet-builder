@@ -37,7 +37,7 @@ export default {
     return {
       minValue: this.initialItemData['schema:minValue'] || 0,
       maxValue: this.initialItemData['schema:maxValue'] || 3000,
-      requiredValue: this.initialItemData.requiredValue || true,
+      requiredValue: this.initialItemData.requiredValue != null ? this.initialItemData.requiredValue : true,
       valid: true,
       minValueRules: [
         v => (v > 0 && v % 1 === 0) || 'Min response length must be a positive integer',
@@ -52,7 +52,7 @@ export default {
       const responseOptions = {
         'schema:minValue': this.minValue,
         'schema:maxValue': this.maxValue,
-        'requiredValue': true,
+        'requiredValue': this.requiredValue,
       };
       this.$emit('updateOptions', responseOptions);
     },

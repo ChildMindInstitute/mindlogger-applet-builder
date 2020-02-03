@@ -77,6 +77,8 @@
         />
         <AudioStimulusBuilder
           v-if="inputType === 'audioStimulus'"
+          :initial-item-input-options="inputOptions"
+          :initial-item-media="media"
           @updateInputOptions="updateInputOptions"
           @updateMedia="updateMedia"
         />
@@ -298,7 +300,7 @@ export default {
       } else if (this.inputType === 'geolocation') {
         itemObj.responseOptions = this.responseOptions;
       } else if (this.inputType === 'audioStimulus') {
-        itemObj.inputOptions === this.inputOptions;
+        itemObj.inputOptions = this.inputOptions;
         itemObj.media = this.media;
       }
       this.$emit('closeItemModal', itemObj);

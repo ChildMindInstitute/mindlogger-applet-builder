@@ -1,7 +1,7 @@
-import ActivitySetBuilder from './ActivitySetBuilder/ActivitySetBuilder.vue';
+import ProtocolBuilder from './ProtocolBuilder/ProtocolBuilder.vue';
 
 const install = Vue => {
-  Vue.component('activity-set-builder', ActivitySetBuilder)
+  Vue.component('protocol-builder', ProtocolBuilder)
 };
 
 export default install;

@@ -1,8 +1,8 @@
-import ActivitySetBuilder from './ActivitySetBuilder.vue';
+import ProtocolBuilder from './ProtocolBuilder.vue';
 import Vue from 'vue';
 
 const Components = {
-  ActivitySetBuilder
+  ProtocolBuilder
 };
 
 Object.keys(Components).forEach(name => {

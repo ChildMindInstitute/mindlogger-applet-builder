@@ -82,7 +82,7 @@
         <v-btn
           class="paddedButton"
           color="primary"
-          @click="onClickSaveActivitySet"
+          @click="onClickSaveProtocol"
         >
           Download Schema
         </v-btn>
@@ -184,12 +184,12 @@ export default {
     deleteActivity(index) {
       this.activities.splice(index, 1);
     },
-    onClickSaveActivitySet() {
-      if (this.isActivitySetValid()) {
+    onClickSaveProtocol() {
+      if (this.isProtocolValid()) {
         this.downloadSchema();
       }
     },
-    isActivitySetValid() {
+    isProtocolValid() {
       if (!this.name) {
         this.error = 'Protocol Name is required';
         return false;
@@ -236,9 +236,9 @@ export default {
       const activityVisibility = this.getActivityVisibility();
       const schema = {
         "@context": [ "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic",
-            "https://raw.githubusercontent.com/YOUR-ACTIVITY-SET-CONTEXT-FILE"
+            "https://raw.githubusercontent.com/YOUR-PROTOCOL-CONTEXT-FILE"
         ],
-        "@type": "reproschema:ActivitySet",
+        "@type": "reproschema:Protocol",
         "@id": `${this.name}_schema`,
         "skos:prefLabel": this.name,
         "skos:altLabel": this.name,

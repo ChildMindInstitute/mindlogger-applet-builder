@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <activity-set-builder />
+    <protocol-builder />
   </v-app>
 </template>
 
@@ -15,12 +15,12 @@
 
 <script>
 
-import ActivitySetBuilder from './components/ActivitySetBuilder/ActivitySetBuilder.vue';
+import ProtocolBuilder from './components/ProtocolBuilder/ProtocolBuilder.vue';
 
 export default {
   name: 'App',
   components: {
-    ActivitySetBuilder
+    ProtocolBuilder
   },
 }
 </script>

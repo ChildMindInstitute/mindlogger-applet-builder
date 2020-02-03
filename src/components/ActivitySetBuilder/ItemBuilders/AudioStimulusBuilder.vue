@@ -26,15 +26,27 @@
 
 <script>
 export default {
-  data: () => ({
-    url: '',
-    allowReplay: true,
-    transcript: '',
-    valid: true,
-    urlRules: [
-      v => !!v || 'Media URL cannot be empty',
-    ],
-  }),
+  props: {
+    initialItemInputOptions: {
+      type: Object,
+      required: true
+    },
+    initialItemMedia: {
+      type: Object,
+      required: true
+    }
+  },
+  data: function () {
+    return {
+      url: Object.keys(this.initialItemMedia)[0] || '',
+      transcript: Object.keys(this.initialItemMedia)[0] ? this.initialItemMedia[Object.keys(this.initialItemMedia)[0]]['schema:transcript'] : '',
+      allowReplay: Array.isArray(this.initialItemInputOptions) ? this.initialItemInputOptions[1]['schema:value'] : true,
+      valid: true,
+      urlRules: [
+        v => !!v || 'Media URL cannot be empty',
+      ],
+    };
+  },
   methods: {
     update () {
       const inputOptions =  [

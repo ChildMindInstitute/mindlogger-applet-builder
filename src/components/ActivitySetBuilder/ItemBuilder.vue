@@ -38,7 +38,8 @@
         />
         <TextBuilder
           v-if="inputType === 'text'"
-          @update="updateResponseOptions"
+          :initial-item-data="options"
+          @updateOptions="updateOptions"
         />
         <SliderBuilder
           v-if="inputType === 'slider'"
@@ -62,11 +63,13 @@
         />
         <AudioRecordBuilder
           v-if="inputType === 'audioRecord'"
-          @update="updateResponseOptions"
+          :initial-item-data="options"
+          @updateOptions="updateOptions"
         />
         <AudioImageRecordBuilder
           v-if="inputType === 'audioImageRecord'"
-          @update="updateResponseOptions"
+          :initial-item-data="options"
+          @updateOptions="updateOptions"
         />
         <GeolocationBuilder
           v-if="inputType === 'geolocation'"
@@ -74,6 +77,8 @@
         />
         <AudioStimulusBuilder
           v-if="inputType === 'audioStimulus'"
+          :initial-item-input-options="inputOptions"
+          :initial-item-media="media"
           @updateInputOptions="updateInputOptions"
           @updateMedia="updateMedia"
         />
@@ -201,7 +206,7 @@ export default {
         };
       }
       if (this.inputType === 'text') {
-        return this.responseOptions;
+        return this.options;
       }
       if (this.inputType === 'slider') {
         const choices = this.getSliderChoices();
@@ -218,6 +223,9 @@ export default {
           "requiredValue": true,
           "schema:maxValue": "new Date()"
         };
+      }
+      if (this.inputType === 'audioRecord' || this.inputType === 'audioImageRecord') {
+        return this.options;
       }
       else {
         return {};
@@ -292,7 +300,7 @@ export default {
       } else if (this.inputType === 'geolocation') {
         itemObj.responseOptions = this.responseOptions;
       } else if (this.inputType === 'audioStimulus') {
-        itemObj.inputOptions === this.inputOptions;
+        itemObj.inputOptions = this.inputOptions;
         itemObj.media = this.media;
       }
       this.$emit('closeItemModal', itemObj);

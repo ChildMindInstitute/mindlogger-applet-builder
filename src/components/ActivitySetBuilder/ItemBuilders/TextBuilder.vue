@@ -4,14 +4,14 @@
     v-model="valid"
   >
     <v-text-field
-      v-model="maxResponseLength"
+      v-model="maxLength"
       label="Maximum response length"
       type="number"
       :rules="maxLengthRules"
       @change="update"
     />
     <v-switch
-      v-model="isResponseRequired"
+      v-model="requiredValue"
       label="Response required"
       @change="update"
     />
@@ -20,26 +20,34 @@
 
 <script>
 export default {
-  data: () => ({
-    maxResponseLength: 50,
-    isResponseRequired: false,
-    type: 'xsd:string',
-    valid: true,
-    textRules: [
-      v => !!v || 'Radio options cannot be empty',
-    ],
-    maxLengthRules: [
-      v => (v > 0 && v % 1 ===0) || 'Max response length must be a positive integer',
-    ]
-  }),
+  props: {
+    initialItemData: {
+      type: Object,
+      required: true
+    }
+  },
+  data: function () {
+    return {
+      maxLength: this.initialItemData.maxLength || 50,
+      requiredValue: this.initialItemData.requiredValue || false,
+      type: this.initialItemData.type || 'xsd:string',
+      valid: true,
+      textRules: [
+        v => !!v || 'Radio options cannot be empty',
+      ],
+      maxLengthRules: [
+        v => (v > 0 && v % 1 ===0) || 'Max response length must be a positive integer',
+      ],
+    };
+  },
   methods: {
     update () {
       const responseOptions = {
-        'requiredValue': this.isResponseRequired,
+        'maxLength': this.maxLength,
+        'requiredValue': this.requiredValue,
         'type': this.type,
-        'maxLength': this.maxResponseLength
       };
-      this.$emit('update', responseOptions);
+      this.$emit('updateOptions', responseOptions);
     },
   }
 }

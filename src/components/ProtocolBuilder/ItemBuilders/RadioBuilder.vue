@@ -3,7 +3,7 @@
     ref="form"
     v-model="valid"
   >
-    <v-switch
+    <v-checkbox
       v-model="isMultipleChoice"
       label="Multiple Choice"
       @change="update"

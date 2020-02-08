@@ -29,9 +29,13 @@
             label="Preamble"
             required
           />
-          <v-switch
+          <v-checkbox
             v-model="shuffleActivityOrder"
             label="Shuffle"
+          />
+          <v-checkbox
+            v-model="isSkippable"
+            label="skippable"
           />
           <v-subheader>
             Items
@@ -176,6 +180,7 @@ export default {
       description: this.initialActivityData.description || '',
       preamble: this.initialActivityData.preamble || '',
       shuffleActivityOrder: this.initialActivityData.shuffle || false,
+      isSkippable: this.initialActivityData.isSkippable || false,
       items: this.initialActivityData.items || [],
       textRules: [
         v => !!v || 'This field is required',
@@ -262,9 +267,13 @@ export default {
       const itemNamesArray = this.items.map(item => item.name)
       return itemNamesArray;
     },
+    getAllowed() {
+      return this.isSkippable ? ["skipped"] : [];
+    },
     getSchema() {
       const visibility = this.getItemVisibility();
       const itemOrder = this.getItemOrder();
+      const allowed = this.getAllowed();
       return {
         "@context": [ "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic",
             "https://raw.githubusercontent.com/YOUR-ACTIVITY-CONTEXT-FILE"
@@ -282,8 +291,9 @@ export default {
         "repronim:timeUnit": "yearmonthdate",
         "ui": {
             "order": itemOrder,
-            "shuffle": false,
-            "visibility": visibility
+            "shuffle": this.shuffleActivityOrder,
+            "visibility": visibility,
+            "allow": allowed
         }
       };
     },
@@ -312,6 +322,7 @@ export default {
         'description': this.description,
         'preamble': this.preamble,
         'shuffle': this.shuffleActivityOrder,
+        'isSkippable': this.isSkippable,
         'schema': schema,
         'context': context,
         'items': items

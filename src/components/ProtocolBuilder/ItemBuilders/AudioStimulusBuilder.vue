@@ -16,7 +16,7 @@
       type="text"
       @change="update"
     />
-    <v-switch
+    <v-checkbox
       v-model="allowReplay"
       label="Media Replay Allowed"
       @change="update"

@@ -10,7 +10,7 @@
       :rules="maxLengthRules"
       @change="update"
     />
-    <v-switch
+    <v-checkbox
       v-model="requiredValue"
       label="Response required"
       @change="update"

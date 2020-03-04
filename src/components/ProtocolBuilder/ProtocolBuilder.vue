@@ -227,7 +227,7 @@ export default {
       });
       return visibilityObj;
     },
-    getSchema() {
+    getCompressedSchema() {
       const variableMap = this.getVariableMap();
       const activityDisplayNames = this.getActivityDisplayNames();
       const activityOrder = this.getActivityOrder();
@@ -270,7 +270,7 @@ export default {
       };
     },
     downloadSchema() {
-      const schemaObj = this.getSchema();
+      const schemaObj = this.getCompressedSchema();
       const contextObj = this.getContext();
 
       var JSZip = require("jszip");

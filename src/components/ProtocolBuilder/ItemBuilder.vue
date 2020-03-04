@@ -243,7 +243,7 @@ export default {
       }
       return {};
     },
-    getSchema() {
+    getCompressedSchema() {
       const responseOptions = this.getResponseOptions();
       const inputOptions = this.getInputOptions();
       const media = this.getMedia();
@@ -276,7 +276,7 @@ export default {
       return schema;
     },
     onSaveItem() {
-      const schema = this.getSchema();
+      const schema = this.getCompressedSchema();
 
       const itemObj = {
         'name': this.name,

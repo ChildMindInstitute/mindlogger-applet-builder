@@ -238,7 +238,7 @@ export default {
     getAllowed() {
       return this.isSkippable ? ["skipped"] : [];
     },
-    getSchema() {
+    getCompressedSchema() {
       const visibility = this.getItemVisibility();
       const itemOrder = this.getItemOrder();
       const allowed = this.getAllowed();
@@ -282,7 +282,7 @@ export default {
       };
     },
     saveActivity() {
-      const schema = this.getSchema();
+      const schema = this.getCompressedSchema();
       const context = this.getContext();
       const items = this.items;
       this.$emit('closeModal', {

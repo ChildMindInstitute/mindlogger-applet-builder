@@ -80,14 +80,12 @@
       </v-alert>
       <div>
         <v-btn
-          class="paddedButton"
           color="primary"
           @click="onClickSaveProtocol"
         >
           Download Schema
         </v-btn>
         <v-btn
-          class="paddedButton"
           outlined
           color="primary"
           @click="resetBuilder"
@@ -110,8 +108,8 @@
 </template>
 
 <style scoped>
-  .paddedButton {
-    margin: 2px;
+  .v-btn {
+    margin: 6px 8px;
   }
 </style>
 

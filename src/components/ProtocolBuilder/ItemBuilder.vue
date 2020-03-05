@@ -4,7 +4,7 @@
       class="headline grey lighten-2"
       primary-title
     >
-      Edit Item
+      <v-icon left>mdi-pencil</v-icon> Edit Item
     </v-card-title>
     <v-card-text>
       <v-form

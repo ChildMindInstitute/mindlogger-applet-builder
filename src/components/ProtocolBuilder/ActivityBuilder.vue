@@ -5,7 +5,7 @@
         class="headline grey lighten-2"
         primary-title
       >
-        Edit Activity
+        <v-icon left>mdi-pencil</v-icon> Edit Activity
       </v-card-title>
       <v-card-text>
         <v-form
@@ -81,10 +81,13 @@
                   </v-btn>
                 </v-list-item-action>
               </v-list-item>
-              <v-list-item @click="addItem">
-                <v-icon color="grey lighten-1">
-                  add
-                </v-icon>
+              <v-list-item>
+                <v-btn @click="addItem">
+                  Build New Item
+                </v-btn>
+                <v-btn @click="addItem">
+                  Upload new Item
+                </v-btn>
               </v-list-item>
             </v-col>
           </v-list>

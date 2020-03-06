@@ -5,7 +5,10 @@
         class="headline grey lighten-2"
         primary-title
       >
-        <v-icon left>mdi-pencil</v-icon> Edit Activity
+        <v-icon left>
+          mdi-pencil
+        </v-icon>
+        Edit Activity
       </v-card-title>
       <v-card-text>
         <v-form

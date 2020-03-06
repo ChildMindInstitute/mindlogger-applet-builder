@@ -44,55 +44,64 @@
             Items
           </v-subheader>
           <v-list>
-            <v-col>
-              <v-list-item
-                v-for="(item, index) in items"
-                :key="item.id"
-              >
-                <v-list-item-content>
-                  <v-list-item-title v-text="item.name" />
-                  <v-list-item-sub-title v-text="item.inputType" />
-                </v-list-item-content>
-                <v-list-item-action>
-                  <v-btn
-                    icon
-                    @click="duplicateItem(index)"
-                  >
-                    <v-icon color="grey lighten-1">
-                      content_copy
-                    </v-icon>
-                  </v-btn>
-                </v-list-item-action>
-                <v-list-item-action>
-                  <v-btn
-                    icon
-                    @click="editItem(index)"
-                  >
-                    <v-icon color="grey lighten-1">
-                      edit
-                    </v-icon>
-                  </v-btn>
-                </v-list-item-action>
-                <v-list-item-action>
-                  <v-btn
-                    icon
-                    @click="deleteItem(index)"
-                  >
-                    <v-icon color="grey lighten-1">
-                      delete
-                    </v-icon>
-                  </v-btn>
-                </v-list-item-action>
-              </v-list-item>
-              <v-list-item>
-                <v-btn @click="addItem">
-                  Build New Item
+            <v-list-item
+              v-for="(item, index) in items"
+              :key="item.id"
+            >
+              <v-list-item-content>
+                <v-list-item-title v-text="item.name" />
+                <v-list-item-sub-title v-text="item.inputType" />
+              </v-list-item-content>
+              <v-list-item-action>
+                <v-btn
+                  icon
+                  @click="duplicateItem(index)"
+                >
+                  <v-icon color="grey lighten-1">
+                    content_copy
+                  </v-icon>
                 </v-btn>
-                <v-btn @click="addItem">
-                  Upload new Item
+              </v-list-item-action>
+              <v-list-item-action>
+                <v-btn
+                  icon
+                  @click="editItem(index)"
+                >
+                  <v-icon color="grey lighten-1">
+                    edit
+                  </v-icon>
                 </v-btn>
-              </v-list-item>
-            </v-col>
+              </v-list-item-action>
+              <v-list-item-action>
+                <v-btn
+                  icon
+                  @click="deleteItem(index)"
+                >
+                  <v-icon color="grey lighten-1">
+                    delete
+                  </v-icon>
+                </v-btn>
+              </v-list-item-action>
+            </v-list-item>
+            <v-menu>
+              <template v-slot:activator="{ on }">
+                <v-list-item
+                  v-on="on"
+                >
+                  <v-icon color="grey lighten-1">
+                    add
+                  </v-icon>
+                </v-list-item>
+              </template>
+              <v-list>
+                <v-list-item @click="addItem">
+                  <v-list-item-title>Blank item</v-list-item-title>
+                </v-list-item>
+                <v-list-item @click="addItem">
+                  <v-list-item-title>Upload from GitHub</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
           </v-list>
         </v-form>
         <v-alert

@@ -11,6 +11,7 @@
     "publish": "npm publish --access public"
   },
   "dependencies": {
+    "axios": "^0.19.2",
     "core-js": "^3.6.4",
     "file-saver": "^2.0.2",
     "jszip": "^3.2.2",

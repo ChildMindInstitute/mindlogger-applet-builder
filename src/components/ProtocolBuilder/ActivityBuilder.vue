@@ -94,10 +94,10 @@
                 </v-list-item>
               </template>
               <v-list>
-                <v-list-item @click="addItem">
+                <v-list-item @click="createItem">
                   <v-list-item-title>Blank item</v-list-item-title>
                 </v-list-item>
-                <v-list-item @click="addItem">
+                <v-list-item @click="importItem">
                   <v-list-item-title>Upload from GitHub</v-list-item-title>
                 </v-list-item>
               </v-list>
@@ -131,12 +131,20 @@
       </v-card-actions>
     </v-card>
     <v-dialog
-      v-model="dialog"
+      v-model="editItemDialog"
     >
       <ItemBuilder
         :key="componentKey"
         :initial-item-data="initialItemData"
         @closeItemModal="onCloseItemModal"
+      />
+    </v-dialog>
+    <v-dialog
+      v-model="urlDialog"
+    >
+      <UrlUploader
+        :key="componentKey"
+        @uploadItem="onUploadItem"
       />
     </v-dialog>
   </div>
@@ -145,11 +153,13 @@
 <script>
 
 import ItemBuilder from './ItemBuilder.vue';
+import UrlUploader from './UrlUploader.vue';
 import { string } from 'prop-types';
 
 export default {
   components: {
-    ItemBuilder
+    ItemBuilder,
+    UrlUploader,
   },
   props: {
     initialActivityData: {
@@ -168,7 +178,8 @@ export default {
       textRules: [
         v => !!v || 'This field is required',
       ],
-      dialog: false,
+      editItemDialog: false,
+      urlDialog: false,
       error: '',
       componentKey: 0,
       initialItemData: {
@@ -186,16 +197,30 @@ export default {
     forceUpdate() {
       this.componentKey += 1;
     },
-    addItem () {
+    createItem() {
       this.editIndex = -1;
       this.initialItemData = {
         options: {},
       };
       this.forceUpdate();
-      this.dialog = true;
+      this.editItemDialog = true;
+    },
+    importItem() {
+      this.editIndex = -1;
+      this.initialItemData = {
+        options: {},
+      };
+      this.forceUpdate();
+      this.urlDialog = true;
     },
     onCloseItemModal(response) {
-      this.dialog = false;
+      this.editItemDialog = false;
+      if (response) {
+        this.onNewItem(response);
+      }
+    },
+    onUploadItem(response) {
+      this.urlDialog = false;
       if (response) {
         this.onNewItem(response);
       }
@@ -214,7 +239,7 @@ export default {
       this.editIndex = index;
       this.initialItemData = this.items[index];
       this.forceUpdate();
-      this.dialog = true;
+      this.editItemDialog = true;
     },
     deleteItem(index) {
       this.items.splice(index, 1);

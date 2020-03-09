@@ -190,11 +190,11 @@ export default {
       return choices;
     },
     getRadioChoices() {
-      const choices = this.options.options.map((option, index) => ({
-        "@type": "schema:Boolean",
-        "schema:name": option,
-        "schema:value": index
-      }));
+      const choices = this.options && this.options.options ? this.options.options.map((option, index) => ({
+          "@type": "schema:Boolean",
+          "schema:name": option,
+          "schema:value": index
+        })) : [];
       return choices;
     },
     getResponseOptions() {

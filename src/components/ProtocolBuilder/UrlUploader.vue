@@ -15,9 +15,10 @@
         v-model="valid"
         lazy-validation
       >
-        <v-text-field
+        <v-combobox
           v-model="url"
           :rules="textRules"
+          :items="sampleItems"
           label="URL"
           required
           @change="resetError"
@@ -61,6 +62,12 @@ export default {
       textRules: [
         v => !!v || 'URL is required',
         v => (v && v.includes('raw.githubusercontent.com')) || 'Invalid item URL. URL should contain \'raw.githubusercontent.com/...\'',
+      ],
+      sampleItems: [
+        'https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/MindLoggerDemo/items/radio',
+        'https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/MindLoggerDemo/items/radio-multi',
+        'https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/MindLoggerDemo/items/slider',
+        'https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/MindLoggerDemo/items/text',
       ],
       fetchedSchema: {},
       error: '',

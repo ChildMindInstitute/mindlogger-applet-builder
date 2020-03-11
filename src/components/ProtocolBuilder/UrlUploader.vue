@@ -20,8 +20,15 @@
           :rules="textRules"
           label="URL"
           required
+          @change="resetError"
         />
       </v-form>
+      <v-alert
+        v-if="error !== ''"
+        type="error"
+      >
+        {{ error }}
+      </v-alert>
     </v-card-text>
     <v-divider />
     <v-card-actions>
@@ -52,10 +59,11 @@ export default {
     return {
       url: '',
       textRules: [
-        v => !!v || 'Url is required',
-        v => (v && v.includes('raw.githubusercontent.com')) || 'Invalid item Url. Url should contain \'raw.githubusercontent.com/...\'',
+        v => !!v || 'URL is required',
+        v => (v && v.includes('raw.githubusercontent.com')) || 'Invalid item URL. URL should contain \'raw.githubusercontent.com/...\'',
       ],
       fetchedSchema: {},
+      error: '',
     };
   },
   methods: {
@@ -69,12 +77,12 @@ export default {
           const transformedSchema = this.transformSchema();
           this.$emit('uploadItem', transformedSchema);
         }).catch(e => {
-          console.log(e);
+          this.error = 'Item not found. Make sure URL points to a raw, unprocessed item schema.';
         });
       }
     },
     onDiscardItem() {
-      this.$emit('closeItemModal', null);
+      this.$emit('uploadItem', null);
     },
     transformSchema() {
       const compressedSchema = this.fetchedSchema;
@@ -100,8 +108,10 @@ export default {
 
       return simplifiedSchema;
 
-    }
-
+    },
+    resetError() {
+      this.error = '';
+    },
   },
 };
 </script>

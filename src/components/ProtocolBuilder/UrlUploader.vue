@@ -12,10 +12,12 @@
     <v-card-text>
       <v-form
         ref="form"
-        :lazy-validation="false"
+        v-model="valid"
+        lazy-validation
       >
         <v-text-field
           v-model="url"
+          :rules="textRules"
           label="URL"
           required
         />
@@ -50,18 +52,26 @@ export default {
     return {
       url: '',
       textRules: [
-        v => !!v || 'This field is required',
+        v => !!v || 'Url is required',
+        v => (v && v.includes('raw.githubusercontent.com')) || 'Invalid item Url. Url should contain \'raw.githubusercontent.com/...\'',
       ],
       fetchedSchema: {},
     };
   },
   methods: {
+    validate() {
+      return this.$refs.form.validate();
+    },
     onUploadItem() {
-      api.getSchema(this.url).then(resp => {
-        this.fetchedSchema = resp.data;
-        const transformedSchema = this.transformSchema();
-        this.$emit('uploadItem', transformedSchema);
-      });
+      if (this.validate()) {
+        api.getSchema(this.url).then(resp => {
+          this.fetchedSchema = resp.data;
+          const transformedSchema = this.transformSchema();
+          this.$emit('uploadItem', transformedSchema);
+        }).catch(e => {
+          console.log(e);
+        });
+      }
     },
     onDiscardItem() {
       this.$emit('closeItemModal', null);

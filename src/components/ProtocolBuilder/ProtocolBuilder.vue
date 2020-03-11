@@ -290,7 +290,6 @@ export default {
       .then(function (blob) {
           saveAs(blob, 'schema.zip');
       });
-      this.resetBuilder();
     },
     resetBuilder (){
       Object.assign(this.$data, initialData());

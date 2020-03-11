@@ -6,7 +6,7 @@
     >
       <v-form
         ref="form"
-        :lazy-validation="lazy"
+        lazy-validation
       >
         <v-text-field
           v-model="name"
@@ -123,7 +123,6 @@ function initialData() {
     textRules: [
       v => !!v || 'This field is required',
     ],
-    lazy: false,
     dialog: false,
     error: '',
     initialActivityData: {},

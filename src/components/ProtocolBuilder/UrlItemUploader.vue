@@ -113,6 +113,19 @@ export default {
         simplifiedSchema.question = compressedSchema['question'];
       }
 
+      if (compressedSchema.responseOptions) {
+        simplifiedSchema.options = {};
+        if ('multipleChoice' in compressedSchema.responseOptions) {
+          simplifiedSchema.options.multipleChoice = compressedSchema.responseOptions.multipleChoice;
+        }
+        if (simplifiedSchema.inputType && simplifiedSchema.inputType === 'radio') {
+          if ('choices' in compressedSchema.responseOptions && Array.isArray(compressedSchema.responseOptions.choices)) {
+            simplifiedSchema.options.options = compressedSchema.responseOptions.choices.map(choice => {
+              return choice['schema:name'];
+            });
+          }
+        }
+      }
       return simplifiedSchema;
 
     },

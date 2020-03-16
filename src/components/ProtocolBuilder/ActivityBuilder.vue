@@ -142,7 +142,7 @@
     <v-dialog
       v-model="urlDialog"
     >
-      <UrlUploader
+      <UrlItemUploader
         :key="componentKey"
         @uploadItem="onUploadItem"
       />
@@ -153,13 +153,13 @@
 <script>
 
 import ItemBuilder from './ItemBuilder.vue';
-import UrlUploader from './UrlUploader.vue';
+import UrlItemUploader from './UrlItemUploader.vue';
 import { string } from 'prop-types';
 
 export default {
   components: {
     ItemBuilder,
-    UrlUploader,
+    UrlItemUploader,
   },
   props: {
     initialActivityData: {

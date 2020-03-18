@@ -190,11 +190,17 @@ export default {
       return choices;
     },
     getRadioChoices() {
-      const choices = this.options && this.options.options ? this.options.options.map((option, index) => ({
-          "@type": "schema:Boolean",
-          "schema:name": option,
-          "schema:value": index
-        })) : [];
+      const choices = this.options && this.options.options ? this.options.options.map((option, index) => {
+          const choiceSchema = {
+            "@type": "schema:Boolean",
+            "schema:name": option.name,
+            "schema:value": index
+          };
+          if (option.image) {
+            choiceSchema['schema:image'] = option.image;
+          }
+          return choiceSchema;
+        }) : [];
       return choices;
     },
     getResponseOptions() {

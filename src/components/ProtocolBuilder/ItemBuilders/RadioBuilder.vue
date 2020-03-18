@@ -17,7 +17,7 @@
         :key="index"
       >
         <v-list-item-content>
-          <v-list-item-title v-text="option" />
+          <v-list-item-title v-text="option.name" />
         </v-list-item-content>
         <v-list-item-action>
           <v-btn
@@ -31,19 +31,25 @@
         </v-list-item-action>
       </v-list-item>
       <v-list-item>
-        <v-text-field
-          v-model="nextOption"
-          :rules="textRules"
-          label="Option Text"
-          @change="update"
-        />
-        <v-icon
-          color="grey lighten-1"
-          :disabled="!valid"
-          @click="addOption"
-        >
-          add
-        </v-icon>
+        <v-form>
+          <v-text-field
+            v-model="nextOptionName"
+            :rules="textRules"
+            label="Option Text"
+            @change="update"
+          />
+          <v-text-field
+            v-model="nextOptionImage"
+            label="Option Image"
+            @change="update"
+          />
+          <v-btn
+            :disabled="!valid"
+            @click="addOption"
+          >
+            Add Option
+          </v-btn>
+        </v-form>
       </v-list-item>
     </v-list>
   </v-form>
@@ -60,7 +66,8 @@ export default {
   data: function () {
     return {
       isMultipleChoice: this.initialItemData.isMultipleChoice || false,
-      nextOption: this.initialItemData.nextOption || '',
+      nextOptionName: this.initialItemData.nextOptionName || '',
+      nextOptionImage: this.initialItemData.nextOptionImage || '',
       options: this.initialItemData.options || [],
       valid: true,
       textRules: [
@@ -73,8 +80,15 @@ export default {
       this.$refs.form.resetValidation()
     },
     addOption() {
-      this.options.push(this.nextOption);
-      this.nextOption = '';
+      const nextOption = {
+        'name': this.nextOptionName,
+      };
+      if (this.nextOptionImage) {
+        nextOption.image = this.nextOptionImage;
+      }
+      this.options.push(nextOption);
+      this.nextOptionName = '';
+      this.nextOptionImage = '';
       this.resetValidation();
       this.update();
     },
@@ -85,7 +99,8 @@ export default {
     update() {
       const responseOptions = {
         'isMultipleChoice': this.isMultipleChoice,
-        'nextOption': this.nextOption,
+        'nextOptionName': this.nextOptionName,
+        'nextOptionImage': this.nextOptionImage,
         'options': this.options,
       };
       this.$emit('updateOptions', responseOptions);

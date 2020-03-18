@@ -121,7 +121,13 @@ export default {
         if (simplifiedSchema.inputType && simplifiedSchema.inputType === 'radio') {
           if ('choices' in compressedSchema.responseOptions && Array.isArray(compressedSchema.responseOptions.choices)) {
             simplifiedSchema.options.options = compressedSchema.responseOptions.choices.map(choice => {
-              return choice['schema:name'];
+              const optionSchema = {
+                'name': choice['schema:name'],
+              };
+              if (choice['schema:image']) {
+                optionSchema.image = choice['schema:image'];
+              }
+              return optionSchema;
             });
           }
         }

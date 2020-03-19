@@ -57,7 +57,9 @@
                   icon
                   @click="duplicateItem(index)"
                 >
-                  <v-icon color="grey lighten-1">
+                  <v-icon
+                    color="grey lighten-1"
+                  >
                     content_copy
                   </v-icon>
                 </v-btn>
@@ -67,8 +69,17 @@
                   icon
                   @click="editItem(index)"
                 >
-                  <v-icon color="grey lighten-1">
+                  <v-icon 
+                    v-if="item.isItemEditable"
+                    color="grey lighten-1"
+                  >
                     edit
+                  </v-icon>
+                  <v-icon
+                    v-else
+                    color="grey lighten-1"
+                  >
+                    mdi-eye
                   </v-icon>
                 </v-btn>
               </v-list-item-action>
@@ -77,8 +88,10 @@
                   icon
                   @click="deleteItem(index)"
                 >
-                  <v-icon color="grey lighten-1">
-                    delete
+                  <v-icon
+                    color="grey lighten-1"
+                  >
+                    mdi-delete
                   </v-icon>
                 </v-btn>
               </v-list-item-action>

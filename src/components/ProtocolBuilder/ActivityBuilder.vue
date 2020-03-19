@@ -136,6 +136,7 @@
       <ItemBuilder
         :key="componentKey"
         :initial-item-data="initialItemData"
+        :is-item-editable="isItemEditable"
         @closeItemModal="onCloseItemModal"
       />
     </v-dialog>
@@ -185,6 +186,7 @@ export default {
       initialItemData: {
         options: {},
       },
+      isItemEditable: true,
       editIndex: -1
     }
   },
@@ -238,6 +240,7 @@ export default {
     editItem(index) {
       this.editIndex = index;
       this.initialItemData = this.items[index];
+      this.isItemEditable = this.initialItemData.isItemEditable;
       this.forceUpdate();
       this.editItemDialog = true;
     },

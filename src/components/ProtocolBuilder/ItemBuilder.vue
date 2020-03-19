@@ -98,6 +98,7 @@
       </v-btn>
       <v-spacer />
       <v-btn
+        v-if="isItemEditable"
         color="primary"
         @click="onSaveItem"
       >
@@ -139,8 +140,12 @@ export default {
   props: {
     initialItemData: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
+    isItemEditable: {
+      type: Boolean,
+      required: true,
+    },
   },
   data: function () {
     return {
@@ -177,7 +182,7 @@ export default {
     updateOptions(newOptions) {
       this.options = newOptions;
     },
-    getSliderChoices() {
+    getSliderChoices() {      
       const n = this.options.numOptions;
       const choices = [];
       var i;
@@ -293,7 +298,8 @@ export default {
         'description': this.description,
         'inputType': this.inputType,
         'options': this.options,
-        'schema': schema
+        'isItemEditable': this.isItemEditable,
+        'schema': schema,
       };
 
       if (this.inputType === 'radio') {

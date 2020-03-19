@@ -159,7 +159,7 @@ export default {
         }
       }
       simplifiedSchema.schema = compressedSchema;
-      simplifiedSchema.uploaded = true;
+      simplifiedSchema.isItemEditable = false;
       return simplifiedSchema;
     },
     resetError() {

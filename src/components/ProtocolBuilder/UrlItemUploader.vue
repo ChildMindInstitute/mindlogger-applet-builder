@@ -84,6 +84,7 @@ export default {
           const transformedSchema = this.transformSchema();
           this.$emit('uploadItem', transformedSchema);
         }).catch(e => {
+          console.log(e);
           this.error = 'Item not found. Make sure URL points to a raw, unprocessed item schema.';
         });
       }
@@ -131,9 +132,35 @@ export default {
             });
           }
         }
-      }
-      return simplifiedSchema;
 
+        if (simplifiedSchema.inputType && simplifiedSchema.inputType === 'slider') {
+          if ('schema:minValue' in compressedSchema.responseOptions) {
+            simplifiedSchema.options.minValue = compressedSchema.responseOptions['schema:minValue'];
+          }
+          if ('schema:maxValue' in compressedSchema.responseOptions) {
+            simplifiedSchema.options.maxValue = compressedSchema.responseOptions['schema:maxValue'];
+          }
+          if ('choices' in compressedSchema.responseOptions && Array.isArray(compressedSchema.responseOptions.choices)) {
+            simplifiedSchema.options.options = compressedSchema.responseOptions.choices.map(choice => {
+              const optionSchema = {};
+              if (choice['schema:name']) {
+                optionSchema.name = choice['schema:name'];
+              }
+              if (choice['schema:value']) {
+                optionSchema.value = choice['schema:value'];
+              }
+              if (choice['schema:image']) {
+                optionSchema.image = choice['schema:image'];
+              }
+              return optionSchema;
+            });
+            simplifiedSchema.options.numOptions = simplifiedSchema.options.options.length;
+          }
+        }
+      }
+      simplifiedSchema.schema = compressedSchema;
+      simplifiedSchema.uploaded = true;
+      return simplifiedSchema;
     },
     resetError() {
       this.error = '';

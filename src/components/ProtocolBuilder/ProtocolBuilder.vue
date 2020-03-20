@@ -97,6 +97,7 @@
     <v-dialog
       v-model="dialog"
       width="800"
+      persistent
     >
       <ActivityBuilder
         :key="componentKey"

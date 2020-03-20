@@ -145,6 +145,7 @@
     </v-card>
     <v-dialog
       v-model="editItemDialog"
+      persistent
     >
       <ItemBuilder
         :key="componentKey"
@@ -155,6 +156,7 @@
     </v-dialog>
     <v-dialog
       v-model="urlDialog"
+      persistent
     >
       <UrlItemUploader
         :key="componentKey"

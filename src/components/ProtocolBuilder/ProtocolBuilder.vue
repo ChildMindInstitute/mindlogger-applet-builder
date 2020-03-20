@@ -288,8 +288,8 @@ export default {
       });
 
       zip.generateAsync({type:"blob"})
-      .then(function (blob) {
-          saveAs(blob, 'schema.zip');
+      .then((blob) => {
+          saveAs(blob, `${this.name}.zip`);
       });
     },
     resetBuilder (){

@@ -95,6 +95,8 @@ export default {
     transformSchema() {
       const compressedSchema = this.fetchedSchema;
       const simplifiedSchema = {};
+      simplifiedSchema.isItemEditable = false;
+      simplifiedSchema.iri = this.url;
 
       if (compressedSchema['skos:prefLabel']) {
         simplifiedSchema.name = compressedSchema['skos:prefLabel'];
@@ -158,8 +160,8 @@ export default {
           }
         }
       }
+      
       simplifiedSchema.schema = compressedSchema;
-      simplifiedSchema.isItemEditable = false;
       return simplifiedSchema;
     },
     resetError() {

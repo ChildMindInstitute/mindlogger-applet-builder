@@ -328,13 +328,25 @@ export default {
       const contextObj = {
         "@version": 1.1
       };
-      contextObj[activityName] = `https://raw.githubusercontent.com/YOUR-PATH-TO-ITEM-FOLDER`;
+      const isPrefixNeeded = false;
       this.items.forEach(function(item) {
-        contextObj[item.name] = {
-          '@id': `${activityName}:${item.name}`,
-          '@type': '@id'
-        };
+        if ('iri' in item) {
+          contextObj[item.name] = {
+            '@id': item.iri,
+            '@type': '@id',
+          };
+        } else {
+          contextObj[item.name] = {
+            '@id': `${activityName}:${item.name}`,
+            '@type': '@id',
+          };
+          isPrefixNeeded = true;
+        }
       });
+      if (isPrefixNeeded) {
+        contextObj[activityName] = `https://raw.githubusercontent.com/YOUR-PATH-TO-ITEM-FOLDER`;
+      }
+
       return {
         "@context": contextObj
       };

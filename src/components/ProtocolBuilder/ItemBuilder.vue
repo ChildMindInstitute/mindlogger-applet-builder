@@ -24,10 +24,11 @@
           label="Description"
           required
         />
-        <v-text-field
+        <v-textarea
           v-model="question"
           label="Question"
-          required
+          auto-grow
+          rows="1"
         />
         <v-select
           v-model="inputType"

@@ -5,9 +5,9 @@
       primary-title
     >
       <v-icon left>
-        mdi-pencil
+        {{ isItemEditable ? 'mdi-pencil' : 'mdi-eye' }}
       </v-icon>
-      Edit Item
+      {{ isItemEditable ? 'Edit Item' : 'View Item' }}
     </v-card-title>
     <v-card-text>
       <v-form
@@ -95,7 +95,7 @@
         color="primary"
         @click="onDiscardItem"
       >
-        Discard
+        {{ isItemEditable ? 'Discard Changes' : 'Close' }}
       </v-btn>
       <v-spacer />
       <v-btn

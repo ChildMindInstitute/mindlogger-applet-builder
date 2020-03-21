@@ -132,7 +132,7 @@
           color="primary"
           @click="onDiscardActivity"
         >
-          Discard
+          Discard Changes
         </v-btn>
         <v-spacer />
         <v-btn

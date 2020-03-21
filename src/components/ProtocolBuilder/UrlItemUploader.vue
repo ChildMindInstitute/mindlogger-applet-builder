@@ -38,7 +38,7 @@
         color="primary"
         @click="onDiscardItem"
       >
-        Discard
+        Close
       </v-btn>
       <v-spacer />
       <v-btn
@@ -160,7 +160,7 @@ export default {
           }
         }
       }
-      
+
       simplifiedSchema.schema = compressedSchema;
       return simplifiedSchema;
     },

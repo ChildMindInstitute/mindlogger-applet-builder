@@ -1,6 +1,6 @@
 {
   "name": "protocol-builder",
-  "version": "0.1.16",
+  "version": "0.1.18",
   "private": false,
   "main": "./dist/protocol-builder.common.js",
   "scripts": {

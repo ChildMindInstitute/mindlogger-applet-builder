@@ -22,11 +22,13 @@
         <v-text-field
           v-model="description"
           label="Description"
+          :disabled="!isItemEditable"
           required
         />
         <v-textarea
           v-model="question"
           label="Question"
+          :disabled="!isItemEditable"
           auto-grow
           rows="1"
         />
@@ -99,7 +101,6 @@
       </v-btn>
       <v-spacer />
       <v-btn
-        v-if="isItemEditable"
         color="primary"
         @click="onSaveItem"
       >
@@ -145,7 +146,7 @@ export default {
     },
     isItemEditable: {
       type: Boolean,
-      required: true,
+      default: true,
     },
   },
   data: function () {
@@ -291,35 +292,39 @@ export default {
       return schema;
     },
     onSaveItem() {
-      const schema = this.getCompressedSchema();
+      if (this.isItemEditable) {
+        const schema = this.getCompressedSchema();
+        const itemObj = {
+          'name': this.name,
+          'question': this.question,
+          'description': this.description,
+          'inputType': this.inputType,
+          'options': this.options,
+          'isItemEditable': this.isItemEditable,
+          'schema': schema,
+        };
 
-      const itemObj = {
-        'name': this.name,
-        'question': this.question,
-        'description': this.description,
-        'inputType': this.inputType,
-        'options': this.options,
-        'isItemEditable': this.isItemEditable,
-        'schema': schema,
-      };
-
-      if (this.inputType === 'radio') {
-        itemObj.responseOptions = this.responseOptions;
-      } else if (this.inputType === 'text') {
-        itemObj.responseOptions = this.responseOptions;
-      } else if (this.inputType === 'slider') {
-        itemObj.responseOptions = this.responseOptions;
-      } else if (this.inputType === 'audioRecord') {
-        itemObj.responseOptions = this.responseOptions;
-      } else if (this.inputType === 'audioImageRecord') {
-        itemObj.responseOptions = this.responseOptions;
-      } else if (this.inputType === 'geolocation') {
-        itemObj.responseOptions = this.responseOptions;
-      } else if (this.inputType === 'audioStimulus') {
-        itemObj.inputOptions = this.inputOptions;
-        itemObj.media = this.media;
-      }
-      this.$emit('closeItemModal', itemObj);
+        if (this.inputType === 'radio') {
+          itemObj.responseOptions = this.responseOptions;
+        } else if (this.inputType === 'text') {
+          itemObj.responseOptions = this.responseOptions;
+        } else if (this.inputType === 'slider') {
+          itemObj.responseOptions = this.responseOptions;
+        } else if (this.inputType === 'audioRecord') {
+          itemObj.responseOptions = this.responseOptions;
+        } else if (this.inputType === 'audioImageRecord') {
+          itemObj.responseOptions = this.responseOptions;
+        } else if (this.inputType === 'geolocation') {
+          itemObj.responseOptions = this.responseOptions;
+        } else if (this.inputType === 'audioStimulus') {
+          itemObj.inputOptions = this.inputOptions;
+          itemObj.media = this.media;
+        }
+        this.$emit('closeItemModal', itemObj);
+      } else {
+        this.$emit('closeItemModal', null);
+      } 
+      
     },
     onDiscardItem() {
       this.$emit('closeItemModal', null)

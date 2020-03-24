@@ -215,6 +215,7 @@ export default {
       this.componentKey += 1;
     },
     createItem() {
+      this.isItemEditable = true;
       this.editIndex = -1;
       this.initialItemData = {
         options: {},
@@ -240,6 +241,8 @@ export default {
       this.urlDialog = false;
       if (response) {
         this.onNewItem(response);
+        const editIndex = this.items.length - 1;
+        this.editItem(editIndex);
       }
     },
     onNewItem(item) {
@@ -328,7 +331,7 @@ export default {
       const contextObj = {
         "@version": 1.1
       };
-      const isPrefixNeeded = false;
+      var isPrefixNeeded = false;
       this.items.forEach(function(item) {
         if ('iri' in item) {
           contextObj[item.name] = {

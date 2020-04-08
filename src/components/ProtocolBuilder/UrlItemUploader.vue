@@ -95,6 +95,7 @@ export default {
     transformSchema() {
       const compressedSchema = this.fetchedSchema;
       const simplifiedSchema = {};
+      simplifiedSchema.options = {};
       simplifiedSchema.isItemEditable = false;
       simplifiedSchema.iri = this.url;
 
@@ -117,7 +118,6 @@ export default {
       }
 
       if (compressedSchema.responseOptions) {
-        simplifiedSchema.options = {};
         if ('multipleChoice' in compressedSchema.responseOptions) {
           simplifiedSchema.options.multipleChoice = compressedSchema.responseOptions.multipleChoice;
         }
@@ -157,6 +157,26 @@ export default {
               return optionSchema;
             });
             simplifiedSchema.options.numOptions = simplifiedSchema.options.options.length;
+          }
+        }
+
+        
+      }
+
+      if (compressedSchema.inputOptions) {
+        const inputOptions = compressedSchema.inputOptions;
+        if (simplifiedSchema.inputType && simplifiedSchema.inputType === 'audioStimulus') {
+          let i;
+          let currentOption;
+          let mediaUrl;
+          for (i = 0; i < inputOptions.length; i++) {
+            currentOption = inputOptions[i];
+            if ('@type' in currentOption && currentOption['@type'] === 'schema:URL') {
+              mediaUrl = currentOption['schema:contentUrl'];
+            }
+          }
+          if (typeof mediaUrl !== 'undefined') {
+            simplifiedSchema.options.url = mediaUrl;
           }
         }
       }

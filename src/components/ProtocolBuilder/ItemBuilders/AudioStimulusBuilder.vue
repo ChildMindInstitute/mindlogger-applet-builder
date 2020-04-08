@@ -7,10 +7,12 @@
       v-model="url"
       label="Media URL"
       type="text"
+      :disabled="!isItemEditable"
       :rules="urlRules"
       @change="update"
     />
     <v-text-field
+      v-if="isItemEditable"
       v-model="transcript"
       label="Media transcript"
       type="text"
@@ -27,6 +29,14 @@
 <script>
 export default {
   props: {
+    initialItemData: {
+      type: Object,
+      required: true
+    },
+    isItemEditable: {
+      type: Boolean,
+      default: true,
+    },
     initialItemInputOptions: {
       type: Object,
       required: true
@@ -34,11 +44,11 @@ export default {
     initialItemMedia: {
       type: Object,
       required: true
-    }
+    },
   },
   data: function () {
     return {
-      url: Object.keys(this.initialItemMedia)[0] || '',
+      url: this.initialItemData.url || Object.keys(this.initialItemMedia)[0] || '',
       transcript: Object.keys(this.initialItemMedia)[0] ? this.initialItemMedia[Object.keys(this.initialItemMedia)[0]]['schema:transcript'] : '',
       allowReplay: Array.isArray(this.initialItemInputOptions) ? this.initialItemInputOptions[1]['schema:value'] : true,
       valid: true,

@@ -90,6 +90,8 @@
           v-if="inputType === 'audioStimulus'"
           :initial-item-input-options="inputOptions"
           :initial-item-media="media"
+          :initial-item-data="options"
+          :is-item-editable="isItemEditable"
           @updateInputOptions="updateInputOptions"
           @updateMedia="updateMedia"
         />

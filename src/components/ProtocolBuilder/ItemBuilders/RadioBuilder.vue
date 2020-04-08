@@ -6,6 +6,7 @@
     <v-checkbox
       v-model="isMultipleChoice"
       label="Multiple Choice"
+      :disabled="!isItemEditable"
       @change="update"
     />
     <v-list>
@@ -22,6 +23,7 @@
         <v-list-item-action>
           <v-btn
             icon
+            :disabled="!isItemEditable"
             @click="deleteOption(index)"
           >
             <v-icon color="grey lighten-1">
@@ -36,15 +38,17 @@
             v-model="nextOptionName"
             :rules="textRules"
             label="Option Text"
+            :disabled="!isItemEditable"
             @change="update"
           />
           <v-text-field
             v-model="nextOptionImage"
             label="Option Image"
+            :disabled="!isItemEditable"
             @change="update"
           />
           <v-btn
-            :disabled="!valid"
+            :disabled="!valid || !isItemEditable"
             @click="addOption"
           >
             Add Option
@@ -61,7 +65,11 @@ export default {
     initialItemData: {
       type: Object,
       required: true
-    }
+    },
+    isItemEditable: {
+      type: Boolean,
+      default: true,
+    },
   },
   data: function () {
     return {

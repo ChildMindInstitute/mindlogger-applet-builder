@@ -7,12 +7,14 @@
       v-model="maxLength"
       label="Maximum response length"
       type="number"
+      :disabled="!isItemEditable"
       :rules="maxLengthRules"
       @change="update"
     />
     <v-checkbox
       v-model="requiredValue"
       label="Response required"
+      :disabled="!isItemEditable"
       @change="update"
     />
   </v-form>
@@ -24,7 +26,11 @@ export default {
     initialItemData: {
       type: Object,
       required: true
-    }
+    },
+    isItemEditable: {
+      type: Boolean,
+      default: true,
+    },
   },
   data: function () {
     return {

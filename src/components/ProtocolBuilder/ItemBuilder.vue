@@ -17,6 +17,7 @@
         <v-text-field
           v-model="name"
           label="Item Name"
+          :disabled="!isItemEditable"
           required
         />
         <v-text-field
@@ -36,20 +37,24 @@
           v-model="inputType"
           :items="inputTypes"
           label="Input Type"
+          :disabled="!isItemEditable"
         />
         <RadioBuilder
           v-if="inputType === 'radio'"
           :initial-item-data="options"
+          :is-item-editable="isItemEditable"
           @updateOptions="updateOptions"
         />
         <TextBuilder
           v-if="inputType === 'text'"
           :initial-item-data="options"
+          :is-item-editable="isItemEditable"
           @updateOptions="updateOptions"
         />
         <SliderBuilder
           v-if="inputType === 'slider'"
           :initial-item-data="options"
+          :is-item-editable="isItemEditable"
           @updateOptions="updateOptions"
         />
         <VideoBuilder

@@ -6,17 +6,20 @@
     <v-text-field
       v-model="numOptions"
       label="On a scale of 1 to "
+      :disabled="!isItemEditable"
       type="number"
       @change="update"
     />
     <v-text-field
       v-model="minValue"
       label="First option"
+      :disabled="!isItemEditable"
       @change="update"
     />
     <v-text-field
       v-model="maxValue"
       label="Last option"
+      :disabled="!isItemEditable"
       @change="update"
     />
   </v-form>
@@ -28,7 +31,11 @@ export default {
     initialItemData: {
       type: Object,
       required: true
-    }
+    },
+    isItemEditable: {
+      type: Boolean,
+      default: true,
+    },
   },
   data: function () {
     return {

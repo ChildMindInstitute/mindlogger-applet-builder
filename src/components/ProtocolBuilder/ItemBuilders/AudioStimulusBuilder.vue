@@ -21,6 +21,7 @@
     <v-checkbox
       v-model="allowReplay"
       label="Media Replay Allowed"
+      :disabled="!isItemEditable"
       @change="update"
     />
   </v-form>

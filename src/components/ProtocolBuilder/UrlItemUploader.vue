@@ -68,6 +68,8 @@ export default {
         'https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/MindLoggerDemo/items/radio-multi',
         'https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/MindLoggerDemo/items/slider',
         'https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/MindLoggerDemo/items/text',
+        'https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/MindLoggerDemo/items/audio-stimulus',
+        'https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/MindLoggerDemo/items/time-range',
       ],
       fetchedSchema: {},
       error: '',

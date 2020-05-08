@@ -1,6 +1,8 @@
 <template>
   <v-app>
-    <protocol-builder />
+    <protocol-builder
+      exportButton
+    />
   </v-app>
 </template>
 

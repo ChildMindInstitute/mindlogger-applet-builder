@@ -80,6 +80,13 @@
       </v-alert>
       <div>
         <v-btn
+          v-if="exportButton"
+          color="primary"
+          @click="onClickExport"
+        >
+          Export Schema
+        </v-btn>
+        <v-btn
           color="primary"
           @click="onClickSaveProtocol"
         >
@@ -138,6 +145,13 @@ import { saveAs } from 'file-saver';
 export default {
   components: {
     ActivityBuilder
+  },
+  props: {
+    exportButton: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data: function() {
     return initialData();
@@ -290,6 +304,11 @@ export default {
       zip.generateAsync({type:"blob"})
       .then((blob) => {
           saveAs(blob, `${this.name}.zip`);
+      });
+    },
+    onClickExport() {
+      this.$emit('uploadProtocol', {
+        'testSchema': 'testSchemaValue',
       });
     },
     resetBuilder (){

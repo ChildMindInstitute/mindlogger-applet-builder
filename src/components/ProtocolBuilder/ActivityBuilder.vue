@@ -50,7 +50,7 @@
             >
               <v-list-item-content>
                 <v-list-item-title v-text="item.name" />
-                <v-list-item-sub-title v-text="item.inputType" />
+                <v-list-item-title v-text="item.inputType" />
               </v-list-item-content>
               <v-list-item-action>
                 <v-btn
@@ -304,8 +304,8 @@ export default {
       const itemOrder = this.getItemOrder();
       const allowed = this.getAllowed();
       return {
-        "@context": [ "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic",
-            "https://raw.githubusercontent.com/YOUR-ACTIVITY-CONTEXT-FILE"
+        "@context": [ "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic"
+            // "https://raw.githubusercontent.com/YOUR-ACTIVITY-CONTEXT-FILE"
         ],
         "@type": "reproschema:Activity",
         "@id": this.name,
@@ -375,4 +375,3 @@ export default {
   },
 };
 </script>
-

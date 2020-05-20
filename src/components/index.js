@@ -1,7 +1,7 @@
-import ProtocolBuilder from './ProtocolBuilder/ProtocolBuilder.vue';
+import AppletBuilder from './ProtocolBuilder/ProtocolBuilder.vue';
 
 const install = Vue => {
-  Vue.component('protocol-builder', ProtocolBuilder)
+  Vue.component('applet-builder', AppletBuilder)
 };
 
 export default install;

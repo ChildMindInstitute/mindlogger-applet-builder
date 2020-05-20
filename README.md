@@ -1,4 +1,4 @@
-# Protocol Builder
+# Applet Schema Builder
 
 Visual user interface used to design, edit, and generate [ReproSchema](https://github.com/ReproNim/reproschema) protocols. Written in Vue, hosted on [GitHub](https://github.com/henryrossiter/Protocol-Builder), and distributed with [NPM](https://www.npmjs.com/package/activity-set-builder).
 
@@ -7,19 +7,19 @@ Visual user interface used to design, edit, and generate [ReproSchema](https://g
 
 ### Install dependency
 ```
-npm install protocol-builder
+npm install applet-schema-builder
 ```
 
 ```
 <template>
-  <ProtocolBuilder
+  <AppletBuilder
     exportButton
-    @uploadProtocol="onUploadProtocol"
+    @uploadProtocol="onUploadApplet"
   />
 </template>
 
 <script>
-import Components from 'protocol-builder';
+import Components from 'applet-schema-builder';
 
 export default {
   name: 'My-App',
@@ -27,8 +27,8 @@ export default {
     ...Components,
   },
   methods: {
-    onUploadProtocol(newProtocol) {
-        console.log('new protocol', newProtocol);
+    onUploadApplet(newApplet) {
+        console.log('new applet', newApplet);
     }
   },
 }

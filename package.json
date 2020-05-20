@@ -1,14 +1,13 @@
 {
-  "name": "protocol-builder",
-  "version": "0.1.20",
+  "name": "applet-schema-builder",
+  "version": "0.1.23",
   "private": false,
-  "main": "./dist/protocol-builder.common.js",
+  "main": "./dist/applet-schema-builder.common.js",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "build-bundle": "vue-cli-service build --target lib --name protocol-builder ./src/components/ProtocolBuilder/index.js",
-    "publish": "npm publish --access public"
+    "build-bundle": "vue-cli-service build --target lib --name applet-schema-builder ./src/components/ProtocolBuilder/index.js"
   },
   "dependencies": {
     "axios": "^0.19.2",

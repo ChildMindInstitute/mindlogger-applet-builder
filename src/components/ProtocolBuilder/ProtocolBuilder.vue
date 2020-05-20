@@ -31,7 +31,7 @@
             >
               <v-list-item-content>
                 <v-list-item-title v-text="activity.name" />
-                <v-list-item-sub-title v-text="activity.description" />
+                <v-list-item-title v-text="activity.description" />
               </v-list-item-content>  
               <v-list-item-action>
                 <v-btn
@@ -139,6 +139,7 @@ function initialData() {
   };
 }
 
+import api from '../../utilities/api';
 import ActivityBuilder from './ActivityBuilder.vue';
 import { saveAs } from 'file-saver';
 
@@ -247,8 +248,8 @@ export default {
       const activityOrder = this.getActivityOrder();
       const activityVisibility = this.getActivityVisibility();
       const schema = {
-        "@context": [ "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic",
-            "https://raw.githubusercontent.com/YOUR-PROTOCOL-CONTEXT-FILE"
+        "@context": [ "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic"
+            // "https://raw.githubusercontent.com/YOUR-PROTOCOL-CONTEXT-FILE"
         ],
         "@type": "reproschema:Protocol",
         "@id": `${this.name}_schema`,
@@ -307,8 +308,33 @@ export default {
       });
     },
     onClickExport() {
+      const contexts = {};
+      const protocol = {
+        data: this.getCompressedSchema(),
+        activities: {},
+      };
+      
+      this.activities.forEach((activity) => {
+        protocol.activities[activity.name] = {
+          data: activity.schema,
+            items: {}
+        };
+        activity.items.forEach((item) => {
+          protocol.activities[activity.name].items[item.name] = item;
+        })
+      });
+
+      protocol.data['@context'].forEach((contextURL) => {
+        api.getSchema(contextURL).then(resp => {
+          contexts[contextURL] = resp.data['@context'];
+        }).catch(e => {
+          console.log(e);
+        });
+      })
+
       this.$emit('uploadProtocol', {
-        'testSchema': 'testSchemaValue',
+        contexts,
+        protocol
       });
     },
     resetBuilder (){

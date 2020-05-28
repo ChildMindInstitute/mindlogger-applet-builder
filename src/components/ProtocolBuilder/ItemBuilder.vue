@@ -272,8 +272,7 @@ export default {
       const media = this.getMedia();
       const schema = {
         "@context": [
-          "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic",
-          "https://raw.githubusercontent.com/YOUR-ACTIVITY-CONTEXT-FILE"
+          "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic"
         ],
         "@type": "reproschema:Field",
         "@id": this.name,
@@ -282,7 +281,6 @@ export default {
         "schema:description": this.description,
         "schema:schemaVersion": "0.0.1",
         "schema:version": "0.0.1",
-        "question": this.question,
         "ui": {
           "inputType": this.inputType
         },
@@ -308,7 +306,7 @@ export default {
           'inputType': this.inputType,
           'options': this.options,
           'isItemEditable': this.isItemEditable,
-          'schema': schema,
+          ...schema,
         };
 
         if (this.inputType === 'radio') {

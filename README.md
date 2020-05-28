@@ -12,7 +12,7 @@ npm install applet-schema-builder
 
 ```
 <template>
-  <AppletBuilder
+  <AppletSchemaBuilder
     exportButton
     @uploadProtocol="onUploadApplet"
   />

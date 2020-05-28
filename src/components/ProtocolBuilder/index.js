@@ -1,8 +1,8 @@
-import ProtocolBuilder from './ProtocolBuilder.vue';
+import AppletSchemaBuilder from './ProtocolBuilder.vue';
 import Vue from 'vue';
 
 const Components = {
-  ProtocolBuilder
+  AppletSchemaBuilder
 };
 
 Object.keys(Components).forEach(name => {

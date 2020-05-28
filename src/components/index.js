@@ -1,7 +1,7 @@
-import AppletBuilder from './ProtocolBuilder/ProtocolBuilder.vue';
+import AppletSchemaBuilder from './ProtocolBuilder/ProtocolBuilder.vue';
 
 const install = Vue => {
-  Vue.component('applet-builder', AppletBuilder)
+  Vue.component('applet-schema-builder', AppletSchemaBuilder)
 };
 
 export default install;

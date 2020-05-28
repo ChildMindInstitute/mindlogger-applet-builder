@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <protocol-builder
+    <applet-schema-builder
       exportButton
     />
   </v-app>
@@ -17,12 +17,12 @@
 
 <script>
 
-import ProtocolBuilder from './components/ProtocolBuilder/ProtocolBuilder.vue';
+import AppletSchemaBuilder from './components/ProtocolBuilder/ProtocolBuilder.vue';
 
 export default {
   name: 'App',
   components: {
-    ProtocolBuilder
+    AppletSchemaBuilder
   },
 }
 </script>

@@ -81,20 +81,23 @@
       <div>
         <v-btn
           v-if="exportButton"
+          class="mx-2 my-2"
           color="primary"
           @click="onClickExport"
         >
           Export Schema
         </v-btn>
         <v-btn
+          class="mx-2 my-2"
           color="primary"
           @click="onClickSaveProtocol"
         >
           Download Schema
         </v-btn>
         <v-btn
-          outlined
+          class="mx-2 my-2"
           color="primary"
+          outlined
           @click="resetBuilder"
         >
           Reset Builder
@@ -114,12 +117,6 @@
     </v-dialog>
   </v-container>
 </template>
-
-<style scoped>
-  .v-btn {
-    margin: 6px 8px;
-  }
-</style>
 
 <script>
 
@@ -142,6 +139,7 @@ function initialData() {
 import api from '../../utilities/api';
 import ActivityBuilder from './ActivityBuilder.vue';
 import { saveAs } from 'file-saver';
+import { cloneDeep } from 'lodash';
 
 export default {
   components: {
@@ -248,8 +246,8 @@ export default {
       const activityOrder = this.getActivityOrder();
       const activityVisibility = this.getActivityVisibility();
       const schema = {
-        "@context": [ "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic"
-            // "https://raw.githubusercontent.com/YOUR-PROTOCOL-CONTEXT-FILE"
+        "@context": [ "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic",
+            "https://raw.githubusercontent.com/YOUR-PROTOCOL-CONTEXT-FILE"
         ],
         "@type": "reproschema:Protocol",
         "@id": `${this.name}_schema`,
@@ -308,7 +306,7 @@ export default {
       });
     },
     onClickExport() {
-      const contexts = {};
+      let contexts = {};
       const protocol = {
         data: this.getCompressedSchema(),
         activities: {},
@@ -324,18 +322,23 @@ export default {
         })
       });
 
-      protocol.data['@context'].forEach((contextURL) => {
-        api.getSchema(contextURL).then(resp => {
-          contexts[contextURL] = resp.data['@context'];
-        }).catch(e => {
-          console.log(e);
-        });
+      protocol.data['@context'].forEach((contextURL, index) => {
+        if (index < protocol.data['@context'].length - 1) {
+          api.getSchema(contextURL).then(resp => {
+            contexts[contextURL] = resp.data['@context'];
+            if (index === protocol.data['@context'].length - 2) {
+              const contextObj = this.getContext();
+              contexts[protocol.data['@context'][index + 1]] = contextObj['@context'];
+              this.$emit('uploadProtocol', {
+                contexts,
+                protocol
+              });
+            }
+          }).catch(e => {
+            console.log(e);
+          });
+        }
       })
-
-      this.$emit('uploadProtocol', {
-        contexts,
-        protocol
-      });
     },
     resetBuilder (){
       Object.assign(this.$data, initialData());

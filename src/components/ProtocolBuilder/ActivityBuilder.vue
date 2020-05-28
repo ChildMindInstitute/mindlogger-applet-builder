@@ -305,7 +305,6 @@ export default {
       const allowed = this.getAllowed();
       return {
         "@context": [ "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic"
-            // "https://raw.githubusercontent.com/YOUR-ACTIVITY-CONTEXT-FILE"
         ],
         "@type": "reproschema:Activity",
         "@id": this.name,

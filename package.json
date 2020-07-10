@@ -10,6 +10,8 @@
     "build-bundle": "vue-cli-service build --target lib --name applet-schema-builder ./src/components/ProtocolBuilder/index.js"
   },
   "dependencies": {
+    "@sentry/browser": "^5.19.1",
+    "@sentry/integrations": "^5.19.1",
     "axios": "^0.19.2",
     "core-js": "^3.6.4",
     "file-saver": "^2.0.2",

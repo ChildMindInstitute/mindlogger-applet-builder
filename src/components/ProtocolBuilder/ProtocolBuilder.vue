@@ -32,7 +32,7 @@
               <v-list-item-content>
                 <v-list-item-title v-text="activity.name" />
                 <v-list-item-title v-text="activity.description" />
-              </v-list-item-content>  
+              </v-list-item-content>
               <v-list-item-action>
                 <v-btn
                   icon
@@ -119,31 +119,28 @@
 </template>
 
 <script>
-
 function initialData() {
   return {
-    name: '',
-    description: '',
+    name: "",
+    description: "",
     activities: [],
-    textRules: [
-      v => !!v || 'This field is required',
-    ],
+    textRules: [(v) => !!v || "This field is required"],
     dialog: false,
-    error: '',
+    error: "",
     initialActivityData: {},
     componentKey: 0,
-    editIndex: -1
+    editIndex: -1,
   };
 }
 
-import api from '../../utilities/api';
-import ActivityBuilder from './ActivityBuilder.vue';
-import { saveAs } from 'file-saver';
-import { cloneDeep } from 'lodash';
+import api from "../../utilities/api";
+import ActivityBuilder from "./ActivityBuilder.vue";
+import { saveAs } from "file-saver";
+import { cloneDeep } from "lodash";
 
 export default {
   components: {
-    ActivityBuilder
+    ActivityBuilder,
   },
   props: {
     exportButton: {
@@ -173,7 +170,7 @@ export default {
     onCloseActivityModal(response) {
       this.dialog = false;
       if (response) {
-        this.onNewActivity(response)
+        this.onNewActivity(response);
       }
     },
     onNewActivity(activity) {
@@ -202,28 +199,32 @@ export default {
     },
     isProtocolValid() {
       if (!this.name) {
-        this.error = 'Protocol Name is required';
+        this.error = "Protocol Name is required";
         return false;
       } else if (!this.description) {
-        this.error = 'Protocol Description is required';
+        this.error = "Protocol Description is required";
         return false;
       } else if (this.activities.length == 0) {
-        this.error = 'Protocol must contain at least one activity';
+        this.error = "Protocol must contain at least one activity";
         return false;
       } else {
-        this.error = '';
+        this.error = "";
       }
       return true;
     },
     getVariableMap() {
-      const variableMap = this.activities.map(activity => ({
-        'variableName': activity.name,
-        'isAbout': activity.name
+      const variableMap = this.activities.map((activity) => ({
+        variableName: `${activity.name}_schema`,
+        isAbout: `${activity.name}_schema`,
+        prefLabel: activity.name,
+        isVis: true,
       }));
       return variableMap;
     },
     getActivityOrder() {
-      const activityNamesArray = this.activities.map(activity => activity.name)
+      const activityNamesArray = this.activities.map(
+        (activity) => activity.name
+      );
       return activityNamesArray;
     },
     getActivityDisplayNames() {
@@ -234,7 +235,7 @@ export default {
       return displayNamesObj;
     },
     getActivityVisibility() {
-      const visibilityObj = {}
+      const visibilityObj = {};
       this.activities.forEach(function(activity) {
         visibilityObj[activity.name] = true;
       });
@@ -246,40 +247,40 @@ export default {
       const activityOrder = this.getActivityOrder();
       const activityVisibility = this.getActivityVisibility();
       const schema = {
-        "@context": [ "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic",
-            "https://raw.githubusercontent.com/YOUR-PROTOCOL-CONTEXT-FILE"
+        "@context": [
+          "https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json",
+          "https://raw.githubusercontent.com/YOUR-PROTOCOL-CONTEXT-FILE",
         ],
         "@type": "reproschema:Protocol",
         "@id": `${this.name}_schema`,
         "skos:prefLabel": this.name,
-        "skos:altLabel": this.name,
         "schema:description": this.description,
         "schema:schemaVersion": "0.0.1",
         "schema:version": "0.0.1",
-        "schema:about": this.description,
-        "variableMap": variableMap,
+        "landingPage": this.description, //point to the readme of protocol
+        // variableMap: variableMap,
         "ui": {
-            "order": activityOrder,
-            "shuffle": false,
-            "activity_display_name": activityDisplayNames,
-            "visibility": activityVisibility
-        }
+          "addProperties": variableMap,
+          "order": activityOrder,
+          "shuffle": false,
+        },
       };
       return schema;
     },
     getContext() {
       const contextObj = {
-        '@version': 1.1,
-        'activity_path': 'https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/',
+        "@version": 1.1,
+        activity_path:
+          "https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/",
       };
       this.activities.forEach(function(activity) {
         contextObj[activity.name] = {
-          '@id': `activity_path:${activity.name}/${activity.name}_schema`,
-          '@type': '@id'
+          "@id": `activity_path:${activity.name}/${activity.name}_schema`,
+          "@type": "@id",
         };
       });
       return {
-        "@context": contextObj
+        "@context": contextObj,
       };
     },
     downloadSchema() {
@@ -289,20 +290,35 @@ export default {
       var JSZip = require("jszip");
       var zip = new JSZip();
 
-      zip.folder("protocols").file("schema", JSON.stringify(schemaObj, null, 2));
-      zip.folder("protocols").file("context", JSON.stringify(contextObj, null, 2));
+      zip
+        .folder("protocols")
+        .file("schema", JSON.stringify(schemaObj, null, 2));
+      zip
+        .folder("protocols")
+        .file("context", JSON.stringify(contextObj, null, 2));
 
       this.activities.forEach(function(activity) {
-        zip.folder(`activities/${activity.name}`).file(`${activity.name}_schema`, JSON.stringify(activity.schema, null, 2));
-        zip.folder(`activities/${activity.name}`).file(`${activity.name}_context`, JSON.stringify(activity.context, null, 2));
+        zip
+          .folder(`activities/${activity.name}`)
+          .file(
+            `${activity.name}_schema`,
+            JSON.stringify(activity.schema, null, 2)
+          );
+        zip
+          .folder(`activities/${activity.name}`)
+          .file(
+            `${activity.name}_context`,
+            JSON.stringify(activity.context, null, 2)
+          );
         activity.items.forEach(function(item) {
-          zip.folder(`activities/${activity.name}/items`).file(`${item.name}`, JSON.stringify(item.schema, null, 2));
+          zip
+            .folder(`activities/${activity.name}/items`)
+            .file(`${item.name}`, JSON.stringify(item.schema, null, 2));
         });
       });
 
-      zip.generateAsync({type:"blob"})
-      .then((blob) => {
-          saveAs(blob, `${this.name}.zip`);
+      zip.generateAsync({ type: "blob" }).then((blob) => {
+        saveAs(blob, `${this.name}.zip`);
       });
     },
     onClickExport() {
@@ -311,43 +327,46 @@ export default {
         data: this.getCompressedSchema(),
         activities: {},
       };
-      
+
       this.activities.forEach((activity) => {
         protocol.activities[activity.name] = {
           data: activity.schema,
-            items: {}
+          items: {},
         };
         activity.items.forEach((item) => {
           protocol.activities[activity.name].items[item.name] = item;
-        })
+        });
       });
 
-      protocol.data['@context'].forEach((contextURL, index) => {
-        if (index < protocol.data['@context'].length - 1) {
-          api.getSchema(contextURL).then(resp => {
-            contexts[contextURL] = resp.data['@context'];
-            if (index === protocol.data['@context'].length - 2) {
-              const contextObj = this.getContext();
-              contexts[protocol.data['@context'][index + 1]] = contextObj['@context'];
-              this.$emit('uploadProtocol', {
-                contexts,
-                protocol
-              });
-            }
-          }).catch(e => {
-            console.log(e);
-          });
+      protocol.data["@context"].forEach((contextURL, index) => {
+        if (index < protocol.data["@context"].length - 1) {
+          api
+            .getSchema(contextURL)
+            .then((resp) => {
+              contexts[contextURL] = resp.data["@context"];
+              if (index === protocol.data["@context"].length - 2) {
+                const contextObj = this.getContext();
+                contexts[protocol.data["@context"][index + 1]] =
+                  contextObj["@context"];
+                this.$emit("uploadProtocol", {
+                  contexts,
+                  protocol,
+                });
+              }
+            })
+            .catch((e) => {
+              console.log(e);
+            });
         }
-      })
+      });
     },
-    resetBuilder (){
+    resetBuilder() {
       Object.assign(this.$data, initialData());
       this.resetValidation();
     },
-    resetValidation () {
-      this.$refs.form.resetValidation()
+    resetValidation() {
+      this.$refs.form.resetValidation();
     },
-  }
-}
-
+  },
+};
 </script>

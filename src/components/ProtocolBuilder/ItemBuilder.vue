@@ -192,10 +192,8 @@ export default {
       this.options = newOptions;
     },
     getSliderChoices() {      
-      const n = this.options.numOptions;
       const choices = [];
-      var i;
-      for (i = 0; i < n; i++) {
+      for (let i = 1; i <= this.options.numOptions; i++) {
         choices.push({
           "schema:name": i.toString(),
           "schema:value": i
@@ -206,9 +204,9 @@ export default {
     getRadioChoices() {
       const choices = this.options && this.options.options ? this.options.options.map((option, index) => {
           const choiceSchema = {
-            "@type": "schema:Boolean",
+            "@type": "schema:option",
             "schema:name": option.name,
-            "schema:value": index
+            "schema:value": index + 1
           };
           if (option.image) {
             choiceSchema['schema:image'] = option.image;
@@ -221,10 +219,10 @@ export default {
       if (this.inputType === 'radio') {
         const choices = this.getRadioChoices();
         return {
-          "@type": "xsd:anyURI",
+          "@valueType": "xsd:anyURI",
           "multipleChoice": this.multipleChoice,
-          "schema:minValue": 0,
-          "schema:maxValue": choices.length - 1,
+          "schema:minValue": 1,
+          "schema:maxValue": choices.length,
           "choices": choices,
         };
       }
@@ -234,7 +232,7 @@ export default {
       if (this.inputType === 'slider') {
         const choices = this.getSliderChoices();
         return {
-          "@type": "xsd:integer",
+          "@valueType": "xsd:integer",
           "schema:minValue": this.options.minValue,
           "schema:maxValue": this.options.maxValue,
           "choices": choices,
@@ -242,7 +240,7 @@ export default {
       }
       if (this.inputType === 'date') {
         return {
-          "type": "xsd:date",
+          "valueType": "xsd:date",
           "requiredValue": true,
           "schema:maxValue": "new Date()"
         };
@@ -272,7 +270,7 @@ export default {
       const media = this.getMedia();
       const schema = {
         "@context": [
-          "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic"
+          "https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json"
         ],
         "@type": "reproschema:Field",
         "@id": this.name,
@@ -294,6 +292,19 @@ export default {
       if (this.inputType === 'audioStimulus') {
         schema["media"] = media;
       }
+      if (this.inputType === 'radio') {
+        schema["ui"] = {
+          "inputType": this.inputType,
+          "allow": [
+            "autoAdvance"
+          ]
+        };
+      } else {
+        schema["ui"] = {
+          "inputType": this.inputType
+        };
+      }
+      
       return schema;
     },
     onSaveItem() {
@@ -303,23 +314,20 @@ export default {
           'name': this.name,
           'question': this.question,
           'description': this.description,
-          'inputType': this.inputType,
           'options': this.options,
           'isItemEditable': this.isItemEditable,
           ...schema,
         };
 
-        if (this.inputType === 'radio') {
-          itemObj.responseOptions = this.responseOptions;
-        } else if (this.inputType === 'text') {
-          itemObj.responseOptions = this.responseOptions;
-        } else if (this.inputType === 'slider') {
-          itemObj.responseOptions = this.responseOptions;
-        } else if (this.inputType === 'audioRecord') {
-          itemObj.responseOptions = this.responseOptions;
-        } else if (this.inputType === 'audioImageRecord') {
-          itemObj.responseOptions = this.responseOptions;
-        } else if (this.inputType === 'geolocation') {
+        if (
+          (this.inputType === 'radio'
+          || this.inputType === 'text' 
+          || this.inputType === 'slider' 
+          || this.inputType === 'audioRecord' 
+          || this.inputType === 'audioImageRecord' 
+          || this.inputType === 'geolocation')
+          && Object.keys(this.responseOptions).length
+         ) {
           itemObj.responseOptions = this.responseOptions;
         } else if (this.inputType === 'audioStimulus') {
           itemObj.inputOptions = this.inputOptions;

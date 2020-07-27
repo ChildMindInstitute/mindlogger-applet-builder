@@ -161,7 +161,7 @@ export default {
       name: this.initialItemData.name || '',
       question: this.initialItemData.question || '',
       description: this.initialItemData.description || '',
-      inputType: this.initialItemData.inputType || '',
+      inputType: this.initialItemData.ui ? this.initialItemData.ui.inputType : '',
       multipleChoice: this.initialItemData.multipleChoice || false,
       options: this.initialItemData.options || [],
       responseOptions: this.initialItemData.responseOptions || {},

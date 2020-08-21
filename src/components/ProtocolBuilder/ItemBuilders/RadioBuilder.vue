@@ -38,6 +38,8 @@
             v-model="nextOptionName"
             :rules="textRules"
             label="Option Text"
+            counter="55"
+            maxlength="55"
             :disabled="!isItemEditable"
             @change="update"
           />

@@ -13,12 +13,16 @@
     <v-text-field
       v-model="minValue"
       label="First option"
+      counter="20"
+      maxlength="20"
       :disabled="!isItemEditable"
       @change="update"
     />
     <v-text-field
       v-model="maxValue"
       label="Last option"
+      counter="20"
+      maxlength="20"
       :disabled="!isItemEditable"
       @change="update"
     />

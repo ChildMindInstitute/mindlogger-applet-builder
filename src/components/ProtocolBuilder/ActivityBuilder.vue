@@ -18,17 +18,23 @@
           <v-text-field
             v-model="name"
             :rules="textRules"
+            counter="50"
+            maxlength="50"
             label="Activity Name"
             required
           />
           <v-text-field
             v-model="description"
             :rules="textRules"
+            counter="100"
+            maxlength="100"
             label="Activity Description"
             required
           />
           <v-text-field
             v-model="preamble"
+            counter="20"
+            maxlength="20"
             label="Preamble"
             required
           />

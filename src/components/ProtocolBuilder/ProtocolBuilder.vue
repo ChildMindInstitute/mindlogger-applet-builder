@@ -277,12 +277,12 @@ export default {
         activity_path:
           "https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/",
       };
-      this.activities.forEach(function(activity) {
-        contextObj[activity.name] = {
-          "@id": `activity_path:${activity.name}/${activity.name}_schema`,
-          "@type": "@id",
-        };
-      });
+      // this.activities.forEach(function(activity) {
+      //   contextObj[activity.name] = {
+      //     "@id": `activity_path:${activity.name}/${activity.name}_schema`,
+      //     "@type": "@id",
+      //   };
+      // });
       return {
         "@context": contextObj,
       };

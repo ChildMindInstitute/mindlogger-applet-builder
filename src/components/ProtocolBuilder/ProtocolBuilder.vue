@@ -1,13 +1,7 @@
 <template>
   <v-container>
-    <v-layout
-      wrap
-      column
-    >
-      <v-form
-        ref="form"
-        lazy-validation
-      >
+    <v-layout wrap column>
+      <v-form ref="form" lazy-validation>
         <v-text-field
           v-model="name"
           :rules="textRules"
@@ -38,30 +32,21 @@
                 <v-list-item-title v-text="activity.description" />
               </v-list-item-content>
               <v-list-item-action>
-                <v-btn
-                  icon
-                  @click="duplicateActivity(index)"
-                >
+                <v-btn icon @click="duplicateActivity(index)">
                   <v-icon color="grey lighten-1">
                     content_copy
                   </v-icon>
                 </v-btn>
               </v-list-item-action>
               <v-list-item-action>
-                <v-btn
-                  icon
-                  @click="editActivity(index)"
-                >
+                <v-btn icon @click="editActivity(index)">
                   <v-icon color="grey lighten-1">
                     edit
                   </v-icon>
                 </v-btn>
               </v-list-item-action>
               <v-list-item-action>
-                <v-btn
-                  icon
-                  @click="deleteActivity(index)"
-                >
+                <v-btn icon @click="deleteActivity(index)">
                   <v-icon color="grey lighten-1">
                     delete
                   </v-icon>
@@ -76,10 +61,7 @@
           </v-col>
         </v-list>
       </v-form>
-      <v-alert
-        v-if="error !== ''"
-        type="error"
-      >
+      <v-alert v-if="error !== ''" type="error">
         {{ error }}
       </v-alert>
       <div>
@@ -89,30 +71,17 @@
           color="primary"
           @click="onClickExport"
         >
-          Export Schema
+          Export Schema111
         </v-btn>
-        <v-btn
-          class="mx-2 my-2"
-          color="primary"
-          @click="onClickSaveProtocol"
-        >
+        <v-btn class="mx-2 my-2" color="primary" @click="onClickSaveProtocol">
           Download Schema
         </v-btn>
-        <v-btn
-          class="mx-2 my-2"
-          color="primary"
-          outlined
-          @click="resetBuilder"
-        >
+        <v-btn class="mx-2 my-2" color="primary" outlined @click="resetBuilder">
           Reset Builder
         </v-btn>
       </div>
     </v-layout>
-    <v-dialog
-      v-model="dialog"
-      width="800"
-      persistent
-    >
+    <v-dialog v-model="dialog" width="800" persistent>
       <ActivityBuilder
         :key="componentKey"
         :initial-activity-data="initialActivityData"
@@ -261,12 +230,12 @@ export default {
         "schema:description": this.description,
         "schema:schemaVersion": "0.0.1",
         "schema:version": "0.0.1",
-        "landingPage": this.description, //point to the readme of protocol
+        landingPage: this.description, //point to the readme of protocol
         // variableMap: variableMap,
-        "ui": {
-          "addProperties": variableMap,
-          "order": activityOrder,
-          "shuffle": false,
+        ui: {
+          addProperties: variableMap,
+          order: activityOrder,
+          shuffle: false,
         },
       };
       return schema;

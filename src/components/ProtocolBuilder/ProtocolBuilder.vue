@@ -66,12 +66,20 @@
       </v-alert>
       <div>
         <v-btn
+          v-if="applet"
+          class="mx-2 my-2"
+          color="primary"
+          @click="onClickDuplicate"
+        >
+          Duplicate
+        </v-btn>
+        <v-btn
           v-if="exportButton"
           class="mx-2 my-2"
           color="primary"
           @click="onClickExport"
         >
-          Export Schema111
+          Export Schema
         </v-btn>
         <v-btn class="mx-2 my-2" color="primary" @click="onClickSaveProtocol">
           Download Schema
@@ -125,7 +133,24 @@ export default {
   data: function() {
     return initialData();
   },
+  computed: {
+    applet() {
+      return this.$route.params.applet;
+    },
+  },
+  created() {
+    if (applet) {
+      this.name = applet["@id"].replace("_schema", "");
+      this.description = applet["schema:description"][0]["@value"];
+    }
+  },
   methods: {
+    onClickDuplicate() {
+      this.$emit("duplicateApplet", {
+        id: this.applet.applet._id,
+        name: this.name,
+      });
+    },
     validate() {
       if (this.$refs.form.validate()) {
         this.snackbar = true;
@@ -159,6 +184,7 @@ export default {
     editActivity(index) {
       this.editIndex = index;
       this.initialActivityData = this.activities[index];
+      console.log("this.initialActivityData: ", this.initialActivityData);
       this.forceUpdate();
       this.dialog = true;
     },
@@ -295,6 +321,7 @@ export default {
       });
     },
     onClickExport() {
+      debugger;
       let contexts = {};
       const protocol = {
         data: this.getCompressedSchema(),

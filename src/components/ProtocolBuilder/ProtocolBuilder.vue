@@ -321,7 +321,6 @@ export default {
       });
     },
     onClickExport() {
-      debugger;
       let contexts = {};
       const protocol = {
         data: this.getCompressedSchema(),

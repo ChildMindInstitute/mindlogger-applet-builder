@@ -20,73 +20,45 @@
         />
         <v-list>
           <v-col>
-            <v-subheader>
-              Activities
-            </v-subheader>
-            <v-list-item
-              v-for="(activity, index) in activities"
-              :key="activity.id"
-            >
+            <v-subheader>Activities</v-subheader>
+            <v-list-item v-for="(activity, index) in activities" :key="activity.id">
               <v-list-item-content>
                 <v-list-item-title v-text="activity.name" />
                 <v-list-item-title v-text="activity.description" />
               </v-list-item-content>
               <v-list-item-action>
                 <v-btn icon @click="duplicateActivity(index)">
-                  <v-icon color="grey lighten-1">
-                    content_copy
-                  </v-icon>
+                  <v-icon color="grey lighten-1">content_copy</v-icon>
                 </v-btn>
               </v-list-item-action>
               <v-list-item-action>
                 <v-btn icon @click="editActivity(index)">
-                  <v-icon color="grey lighten-1">
-                    edit
-                  </v-icon>
+                  <v-icon color="grey lighten-1">edit</v-icon>
                 </v-btn>
               </v-list-item-action>
               <v-list-item-action>
                 <v-btn icon @click="deleteActivity(index)">
-                  <v-icon color="grey lighten-1">
-                    delete
-                  </v-icon>
+                  <v-icon color="grey lighten-1">delete</v-icon>
                 </v-btn>
               </v-list-item-action>
             </v-list-item>
             <v-list-item @click="addActivity">
-              <v-icon color="grey lighten-1">
-                add
-              </v-icon>
+              <v-icon color="grey lighten-1">add</v-icon>
             </v-list-item>
           </v-col>
         </v-list>
       </v-form>
-      <v-alert v-if="error !== ''" type="error">
-        {{ error }}
-      </v-alert>
+      <v-alert v-if="error !== ''" type="error">{{ error }}</v-alert>
       <div>
-        <v-btn
-          v-if="applet"
-          class="mx-2 my-2"
-          color="primary"
-          @click="onClickDuplicate"
-        >
-          Duplicate
-        </v-btn>
+        <v-btn v-if="applet" class="mx-2 my-2" color="primary" @click="onClickDuplicate">Duplicate</v-btn>
         <v-btn
           v-if="exportButton"
           class="mx-2 my-2"
           color="primary"
           @click="onClickExport"
-        >
-          Export Schema
-        </v-btn>
-        <v-btn class="mx-2 my-2" color="primary" @click="onClickSaveProtocol">
-          Download Schema
-        </v-btn>
-        <v-btn class="mx-2 my-2" color="primary" outlined @click="resetBuilder">
-          Reset Builder
-        </v-btn>
+        >Export Schema</v-btn>
+        <v-btn class="mx-2 my-2" color="primary" @click="onClickSaveProtocol">Download Schema</v-btn>
+        <v-btn class="mx-2 my-2" color="primary" outlined @click="resetBuilder">Reset Builder</v-btn>
       </div>
     </v-layout>
     <v-dialog v-model="dialog" width="800" persistent>
@@ -105,12 +77,13 @@ function initialData() {
     name: "",
     description: "",
     activities: [],
-    textRules: [(v) => !!v || "This field is required"],
+    textRules: [v => !!v || "This field is required"],
     dialog: false,
     error: "",
     initialActivityData: {},
     componentKey: 0,
     editIndex: -1,
+    applet: {}
   };
 }
 
@@ -121,34 +94,131 @@ import { cloneDeep } from "lodash";
 
 export default {
   components: {
-    ActivityBuilder,
+    ActivityBuilder
   },
   props: {
     exportButton: {
       type: Boolean,
       required: false,
-      default: false,
-    },
+      default: false
+    }
   },
   data: function() {
     return initialData();
   },
-  computed: {
-    applet() {
-      return this.$route.params.applet;
-    },
-  },
   created() {
-    if (applet) {
-      this.name = applet["@id"].replace("_schema", "");
-      this.description = applet["schema:description"][0]["@value"];
-    }
+    const { applet, activities, items } = this.$route.params.applet;
+
+    this.name = applet["@id"].replace("_schema", "");
+    this.description = applet["schema:description"][0]["@value"];
+
+    const activitiesObj = Object.values(activities)[0];
+    const {
+      ["@id"]: name,
+      ["schema:description"]: description,
+      ["reprolib:terms/preamble"]: activityPreamble,
+      ["reprolib:terms/shuffle"]: shuffle,
+      ["reprolib:terms/allow"]: isSkippable
+    } = activitiesObj;
+    console.log("activitiesObj: ", activitiesObj);
+
+    const activityInfo = {
+      name,
+      description: description[0]["@value"],
+      activityPreamble: activityPreamble[0]["@value"],
+      shuffle: shuffle[0]["@value"],
+      isSkippable:
+        isSkippable[0]["@list"][0]["@id"].includes("refused_to_answer") ||
+        isSkippable[0]["@list"][0]["@id"].includes("dontKnow")
+          ? true
+          : false
+    };
+
+    activityInfo.items = Object.values(items).map(item => {
+      let itemContent = {
+        name: item["@id"],
+        question: item["schema:question"][0]["@value"],
+        description: item["schema:description"][0]["@value"],
+        ui: {
+          inputType: item["reprolib:terms/inputType"][0]["@value"]
+        }
+      };
+
+      let responseOptions = item["reprolib:terms/responseOptions"];
+      let itemType = itemContent.ui.inputType;
+
+      if (responseOptions) {
+        let multipleChoice =
+          responseOptions[0]["reprolib:terms/multipleChoice"];
+
+        if (multipleChoice) {
+          itemContent.multipleChoice = multipleChoice[0]["@value"];
+        }
+
+        if (itemType === "radio") {
+          itemContent.options = {
+            isMultipleChoice: itemContent.multipleChoice || false,
+            nextOptionImage: "",
+            nextOptionName: "",
+            options: responseOptions[0]["schema:itemListElement"].map(
+              itemListElement => {
+                return {
+                  image: itemListElement["schema:value"][0]["@value"],
+                  name: itemListElement["schema:name"][0]["@value"]
+                };
+              }
+            )
+          };
+        }
+        if (itemType === "text") {
+          itemContent.options = {
+            requiredValue:
+              responseOptions[0]["reprolib:terms/requiredValue"][0]["@value"]
+            // TODO: add 'maximum response length' value which is absent for now
+          };
+        }
+        if (itemType === "slider") {
+          itemContent.options = {
+            maxValue: responseOptions[0]["schema:maxValue"][0]["@value"],
+            minValue: responseOptions[0]["schema:minValue"][0]["@value"],
+            numOptions: responseOptions[0]["schema:itemListElement"].length
+          };
+        }
+        if (itemType === "audioRecord" || itemType === "audioImageRecord") {
+          itemContent.options = {
+            requiredValue:
+              responseOptions[0]["reprolib:terms/requiredValue"][0]["@value"],
+            "schema:maxValue":
+              responseOptions[0]["schema:maxValue"][0]["@value"],
+            "schema:minValue":
+              responseOptions[0]["schema:minValue"][0]["@value"]
+          };
+        }
+      }
+
+      if (itemType === "audioStimulus") {
+        let mediaObj = Object.entries(item["reprolib:terms/media"][0]);
+        let mediaUrl = mediaObj[0][0];
+        let mediaData = mediaObj[0][1];
+
+        itemContent.media = {
+          [mediaUrl]: {
+            "schema:contentUrl": [mediaUrl],
+            "schema:name": mediaData[0]["schema:name"][0]["@value"],
+            "schema:transcript": mediaData[0]["schema:transcript"][0]["@value"]
+          }
+        };
+      }
+
+      return itemContent;
+    });
+    console.log("activityInfo: ", activityInfo);
   },
   methods: {
     onClickDuplicate() {
       this.$emit("duplicateApplet", {
         id: this.applet.applet._id,
-        name: this.name,
+        name: this.name
       });
     },
     validate() {
@@ -172,6 +242,7 @@ export default {
       }
     },
     onNewActivity(activity) {
+      console.log(activity);
       if (this.editIndex >= 0 && this.editIndex < this.activities.length) {
         this.activities[this.editIndex] = activity;
       } else {
@@ -212,18 +283,16 @@ export default {
       return true;
     },
     getVariableMap() {
-      const variableMap = this.activities.map((activity) => ({
+      const variableMap = this.activities.map(activity => ({
         variableName: `${activity.name}_schema`,
         isAbout: `${activity.name}_schema`,
         prefLabel: activity.name,
-        isVis: true,
+        isVis: true
       }));
       return variableMap;
     },
     getActivityOrder() {
-      const activityNamesArray = this.activities.map(
-        (activity) => activity.name
-      );
+      const activityNamesArray = this.activities.map(activity => activity.name);
       return activityNamesArray;
     },
     getActivityDisplayNames() {
@@ -248,7 +317,7 @@ export default {
       const schema = {
         "@context": [
           "https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json",
-          "https://raw.githubusercontent.com/YOUR-PROTOCOL-CONTEXT-FILE",
+          "https://raw.githubusercontent.com/YOUR-PROTOCOL-CONTEXT-FILE"
         ],
         "@type": "reproschema:Protocol",
         "@id": `${this.name}_schema`,
@@ -261,8 +330,8 @@ export default {
         ui: {
           addProperties: variableMap,
           order: activityOrder,
-          shuffle: false,
-        },
+          shuffle: false
+        }
       };
       return schema;
     },
@@ -270,16 +339,16 @@ export default {
       const contextObj = {
         "@version": 1.1,
         activity_path:
-          "https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/",
+          "https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/"
       };
       this.activities.forEach(function(activity) {
         contextObj[activity.name] = {
           "@id": `activity_path:${activity.name}/${activity.name}_schema`,
-          "@type": "@id",
+          "@type": "@id"
         };
       });
       return {
-        "@context": contextObj,
+        "@context": contextObj
       };
     },
     downloadSchema() {
@@ -316,7 +385,7 @@ export default {
         });
       });
 
-      zip.generateAsync({ type: "blob" }).then((blob) => {
+      zip.generateAsync({ type: "blob" }).then(blob => {
         saveAs(blob, `${this.name}.zip`);
       });
     },
@@ -324,15 +393,15 @@ export default {
       let contexts = {};
       const protocol = {
         data: this.getCompressedSchema(),
-        activities: {},
+        activities: {}
       };
 
-      this.activities.forEach((activity) => {
+      this.activities.forEach(activity => {
         protocol.activities[activity.name] = {
           data: activity.schema,
-          items: {},
+          items: {}
         };
-        activity.items.forEach((item) => {
+        activity.items.forEach(item => {
           protocol.activities[activity.name].items[item.name] = item;
         });
       });
@@ -341,7 +410,7 @@ export default {
         if (index < protocol.data["@context"].length - 1) {
           api
             .getSchema(contextURL)
-            .then((resp) => {
+            .then(resp => {
               contexts[contextURL] = resp.data["@context"];
               if (index === protocol.data["@context"].length - 2) {
                 const contextObj = this.getContext();
@@ -349,11 +418,11 @@ export default {
                   contextObj["@context"];
                 this.$emit("uploadProtocol", {
                   contexts,
-                  protocol,
+                  protocol
                 });
               }
             })
-            .catch((e) => {
+            .catch(e => {
               console.log(e);
             });
         }
@@ -365,7 +434,7 @@ export default {
     },
     resetValidation() {
       this.$refs.form.resetValidation();
-    },
-  },
+    }
+  }
 };
 </script>

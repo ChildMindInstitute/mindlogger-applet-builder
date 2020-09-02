@@ -1,19 +1,11 @@
 <template>
   <v-card>
-    <v-card-title
-      class="headline grey lighten-2"
-      primary-title
-    >
-      <v-icon left>
-        {{ isItemEditable ? 'mdi-pencil' : 'mdi-eye' }}
-      </v-icon>
+    <v-card-title class="headline grey lighten-2" primary-title>
+      <v-icon left>{{ isItemEditable ? 'mdi-pencil' : 'mdi-eye' }}</v-icon>
       {{ isItemEditable ? 'Edit Item' : 'View Item' }}
     </v-card-title>
     <v-card-text>
-      <v-form
-        ref="form"
-        lazy-validation
-      >
+      <v-form ref="form" lazy-validation>
         <v-text-field
           v-model="name"
           label="Item Name"
@@ -63,21 +55,11 @@
           :is-item-editable="isItemEditable"
           @updateOptions="updateOptions"
         />
-        <VideoBuilder
-          v-if="inputType === 'video'"
-        />
-        <PhotoBuilder
-          v-if="inputType === 'photo'"
-        />
-        <TimeRangeBuilder
-          v-if="inputType === 'timeRange'"
-        />
-        <DateBuilder
-          v-if="inputType === 'date'"
-        />
-        <DrawingBuilder
-          v-if="inputType === 'drawing'"
-        />
+        <VideoBuilder v-if="inputType === 'video'" />
+        <PhotoBuilder v-if="inputType === 'photo'" />
+        <TimeRangeBuilder v-if="inputType === 'timeRange'" />
+        <DateBuilder v-if="inputType === 'date'" />
+        <DrawingBuilder v-if="inputType === 'drawing'" />
         <AudioRecordBuilder
           v-if="inputType === 'audioRecord'"
           :initial-item-data="options"
@@ -88,10 +70,7 @@
           :initial-item-data="options"
           @updateOptions="updateOptions"
         />
-        <GeolocationBuilder
-          v-if="inputType === 'geolocation'"
-          @update="updateResponseOptions"
-        />
+        <GeolocationBuilder v-if="inputType === 'geolocation'" @update="updateResponseOptions" />
         <AudioStimulusBuilder
           v-if="inputType === 'audioStimulus'"
           :initial-item-input-options="inputOptions"
@@ -109,33 +88,26 @@
         outlined
         color="primary"
         @click="onDiscardItem"
-      >
-        {{ isItemEditable ? 'Discard Changes' : 'Close' }}
-      </v-btn>
+      >{{ isItemEditable ? 'Discard Changes' : 'Close' }}</v-btn>
       <v-spacer />
-      <v-btn
-        color="primary"
-        @click="onSaveItem"
-      >
-        Save Item
-      </v-btn>
+      <v-btn color="primary" @click="onSaveItem">Save Item</v-btn>
     </v-card-actions>
   </v-card>
 </template>
 
 <script>
-import RadioBuilder from './ItemBuilders/RadioBuilder.vue';
-import TextBuilder from './ItemBuilders/TextBuilder.vue';
-import SliderBuilder from './ItemBuilders/SliderBuilder.vue';
-import VideoBuilder from './ItemBuilders/VideoBuilder.vue';
-import PhotoBuilder from './ItemBuilders/PhotoBuilder.vue';
-import TimeRangeBuilder from './ItemBuilders/TimeRangeBuilder.vue';
-import DateBuilder from './ItemBuilders/DateBuilder.vue';
-import DrawingBuilder from './ItemBuilders/DrawingBuilder.vue';
-import AudioRecordBuilder from './ItemBuilders/AudioRecordBuilder.vue';
-import AudioImageRecordBuilder from './ItemBuilders/AudioImageRecordBuilder.vue';
-import GeolocationBuilder from './ItemBuilders/GeolocationBuilder.vue';
-import AudioStimulusBuilder from './ItemBuilders/AudioStimulusBuilder.vue';
+import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
+import TextBuilder from "./ItemBuilders/TextBuilder.vue";
+import SliderBuilder from "./ItemBuilders/SliderBuilder.vue";
+import VideoBuilder from "./ItemBuilders/VideoBuilder.vue";
+import PhotoBuilder from "./ItemBuilders/PhotoBuilder.vue";
+import TimeRangeBuilder from "./ItemBuilders/TimeRangeBuilder.vue";
+import DateBuilder from "./ItemBuilders/DateBuilder.vue";
+import DrawingBuilder from "./ItemBuilders/DrawingBuilder.vue";
+import AudioRecordBuilder from "./ItemBuilders/AudioRecordBuilder.vue";
+import AudioImageRecordBuilder from "./ItemBuilders/AudioImageRecordBuilder.vue";
+import GeolocationBuilder from "./ItemBuilders/GeolocationBuilder.vue";
+import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
 
 export default {
   components: {
@@ -150,39 +122,52 @@ export default {
     AudioRecordBuilder,
     AudioImageRecordBuilder,
     GeolocationBuilder,
-    AudioStimulusBuilder,
+    AudioStimulusBuilder
   },
   props: {
     initialItemData: {
       type: Object,
-      required: true,
+      required: true
     },
     isItemEditable: {
       type: Boolean,
-      default: true,
-    },
+      default: true
+    }
   },
-  data: function () {
+  data: function() {
     return {
-      name: this.initialItemData.name || '',
-      question: this.initialItemData.question || '',
-      description: this.initialItemData.description || '',
-      inputType: this.initialItemData.ui ? this.initialItemData.ui.inputType : '',
+      name: this.initialItemData.name || "",
+      question: this.initialItemData.question || "",
+      description: this.initialItemData.description || "",
+      inputType: this.initialItemData.ui
+        ? this.initialItemData.ui.inputType
+        : "",
       multipleChoice: this.initialItemData.multipleChoice || false,
       options: this.initialItemData.options || [],
       responseOptions: this.initialItemData.responseOptions || {},
       inputOptions: this.initialItemData.inputOptions || {},
       media: this.initialItemData.media || {},
-      textRules: [
-        v => !!v || 'This field is required',
-      ],
-      inputTypes: ['radio', 'text', 'slider', 'photo', 'video', 'timeRange', 'date', 'drawing', 'audioRecord', 'audioImageRecord', 'geolocation', 'audioStimulus'],
+      textRules: [v => !!v || "This field is required"],
+      inputTypes: [
+        "radio",
+        "text",
+        "slider",
+        "photo",
+        "video",
+        "timeRange",
+        "date",
+        "drawing",
+        "audioRecord",
+        "audioImageRecord",
+        "geolocation",
+        "audioStimulus"
+      ]
     };
   },
   methods: {
-    validate () {
+    validate() {
       if (this.$refs.form.validate()) {
-        this.snackbar = true
+        this.snackbar = true;
       }
     },
     updateResponseOptions(newResponseOptions) {
@@ -197,7 +182,7 @@ export default {
     updateOptions(newOptions) {
       this.options = newOptions;
     },
-    getSliderChoices() {      
+    getSliderChoices() {
       const choices = [];
       for (let i = 1; i <= this.options.numOptions; i++) {
         choices.push({
@@ -208,64 +193,69 @@ export default {
       return choices;
     },
     getRadioChoices() {
-      const choices = this.options && this.options.options ? this.options.options.map((option, index) => {
-          const choiceSchema = {
-            "@type": "schema:option",
-            "schema:name": option.name,
-            "schema:value": index + 1
-          };
-          if (option.image) {
-            choiceSchema['schema:image'] = option.image;
-          }
-          return choiceSchema;
-        }) : [];
+      const choices =
+        this.options && this.options.options
+          ? this.options.options.map((option, index) => {
+              const choiceSchema = {
+                "@type": "schema:option",
+                "schema:name": option.name,
+                "schema:value": index + 1
+              };
+              if (option.image) {
+                choiceSchema["schema:image"] = option.image;
+              }
+              return choiceSchema;
+            })
+          : [];
       return choices;
     },
     getResponseOptions() {
-      if (this.inputType === 'radio') {
+      if (this.inputType === "radio") {
         const choices = this.getRadioChoices();
         return {
           "@valueType": "xsd:anyURI",
-          "multipleChoice": this.multipleChoice,
+          multipleChoice: this.multipleChoice,
           "schema:minValue": 1,
           "schema:maxValue": choices.length,
-          "choices": choices,
+          choices: choices
         };
       }
-      if (this.inputType === 'text') {
+      if (this.inputType === "text") {
         return this.options;
       }
-      if (this.inputType === 'slider') {
+      if (this.inputType === "slider") {
         const choices = this.getSliderChoices();
         return {
           "@valueType": "xsd:integer",
           "schema:minValue": this.options.minValue,
           "schema:maxValue": this.options.maxValue,
-          "choices": choices,
+          choices: choices
         };
       }
-      if (this.inputType === 'date') {
+      if (this.inputType === "date") {
         return {
-          "valueType": "xsd:date",
-          "requiredValue": true,
+          valueType: "xsd:date",
+          requiredValue: true,
           "schema:maxValue": "new Date()"
         };
       }
-      if (this.inputType === 'audioRecord' || this.inputType === 'audioImageRecord') {
+      if (
+        this.inputType === "audioRecord" ||
+        this.inputType === "audioImageRecord"
+      ) {
         return this.options;
-      }
-      else {
+      } else {
         return {};
       }
     },
     getInputOptions() {
-      if (this.inputType === 'audioStimulus') {
+      if (this.inputType === "audioStimulus") {
         return this.inputOptions;
       }
       return {};
     },
     getMedia() {
-      if (this.inputType === 'audioStimulus') {
+      if (this.inputType === "audioStimulus") {
         return this.media;
       }
       return {};
@@ -285,70 +275,68 @@ export default {
         "schema:description": this.description,
         "schema:schemaVersion": "0.0.1",
         "schema:version": "0.0.1",
-        "ui": {
-          "inputType": this.inputType
-        },
+        ui: {
+          inputType: this.inputType
+        }
       };
       if (Object.keys(responseOptions).length !== 0) {
         schema["responseOptions"] = responseOptions;
       }
-      if (this.inputType === 'audioStimulus') {
+      if (this.inputType === "audioStimulus") {
         schema["inputOptions"] = inputOptions;
       }
-      if (this.inputType === 'audioStimulus') {
+      if (this.inputType === "audioStimulus") {
         schema["media"] = media;
       }
-      if (this.inputType === 'radio') {
+      if (this.inputType === "radio") {
         schema["ui"] = {
-          "inputType": this.inputType,
-          "allow": [
-            "autoAdvance"
-          ]
+          inputType: this.inputType,
+          allow: ["autoAdvance"]
         };
       } else {
         schema["ui"] = {
-          "inputType": this.inputType
+          inputType: this.inputType
         };
       }
-      
+
       return schema;
     },
     onSaveItem() {
+      debugger;
       if (this.isItemEditable) {
         const schema = this.getCompressedSchema();
         const itemObj = {
-          'name': this.name,
-          'question': this.question,
-          'description': this.description,
-          'options': this.options,
-          'isItemEditable': this.isItemEditable,
-          ...schema,
+          name: this.name,
+          question: this.question,
+          description: this.description,
+          options: this.options,
+          isItemEditable: this.isItemEditable,
+          ...schema
         };
 
         if (
-          (this.inputType === 'radio'
-          || this.inputType === 'text' 
-          || this.inputType === 'slider' 
-          || this.inputType === 'audioRecord' 
-          || this.inputType === 'audioImageRecord' 
-          || this.inputType === 'geolocation')
-          && Object.keys(this.responseOptions).length
-         ) {
+          (this.inputType === "radio" ||
+            this.inputType === "text" ||
+            this.inputType === "slider" ||
+            this.inputType === "audioRecord" ||
+            this.inputType === "audioImageRecord" ||
+            this.inputType === "geolocation") &&
+          Object.keys(this.responseOptions).length
+        ) {
           itemObj.responseOptions = this.responseOptions;
-        } else if (this.inputType === 'audioStimulus') {
+        } else if (this.inputType === "audioStimulus") {
           itemObj.inputOptions = this.inputOptions;
           itemObj.media = this.media;
         }
-        this.$emit('closeItemModal', itemObj);
+        this.$emit("closeItemModal", itemObj);
       } else {
-        this.$emit('closeItemModal', null);
-      } 
-      
+        this.$emit("closeItemModal", null);
+      }
     },
     onDiscardItem() {
-      this.$emit('closeItemModal', null)
+      this.$emit("closeItemModal", null);
     }
-  },
+  }
 };
 </script>
 

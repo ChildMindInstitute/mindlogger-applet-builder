@@ -1,8 +1,5 @@
 <template>
-  <v-form
-    ref="form"
-    v-model="valid"
-  >
+  <v-form ref="form" v-model="valid">
     <v-text-field
       v-model="url"
       label="Media URL"
@@ -36,7 +33,7 @@ export default {
     },
     isItemEditable: {
       type: Boolean,
-      default: true,
+      default: true
     },
     initialItemInputOptions: {
       type: Object,
@@ -45,45 +42,53 @@ export default {
     initialItemMedia: {
       type: Object,
       required: true
-    },
+    }
   },
-  data: function () {
+  data: function() {
     return {
-      url: this.initialItemData.url || Object.keys(this.initialItemMedia)[0] || '',
-      transcript: Object.keys(this.initialItemMedia)[0] ? this.initialItemMedia[Object.keys(this.initialItemMedia)[0]]['schema:transcript'] : '',
-      allowReplay: Array.isArray(this.initialItemInputOptions) ? this.initialItemInputOptions[1]['schema:value'] : true,
+      url:
+        this.initialItemData.url || Object.keys(this.initialItemMedia)[0] || "",
+      transcript: Object.keys(this.initialItemMedia)[0]
+        ? this.initialItemMedia[Object.keys(this.initialItemMedia)[0]][
+            "schema:transcript"
+          ]
+        : "",
+      allowReplay: Array.isArray(this.initialItemInputOptions)
+        ? this.initialItemInputOptions[1]["schema:value"]
+        : true,
       valid: true,
-      urlRules: [
-        v => !!v || 'Media URL cannot be empty',
-      ],
+      urlRules: [v => !!v || "Media URL cannot be empty"]
     };
   },
+  created() {
+    console.log("stimulus initialItemMedia: ", this.initialItemMedia);
+  },
   methods: {
-    update () {
-      const inputOptions =  [
+    update() {
+      const inputOptions = [
         {
           "@type": "schema:URL",
           "schema:name": "stimulus",
           "schema:value": this.url,
-          "schema:contentUrl": this.url,
+          "schema:contentUrl": this.url
         },
         {
           "@type": "schema:Boolean",
           "schema:name": "allowReplay",
           "schema:value": this.allowReplay
-        },
+        }
       ];
-      this.$emit('updateInputOptions', inputOptions);
+      this.$emit("updateInputOptions", inputOptions);
 
       const media = {};
       media[this.url] = {
         "@type": "schema:AudioObject",
         "schema:name": "stimulus",
         "schema:contentUrl": this.url,
-        "schema:transcript": this.transcript,
+        "schema:transcript": this.transcript
       };
-      this.$emit('updateMedia', media);
-    },
+      this.$emit("updateMedia", media);
+    }
   }
-}
+};
 </script>

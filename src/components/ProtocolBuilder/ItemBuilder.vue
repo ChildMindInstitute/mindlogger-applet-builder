@@ -302,7 +302,6 @@ export default {
       return schema;
     },
     onSaveItem() {
-      debugger;
       if (this.isItemEditable) {
         const schema = this.getCompressedSchema();
         const itemObj = {

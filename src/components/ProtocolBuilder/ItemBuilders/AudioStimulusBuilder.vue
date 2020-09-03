@@ -60,9 +60,6 @@ export default {
       urlRules: [v => !!v || "Media URL cannot be empty"]
     };
   },
-  created() {
-    console.log("stimulus initialItemMedia: ", this.initialItemMedia);
-  },
   methods: {
     update() {
       const inputOptions = [

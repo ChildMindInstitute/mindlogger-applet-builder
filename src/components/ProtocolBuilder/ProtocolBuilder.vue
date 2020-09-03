@@ -50,7 +50,12 @@
       </v-form>
       <v-alert v-if="error !== ''" type="error">{{ error }}</v-alert>
       <div>
-        <v-btn v-if="applet" class="mx-2 my-2" color="primary" @click="onClickDuplicate">Duplicate</v-btn>
+        <v-btn
+          v-if="name !== ''"
+          class="mx-2 my-2"
+          color="primary"
+          @click="onClickDuplicate"
+        >Duplicate</v-btn>
         <v-btn
           v-if="exportButton"
           class="mx-2 my-2"
@@ -107,118 +112,141 @@ export default {
     return initialData();
   },
   created() {
-    const { applet, activities, items } = this.$route.params.applet;
-
-    this.name = applet["@id"].replace("_schema", "");
-    this.description = applet["schema:description"][0]["@value"];
-
-    const activitiesObj = Object.values(activities)[0];
-    const {
-      ["@id"]: name,
-      ["schema:description"]: description,
-      ["reprolib:terms/preamble"]: activityPreamble,
-      ["reprolib:terms/shuffle"]: shuffle,
-      ["reprolib:terms/allow"]: isSkippable
-    } = activitiesObj;
-    console.log("activitiesObj: ", activitiesObj);
-
-    const activityInfo = {
-      name,
-      description: description[0]["@value"],
-      activityPreamble: activityPreamble[0]["@value"],
-      shuffle: shuffle[0]["@value"],
-      isSkippable:
-        isSkippable[0]["@list"][0]["@id"].includes("refused_to_answer") ||
-        isSkippable[0]["@list"][0]["@id"].includes("dontKnow")
-          ? true
-          : false
-    };
-
-    activityInfo.items = Object.values(items).map(item => {
-      let itemContent = {
-        name: item["@id"],
-        question: item["schema:question"][0]["@value"],
-        description: item["schema:description"][0]["@value"],
-        ui: {
-          inputType: item["reprolib:terms/inputType"][0]["@value"]
-        }
-      };
-
-      let responseOptions = item["reprolib:terms/responseOptions"];
-      let itemType = itemContent.ui.inputType;
-
-      if (responseOptions) {
-        let multipleChoice =
-          responseOptions[0]["reprolib:terms/multipleChoice"];
-
-        if (multipleChoice) {
-          itemContent.multipleChoice = multipleChoice[0]["@value"];
-        }
-
-        if (itemType === "radio") {
-          itemContent.options = {
-            isMultipleChoice: itemContent.multipleChoice || false,
-            nextOptionImage: "",
-            nextOptionName: "",
-            options: responseOptions[0]["schema:itemListElement"].map(
-              itemListElement => {
-                return {
-                  image: itemListElement["schema:value"][0]["@value"],
-                  name: itemListElement["schema:name"][0]["@value"]
-                };
-              }
-            )
-          };
-        }
-        if (itemType === "text") {
-          itemContent.options = {
-            requiredValue:
-              responseOptions[0]["reprolib:terms/requiredValue"][0]["@value"]
-            // TODO: add 'maximum response length' value which is absent for now
-          };
-        }
-        if (itemType === "slider") {
-          itemContent.options = {
-            maxValue: responseOptions[0]["schema:maxValue"][0]["@value"],
-            minValue: responseOptions[0]["schema:minValue"][0]["@value"],
-            numOptions: responseOptions[0]["schema:itemListElement"].length
-          };
-        }
-        if (itemType === "audioRecord" || itemType === "audioImageRecord") {
-          itemContent.options = {
-            requiredValue:
-              responseOptions[0]["reprolib:terms/requiredValue"][0]["@value"],
-            "schema:maxValue":
-              responseOptions[0]["schema:maxValue"][0]["@value"],
-            "schema:minValue":
-              responseOptions[0]["schema:minValue"][0]["@value"]
-          };
-        }
-      }
-
-      if (itemType === "audioStimulus") {
-        let mediaObj = Object.entries(item["reprolib:terms/media"][0]);
-        let mediaUrl = mediaObj[0][0];
-        let mediaData = mediaObj[0][1];
-
-        itemContent.media = {
-          [mediaUrl]: {
-            "schema:contentUrl": [mediaUrl],
-            "schema:name": mediaData[0]["schema:name"][0]["@value"],
-            "schema:transcript": mediaData[0]["schema:transcript"][0]["@value"]
-          }
-        };
-      }
-
-      return itemContent;
-    });
-    console.log("activityInfo: ", activityInfo);
+    this.fillBuilderWithAppletData();
   },
   methods: {
+    fillBuilderWithAppletData() {
+      if (!this.$route) return;
+
+      const { applet, activities, items } = this.$route.params.applet;
+
+      this.applet = applet;
+      this.name = applet["@id"].replace("_schema", "");
+      this.description = applet["schema:description"][0]["@value"];
+
+      Object.values(activities).forEach(act => {
+        const activitiesObj = act;
+        const {
+          ["@id"]: name,
+          ["schema:description"]: description,
+          ["reprolib:terms/preamble"]: activityPreamble,
+          ["reprolib:terms/shuffle"]: shuffle,
+          ["reprolib:terms/allow"]: isSkippable
+        } = activitiesObj;
+
+        const activityInfo = {
+          name,
+          description: description[0]["@value"],
+          preamble: activityPreamble[0]["@value"],
+          shuffle: shuffle[0]["@value"]
+        };
+
+        let isSkippableList = isSkippable[0]["@list"];
+
+        if (isSkippableList.length) {
+          if (
+            isSkippableList[0]["@id"].includes("refused_to_answer") ||
+            isSkippableList[0]["@id"].includes("dontKnow")
+          ) {
+            activityInfo.isSkippable = true;
+          }
+        }
+
+        activityInfo.items = Object.values(items).map(item => {
+          let itemContent = {
+            name: item["@id"],
+            question: item["schema:question"][0]["@value"],
+            description: item["schema:description"][0]["@value"],
+            ui: {
+              inputType: item["reprolib:terms/inputType"][0]["@value"]
+            }
+          };
+
+          let responseOptions = item["reprolib:terms/responseOptions"];
+          let itemType = itemContent.ui.inputType;
+
+          if (responseOptions) {
+            let multipleChoice =
+              responseOptions[0]["reprolib:terms/multipleChoice"];
+
+            if (multipleChoice) {
+              itemContent.multipleChoice = multipleChoice[0]["@value"];
+            }
+
+            if (itemType === "radio") {
+              itemContent.options = {
+                isMultipleChoice: itemContent.multipleChoice || false,
+                nextOptionImage: "",
+                nextOptionName: "",
+                options: responseOptions[0]["schema:itemListElement"].map(
+                  itemListElement => {
+                    return {
+                      image: itemListElement["schema:value"][0]["@value"],
+                      name: itemListElement["schema:name"][0]["@value"]
+                    };
+                  }
+                )
+              };
+            }
+            if (itemType === "text") {
+              itemContent.options = {
+                requiredValue:
+                  responseOptions[0]["reprolib:terms/requiredValue"][0][
+                    "@value"
+                  ]
+                // TODO: add 'maximum response length' value which is absent for now
+              };
+            }
+            if (itemType === "slider") {
+              itemContent.options = {
+                maxValue: responseOptions[0]["schema:maxValue"][0]["@value"],
+                minValue: responseOptions[0]["schema:minValue"][0]["@value"],
+                numOptions: responseOptions[0]["schema:itemListElement"].length
+              };
+            }
+            if (itemType === "audioRecord" || itemType === "audioImageRecord") {
+              itemContent.options = {
+                requiredValue:
+                  responseOptions[0]["reprolib:terms/requiredValue"][0][
+                    "@value"
+                  ],
+                "schema:maxValue":
+                  responseOptions[0]["schema:maxValue"][0]["@value"],
+                "schema:minValue":
+                  responseOptions[0]["schema:minValue"][0]["@value"]
+              };
+            }
+          }
+
+          if (itemType === "audioStimulus") {
+            let mediaObj = Object.entries(item["reprolib:terms/media"][0]);
+            let mediaUrl = mediaObj[0][0];
+            let mediaData = mediaObj[0][1];
+
+            itemContent.media = {
+              [mediaUrl]: {
+                "schema:contentUrl": [mediaUrl],
+                "schema:name": mediaData[0]["schema:name"][0]["@value"],
+                "schema:transcript":
+                  mediaData[0]["schema:transcript"][0]["@value"]
+              }
+            };
+          }
+
+          return itemContent;
+        });
+
+        this.activities.push(activityInfo);
+      });
+    },
     onClickDuplicate() {
+      const name =
+        this.applet["@id"].replace("_schema", "") === this.name
+          ? `${this.name} (1)`
+          : this.name;
       this.$emit("duplicateApplet", {
-        id: this.applet.applet._id,
-        name: this.name
+        id: this.applet._id.replace("applet/", ""),
+        name
       });
     },
     validate() {
@@ -242,7 +270,6 @@ export default {
       }
     },
     onNewActivity(activity) {
-      console.log(activity);
       if (this.editIndex >= 0 && this.editIndex < this.activities.length) {
         this.activities[this.editIndex] = activity;
       } else {
@@ -255,7 +282,6 @@ export default {
     editActivity(index) {
       this.editIndex = index;
       this.initialActivityData = this.activities[index];
-      console.log("this.initialActivityData: ", this.initialActivityData);
       this.forceUpdate();
       this.dialog = true;
     },

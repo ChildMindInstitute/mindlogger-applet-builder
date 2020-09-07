@@ -168,7 +168,6 @@ export default {
       question: this.initialItemData.question || '',
       description: this.initialItemData.description || '',
       inputType: this.initialItemData.ui ? this.initialItemData.ui.inputType : '',
-      multipleChoice: this.initialItemData.multipleChoice || false,
       options: this.initialItemData.options || [],
       responseOptions: this.initialItemData.responseOptions || {},
       inputOptions: this.initialItemData.inputOptions || {},
@@ -226,7 +225,7 @@ export default {
         const choices = this.getRadioChoices();
         return {
           "@valueType": "xsd:anyURI",
-          "multipleChoice": this.multipleChoice,
+          "multipleChoice": this.options.isMultipleChoice,
           "schema:minValue": 1,
           "schema:maxValue": choices.length,
           "choices": choices,
@@ -299,12 +298,18 @@ export default {
         schema["media"] = media;
       }
       if (this.inputType === 'radio') {
-        schema["ui"] = {
-          "inputType": this.inputType,
-          "allow": [
-            "autoAdvance"
-          ]
-        };
+        if (this.options.isMultipleChoice) {
+          schema["ui"] = {
+            "inputType": this.inputType
+          };
+        } else {
+          schema["ui"] = {
+            "inputType": this.inputType,
+            "allow": [
+              "autoAdvance"
+            ]
+          };
+        }
       } else {
         schema["ui"] = {
           "inputType": this.inputType

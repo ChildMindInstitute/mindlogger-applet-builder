@@ -1,13 +1,7 @@
 <template>
   <v-container>
-    <v-layout
-      wrap
-      column
-    >
-      <v-form
-        ref="form"
-        lazy-validation
-      >
+    <v-layout wrap column>
+      <v-form ref="form" lazy-validation>
         <v-text-field
           v-model="name"
           :rules="textRules"
@@ -26,9 +20,7 @@
         />
         <v-list>
           <v-col>
-            <v-subheader>
-              Activities
-            </v-subheader>
+            <v-subheader>Activities</v-subheader>
             <v-list-item
               v-for="(activity, index) in activities"
               :key="activity.id"
@@ -38,30 +30,21 @@
                 <v-list-item-title v-text="activity.description" />
               </v-list-item-content>
               <v-list-item-action>
-                <v-btn
-                  icon
-                  @click="duplicateActivity(index)"
-                >
+                <v-btn icon @click="duplicateActivity(index)">
                   <v-icon color="grey lighten-1">
                     content_copy
                   </v-icon>
                 </v-btn>
               </v-list-item-action>
               <v-list-item-action>
-                <v-btn
-                  icon
-                  @click="editActivity(index)"
-                >
+                <v-btn icon @click="editActivity(index)">
                   <v-icon color="grey lighten-1">
                     edit
                   </v-icon>
                 </v-btn>
               </v-list-item-action>
               <v-list-item-action>
-                <v-btn
-                  icon
-                  @click="deleteActivity(index)"
-                >
+                <v-btn icon @click="deleteActivity(index)">
                   <v-icon color="grey lighten-1">
                     delete
                   </v-icon>
@@ -76,13 +59,18 @@
           </v-col>
         </v-list>
       </v-form>
-      <v-alert
-        v-if="error !== ''"
-        type="error"
-      >
+      <v-alert v-if="error !== ''" type="error">
         {{ error }}
       </v-alert>
       <div>
+        <v-btn
+          v-if="name !== ''"
+          class="mx-2 my-2"
+          color="primary"
+          @click="onClickDuplicate"
+        >
+          Duplicate
+        </v-btn>
         <v-btn
           v-if="exportButton"
           class="mx-2 my-2"
@@ -91,28 +79,15 @@
         >
           Export Schema
         </v-btn>
-        <v-btn
-          class="mx-2 my-2"
-          color="primary"
-          @click="onClickSaveProtocol"
-        >
+        <v-btn class="mx-2 my-2" color="primary" @click="onClickSaveProtocol">
           Download Schema
         </v-btn>
-        <v-btn
-          class="mx-2 my-2"
-          color="primary"
-          outlined
-          @click="resetBuilder"
-        >
+        <v-btn class="mx-2 my-2" color="primary" outlined @click="resetBuilder">
           Reset Builder
         </v-btn>
       </div>
     </v-layout>
-    <v-dialog
-      v-model="dialog"
-      width="800"
-      persistent
-    >
+    <v-dialog v-model="dialog" width="800" persistent>
       <ActivityBuilder
         :key="componentKey"
         :initial-activity-data="initialActivityData"
@@ -134,6 +109,7 @@ function initialData() {
     initialActivityData: {},
     componentKey: 0,
     editIndex: -1,
+    applet: {},
   };
 }
 
@@ -156,7 +132,206 @@ export default {
   data: function() {
     return initialData();
   },
+  created() {
+    this.fillBuilderWithAppletData();
+  },
   methods: {
+    fillBuilderWithAppletData() {
+      if (!this.$route) return;
+      const { applet, activities, items } = this.$route.params.applet;
+
+      this.applet = applet;
+      this.name = applet["@id"].replace("_schema", "");
+      this.description = applet["schema:description"][0]["@value"];
+
+      Object.values(activities).forEach((act) => {
+        const activitiesObj = act;
+        const {
+          ["@id"]: name,
+          ["schema:description"]: description,
+          ["reprolib:terms/preamble"]: activityPreamble,
+          ["reprolib:terms/shuffle"]: shuffle,
+          ["reprolib:terms/allow"]: isSkippable,
+        } = activitiesObj;
+
+        const activityInfo = {
+          name,
+          description:
+            description && description[0] && description[0]["@value"],
+          preamble:
+            activityPreamble &&
+            activityPreamble[0] &&
+            activityPreamble[0]["@value"],
+          shuffle: shuffle && shuffle[0] && shuffle[0]["@value"],
+        };
+
+        let isSkippableList =
+          (isSkippable && isSkippable[0] && isSkippable[0]["@list"]) || [];
+
+        if (isSkippableList.length) {
+          if (
+            (isSkippableList[0] &&
+              isSkippableList[0]["@id"] &&
+              isSkippableList[0]["@id"].includes("refused_to_answer")) ||
+            (isSkippableList[0] &&
+              isSkippableList[0]["@id"] &&
+              isSkippableList[0]["@id"].includes("dontKnow"))
+          ) {
+            activityInfo.isSkippable = true;
+          }
+        }
+
+        activityInfo.items = Object.values(items).map((item) => {
+          let itemContent = {
+            name: item["@id"],
+            question:
+              item["schema:question"] &&
+              item["schema:question"][0] &&
+              item["schema:question"][0]["@value"],
+            description:
+              item["schema:description"] &&
+              item["schema:description"][0] &&
+              item["schema:description"][0]["@value"],
+            ui: {
+              inputType:
+                item["reprolib:terms/inputType"] &&
+                item["reprolib:terms/inputType"][0] &&
+                item["reprolib:terms/inputType"][0]["@value"],
+            },
+          };
+
+          let responseOptions = item["reprolib:terms/responseOptions"];
+
+          let itemType = itemContent.ui.inputType;
+
+          if (responseOptions) {
+            let multipleChoice =
+              responseOptions[0] &&
+              responseOptions[0]["reprolib:terms/multipleChoice"];
+
+            if (multipleChoice) {
+              itemContent.multipleChoice =
+                multipleChoice[0] && multipleChoice[0]["@value"];
+            }
+
+            if (itemType === "radio") {
+              itemContent.options = {
+                isMultipleChoice: itemContent.multipleChoice || false,
+                nextOptionImage: "",
+                nextOptionName: "",
+                options:
+                  responseOptions[0] &&
+                  responseOptions[0]["schema:itemListElement"].map(
+                    (itemListElement) => {
+                      return {
+                        image:
+                          itemListElement["schema:value"] &&
+                          itemListElement["schema:value"][0] &&
+                          itemListElement["schema:value"][0]["@value"],
+                        name:
+                          itemListElement["schema:name"] &&
+                          itemListElement["schema:name"][0] &&
+                          itemListElement["schema:name"][0]["@value"],
+                      };
+                    }
+                  ),
+              };
+            }
+            if (itemType === "text") {
+              itemContent.options = {
+                requiredValue:
+                  responseOptions[0] &&
+                  responseOptions[0]["reprolib:terms/requiredValue"] &&
+                  responseOptions[0]["reprolib:terms/requiredValue"][0] &&
+                  responseOptions[0]["reprolib:terms/requiredValue"][0][
+                    "@value"
+                  ],
+                // TODO: add 'maximum response length' value which is absent for now
+              };
+            }
+            if (itemType === "slider") {
+              itemContent.options = {
+                maxValue:
+                  responseOptions[0] &&
+                  responseOptions[0]["schema:maxValue"] &&
+                  responseOptions[0]["schema:maxValue"][0] &&
+                  responseOptions[0]["schema:maxValue"][0]["@value"],
+                minValue:
+                  responseOptions[0] &&
+                  responseOptions[0]["schema:minValue"] &&
+                  responseOptions[0]["schema:minValue"][0] &&
+                  responseOptions[0]["schema:minValue"][0]["@value"],
+                numOptions:
+                  responseOptions[0] &&
+                  responseOptions[0]["schema:itemListElement"].length,
+              };
+            }
+            if (itemType === "audioRecord" || itemType === "audioImageRecord") {
+              itemContent.options = {
+                requiredValue:
+                  responseOptions[0] &&
+                  responseOptions[0]["reprolib:terms/requiredValue"] &&
+                  responseOptions[0]["reprolib:terms/requiredValue"][0] &&
+                  responseOptions[0]["reprolib:terms/requiredValue"][0][
+                    "@value"
+                  ],
+                "schema:maxValue":
+                  responseOptions[0] &&
+                  responseOptions[0]["schema:maxValue"] &&
+                  responseOptions[0]["schema:maxValue"][0] &&
+                  responseOptions[0]["schema:maxValue"][0]["@value"],
+                "schema:minValue":
+                  responseOptions[0] &&
+                  responseOptions[0]["schema:minValue"] &&
+                  responseOptions[0]["schema:minValue"][0] &&
+                  responseOptions[0]["schema:minValue"][0]["@value"],
+              };
+            }
+          }
+
+          if (itemType === "audioStimulus") {
+            let mediaObj = Object.entries(
+              item["reprolib:terms/media"] && item["reprolib:terms/media"][0]
+            );
+
+            if (mediaObj) {
+              let mediaUrl = mediaObj[0][0];
+              let mediaData = mediaObj[0][1];
+
+              itemContent.media = {
+                [mediaUrl]: {
+                  "schema:contentUrl": [mediaUrl],
+                  "schema:name":
+                    mediaData[0] &&
+                    mediaData[0]["schema:name"] &&
+                    mediaData[0]["schema:name"][0] &&
+                    mediaData[0]["schema:name"][0]["@value"],
+                  "schema:transcript":
+                    mediaData[0] &&
+                    mediaData[0]["schema:transcript"] &&
+                    mediaData[0]["schema:transcript"][0] &&
+                    mediaData[0]["schema:transcript"][0]["@value"],
+                },
+              };
+            }
+          }
+
+          return itemContent;
+        });
+
+        this.activities.push(activityInfo);
+      });
+    },
+    onClickDuplicate() {
+      const name =
+        this.applet["@id"].replace("_schema", "") === this.name
+          ? `${this.name} (1)`
+          : this.name;
+      this.$emit("duplicateApplet", {
+        id: this.applet._id.replace("applet/", ""),
+        name,
+      });
+    },
     validate() {
       if (this.$refs.form.validate()) {
         this.snackbar = true;
@@ -261,12 +436,12 @@ export default {
         "schema:description": this.description,
         "schema:schemaVersion": "0.0.1",
         "schema:version": "0.0.1",
-        "landingPage": this.description, //point to the readme of protocol
+        landingPage: this.description, //point to the readme of protocol
         // variableMap: variableMap,
-        "ui": {
-          "addProperties": variableMap,
-          "order": activityOrder,
-          "shuffle": false,
+        ui: {
+          addProperties: variableMap,
+          order: activityOrder,
+          shuffle: false,
         },
       };
       return schema;

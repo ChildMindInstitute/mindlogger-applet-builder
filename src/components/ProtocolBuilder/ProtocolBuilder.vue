@@ -64,7 +64,7 @@
       </v-alert>
       <div>
         <v-btn
-          v-if="name !== ''"
+          v-if="isForDuplicate"
           class="mx-2 my-2"
           color="primary"
           @click="onClickDuplicate"
@@ -110,6 +110,7 @@ function initialData() {
     componentKey: 0,
     editIndex: -1,
     applet: {},
+    isForDuplicate: false,
   };
 }
 
@@ -140,6 +141,7 @@ export default {
       if (!this.$route) return;
       const { applet, activities, items } = this.$route.params.applet;
 
+      this.isForDuplicate = true;
       this.applet = applet;
       this.name = applet["@id"].replace("_schema", "");
       this.description = applet["schema:description"][0]["@value"];

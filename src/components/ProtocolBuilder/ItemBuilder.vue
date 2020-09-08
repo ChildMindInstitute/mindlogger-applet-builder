@@ -136,13 +136,10 @@ export default {
   },
   data: function() {
     return {
-      name: this.initialItemData.name || "",
-      question: this.initialItemData.question || "",
-      description: this.initialItemData.description || "",
-      inputType: this.initialItemData.ui
-        ? this.initialItemData.ui.inputType
-        : "",
-      multipleChoice: this.initialItemData.multipleChoice || false,
+      name: this.initialItemData.name || '',
+      question: this.initialItemData.question || '',
+      description: this.initialItemData.description || '',
+      inputType: this.initialItemData.ui ? this.initialItemData.ui.inputType : '',
       options: this.initialItemData.options || [],
       responseOptions: this.initialItemData.responseOptions || {},
       inputOptions: this.initialItemData.inputOptions || {},
@@ -214,7 +211,7 @@ export default {
         const choices = this.getRadioChoices();
         return {
           "@valueType": "xsd:anyURI",
-          multipleChoice: this.multipleChoice,
+          "multipleChoice": this.options.isMultipleChoice,
           "schema:minValue": 1,
           "schema:maxValue": choices.length,
           choices: choices
@@ -288,11 +285,19 @@ export default {
       if (this.inputType === "audioStimulus") {
         schema["media"] = media;
       }
-      if (this.inputType === "radio") {
-        schema["ui"] = {
-          inputType: this.inputType,
-          allow: ["autoAdvance"]
-        };
+      if (this.inputType === 'radio') {
+        if (this.options.isMultipleChoice) {
+          schema["ui"] = {
+            "inputType": this.inputType
+          };
+        } else {
+          schema["ui"] = {
+            "inputType": this.inputType,
+            "allow": [
+              "autoAdvance"
+            ]
+          };
+        }
       } else {
         schema["ui"] = {
           inputType: this.inputType

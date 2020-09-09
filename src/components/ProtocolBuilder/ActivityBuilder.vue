@@ -1,20 +1,14 @@
 <template>
   <div>
     <v-card>
-      <v-card-title
-        class="headline grey lighten-2"
-        primary-title
-      >
+      <v-card-title class="headline grey lighten-2" primary-title>
         <v-icon left>
           mdi-pencil
         </v-icon>
         Edit Activity
       </v-card-title>
       <v-card-text>
-        <v-form
-          ref="form"
-          lazy-validation
-        >
+        <v-form ref="form" lazy-validation>
           <v-text-field
             v-model="name"
             :rules="textRules"
@@ -42,76 +36,51 @@
             v-model="shuffleActivityOrder"
             label="Shuffle item order"
           />
-          <v-checkbox
-            v-model="isSkippable"
-            label="Allow items to be skipped"
-          />
+          <v-checkbox v-model="isSkippable" label="Allow items to be skipped" />
           <v-subheader>
             Items
           </v-subheader>
           <v-list>
-            <v-list-item
-              v-for="(item, index) in items"
-              :key="item.id"
-            >
+            <v-list-item v-for="(item, index) in items" :key="item.id">
               <v-list-item-content>
                 <v-list-item-title v-text="item.name" />
                 <v-list-item-title v-text="item.inputType" />
               </v-list-item-content>
               <v-list-item-action>
-                <v-btn
-                  icon
-                  @click="duplicateItem(index)"
-                >
-                  <v-icon
-                    color="grey lighten-1"
-                  >
+                <v-btn icon @click="duplicateItem(index)">
+                  <v-icon color="grey lighten-1">
                     content_copy
                   </v-icon>
                 </v-btn>
               </v-list-item-action>
               <v-list-item-action>
-                <v-btn
-                  icon
-                  @click="editItem(index)"
-                >
-                  <v-icon 
-                    v-if="item.isItemEditable"
-                    color="grey lighten-1"
-                  >
+                <v-btn icon @click="editItem(index)">
+                  <v-icon v-if="item.isItemEditable" color="grey lighten-1">
                     edit
                   </v-icon>
-                  <v-icon
-                    v-else
-                    color="grey lighten-1"
-                  >
+                  <v-icon v-else color="grey lighten-1">
                     mdi-eye
                   </v-icon>
                 </v-btn>
               </v-list-item-action>
               <v-list-item-action>
-                <v-btn
-                  icon
-                  @click="deleteItem(index)"
-                >
-                  <v-icon
-                    color="grey lighten-1"
-                  >
+                <v-btn icon @click="deleteItem(index)">
+                  <v-icon color="grey lighten-1">
                     mdi-delete
                   </v-icon>
                 </v-btn>
               </v-list-item-action>
             </v-list-item>
-            <v-menu>
-              <template v-slot:activator="{ on }">
-                <v-list-item
-                  v-on="on"
-                >
-                  <v-icon color="grey lighten-1">
-                    add
-                  </v-icon>
-                </v-list-item>
+          </v-list>
+
+          <v-row justify="space-around">
+            <v-menu bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn color="primary" v-bind="attrs" v-on="on">
+                  Add item
+                </v-btn>
               </template>
+
               <v-list>
                 <v-list-item @click="createItem">
                   <v-list-item-title>Blank item</v-list-item-title>
@@ -121,38 +90,40 @@
                 </v-list-item>
               </v-list>
             </v-menu>
-          </v-list>
+
+            <!-- v-if="ifConditionalAvailable" -->
+            <v-menu bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn color="primary" v-bind="attrs" v-on="on">
+                  Add conditional logic
+                </v-btn>
+              </template>
+              <v-list>
+                <v-list-item @click="createConditionalItem">
+                  <v-list-item-title>Blank item</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+          </v-row>
         </v-form>
-        <v-alert
-          v-if="error !== ''"
-          type="error"
-        >
+        <v-alert v-if="error !== ''" type="error">
           {{ error }}
         </v-alert>
       </v-card-text>
       <v-divider />
 
       <v-card-actions>
-        <v-btn
-          outlined
-          color="primary"
-          @click="onDiscardActivity"
-        >
+        <v-btn outlined color="primary" @click="onDiscardActivity">
           Discard Changes
         </v-btn>
         <v-spacer />
-        <v-btn
-          color="primary"
-          @click="onClickSaveActivity"
-        >
+        <v-btn color="primary" @click="onClickSaveActivity">
           Save Activity
         </v-btn>
       </v-card-actions>
     </v-card>
-    <v-dialog
-      v-model="editItemDialog"
-      persistent
-    >
+
+    <v-dialog v-model="editItemDialog" persistent>
       <ItemBuilder
         :key="componentKey"
         :initial-item-data="initialItemData"
@@ -160,23 +131,17 @@
         @closeItemModal="onCloseItemModal"
       />
     </v-dialog>
-    <v-dialog
-      v-model="urlDialog"
-      persistent
-    >
-      <UrlItemUploader
-        :key="componentKey"
-        @uploadItem="onUploadItem"
-      />
+
+    <v-dialog v-model="urlDialog" persistent>
+      <UrlItemUploader :key="componentKey" @uploadItem="onUploadItem" />
     </v-dialog>
   </div>
 </template>
 
 <script>
-
-import ItemBuilder from './ItemBuilder.vue';
-import UrlItemUploader from './UrlItemUploader.vue';
-import { string } from 'prop-types';
+import ItemBuilder from "./ItemBuilder.vue";
+import UrlItemUploader from "./UrlItemUploader.vue";
+import { string } from "prop-types";
 
 export default {
   components: {
@@ -186,35 +151,46 @@ export default {
   props: {
     initialActivityData: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
-  data: function () {
+  data: function() {
     return {
-      name: this.initialActivityData.name || '',
-      description: this.initialActivityData.description || '',
-      preamble: this.initialActivityData.preamble || '',
+      name: this.initialActivityData.name || "",
+      description: this.initialActivityData.description || "",
+      preamble: this.initialActivityData.preamble || "",
       shuffleActivityOrder: this.initialActivityData.shuffle || false,
       isSkippable: this.initialActivityData.isSkippable || false,
       items: this.initialActivityData.items || [],
-      textRules: [
-        v => !!v || 'This field is required',
-      ],
+      textRules: [(v) => !!v || "This field is required"],
       editItemDialog: false,
       urlDialog: false,
-      error: '',
+      error: "",
       componentKey: 0,
       initialItemData: {
         options: {},
       },
       isItemEditable: true,
-      editIndex: -1
-    }
+      editIndex: -1,
+      conditionalItems: [],
+      ifConditionalAvailable: false,
+    };
+  },
+  watch: {
+    items() {
+      this.conditionalItems = this.items.filter((item) => {
+        return (
+          item.ui.inputType === "radio" || item.ui.inputType === "checkbox"
+        );
+      });
+
+      this.ifConditionalAvailable = this.conditionalItems.length >= 2;
+    },
   },
   methods: {
-    validate () {
+    validate() {
       if (this.$refs.form.validate()) {
-        this.snackbar = true
+        this.snackbar = true;
       }
     },
     forceUpdate() {
@@ -228,6 +204,12 @@ export default {
       };
       this.forceUpdate();
       this.editItemDialog = true;
+    },
+    createConditionalItem() {
+      this.$router.push({
+        name: "ConditionalItemBuilder",
+        params: { items: this.conditionalItems },
+      });
     },
     importItem() {
       this.editIndex = -1;
@@ -255,7 +237,7 @@ export default {
       if (this.editIndex >= 0 && this.editIndex < this.items.length) {
         this.items[this.editIndex] = item;
       } else {
-      this.items.push(item);
+        this.items.push(item);
       }
     },
     duplicateItem(index) {
@@ -278,16 +260,16 @@ export default {
     },
     isActivityValid() {
       if (!this.name) {
-        this.error = 'Activity Name is required';
+        this.error = "Activity Name is required";
         return false;
       } else if (!this.description) {
-        this.error = 'Activity Description is required';
+        this.error = "Activity Description is required";
         return false;
       } else if (this.items.length == 0) {
-        this.error = 'Activities must contain at least one item';
+        this.error = "Activities must contain at least one item";
         return false;
       } else {
-        this.error = '';
+        this.error = "";
       }
       return true;
     },
@@ -302,16 +284,16 @@ export default {
       const addProperties = [];
       this.items.forEach(function(item) {
         const property = {
-          "variableName": item.name,
-          "isAbout": item.name,
-          "isVis": true
+          variableName: item.name,
+          isAbout: item.name,
+          isVis: true,
         };
         addProperties.push(property);
       });
       return addProperties;
     },
     getItemOrder() {
-      const itemNamesArray = this.items.map(item => item.name)
+      const itemNamesArray = this.items.map((item) => item.name);
       return itemNamesArray;
     },
     getAllowed() {
@@ -323,7 +305,8 @@ export default {
       const itemOrder = this.getItemOrder();
       const allowed = this.getAllowed();
       return {
-        "@context": [ "https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json"
+        "@context": [
+          "https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json",
         ],
         "@type": "reproschema:Activity",
         "@id": this.name,
@@ -332,64 +315,65 @@ export default {
         "schema:description": this.description,
         "schema:schemaVersion": "0.0.1",
         "schema:version": "0.0.1",
-        "preamble": this.preamble,
-        "scoringLogic": {
-        },
+        preamble: this.preamble,
+        scoringLogic: {},
         "repronim:timeUnit": "yearmonthdate",
-        "ui": {
-            "order": itemOrder,
-            "shuffle": this.shuffleActivityOrder,
-            "addProperties": addProperties,
-            "allow": allowed
-        }
+        ui: {
+          order: itemOrder,
+          shuffle: this.shuffleActivityOrder,
+          addProperties: addProperties,
+          allow: allowed,
+        },
       };
     },
     getContext() {
       const activityName = this.name;
       const contextObj = {
-        "@version": 1.1
+        "@version": 1.1,
       };
       var isPrefixNeeded = false;
       this.items.forEach(function(item) {
-        if ('iri' in item) {
+        if ("iri" in item) {
           contextObj[item.name] = {
-            '@id': item.iri,
-            '@type': '@id',
+            "@id": item.iri,
+            "@type": "@id",
           };
         } else {
           contextObj[item.name] = {
-            '@id': `${activityName}:${item.name}`,
-            '@type': '@id',
+            "@id": `${activityName}:${item.name}`,
+            "@type": "@id",
           };
           isPrefixNeeded = true;
         }
       });
       if (isPrefixNeeded) {
-        contextObj[activityName] = `https://raw.githubusercontent.com/YOUR-PATH-TO-ITEM-FOLDER`;
+        contextObj[
+          activityName
+        ] = `https://raw.githubusercontent.com/YOUR-PATH-TO-ITEM-FOLDER`;
       }
 
       return {
-        "@context": contextObj
+        "@context": contextObj,
       };
     },
     saveActivity() {
       const schema = this.getCompressedSchema();
       const context = this.getContext();
       const items = this.items;
-      this.$emit('closeModal', {
-        'name': this.name,
-        'description': this.description,
-        'preamble': this.preamble,
-        'shuffle': this.shuffleActivityOrder,
-        'isSkippable': this.isSkippable,
-        'schema': schema,
-        'context': context,
-        'items': items
+      this.$emit("closeModal", {
+        name: this.name,
+        description: this.description,
+        preamble: this.preamble,
+        shuffle: this.shuffleActivityOrder,
+        isSkippable: this.isSkippable,
+        schema: schema,
+        context: context,
+        items: items,
       });
     },
     onDiscardActivity() {
-      this.$emit('closeModal', null);
-    }
+      this.$emit("closeModal", null);
+    },
   },
 };
 </script>

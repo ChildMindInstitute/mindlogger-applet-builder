@@ -138,7 +138,9 @@ export default {
   },
   methods: {
     fillBuilderWithAppletData() {
-      if (!this.$route) return;
+      if (!this.$route || !this.$route.params || !this.$route.params.applet)
+        return;
+
       const { applet, activities, items } = this.$route.params.applet;
 
       this.isForDuplicate = true;

@@ -1,6 +1,6 @@
 {
   "name": "applet-schema-builder",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "private": false,
   "main": "./dist/applet-schema-builder.common.js",
   "scripts": {
@@ -17,6 +17,7 @@
     "jszip": "^3.2.2",
     "prop-types": "^15.7.2",
     "vue": "^2.6.10",
+    "vue-router": "^3.4.3",
     "vuetify": "^2.2.15"
   },
   "devDependencies": {

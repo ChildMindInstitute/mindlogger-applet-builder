@@ -37,41 +37,61 @@
             label="Shuffle item order"
           />
           <v-checkbox v-model="isSkippable" label="Allow items to be skipped" />
-          <v-subheader>
-            Items
-          </v-subheader>
-          <v-list>
-            <v-list-item v-for="(item, index) in items" :key="item.id">
-              <v-list-item-content>
-                <v-list-item-title v-text="item.name" />
-                <v-list-item-title v-text="item.inputType" />
-              </v-list-item-content>
-              <v-list-item-action>
-                <v-btn icon @click="duplicateItem(index)">
-                  <v-icon color="grey lighten-1">
-                    content_copy
-                  </v-icon>
-                </v-btn>
-              </v-list-item-action>
-              <v-list-item-action>
-                <v-btn icon @click="editItem(index)">
-                  <v-icon v-if="item.isItemEditable" color="grey lighten-1">
-                    edit
-                  </v-icon>
-                  <v-icon v-else color="grey lighten-1">
-                    mdi-eye
-                  </v-icon>
-                </v-btn>
-              </v-list-item-action>
-              <v-list-item-action>
-                <v-btn icon @click="deleteItem(index)">
-                  <v-icon color="grey lighten-1">
-                    mdi-delete
-                  </v-icon>
-                </v-btn>
-              </v-list-item-action>
-            </v-list-item>
-          </v-list>
+          <v-tabs centered>
+            <v-tab>Items</v-tab>
+            <v-tab v-if="conditionalItems.length">
+              Conditional logic items
+            </v-tab>
+
+            <v-tab-item>
+              <v-card flat>
+                <v-card-text>
+                  <v-list>
+                    <v-list-item v-for="(item, index) in items" :key="item.id">
+                      <v-list-item-content>
+                        <v-list-item-title v-text="item.name" />
+                        <v-list-item-title v-text="item.inputType" />
+                      </v-list-item-content>
+                      <v-list-item-action>
+                        <v-btn icon @click="duplicateItem(index)">
+                          <v-icon color="grey lighten-1">
+                            content_copy
+                          </v-icon>
+                        </v-btn>
+                      </v-list-item-action>
+                      <v-list-item-action>
+                        <v-btn icon @click="editItem(index)">
+                          <v-icon
+                            v-if="item.isItemEditable"
+                            color="grey lighten-1"
+                          >
+                            edit
+                          </v-icon>
+                          <v-icon v-else color="grey lighten-1">
+                            mdi-eye
+                          </v-icon>
+                        </v-btn>
+                      </v-list-item-action>
+                      <v-list-item-action>
+                        <v-btn icon @click="deleteItem(index)">
+                          <v-icon color="grey lighten-1">
+                            mdi-delete
+                          </v-icon>
+                        </v-btn>
+                      </v-list-item-action>
+                    </v-list-item>
+                  </v-list>
+                </v-card-text>
+              </v-card>
+            </v-tab-item>
+            <v-tab-item v-if="conditionalItems.length">
+              <v-card flat>
+                <v-card-text>
+                  <conditional-item-list :options="conditionalItems" />
+                </v-card-text>
+              </v-card>
+            </v-tab-item>
+          </v-tabs>
 
           <v-row justify="space-around">
             <v-menu bottom>
@@ -91,8 +111,7 @@
               </v-list>
             </v-menu>
 
-            <!-- v-if="ifConditionalAvailable" -->
-            <v-menu bottom>
+            <v-menu v-if="ifConditionalAvailable" bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-btn color="primary" v-bind="attrs" v-on="on">
                   Add conditional logic
@@ -141,12 +160,14 @@
 <script>
 import ItemBuilder from "./ItemBuilder.vue";
 import UrlItemUploader from "./UrlItemUploader.vue";
+import ConditionalItemList from "./ConditionalItemList.vue";
 import { string } from "prop-types";
 
 export default {
   components: {
     ItemBuilder,
     UrlItemUploader,
+    ConditionalItemList,
   },
   props: {
     initialActivityData: {
@@ -172,20 +193,30 @@ export default {
       },
       isItemEditable: true,
       editIndex: -1,
-      conditionalItems: [],
+      itemsForConditionalBuilder: [],
       ifConditionalAvailable: false,
     };
   },
+  computed: {
+    conditionalItems() {
+      return this.$store.state.conditionalItems;
+    },
+  },
   watch: {
     items() {
-      this.conditionalItems = this.items.filter((item) => {
+      this.itemsForConditionalBuilder = this.items.filter((item) => {
         return (
           item.ui.inputType === "radio" || item.ui.inputType === "checkbox"
         );
       });
 
-      this.ifConditionalAvailable = this.conditionalItems.length >= 2;
+      this.ifConditionalAvailable = this.itemsForConditionalBuilder.length >= 2;
     },
+  },
+  created() {
+    this.ifConditionalAvailable =
+      this.itemsForConditionalBuilder.length >= 2 ||
+      this.conditionalItems.length;
   },
   methods: {
     validate() {
@@ -208,7 +239,7 @@ export default {
     createConditionalItem() {
       this.$router.push({
         name: "ConditionalItemBuilder",
-        params: { items: this.conditionalItems },
+        params: { items: this.itemsForConditionalBuilder },
       });
     },
     importItem() {
@@ -254,9 +285,11 @@ export default {
       this.items.splice(index, 1);
     },
     onClickSaveActivity() {
-      if (this.isActivityValid()) {
-        this.saveActivity();
-      }
+      console.log("items: ", this.items);
+      console.log("conds: ", this.conditionalItems);
+      // if (this.isActivityValid()) {
+      this.saveActivity();
+      // }
     },
     isActivityValid() {
       if (!this.name) {
@@ -360,6 +393,15 @@ export default {
       const schema = this.getCompressedSchema();
       const context = this.getContext();
       const items = this.items;
+
+      items.forEach((item) => {
+        const conditionalItems = this.conditionalItems.filter((cond) => {
+          return cond.ifValue === item.question;
+        });
+
+        if (conditionalItems.length) item.conditionalItems = conditionalItems;
+      });
+
       this.$emit("closeModal", {
         name: this.name,
         description: this.description,

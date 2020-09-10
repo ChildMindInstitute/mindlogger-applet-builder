@@ -127,7 +127,7 @@ export default {
     exportButton: {
       type: Boolean,
       required: false,
-      default: false,
+      default: true,
     },
   },
   data: function() {

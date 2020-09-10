@@ -15,13 +15,8 @@
 </style>
 
 <script>
-import AppletSchemaBuilder from "./components/ProtocolBuilder/ProtocolBuilder.vue";
-
 export default {
   name: "App",
-  components: {
-    // AppletSchemaBuilder
-  },
 };
 </script>
 

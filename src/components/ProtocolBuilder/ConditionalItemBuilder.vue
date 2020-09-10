@@ -9,24 +9,7 @@
     <v-container>
       <v-row no-gutters>
         <v-col md="6" offset-md="3">
-          <v-list-item v-for="(option, index) in options" :key="index">
-            <v-list-item-content>
-              <v-list-item-title>
-                <span class="blue--text">IF </span>
-                <span>{{ option.ifValue }} </span>
-                <span class="blue--text">{{ option.stateValue }} </span>
-                <span>{{ option.answerValue }} </span>
-                <span>{{ option.showValue }} </span>
-              </v-list-item-title>
-            </v-list-item-content>
-            <v-list-item-action>
-              <v-btn icon @click="deleteOption(index)">
-                <v-icon color="grey lighten-1">
-                  delete
-                </v-icon>
-              </v-btn>
-            </v-list-item-action>
-          </v-list-item>
+          <conditional-item-list :options="options" />
 
           <v-form ref="form" lazy-validation>
             <v-select
@@ -62,7 +45,7 @@
         </v-btn>
         <v-spacer />
         <v-btn color="primary" @click="onSaveItem">
-          Save Item
+          Save
         </v-btn>
       </v-card-actions>
     </v-container>
@@ -71,9 +54,12 @@
 
 <script>
 import { without } from "lodash";
+import ConditionalItemList from "./ConditionalItemList.vue";
 
 export default {
-  components: {},
+  components: {
+    ConditionalItemList,
+  },
   props: {
     // initialItemData: {
     //   type: Object,
@@ -86,8 +72,28 @@ export default {
   },
   data: function() {
     return {
+      items2: [
+        {
+          id: 1,
+          avatar: "https://s3.amazonaws.com/vuetify-docs/images/lists/1.jpg",
+          title: "Brunch this life?",
+          subtitle: "Subtitle 1",
+        },
+        {
+          id: 2,
+          avatar: "https://s3.amazonaws.com/vuetify-docs/images/lists/2.jpg",
+          title: "Winter Lunch",
+          subtitle: "Subtitle 2",
+        },
+        {
+          id: 3,
+          avatar: "https://s3.amazonaws.com/vuetify-docs/images/lists/3.jpg",
+          title: "Oui oui",
+          subtitle: "Subtitle 3",
+        },
+      ],
       items: this.$route.params.items,
-      ifValue: {},
+      ifValue: "",
       stateValue: "",
       stateItems: ["IS EQUAL TO", "IS NOT EQUAL TO"],
       showValue: {},
@@ -99,12 +105,13 @@ export default {
   },
   watch: {
     ifValue() {
+      if (this.ifValue === "") return;
       let answerItemsObj = this.items.find((item) => {
         return item.question === this.ifValue;
       });
 
       this.answerItems = answerItemsObj.options.options;
-      console.log("answerItems: ", this.answerItems);
+
       this.showItems = this.items.filter((item) => {
         return item.question !== this.ifValue;
       });
@@ -112,9 +119,15 @@ export default {
   },
   created() {},
   methods: {
-    onSaveItem() {},
+    onSaveItem() {
+      this.$store.commit("setConditionalItems", this.options);
+
+      this.$router.push({
+        name: "Builder",
+      });
+    },
     onDiscardItem() {
-      this.$emit("closeItemModal", null);
+      this.$router.go(-1);
     },
     addOption() {
       this.options.push({
@@ -125,11 +138,10 @@ export default {
         value: {}, // To store for backend
       });
 
-      this.ifValue = {};
+      this.ifValue = "";
       this.stateValue = "";
+      this.answerValue = "";
       this.showValue = {};
-
-      console.log("options: ", this.options);
     },
   },
 };

@@ -1,8 +1,10 @@
 <template>
   <v-card>
     <v-card-title class="headline grey lighten-2" primary-title>
-      <v-icon left>{{ isItemEditable ? 'mdi-pencil' : 'mdi-eye' }}</v-icon>
-      {{ isItemEditable ? 'Edit Item' : 'View Item' }}
+      <v-icon left>
+        {{ isItemEditable ? "mdi-pencil" : "mdi-eye" }}
+      </v-icon>
+      {{ isItemEditable ? "Edit Item" : "View Item" }}
     </v-card-title>
     <v-card-text>
       <v-form ref="form" lazy-validation>
@@ -70,7 +72,10 @@
           :initial-item-data="options"
           @updateOptions="updateOptions"
         />
-        <GeolocationBuilder v-if="inputType === 'geolocation'" @update="updateResponseOptions" />
+        <GeolocationBuilder
+          v-if="inputType === 'geolocation'"
+          @update="updateResponseOptions"
+        />
         <AudioStimulusBuilder
           v-if="inputType === 'audioStimulus'"
           :initial-item-input-options="inputOptions"
@@ -84,13 +89,13 @@
     </v-card-text>
     <v-divider />
     <v-card-actions>
-      <v-btn
-        outlined
-        color="primary"
-        @click="onDiscardItem"
-      >{{ isItemEditable ? 'Discard Changes' : 'Close' }}</v-btn>
+      <v-btn outlined color="primary" @click="onDiscardItem">
+        {{ isItemEditable ? "Discard Changes" : "Close" }}
+      </v-btn>
       <v-spacer />
-      <v-btn color="primary" @click="onSaveItem">Save Item</v-btn>
+      <v-btn color="primary" @click="onSaveItem">
+        Save Item
+      </v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -122,29 +127,31 @@ export default {
     AudioRecordBuilder,
     AudioImageRecordBuilder,
     GeolocationBuilder,
-    AudioStimulusBuilder
+    AudioStimulusBuilder,
   },
   props: {
     initialItemData: {
       type: Object,
-      required: true
+      required: true,
     },
     isItemEditable: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
   data: function() {
     return {
-      name: this.initialItemData.name || '',
-      question: this.initialItemData.question || '',
-      description: this.initialItemData.description || '',
-      inputType: this.initialItemData.ui ? this.initialItemData.ui.inputType : '',
+      name: this.initialItemData.name || "",
+      question: this.initialItemData.question || "",
+      description: this.initialItemData.description || "",
+      inputType: this.initialItemData.ui
+        ? this.initialItemData.ui.inputType
+        : "",
       options: this.initialItemData.options || [],
       responseOptions: this.initialItemData.responseOptions || {},
       inputOptions: this.initialItemData.inputOptions || {},
       media: this.initialItemData.media || {},
-      textRules: [v => !!v || "This field is required"],
+      textRules: [(v) => !!v || "This field is required"],
       inputTypes: [
         "radio",
         "text",
@@ -157,8 +164,8 @@ export default {
         "audioRecord",
         "audioImageRecord",
         "geolocation",
-        "audioStimulus"
-      ]
+        "audioStimulus",
+      ],
     };
   },
   methods: {
@@ -184,7 +191,7 @@ export default {
       for (let i = 1; i <= this.options.numOptions; i++) {
         choices.push({
           "schema:name": i.toString(),
-          "schema:value": i
+          "schema:value": i,
         });
       }
       return choices;
@@ -196,7 +203,7 @@ export default {
               const choiceSchema = {
                 "@type": "schema:option",
                 "schema:name": option.name,
-                "schema:value": index + 1
+                "schema:value": index + 1,
               };
               if (option.image) {
                 choiceSchema["schema:image"] = option.image;
@@ -211,10 +218,10 @@ export default {
         const choices = this.getRadioChoices();
         return {
           "@valueType": "xsd:anyURI",
-          "multipleChoice": this.options.isMultipleChoice,
+          multipleChoice: this.options.isMultipleChoice,
           "schema:minValue": 1,
           "schema:maxValue": choices.length,
-          choices: choices
+          choices: choices,
         };
       }
       if (this.inputType === "text") {
@@ -226,14 +233,14 @@ export default {
           "@valueType": "xsd:integer",
           "schema:minValue": this.options.minValue,
           "schema:maxValue": this.options.maxValue,
-          choices: choices
+          choices: choices,
         };
       }
       if (this.inputType === "date") {
         return {
           valueType: "xsd:date",
           requiredValue: true,
-          "schema:maxValue": "new Date()"
+          "schema:maxValue": "new Date()",
         };
       }
       if (
@@ -263,7 +270,7 @@ export default {
       const media = this.getMedia();
       const schema = {
         "@context": [
-          "https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json"
+          "https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json",
         ],
         "@type": "reproschema:Field",
         "@id": this.name,
@@ -273,8 +280,8 @@ export default {
         "schema:schemaVersion": "0.0.1",
         "schema:version": "0.0.1",
         ui: {
-          inputType: this.inputType
-        }
+          inputType: this.inputType,
+        },
       };
       if (Object.keys(responseOptions).length !== 0) {
         schema["responseOptions"] = responseOptions;
@@ -285,22 +292,20 @@ export default {
       if (this.inputType === "audioStimulus") {
         schema["media"] = media;
       }
-      if (this.inputType === 'radio') {
+      if (this.inputType === "radio") {
         if (this.options.isMultipleChoice) {
           schema["ui"] = {
-            "inputType": this.inputType
+            inputType: this.inputType,
           };
         } else {
           schema["ui"] = {
-            "inputType": this.inputType,
-            "allow": [
-              "autoAdvance"
-            ]
+            inputType: this.inputType,
+            allow: ["autoAdvance"],
           };
         }
       } else {
         schema["ui"] = {
-          inputType: this.inputType
+          inputType: this.inputType,
         };
       }
 
@@ -315,7 +320,7 @@ export default {
           description: this.description,
           options: this.options,
           isItemEditable: this.isItemEditable,
-          ...schema
+          ...schema,
         };
 
         if (
@@ -339,8 +344,7 @@ export default {
     },
     onDiscardItem() {
       this.$emit("closeItemModal", null);
-    }
-  }
+    },
+  },
 };
 </script>
-

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <v-card>
     <v-card-title class="headline grey lighten-2" primary-title>
       <v-icon left>
         {{ isItemEditable ? "mdi-pencil" : "mdi-eye" }}
@@ -9,7 +9,11 @@
     <v-container>
       <v-row no-gutters>
         <v-col md="6" offset-md="3">
-          <conditional-item-list :options="options" />
+          <conditional-item-list
+            v-if="!editMode"
+            :options="options"
+            noActions
+          />
 
           <v-form ref="form" lazy-validation>
             <v-select
@@ -33,7 +37,7 @@
             />
           </v-form>
 
-          <v-btn @click="addOption">
+          <v-btn v-if="!editMode" @click="addOption">
             Add more conditions
           </v-btn>
         </v-col>
@@ -49,11 +53,10 @@
         </v-btn>
       </v-card-actions>
     </v-container>
-  </div>
+  </v-card>
 </template>
 
 <script>
-import { without } from "lodash";
 import ConditionalItemList from "./ConditionalItemList.vue";
 
 export default {
@@ -61,50 +64,53 @@ export default {
     ConditionalItemList,
   },
   props: {
-    // initialItemData: {
-    //   type: Object,
-    //   required: true,
-    // },
+    editConditionalCallback: {
+      type: Function,
+      required: true,
+    },
+    initialConditionalItemData: {
+      type: Object,
+      required: true,
+    },
+    editConditionalItemIndex: {
+      type: Number,
+      default: -1,
+    },
+    items: {
+      type: Array,
+      required: true,
+    },
     isItemEditable: {
       type: Boolean,
       default: true,
     },
+    editMode: {
+      type: Boolean,
+      default: false,
+    },
   },
   data: function() {
     return {
-      items2: [
-        {
-          id: 1,
-          avatar: "https://s3.amazonaws.com/vuetify-docs/images/lists/1.jpg",
-          title: "Brunch this life?",
-          subtitle: "Subtitle 1",
-        },
-        {
-          id: 2,
-          avatar: "https://s3.amazonaws.com/vuetify-docs/images/lists/2.jpg",
-          title: "Winter Lunch",
-          subtitle: "Subtitle 2",
-        },
-        {
-          id: 3,
-          avatar: "https://s3.amazonaws.com/vuetify-docs/images/lists/3.jpg",
-          title: "Oui oui",
-          subtitle: "Subtitle 3",
-        },
-      ],
-      items: this.$route.params.items,
-      ifValue: "",
-      stateValue: "",
+      ifValue: this.initialConditionalItemData.ifValue || "",
+      stateValue: this.initialConditionalItemData.stateValue || "",
       stateItems: ["IS EQUAL TO", "IS NOT EQUAL TO"],
-      showValue: {},
+      showValue: this.initialConditionalItemData.showValue || "",
       showItems: [],
       options: [],
       answerItems: [],
-      answerValue: "",
+      answerValue: this.initialConditionalItemData.answerValue || "",
     };
   },
   watch: {
     ifValue() {
+      this.fillAnswerAndShowItems();
+    },
+  },
+  created() {
+    this.fillAnswerAndShowItems();
+  },
+  methods: {
+    fillAnswerAndShowItems() {
       if (this.ifValue === "") return;
       let answerItemsObj = this.items.find((item) => {
         return item.question === this.ifValue;
@@ -116,18 +122,25 @@ export default {
         return item.question !== this.ifValue;
       });
     },
-  },
-  created() {},
-  methods: {
     onSaveItem() {
-      this.$store.commit("setConditionalItems", this.options);
+      if (this.editConditionalItemIndex !== -1) {
+        const payload = {
+          index: this.editConditionalItemIndex,
+          item: {
+            ifValue: this.ifValue,
+            stateValue: this.stateValue,
+            showValue: this.showValue,
+            answerValue: this.answerValue,
+          },
+        };
 
-      this.$router.push({
-        name: "Builder",
-      });
+        this.editConditionalCallback(payload, true);
+      } else {
+        this.editConditionalCallback(this.options, false);
+      }
     },
     onDiscardItem() {
-      this.$router.go(-1);
+      this.$emit("closeConditionalItemModal", null);
     },
     addOption() {
       this.options.push({
@@ -135,7 +148,6 @@ export default {
         stateValue: this.stateValue,
         showValue: this.showValue,
         answerValue: this.answerValue,
-        value: {}, // To store for backend
       });
 
       this.ifValue = "";

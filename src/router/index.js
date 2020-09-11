@@ -18,11 +18,6 @@ let router = new Router({
       name: "ActivityBuilder",
       component: ActivityBuilder,
     },
-    {
-      path: "/conditional-item-builder",
-      name: "ConditionalItemBuilder",
-      component: ConditionalItemBuilder,
-    },
   ],
 });
 

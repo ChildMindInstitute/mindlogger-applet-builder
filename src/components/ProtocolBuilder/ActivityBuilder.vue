@@ -87,7 +87,12 @@
             <v-tab-item v-if="conditionalItems.length">
               <v-card flat>
                 <v-card-text>
-                  <conditional-item-list :options="conditionalItems" />
+                  <conditional-item-list
+                    :options="conditionalItems"
+                    :deleteConditionalCallback="onDeleteConditionalCallback"
+                    @editConditionalItem="onEditConditionalItem"
+                    @dragConditionalItem="onDragConditionalItem"
+                  />
                 </v-card-text>
               </v-card>
             </v-tab-item>
@@ -151,6 +156,18 @@
       />
     </v-dialog>
 
+    <v-dialog v-model="editConditionalItemDialog" persistent>
+      <ConditionalItemBuilder
+        :key="componentKey"
+        :initial-conditional-item-data="initialConditionalItemData"
+        :items="items"
+        :editMode="isConditionalEditMode"
+        :editConditionalItemIndex="editConditionalItemIndex"
+        :editConditionalCallback="onEditConditionalCallback"
+        @closeConditionalItemModal="onCloseConditionalItemModal"
+      />
+    </v-dialog>
+
     <v-dialog v-model="urlDialog" persistent>
       <UrlItemUploader :key="componentKey" @uploadItem="onUploadItem" />
     </v-dialog>
@@ -159,13 +176,14 @@
 
 <script>
 import ItemBuilder from "./ItemBuilder.vue";
+import ConditionalItemBuilder from "./ConditionalItemBuilder.vue";
 import UrlItemUploader from "./UrlItemUploader.vue";
 import ConditionalItemList from "./ConditionalItemList.vue";
-import { string } from "prop-types";
 
 export default {
   components: {
     ItemBuilder,
+    ConditionalItemBuilder,
     UrlItemUploader,
     ConditionalItemList,
   },
@@ -185,22 +203,22 @@ export default {
       items: this.initialActivityData.items || [],
       textRules: [(v) => !!v || "This field is required"],
       editItemDialog: false,
+      editConditionalItemDialog: false,
       urlDialog: false,
       error: "",
       componentKey: 0,
       initialItemData: {
         options: {},
       },
+      initialConditionalItemData: {},
+      editConditionalItemIndex: -1,
       isItemEditable: true,
       editIndex: -1,
       itemsForConditionalBuilder: [],
       ifConditionalAvailable: false,
+      isConditionalEditMode: false,
+      conditionalItems: [],
     };
-  },
-  computed: {
-    conditionalItems() {
-      return this.$store.state.conditionalItems;
-    },
   },
   watch: {
     items() {
@@ -237,10 +255,9 @@ export default {
       this.editItemDialog = true;
     },
     createConditionalItem() {
-      this.$router.push({
-        name: "ConditionalItemBuilder",
-        params: { items: this.itemsForConditionalBuilder },
-      });
+      this.isConditionalEditMode = false;
+      this.editConditionalItemIndex = -1;
+      this.editConditionalItemDialog = true;
     },
     importItem() {
       this.editIndex = -1;
@@ -255,6 +272,32 @@ export default {
       if (response) {
         this.onNewItem(response);
       }
+    },
+    onDragConditionalItem(items) {
+      this.conditionalItems = items;
+    },
+    onCloseConditionalItemModal(response) {
+      this.editConditionalItemDialog = false;
+    },
+    onEditConditionalCallback(payload, isForEdit) {
+      if (isForEdit) {
+        this.conditionalItems[payload.index] = payload.item;
+      } else {
+        this.conditionalItems = this.conditionalItems.concat(payload);
+      }
+
+      this.editConditionalItemDialog = false;
+    },
+    onDeleteConditionalCallback(index) {
+      this.conditionalItems.splice(index, 1);
+    },
+    onEditConditionalItem(index) {
+      this.editConditionalItemIndex = index;
+
+      this.initialConditionalItemData = this.conditionalItems[index];
+      this.forceUpdate();
+      this.isConditionalEditMode = true;
+      this.editConditionalItemDialog = true;
     },
     onUploadItem(response) {
       this.urlDialog = false;
@@ -285,11 +328,9 @@ export default {
       this.items.splice(index, 1);
     },
     onClickSaveActivity() {
-      console.log("items: ", this.items);
-      console.log("conds: ", this.conditionalItems);
-      // if (this.isActivityValid()) {
-      this.saveActivity();
-      // }
+      if (this.isActivityValid()) {
+        this.saveActivity();
+      }
     },
     isActivityValid() {
       if (!this.name) {

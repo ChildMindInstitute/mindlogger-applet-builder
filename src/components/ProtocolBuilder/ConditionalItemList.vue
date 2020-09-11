@@ -1,6 +1,6 @@
 <template>
   <div>
-    <draggable v-model="items" :options="{ group: 'people' }">
+    <draggable v-model="items" @end="onDragEnd">
       <v-list-item
         v-for="(item, index) in items"
         :key="index"
@@ -15,8 +15,13 @@
             <span>{{ item.showValue }} </span>
           </v-list-item-title>
         </v-list-item-content>
-        <v-list-item-action>
-          <v-btn icon @click="deleteOption(index)">
+        <v-list-item-action v-if="!noActions">
+          <v-btn icon @click="editItem(index)">
+            <v-icon color="grey lighten-1">
+              edit
+            </v-icon>
+          </v-btn>
+          <v-btn icon @click="deleteConditionalCallback(index)">
             <v-icon color="grey lighten-1">
               delete
             </v-icon>
@@ -35,9 +40,18 @@ export default {
     draggable,
   },
   props: {
+    deleteConditionalCallback: {
+      type: Function,
+      required: false,
+      default: () => {},
+    },
     options: {
       type: Array,
       required: true,
+    },
+    noActions: {
+      type: Boolean,
+      default: false,
     },
   },
   data: function() {
@@ -45,12 +59,12 @@ export default {
       items: this.options,
     };
   },
-  created() {
-    console.log("options1: ", this.options);
-  },
   methods: {
-    deleteOption() {
-      this.$emit("deleteOption", index);
+    onDragEnd(item) {
+      this.$emit("dragConditionalItem", this.items);
+    },
+    editItem(index) {
+      this.$emit("editConditionalItem", index);
     },
   },
 };

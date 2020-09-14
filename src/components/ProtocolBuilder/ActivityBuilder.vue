@@ -38,7 +38,9 @@
           />
           <v-checkbox v-model="isSkippable" label="Allow items to be skipped" />
           <v-tabs centered>
-            <v-tab>Items</v-tab>
+            <v-tab>
+              Items
+            </v-tab>
             <v-tab v-if="conditionalItems.length">
               Conditional logic items
             </v-tab>
@@ -123,8 +125,17 @@
                 </v-btn>
               </template>
               <v-list>
-                <v-list-item @click="createConditionalItem">
-                  <v-list-item-title>Blank item</v-list-item-title>
+                <v-list-item
+                  :disabled="!conditionalRadioItems.length"
+                  @click="createConditionalItem('checkbox')"
+                >
+                  <v-list-item-title>Radio/Checkbox</v-list-item-title>
+                </v-list-item>
+                <v-list-item
+                  :disabled="!conditionalSliderItems.length"
+                  @click="createConditionalItem('radio')"
+                >
+                  <v-list-item-title>Slider</v-list-item-title>
                 </v-list-item>
               </v-list>
             </v-menu>
@@ -164,6 +175,7 @@
         :editMode="isConditionalEditMode"
         :editConditionalItemIndex="editConditionalItemIndex"
         :editConditionalCallback="onEditConditionalCallback"
+        :type="conditionalBuilderType"
         @closeConditionalItemModal="onCloseConditionalItemModal"
       />
     </v-dialog>
@@ -214,29 +226,43 @@ export default {
       editConditionalItemIndex: -1,
       isItemEditable: true,
       editIndex: -1,
-      itemsForConditionalBuilder: [],
+      conditionalRadioItems: [],
+      conditionalSliderItems: [],
       ifConditionalAvailable: false,
       isConditionalEditMode: false,
       conditionalItems: [],
+      conditionalBuilderType: "",
     };
   },
   watch: {
     items() {
-      this.itemsForConditionalBuilder = this.items.filter((item) => {
-        return (
-          item.ui.inputType === "radio" || item.ui.inputType === "checkbox"
-        );
-      });
+      this.conditionalRadioItems = this.collectConditionals("radio");
+      this.conditionalSliderItems = this.collectConditionals("slider");
 
-      this.ifConditionalAvailable = this.itemsForConditionalBuilder.length >= 2;
+      this.checkIfConditionalAvailable();
     },
   },
   created() {
-    this.ifConditionalAvailable =
-      this.itemsForConditionalBuilder.length >= 2 ||
-      this.conditionalItems.length;
+    this.checkIfConditionalAvailable();
   },
   methods: {
+    checkIfConditionalAvailable() {
+      this.ifConditionalAvailable =
+        this.conditionalRadioItems.length >= 2 ||
+        this.conditionalSliderItems.length >= 2 ||
+        this.conditionalItems.length;
+
+      if (this.conditionalRadioItems.length >= 2)
+        this.conditionalBuilderType = "radio";
+      else if (this.conditionalSliderItems.length >= 2)
+        this.conditionalBuilderType = "slider";
+      else this.conditionalBuilderType = "";
+    },
+    collectConditionals(type) {
+      return this.items.filter((item) => {
+        return item.ui.inputType === type;
+      });
+    },
     validate() {
       if (this.$refs.form.validate()) {
         this.snackbar = true;
@@ -254,7 +280,7 @@ export default {
       this.forceUpdate();
       this.editItemDialog = true;
     },
-    createConditionalItem() {
+    createConditionalItem(type) {
       this.isConditionalEditMode = false;
       this.editConditionalItemIndex = -1;
       this.editConditionalItemDialog = true;

@@ -88,12 +88,16 @@ export default {
       type: Boolean,
       default: false,
     },
+    type: {
+      type: String,
+      default: "radio",
+    },
   },
   data: function() {
     return {
       ifValue: this.initialConditionalItemData.ifValue || "",
       stateValue: this.initialConditionalItemData.stateValue || "",
-      stateItems: ["IS EQUAL TO", "IS NOT EQUAL TO"],
+      stateItems: [],
       showValue: this.initialConditionalItemData.showValue || "",
       showItems: [],
       options: [],
@@ -107,6 +111,11 @@ export default {
     },
   },
   created() {
+    this.stateItems =
+      this.type === "radio"
+        ? ["IS EQUAL TO", "IS NOT EQUAL TO"]
+        : ["GREATER THEN", "LESS THEN", "EQUAL TO", "WITHIN", "OUTSIDE OF"];
+
     this.fillAnswerAndShowItems();
   },
   methods: {

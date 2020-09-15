@@ -15,9 +15,9 @@ if (env !== 'development') {
   });
 }
 
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
 
 new Vue({
   vuetify,
-  render: h => h(App)
-}).$mount('#app')
+  render: (h) => h(App),
+}).$mount("#app");

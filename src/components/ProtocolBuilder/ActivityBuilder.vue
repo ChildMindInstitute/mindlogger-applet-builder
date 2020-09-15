@@ -18,17 +18,23 @@
           <v-text-field
             v-model="name"
             :rules="textRules"
+            counter="50"
+            maxlength="50"
             label="Activity Name"
             required
           />
           <v-text-field
             v-model="description"
             :rules="textRules"
+            counter="100"
+            maxlength="100"
             label="Activity Description"
             required
           />
           <v-text-field
             v-model="preamble"
+            counter="20"
+            maxlength="20"
             label="Preamble"
             required
           />
@@ -286,11 +292,23 @@ export default {
       return true;
     },
     getItemVisibility() {
-      const visibilityObj = {}
+      const visibilityObj = {};
       this.items.forEach(function(item) {
         visibilityObj[item.name] = true;
       });
       return visibilityObj;
+    },
+    getAddProperties() {
+      const addProperties = [];
+      this.items.forEach(function(item) {
+        const property = {
+          "variableName": item.name,
+          "isAbout": item.name,
+          "isVis": true
+        };
+        addProperties.push(property);
+      });
+      return addProperties;
     },
     getItemOrder() {
       const itemNamesArray = this.items.map(item => item.name)
@@ -300,11 +318,12 @@ export default {
       return this.isSkippable ? ["skipped"] : [];
     },
     getCompressedSchema() {
+      const addProperties = this.getAddProperties();
       const visibility = this.getItemVisibility();
       const itemOrder = this.getItemOrder();
       const allowed = this.getAllowed();
       return {
-        "@context": [ "https://raw.githubusercontent.com/ReproNim/reproschema/master/contexts/generic"
+        "@context": [ "https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json"
         ],
         "@type": "reproschema:Activity",
         "@id": this.name,
@@ -320,7 +339,7 @@ export default {
         "ui": {
             "order": itemOrder,
             "shuffle": this.shuffleActivityOrder,
-            "visibility": visibility,
+            "addProperties": addProperties,
             "allow": allowed
         }
       };

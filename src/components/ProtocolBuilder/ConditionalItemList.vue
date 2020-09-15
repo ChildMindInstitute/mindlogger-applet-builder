@@ -11,7 +11,11 @@
             <span class="blue--text">IF </span>
             <span>{{ item.ifValue }} </span>
             <span class="blue--text">{{ item.stateValue }} </span>
-            <span>{{ item.answerValue }} </span>
+            <span v-if="item.answerValue">{{ item.answerValue }} </span>
+            <template v-else>
+              <span>{{ item.minValue }} </span>
+              <span v-if="item.maxValue">AND {{ item.maxValue }} </span>
+            </template>
             <span>{{ item.showValue }} </span>
           </v-list-item-title>
         </v-list-item-content>
@@ -21,6 +25,8 @@
               edit
             </v-icon>
           </v-btn>
+        </v-list-item-action>
+        <v-list-item-action v-if="!noActions">
           <v-btn icon @click="deleteConditionalCallback(index)">
             <v-icon color="grey lighten-1">
               delete
@@ -59,7 +65,13 @@ export default {
       items: this.options,
     };
   },
+  created() {
+    this.$watch("$props", this.watchHandler, { deep: true });
+  },
   methods: {
+    watchHandler() {
+      this.items = this.options;
+    },
     onDragEnd(item) {
       this.$emit("dragConditionalItem", this.items);
     },

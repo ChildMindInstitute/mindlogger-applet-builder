@@ -118,7 +118,8 @@
               </v-list>
             </v-menu>
 
-            <v-menu v-if="ifConditionalAvailable" bottom>
+            <!-- v-if="ifConditionalAvailable" -->
+            <v-menu :disabled="!ifConditionalAvailable" bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-btn color="primary" v-bind="attrs" v-on="on">
                   Add conditional logic
@@ -126,14 +127,14 @@
               </template>
               <v-list>
                 <v-list-item
-                  :disabled="!conditionalRadioItems.length"
-                  @click="createConditionalItem('checkbox')"
+                  :disabled="conditionalRadioItems.length < 2"
+                  @click="createConditionalItem('radio')"
                 >
                   <v-list-item-title>Radio/Checkbox</v-list-item-title>
                 </v-list-item>
                 <v-list-item
-                  :disabled="!conditionalSliderItems.length"
-                  @click="createConditionalItem('radio')"
+                  :disabled="conditionalSliderItems.length < 2"
+                  @click="createConditionalItem('slider')"
                 >
                   <v-list-item-title>Slider</v-list-item-title>
                 </v-list-item>
@@ -171,7 +172,7 @@
       <ConditionalItemBuilder
         :key="componentKey"
         :initial-conditional-item-data="initialConditionalItemData"
-        :items="items"
+        :items="conditionalItemsForBuilder"
         :editMode="isConditionalEditMode"
         :editConditionalItemIndex="editConditionalItemIndex"
         :editConditionalCallback="onEditConditionalCallback"
@@ -232,6 +233,7 @@ export default {
       isConditionalEditMode: false,
       conditionalItems: [],
       conditionalBuilderType: "",
+      conditionalItemsForBuilder: [],
     };
   },
   watch: {
@@ -251,12 +253,6 @@ export default {
         this.conditionalRadioItems.length >= 2 ||
         this.conditionalSliderItems.length >= 2 ||
         this.conditionalItems.length;
-
-      if (this.conditionalRadioItems.length >= 2)
-        this.conditionalBuilderType = "radio";
-      else if (this.conditionalSliderItems.length >= 2)
-        this.conditionalBuilderType = "slider";
-      else this.conditionalBuilderType = "";
     },
     collectConditionals(type) {
       return this.items.filter((item) => {
@@ -282,6 +278,11 @@ export default {
     },
     createConditionalItem(type) {
       this.isConditionalEditMode = false;
+      this.conditionalBuilderType = type;
+      this.conditionalItemsForBuilder =
+        type === "radio"
+          ? this.conditionalRadioItems
+          : this.conditionalSliderItems;
       this.editConditionalItemIndex = -1;
       this.editConditionalItemDialog = true;
     },
@@ -309,8 +310,11 @@ export default {
       if (isForEdit) {
         this.conditionalItems[payload.index] = payload.item;
       } else {
-        this.conditionalItems = this.conditionalItems.concat(payload);
+        let condItems = this.conditionalItems.concat(payload);
+        this.conditionalItems = condItems;
       }
+
+      this.forceUpdate();
 
       this.editConditionalItemDialog = false;
     },

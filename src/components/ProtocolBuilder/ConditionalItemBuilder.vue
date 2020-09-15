@@ -23,12 +23,33 @@
               label="If"
             />
             <v-select v-model="stateValue" :items="stateItems" label="State" />
-            <v-select
-              v-model="answerValue"
-              item-text="name"
-              :items="answerItems"
-              label="Answer"
-            />
+
+            <template v-if="type === 'slider'">
+              <v-text-field
+                v-model="minValue"
+                label="Min value"
+                min="1"
+                :max="sliderNumOptions"
+                type="number"
+              />
+
+              <v-text-field
+                v-if="stateValue === 'WITHIN' || stateValue === 'OUTSIDE OF'"
+                v-model="maxValue"
+                label="Max value"
+                min="1"
+                :max="sliderNumOptions"
+                type="number"
+              />
+            </template>
+            <template v-else>
+              <v-select
+                v-model="answerValue"
+                item-text="name"
+                :items="answerItems"
+                label="Answer"
+              />
+            </template>
             <v-select
               v-model="showValue"
               item-text="question"
@@ -95,6 +116,8 @@ export default {
   },
   data: function() {
     return {
+      minValue: this.initialConditionalItemData.minValue || 1,
+      maxValue: this.initialConditionalItemData.maxValue || 0,
       ifValue: this.initialConditionalItemData.ifValue || "",
       stateValue: this.initialConditionalItemData.stateValue || "",
       stateItems: [],
@@ -103,6 +126,7 @@ export default {
       options: [],
       answerItems: [],
       answerValue: this.initialConditionalItemData.answerValue || "",
+      sliderNumOptions: 0,
     };
   },
   watch: {
@@ -111,21 +135,29 @@ export default {
     },
   },
   created() {
-    this.stateItems =
-      this.type === "radio"
-        ? ["IS EQUAL TO", "IS NOT EQUAL TO"]
-        : ["GREATER THEN", "LESS THEN", "EQUAL TO", "WITHIN", "OUTSIDE OF"];
+    this.$watch("$props", this.setStateItems, { deep: true });
 
+    this.setStateItems();
     this.fillAnswerAndShowItems();
   },
   methods: {
+    setStateItems() {
+      this.stateItems =
+        this.type === "radio"
+          ? ["IS EQUAL TO", "IS NOT EQUAL TO"]
+          : ["GREATER THEN", "LESS THEN", "EQUAL TO", "WITHIN", "OUTSIDE OF"];
+    },
     fillAnswerAndShowItems() {
       if (this.ifValue === "") return;
       let answerItemsObj = this.items.find((item) => {
         return item.question === this.ifValue;
       });
 
-      this.answerItems = answerItemsObj.options.options;
+      if (this.type === "radio") {
+        this.answerItems = answerItemsObj.options.options;
+      } else {
+        this.sliderNumOptions = answerItemsObj.options.numOptions;
+      }
 
       this.showItems = this.items.filter((item) => {
         return item.question !== this.ifValue;
@@ -152,17 +184,26 @@ export default {
       this.$emit("closeConditionalItemModal", null);
     },
     addOption() {
-      this.options.push({
+      const obj = {
         ifValue: this.ifValue,
         stateValue: this.stateValue,
         showValue: this.showValue,
-        answerValue: this.answerValue,
-      });
+      };
+
+      if (this.type === "radio") obj.answerValue = this.answerValue;
+      else {
+        obj.minValue = this.minValue;
+        obj.maxValue = this.maxValue;
+      }
+
+      this.options.push(obj);
 
       this.ifValue = "";
       this.stateValue = "";
       this.answerValue = "";
       this.showValue = {};
+      this.minValue = "";
+      this.maxValue = "";
     },
   },
 };

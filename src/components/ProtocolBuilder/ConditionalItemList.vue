@@ -9,13 +9,14 @@
         <v-list-item-content>
           <v-list-item-title>
             <span class="blue--text">IF </span>
-            <span>{{ item.ifValue }} </span>
-            <span class="blue--text">{{ item.stateValue }} </span>
+            <span>{{ item.ifValue.question }} </span>
+            <span class="blue--text">{{ item.stateValue.name }} </span>
             <span v-if="item.answerValue">{{ item.answerValue }} </span>
             <template v-else>
               <span>{{ item.minValue }} </span>
               <span v-if="item.maxValue">AND {{ item.maxValue }} </span>
             </template>
+            <span class="blue--text">SHOW </span>
             <span>{{ item.showValue }} </span>
           </v-list-item-title>
         </v-list-item-content>
@@ -64,6 +65,14 @@ export default {
     return {
       items: this.options,
     };
+  },
+  watch: {
+    options: {
+      deep: true,
+      handler() {
+        console.log("The list of options has changed!: ", this.options);
+      },
+    },
   },
   created() {
     this.$watch("$props", this.watchHandler, { deep: true });

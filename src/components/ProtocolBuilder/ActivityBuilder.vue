@@ -118,7 +118,6 @@
               </v-list>
             </v-menu>
 
-            <!-- v-if="ifConditionalAvailable" -->
             <v-menu :disabled="!ifConditionalAvailable" bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-btn color="primary" v-bind="attrs" v-on="on">
@@ -245,6 +244,9 @@ export default {
     },
   },
   created() {
+    this.conditionalRadioItems = this.collectConditionals("radio");
+    this.conditionalSliderItems = this.collectConditionals("slider");
+
     this.checkIfConditionalAvailable();
   },
   methods: {
@@ -386,14 +388,37 @@ export default {
     },
     getAddProperties() {
       const addProperties = [];
-      this.items.forEach(function(item) {
+
+      this.items.forEach((item) => {
+        const conditionalItems = this.conditionalItems.filter((cond) => {
+          return cond.showValue === item.question;
+        });
+
+        let isVis = true;
+
+        if (conditionalItems.length) {
+          const visibleItems = conditionalItems.map((cond) => {
+            if (cond.stateValue.val === "within") {
+              return `${cond.ifValue.name} > ${cond.minValue} && ${cond.ifValue.name} < ${cond.maxValue}`;
+            } else if (cond.stateValue.val === "outsideof") {
+              return `${cond.ifValue.name} < ${cond.minValue} && ${cond.ifValue.name} > ${cond.maxValue}`;
+            } else if (!cond.answerValue) {
+              return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.minValue}`;
+            } else {
+              return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.answerValue}`;
+            }
+          });
+          isVis = visibleItems.join(" && ");
+        }
+
         const property = {
           variableName: item.name,
           isAbout: item.name,
-          isVis: true,
+          isVis: isVis,
         };
         addProperties.push(property);
       });
+
       return addProperties;
     },
     getItemOrder() {
@@ -464,14 +489,6 @@ export default {
       const schema = this.getCompressedSchema();
       const context = this.getContext();
       const items = this.items;
-
-      items.forEach((item) => {
-        const conditionalItems = this.conditionalItems.filter((cond) => {
-          return cond.ifValue === item.question;
-        });
-
-        if (conditionalItems.length) item.conditionalItems = conditionalItems;
-      });
 
       this.$emit("closeModal", {
         name: this.name,

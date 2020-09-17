@@ -20,9 +20,17 @@
               v-model="ifValue"
               item-text="question"
               :items="items"
+              return-object
               label="If"
             />
-            <v-select v-model="stateValue" :items="stateItems" label="State" />
+            <v-select
+              v-model="stateValue"
+              name="name"
+              :items="stateItems"
+              item-text="name"
+              return-object
+              label="State"
+            />
 
             <template v-if="type === 'slider'">
               <v-text-field
@@ -34,7 +42,10 @@
               />
 
               <v-text-field
-                v-if="stateValue === 'WITHIN' || stateValue === 'OUTSIDE OF'"
+                v-if="
+                  stateValue.name === 'WITHIN' ||
+                    stateValue.name === 'OUTSIDE OF'
+                "
                 v-model="maxValue"
                 label="Max value"
                 min="1"
@@ -144,13 +155,22 @@ export default {
     setStateItems() {
       this.stateItems =
         this.type === "radio"
-          ? ["IS EQUAL TO", "IS NOT EQUAL TO"]
-          : ["GREATER THEN", "LESS THEN", "EQUAL TO", "WITHIN", "OUTSIDE OF"];
+          ? [
+              { name: "IS EQUAL TO", val: "==" },
+              { name: "IS NOT EQUAL TO", val: "!=" },
+            ]
+          : [
+              { name: "GREATER THEN", val: ">" },
+              { name: "LESS THEN", val: "<" },
+              { name: "EQUAL TO", val: "=" },
+              { name: "WITHIN", val: "within" },
+              { name: "OUTSIDE OF", val: "outsideof" },
+            ];
     },
     fillAnswerAndShowItems() {
       if (this.ifValue === "") return;
       let answerItemsObj = this.items.find((item) => {
-        return item.question === this.ifValue;
+        return item.question === this.ifValue.question;
       });
 
       if (this.type === "radio") {
@@ -160,7 +180,7 @@ export default {
       }
 
       this.showItems = this.items.filter((item) => {
-        return item.question !== this.ifValue;
+        return item.question !== this.ifValue.question;
       });
     },
     onSaveItem() {
@@ -172,6 +192,8 @@ export default {
             stateValue: this.stateValue,
             showValue: this.showValue,
             answerValue: this.answerValue,
+            minValue: this.minValue,
+            maxValue: this.maxValue,
           },
         };
 

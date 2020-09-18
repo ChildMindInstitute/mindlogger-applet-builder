@@ -309,16 +309,15 @@ export default {
       this.editConditionalItemDialog = false;
     },
     onEditConditionalCallback(payload, isForEdit) {
+      this.editConditionalItemDialog = false;
       if (isForEdit) {
-        this.conditionalItems[payload.index] = payload.item;
+        this.$set(this.conditionalItems, payload.index, payload.item);
       } else {
         let condItems = this.conditionalItems.concat(payload);
         this.conditionalItems = condItems;
       }
 
       this.forceUpdate();
-
-      this.editConditionalItemDialog = false;
     },
     onDeleteConditionalCallback(index) {
       this.conditionalItems.splice(index, 1);

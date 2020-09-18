@@ -3,7 +3,7 @@
     <draggable v-model="items" @end="onDragEnd">
       <v-list-item
         v-for="(item, index) in items"
-        :key="index"
+        :key="item + index"
         class="draggable-item"
       >
         <v-list-item-content>
@@ -61,26 +61,12 @@ export default {
       default: false,
     },
   },
-  data: function() {
-    return {
-      items: this.options,
-    };
-  },
-  watch: {
-    options: {
-      deep: true,
-      handler() {
-        console.log("The list of options has changed!: ", this.options);
-      },
+  computed: {
+    items() {
+      return this.options;
     },
-  },
-  created() {
-    this.$watch("$props", this.watchHandler, { deep: true });
   },
   methods: {
-    watchHandler() {
-      this.items = this.options;
-    },
     onDragEnd(item) {
       this.$emit("dragConditionalItem", this.items);
     },

@@ -11,7 +11,7 @@
             <span class="blue--text">IF </span>
             <span>{{ item.ifValue.question }} </span>
             <span class="blue--text">{{ item.stateValue.name }} </span>
-            <span v-if="item.answerValue">{{ item.answerValue }} </span>
+            <span v-if="item.answerValue">{{ item.answerValue.name }} </span>
             <template v-else>
               <span>{{ item.minValue }} </span>
               <span v-if="item.maxValue">AND {{ item.maxValue }} </span>

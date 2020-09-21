@@ -59,6 +59,7 @@
                 item-text="name"
                 :items="answerItems"
                 label="Answer"
+                return-object
               />
             </template>
             <v-select
@@ -174,7 +175,15 @@ export default {
       });
 
       if (this.type === "radio") {
-        this.answerItems = answerItemsObj.options.options;
+        this.answerItems = answerItemsObj.responseOptions.choices.map(
+          (choice) => {
+            return {
+              name: choice["schema:name"],
+              value: choice["schema:value"],
+            };
+          }
+        );
+        console.log("this.answerItems: ", this.answerItems);
       } else {
         this.sliderNumOptions = answerItemsObj.options.numOptions;
       }

@@ -404,7 +404,7 @@ export default {
             } else if (!cond.answerValue) {
               return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.minValue}`;
             } else {
-              return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.answerValue}`;
+              return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.answerValue.value}`;
             }
           });
           isVis = visibleItems.join(" && ");

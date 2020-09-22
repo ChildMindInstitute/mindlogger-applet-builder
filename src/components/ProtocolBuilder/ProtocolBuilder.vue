@@ -64,20 +64,12 @@
       </v-alert>
       <div>
         <v-btn
-          v-if="isForDuplicate"
-          class="mx-2 my-2"
-          color="primary"
-          @click="onClickDuplicate"
-        >
-          Duplicate
-        </v-btn>
-        <v-btn
           v-if="exportButton"
           class="mx-2 my-2"
           color="primary"
           @click="onClickExport"
         >
-          Export Schema
+          Save to dashboard
         </v-btn>
         <v-btn class="mx-2 my-2" color="primary" @click="onClickSaveProtocol">
           Download Schema
@@ -110,7 +102,7 @@ function initialData() {
     componentKey: 0,
     editIndex: -1,
     applet: {},
-    isForDuplicate: false,
+    isEditing: false,
   };
 }
 
@@ -138,10 +130,10 @@ export default {
   },
   methods: {
     fillBuilderWithAppletData() {
-      if (!this.$route) return;
+      if (!this.$route.params || !this.$route.params.applet) return;
       const { applet, activities, items } = this.$route.params.applet;
 
-      this.isForDuplicate = true;
+      this.isEditing = true;
       this.applet = applet;
       this.name = applet["@id"].replace("_schema", "");
       this.description = applet["schema:description"][0]["@value"];
@@ -154,9 +146,11 @@ export default {
           ["reprolib:terms/preamble"]: activityPreamble,
           ["reprolib:terms/shuffle"]: shuffle,
           ["reprolib:terms/allow"]: isSkippable,
+          ["_id"]: id,
         } = activitiesObj;
 
         const activityInfo = {
+          id,
           name,
           description:
             description && description[0] && description[0]["@value"],
@@ -185,6 +179,7 @@ export default {
 
         activityInfo.items = Object.values(items).map((item) => {
           let itemContent = {
+            id: item["_id"],
             name: item["@id"],
             question:
               item["schema:question"] &&
@@ -322,16 +317,6 @@ export default {
         });
 
         this.activities.push(activityInfo);
-      });
-    },
-    onClickDuplicate() {
-      const name =
-        this.applet["@id"].replace("_schema", "") === this.name
-          ? `${this.name} (1)`
-          : this.name;
-      this.$emit("duplicateApplet", {
-        id: this.applet._id.replace("applet/", ""),
-        name,
       });
     },
     validate() {
@@ -519,26 +504,25 @@ export default {
         });
       });
 
-      protocol.data["@context"].forEach((contextURL, index) => {
-        if (index < protocol.data["@context"].length - 1) {
-          api
-            .getSchema(contextURL)
-            .then((resp) => {
-              contexts[contextURL] = resp.data["@context"];
-              if (index === protocol.data["@context"].length - 2) {
-                const contextObj = this.getContext();
-                contexts[protocol.data["@context"][index + 1]] =
-                  contextObj["@context"];
-                this.$emit("uploadProtocol", {
-                  contexts,
-                  protocol,
-                });
-              }
-            })
-            .catch((e) => {
-              console.log(e);
-            });
-        }
+      Promise.all(
+        protocol.data["@context"].map(
+          (contextURL, index) => {
+            if (index === protocol.data["@context"].length - 1) {
+              return Promise.resolve();
+            }
+            return api.getSchema(contextURL).then(resp => contexts[contextURL] = resp.data["@context"]);
+          }
+        )
+      ).then(() => {
+        const activityContext = this.getContext();
+        const activityContextUrl  = protocol.data["@context"][protocol.data["@context"].length - 1];
+        contexts[activityContextUrl] = activityContext["@context"];
+        this.$emit("uploadProtocol", {
+          contexts,
+          protocol
+        })
+      }).catch(e => {
+        console.log(e);
       });
     },
     resetBuilder() {

@@ -197,6 +197,7 @@ export default {
       shuffleActivityOrder: this.initialActivityData.shuffle || false,
       isSkippable: this.initialActivityData.isSkippable || false,
       items: this.initialActivityData.items || [],
+      id: this.initialActivityData.id || null,
       textRules: [
         v => !!v || 'This field is required',
       ],

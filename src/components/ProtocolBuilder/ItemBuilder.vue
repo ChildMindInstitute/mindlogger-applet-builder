@@ -136,6 +136,7 @@ export default {
   },
   data: function() {
     return {
+      id: this.initialItemData._id || null,
       name: this.initialItemData.name || '',
       question: this.initialItemData.question || '',
       description: this.initialItemData.description || '',

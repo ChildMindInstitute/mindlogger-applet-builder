@@ -177,6 +177,7 @@
 import ItemBuilder from './ItemBuilder.vue';
 import UrlItemUploader from './UrlItemUploader.vue';
 import { string } from 'prop-types';
+import Activity from '../../models/Activity';
 
 export default {
   components: {
@@ -190,26 +191,12 @@ export default {
     }
   },
   data: function () {
+    const model = new Activity();
+    model.updateReferenceObject(this);
+
     return {
-      name: this.initialActivityData.name || '',
-      description: this.initialActivityData.description || '',
-      preamble: this.initialActivityData.preamble || '',
-      shuffleActivityOrder: this.initialActivityData.shuffle || false,
-      isSkippable: this.initialActivityData.isSkippable || false,
-      items: this.initialActivityData.items || [],
-      id: this.initialActivityData.id || null,
-      textRules: [
-        v => !!v || 'This field is required',
-      ],
-      editItemDialog: false,
-      urlDialog: false,
-      error: '',
-      componentKey: 0,
-      initialItemData: {
-        options: {},
-      },
-      isItemEditable: true,
-      editIndex: -1
+      model,
+      ...model.getActivityBuilderData(this.initialActivityData)
     }
   },
   methods: {
@@ -256,7 +243,7 @@ export default {
       if (this.editIndex >= 0 && this.editIndex < this.items.length) {
         this.items[this.editIndex] = item;
       } else {
-      this.items.push(item);
+        this.items.push(item);
       }
     },
     duplicateItem(index) {
@@ -292,101 +279,8 @@ export default {
       }
       return true;
     },
-    getItemVisibility() {
-      const visibilityObj = {};
-      this.items.forEach(function(item) {
-        visibilityObj[item.name] = true;
-      });
-      return visibilityObj;
-    },
-    getAddProperties() {
-      const addProperties = [];
-      this.items.forEach(function(item) {
-        const property = {
-          "variableName": item.name,
-          "isAbout": item.name,
-          "isVis": true
-        };
-        addProperties.push(property);
-      });
-      return addProperties;
-    },
-    getItemOrder() {
-      const itemNamesArray = this.items.map(item => item.name)
-      return itemNamesArray;
-    },
-    getAllowed() {
-      return this.isSkippable ? ["skipped"] : [];
-    },
-    getCompressedSchema() {
-      const addProperties = this.getAddProperties();
-      const visibility = this.getItemVisibility();
-      const itemOrder = this.getItemOrder();
-      const allowed = this.getAllowed();
-      return {
-        "@context": [ "https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json"
-        ],
-        "@type": "reproschema:Activity",
-        "@id": this.name,
-        "skos:prefLabel": this.name,
-        "skos:altLabel": this.name,
-        "schema:description": this.description,
-        "schema:schemaVersion": "0.0.1",
-        "schema:version": "0.0.1",
-        "preamble": this.preamble,
-        "scoringLogic": {
-        },
-        "repronim:timeUnit": "yearmonthdate",
-        "ui": {
-            "order": itemOrder,
-            "shuffle": this.shuffleActivityOrder,
-            "addProperties": addProperties,
-            "allow": allowed
-        }
-      };
-    },
-    getContext() {
-      const activityName = this.name;
-      const contextObj = {
-        "@version": 1.1
-      };
-      var isPrefixNeeded = false;
-      this.items.forEach(function(item) {
-        if ('iri' in item) {
-          contextObj[item.name] = {
-            '@id': item.iri,
-            '@type': '@id',
-          };
-        } else {
-          contextObj[item.name] = {
-            '@id': `${activityName}:${item.name}`,
-            '@type': '@id',
-          };
-          isPrefixNeeded = true;
-        }
-      });
-      if (isPrefixNeeded) {
-        contextObj[activityName] = `https://raw.githubusercontent.com/YOUR-PATH-TO-ITEM-FOLDER`;
-      }
-
-      return {
-        "@context": contextObj
-      };
-    },
     saveActivity() {
-      const schema = this.getCompressedSchema();
-      const context = this.getContext();
-      const items = this.items;
-      this.$emit('closeModal', {
-        'name': this.name,
-        'description': this.description,
-        'preamble': this.preamble,
-        'shuffle': this.shuffleActivityOrder,
-        'isSkippable': this.isSkippable,
-        'schema': schema,
-        'context': context,
-        'items': items
-      });
+      this.$emit('closeModal', this.model.getActivityData());
     },
     onDiscardActivity() {
       this.$emit('closeModal', null);

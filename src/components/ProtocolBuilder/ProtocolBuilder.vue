@@ -90,21 +90,10 @@
 </template>
 
 <script>
-function initialData() {
-  return {
-    name: "",
-    description: "",
-    activities: [],
-    textRules: [(v) => !!v || "This field is required"],
-    dialog: false,
-    error: "",
-    initialActivityData: {},
-    componentKey: 0,
-    editIndex: -1,
-    applet: {},
-    isEditing: false,
-  };
-}
+
+import Protocol from '../../models/Protocol';
+import Activity from '../../models/Activity';
+import Item from '../../models/Item';
 
 import api from "../../utilities/api";
 import ActivityBuilder from "./ActivityBuilder.vue";
@@ -121,22 +110,47 @@ export default {
       required: false,
       default: false,
     },
+    initialData: {
+      type: Object,
+      required: false,
+      default: null
+    }
   },
   data: function() {
-    return initialData();
+    const model = new Protocol();
+    model.updateReferenceObject(this);
+
+    return {
+      name: "",
+      description: "",
+      activities: [],
+      textRules: [(v) => !!v || "This field is required"],
+      dialog: false,
+      error: "",
+      initialActivityData: {},
+      componentKey: 0,
+      editIndex: -1,
+      applet: null,
+      isEditing: false,
+      id: null,
+      model,
+      original: null,
+    };
   },
-  created() {
-    this.fillBuilderWithAppletData();
+  async beforeMount() {
+    await this.fillBuilderWithAppletData();
   },
   methods: {
-    fillBuilderWithAppletData() {
-      if (!this.$route.params || !this.$route.params.applet) return;
-      const { applet, activities, items } = this.$route.params.applet;
+    async fillBuilderWithAppletData() {
+      if (!this.initialData) return;
+
+      const { applet, activities, items, protocol } = this.initialData;
 
       this.isEditing = true;
       this.applet = applet;
       this.name = applet["@id"].replace("_schema", "");
       this.description = applet["schema:description"][0]["@value"];
+      this.id = protocol._id.split('/')[1];
 
       Object.values(activities).forEach((act) => {
         const activitiesObj = act;
@@ -150,7 +164,7 @@ export default {
         } = activitiesObj;
 
         const activityInfo = {
-          id,
+          _id: id && id.split("/")[1],
           name,
           description:
             description && description[0] && description[0]["@value"],
@@ -179,7 +193,7 @@ export default {
 
         activityInfo.items = Object.values(items).map((item) => {
           let itemContent = {
-            id: item["_id"],
+            _id: item["_id"] && item["_id"].split("/")[1],
             name: item["@id"],
             question:
               item["schema:question"] &&
@@ -313,11 +327,18 @@ export default {
             }
           }
 
-          return itemContent;
+          const itemModel = new Item();
+          itemModel.updateReferenceObject(itemModel.getItemBuilderData(itemContent));
+          return itemModel.getItemData();
         });
 
-        this.activities.push(activityInfo);
+        const activityModel = new Activity();
+        activityModel.updateReferenceObject(activityModel.getActivityBuilderData(activityInfo));
+
+        this.activities.push(activityModel.getActivityData());
       });
+
+      this.original = await this.model.getProtocolData();
     },
     validate() {
       if (this.$refs.form.validate()) {
@@ -378,80 +399,9 @@ export default {
       }
       return true;
     },
-    getVariableMap() {
-      const variableMap = this.activities.map((activity) => ({
-        variableName: `${activity.name}_schema`,
-        isAbout: `${activity.name}_schema`,
-        prefLabel: activity.name,
-        isVis: true,
-      }));
-      return variableMap;
-    },
-    getActivityOrder() {
-      const activityNamesArray = this.activities.map(
-        (activity) => activity.name
-      );
-      return activityNamesArray;
-    },
-    getActivityDisplayNames() {
-      const displayNamesObj = {};
-      this.activities.forEach(function(activity) {
-        displayNamesObj[activity.name] = activity.name;
-      });
-      return displayNamesObj;
-    },
-    getActivityVisibility() {
-      const visibilityObj = {};
-      this.activities.forEach(function(activity) {
-        visibilityObj[activity.name] = true;
-      });
-      return visibilityObj;
-    },
-    getCompressedSchema() {
-      const variableMap = this.getVariableMap();
-      const activityDisplayNames = this.getActivityDisplayNames();
-      const activityOrder = this.getActivityOrder();
-      const activityVisibility = this.getActivityVisibility();
-      const schema = {
-        "@context": [
-          "https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json",
-          "https://raw.githubusercontent.com/YOUR-PROTOCOL-CONTEXT-FILE",
-        ],
-        "@type": "reproschema:Protocol",
-        "@id": `${this.name}_schema`,
-        "skos:prefLabel": this.name,
-        "schema:description": this.description,
-        "schema:schemaVersion": "0.0.1",
-        "schema:version": "0.0.1",
-        landingPage: this.description, //point to the readme of protocol
-        // variableMap: variableMap,
-        ui: {
-          addProperties: variableMap,
-          order: activityOrder,
-          shuffle: false,
-        },
-      };
-      return schema;
-    },
-    getContext() {
-      const contextObj = {
-        "@version": 1.1,
-        activity_path:
-          "https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/",
-      };
-      // this.activities.forEach(function(activity) {
-      //   contextObj[activity.name] = {
-      //     "@id": `activity_path:${activity.name}/${activity.name}_schema`,
-      //     "@type": "@id",
-      //   };
-      // });
-      return {
-        "@context": contextObj,
-      };
-    },
     downloadSchema() {
-      const schemaObj = this.getCompressedSchema();
-      const contextObj = this.getContext();
+      const schemaObj = this.model.getCompressedSchema();
+      const contextObj = this.model.getContext();
 
       var JSZip = require("jszip");
       var zip = new JSZip();
@@ -488,39 +438,12 @@ export default {
       });
     },
     onClickExport() {
-      let contexts = {};
-      const protocol = {
-        data: this.getCompressedSchema(),
-        activities: {},
-      };
-
-      this.activities.forEach((activity) => {
-        protocol.activities[activity.name] = {
-          data: activity.schema,
-          items: {},
-        };
-        activity.items.forEach((item) => {
-          protocol.activities[activity.name].items[item.name] = item;
-        });
-      });
-
-      Promise.all(
-        protocol.data["@context"].map(
-          (contextURL, index) => {
-            if (index === protocol.data["@context"].length - 1) {
-              return Promise.resolve();
-            }
-            return api.getSchema(contextURL).then(resp => contexts[contextURL] = resp.data["@context"]);
-          }
-        )
-      ).then(() => {
-        const activityContext = this.getContext();
-        const activityContextUrl  = protocol.data["@context"][protocol.data["@context"].length - 1];
-        contexts[activityContextUrl] = activityContext["@context"];
-        this.$emit("uploadProtocol", {
-          contexts,
-          protocol
-        })
+      this.model.getProtocolData().then( data => {
+        if (!this.isEditing) {
+          this.$emit("uploadProtocol", data)
+        } else {
+          this.$emit("updateProtocol", data);
+        }
       }).catch(e => {
         console.log(e);
       });

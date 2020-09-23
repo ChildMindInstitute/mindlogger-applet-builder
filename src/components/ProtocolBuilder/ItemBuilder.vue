@@ -108,6 +108,7 @@ import AudioRecordBuilder from "./ItemBuilders/AudioRecordBuilder.vue";
 import AudioImageRecordBuilder from "./ItemBuilders/AudioImageRecordBuilder.vue";
 import GeolocationBuilder from "./ItemBuilders/GeolocationBuilder.vue";
 import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
+import Item from '../../models/Item';
 
 export default {
   components: {
@@ -135,31 +136,12 @@ export default {
     }
   },
   data: function() {
+    const model = new Item();
+    model.updateReferenceObject(this);
+
     return {
-      id: this.initialItemData._id || null,
-      name: this.initialItemData.name || '',
-      question: this.initialItemData.question || '',
-      description: this.initialItemData.description || '',
-      inputType: this.initialItemData.ui ? this.initialItemData.ui.inputType : '',
-      options: this.initialItemData.options || [],
-      responseOptions: this.initialItemData.responseOptions || {},
-      inputOptions: this.initialItemData.inputOptions || {},
-      media: this.initialItemData.media || {},
-      textRules: [v => !!v || "This field is required"],
-      inputTypes: [
-        "radio",
-        "text",
-        "slider",
-        "photo",
-        "video",
-        "timeRange",
-        "date",
-        "drawing",
-        "audioRecord",
-        "audioImageRecord",
-        "geolocation",
-        "audioStimulus"
-      ]
+      model,
+      ...model.getItemBuilderData(this.initialItemData)
     };
   },
   methods: {
@@ -180,160 +162,9 @@ export default {
     updateOptions(newOptions) {
       this.options = newOptions;
     },
-    getSliderChoices() {
-      const choices = [];
-      for (let i = 1; i <= this.options.numOptions; i++) {
-        choices.push({
-          "schema:name": i.toString(),
-          "schema:value": i
-        });
-      }
-      return choices;
-    },
-    getRadioChoices() {
-      const choices =
-        this.options && this.options.options
-          ? this.options.options.map((option, index) => {
-              const choiceSchema = {
-                "@type": "schema:option",
-                "schema:name": option.name,
-                "schema:value": index + 1
-              };
-              if (option.image) {
-                choiceSchema["schema:image"] = option.image;
-              }
-              return choiceSchema;
-            })
-          : [];
-      return choices;
-    },
-    getResponseOptions() {
-      if (this.inputType === "radio") {
-        const choices = this.getRadioChoices();
-        return {
-          "@valueType": "xsd:anyURI",
-          "multipleChoice": this.options.isMultipleChoice,
-          "schema:minValue": 1,
-          "schema:maxValue": choices.length,
-          choices: choices
-        };
-      }
-      if (this.inputType === "text") {
-        return this.options;
-      }
-      if (this.inputType === "slider") {
-        const choices = this.getSliderChoices();
-        return {
-          "@valueType": "xsd:integer",
-          "schema:minValue": this.options.minValue,
-          "schema:maxValue": this.options.maxValue,
-          choices: choices
-        };
-      }
-      if (this.inputType === "date") {
-        return {
-          valueType: "xsd:date",
-          requiredValue: true,
-          "schema:maxValue": "new Date()"
-        };
-      }
-      if (
-        this.inputType === "audioRecord" ||
-        this.inputType === "audioImageRecord"
-      ) {
-        return this.options;
-      } else {
-        return {};
-      }
-    },
-    getInputOptions() {
-      if (this.inputType === "audioStimulus") {
-        return this.inputOptions;
-      }
-      return {};
-    },
-    getMedia() {
-      if (this.inputType === "audioStimulus") {
-        return this.media;
-      }
-      return {};
-    },
-    getCompressedSchema() {
-      const responseOptions = this.getResponseOptions();
-      const inputOptions = this.getInputOptions();
-      const media = this.getMedia();
-      const schema = {
-        "@context": [
-          "https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json"
-        ],
-        "@type": "reproschema:Field",
-        "@id": this.name,
-        "skos:prefLabel": this.name,
-        "skos:altLabel": this.name,
-        "schema:description": this.description,
-        "schema:schemaVersion": "0.0.1",
-        "schema:version": "0.0.1",
-        ui: {
-          inputType: this.inputType
-        }
-      };
-      if (Object.keys(responseOptions).length !== 0) {
-        schema["responseOptions"] = responseOptions;
-      }
-      if (this.inputType === "audioStimulus") {
-        schema["inputOptions"] = inputOptions;
-      }
-      if (this.inputType === "audioStimulus") {
-        schema["media"] = media;
-      }
-      if (this.inputType === 'radio') {
-        if (this.options.isMultipleChoice) {
-          schema["ui"] = {
-            "inputType": this.inputType
-          };
-        } else {
-          schema["ui"] = {
-            "inputType": this.inputType,
-            "allow": [
-              "autoAdvance"
-            ]
-          };
-        }
-      } else {
-        schema["ui"] = {
-          inputType: this.inputType
-        };
-      }
-
-      return schema;
-    },
     onSaveItem() {
       if (this.isItemEditable) {
-        const schema = this.getCompressedSchema();
-        const itemObj = {
-          name: this.name,
-          question: this.question,
-          description: this.description,
-          options: this.options,
-          isItemEditable: this.isItemEditable,
-          ...schema
-        };
-
-        if (
-          (this.inputType === "radio" ||
-            this.inputType === "text" ||
-            this.inputType === "slider" ||
-            this.inputType === "audioRecord" ||
-            this.inputType === "audioImageRecord" ||
-            this.inputType === "geolocation") &&
-          Object.keys(this.responseOptions).length
-        ) {
-          itemObj.responseOptions = this.responseOptions;
-        } else if (this.inputType === "audioStimulus") {
-          itemObj.inputOptions = this.inputOptions;
-          itemObj.media = this.media;
-        }
-        this.$emit("closeItemModal", itemObj);
+        this.$emit("closeItemModal", this.model.getItemData());
       } else {
         this.$emit("closeItemModal", null);
       }

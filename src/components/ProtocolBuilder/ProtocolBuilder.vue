@@ -77,6 +77,7 @@
         <v-btn class="mx-2 my-2" color="primary" outlined @click="resetBuilder">
           Reset Builder
         </v-btn>
+
       </div>
     </v-layout>
     <v-dialog v-model="dialog" width="800" persistent>
@@ -100,6 +101,25 @@ import ActivityBuilder from "./ActivityBuilder.vue";
 import { saveAs } from "file-saver";
 import { cloneDeep } from "lodash";
 
+const getInitialData = (model) => {
+  return {
+    name: "",
+    description: "",
+    activities: [],
+    textRules: [(v) => !!v || "This field is required"],
+    dialog: false,
+    error: "",
+    initialActivityData: {},
+    componentKey: 0,
+    editIndex: -1,
+    applet: null,
+    isEditing: false,
+    id: null,
+    model,
+    original: null,
+  };
+}
+
 export default {
   components: {
     ActivityBuilder,
@@ -120,22 +140,7 @@ export default {
     const model = new Protocol();
     model.updateReferenceObject(this);
 
-    return {
-      name: "",
-      description: "",
-      activities: [],
-      textRules: [(v) => !!v || "This field is required"],
-      dialog: false,
-      error: "",
-      initialActivityData: {},
-      componentKey: 0,
-      editIndex: -1,
-      applet: null,
-      isEditing: false,
-      id: null,
-      model,
-      original: null,
-    };
+    return getInitialData(model);
   },
   async beforeMount() {
     await this.fillBuilderWithAppletData();
@@ -338,7 +343,8 @@ export default {
         this.activities.push(activityModel.getActivityData());
       });
 
-      this.original = await this.model.getProtocolData();
+      const protocolData = await this.model.getProtocolData();
+      this.original = JSON.parse(JSON.stringify(protocolData));
     },
     validate() {
       if (this.$refs.form.validate()) {
@@ -449,7 +455,7 @@ export default {
       });
     },
     resetBuilder() {
-      Object.assign(this.$data, initialData());
+      Object.assign(this.$data, getInitialData(this.model));
       this.resetValidation();
     },
     resetValidation() {

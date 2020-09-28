@@ -1,3 +1,5 @@
+import util from '../utilities/util';
+import Item from './Item';
 export default class Activity {
   constructor() {
     this.ref = null;
@@ -124,6 +126,7 @@ export default class Activity {
     const context = this.getContext();
     const items = this.ref.items;
     return {
+      '_id': this.ref.id,
       'name': this.ref.name,
       'description': this.ref.description,
       'preamble': this.ref.preamble,
@@ -132,6 +135,145 @@ export default class Activity {
       'schema': schema,
       'context': context,
       'items': items
+    };
+  }
+
+  static getHistoryTemplate(oldValue, newValue) {
+    return {
+      'skos:prefLabel': {
+        updated: (field) => `Activity name was changed to ${_.get(newValue, field)}`,
+      },
+      'schema:description': {
+        updated: (field) => `Activity description was changed to ${_.get(newValue, field)}`,
+        removed: (field) => `Activity description was removed`,
+        inserted: (field) => `Activity description was added (${_.get(newValue, field)})`
+      }, 
+      'ui.shuffle': {
+        updated: (field) => `shuffle item order was ${_.get(newValue, field, false) ? 'enabled' : 'disabled'}`
+      },
+      'ui.allow': {
+        updated: (field) => {
+          const oldOptions = _.get(oldValue, field, []);
+          const newOptions = _.get(newValue, field, []);
+    
+          const removedOptions = oldOptions.filter(option => newOptions.indexOf(option) < 0);
+          const insertedOptions = newOptions.filter(option => oldOptions.indexOf(option) < 0);
+    
+          return [
+            ...removedOptions.map(option => `${option} option was disabled`),
+            ...insertedOptions.map(option => `${option} option was enabled`)
+          ];
+        }
+      }
+    }
+  }
+
+  static getChangeInfo(old, current) {
+    const {
+      "data": oldData,
+      "items": oldItems
+    } = old;
+
+    const {
+      "data": currentData, 
+      "items": currentItems
+    } = current;
+
+    const logTemplates = Activity.getHistoryTemplate(oldData, currentData);
+    let versionUpgrade = '0.0.0';
+
+    const metaInfoChanges = util.compareValues(oldData, currentData, Object.keys(logTemplates));
+    const itemChanges = util.compareIDs(oldItems, currentItems, '_id');
+
+    const changeLog = [];
+
+    Object.keys(metaInfoChanges).forEach(key => {
+      const changeType = metaInfoChanges[key];
+      let logs = [];
+
+      if (logTemplates[key][changeType]) {
+        logs = logTemplates[key][changeType](key);
+      } else {
+        logs = logTemplates[key]['updated'](key);
+      }
+      
+      if (!Array.isArray(logs)) {
+        logs = [logs];
+      }
+
+      logs.forEach(log => {
+        changeLog.push({
+          name: log,
+          type: metaInfoChanges[key]
+        })
+      })
+    });
+
+    const result = [];
+
+    /** log activity metadata changes */
+
+    if (changeLog.length) {
+      result.push({
+        name: 'activity metadata',
+        children: changeLog,
+      })
+
+      versionUpgrade = '0.0.1';
+    }
+
+    const itemLogs = [];
+
+    if (itemChanges.inserted.length || itemChanges.removed.length) {
+      versionUpgrade = '0.1.0';
+    }
+
+    /** display log for updated activities */
+    Object.entries(itemChanges.keyReferences).forEach(entry => {
+      const changeLog = Item.getChangeInfo(oldItems[entry[0]], currentItems[entry[1]]);
+
+      if (versionUpgrade < changeLog.upgrade) {
+        versionUpgrade = changeLog.upgrade;
+      }
+
+      if (changeLog.upgrade !== '0.0.0') {
+        itemLogs.push({
+          name: `item ${currentItems[entry[1]]['skos:prefLabel']} was updated`,
+          type: 'updated',
+          children: changeLog.log
+        });
+      }
+    });
+
+    /** display log for new activities */
+    itemChanges.inserted.forEach(id => {
+      itemLogs.push({
+        name: `item ${currentItems[id]['skos:prefLabel']} was inserted`,
+        type: 'inserted',
+        children: []
+      });
+    });
+
+    /** display log for removed activities */
+    itemChanges.removed.forEach(id => {
+      itemLogs.push({
+        name: `activity ${oldItems[id]['skos:prefLabel']} was removed`,
+        type: 'removed',
+        children: []
+      })
+    })
+
+    /** log activity changes */
+    if (itemLogs.length) {
+      result.push({
+        name: 'items',
+        children: itemLogs
+      });
+    }
+
+    return {
+      log: result,
+      upgrade: versionUpgrade,
     };
   }
 };

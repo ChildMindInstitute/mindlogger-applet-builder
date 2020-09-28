@@ -1,3 +1,4 @@
+import util from '../utilities/util';
 export default class Item {
   constructor() {
     this.ref = null;
@@ -200,5 +201,99 @@ export default class Item {
     }
 
     return itemObj;
+  }
+
+  static getHistoryTemplate(oldValue, newValue) {
+    const radioOptionListUpdate = (field) => {
+      const oldOptions = _.get(oldValue, field, []).map(option => option.name);
+      const newOptions = _.get(newValue, field, []).map(option => option.name);
+
+      const removedOptions = oldOptions.filter(option => newOptions.indexOf(option) < 0);
+      const insertedOptions = newOptions.filter(option => oldOptions.indexOf(option) < 0);
+
+      return [
+        ...removedOptions.map(option => `${option} option was removed`),
+        ...insertedOptions.map(option => `${option} option was inserted`)
+      ];
+    };
+    const optionUpdate = name => field => 
+          `${name} was ${_.get(newValue, field) ? 'enabled' : 'disabled'}`;
+    const valueUpdate = name => field =>
+          `${name} was updated to ${_.get(newValue, field)}`
+
+    return {
+      'skos:prefLabel': {
+        updated: valueUpdate('Item name'),
+      },
+      'schema:description': {
+        updated: (field) => `Item description was changed to ${_.get(newValue, field)}`,
+        removed: (field) => `Item description was removed`,
+        inserted: (field) => `Item description was added (${_.get(newValue, field)})`
+      }, 
+      'ui:inputType': {
+        updated: valueUpdate('Input type'),
+      },
+      'options.isMultipleChoice': {
+        updated: optionUpdate('Multiple choice option'),
+      },
+      'options.options': {
+        updated: radioOptionListUpdate,
+      },
+      'options.schema:minValue': {
+        updated: valueUpdate('minValue'),
+      },
+      'options.schema:maxValue': {
+        updated: valueUpdate('maxValue'),
+      },
+      'options.minValue': {
+        updated: valueUpdate('minValue'),
+      },
+      'options.maxValue': {
+        updated: valueUpdate('maxValue'),
+      },
+      'options.requiredValue': {
+        updated: optionUpdate('Required option'),
+      },
+      'options.numOptions': {
+        updated: valueUpdate('Scale value')
+      },
+      'options.maxLength': {
+        updated: valueUpdate('maxLength')
+      }
+    }
+  }
+
+  static getChangeInfo(old, current) {
+    const logTemplates = Item.getHistoryTemplate(old, current);
+    const changeInfo = util.compareValues(old, current, Object.keys(logTemplates));
+
+    const changeLog = [];
+
+    Object.keys(changeInfo).forEach(key => {
+      const changeType = changeInfo[key];
+      let logs = [];
+
+      if (logTemplates[key][changeType]) {
+        logs = logTemplates[key][changeType](key);
+      } else {
+        logs = logTemplates[key]['updated'](key);
+      }
+      
+      if (!Array.isArray(logs)) {
+        logs = [logs];
+      }
+
+      logs.forEach(log => {
+        changeLog.push({
+          name: log,
+          type: changeInfo[key]
+        })
+      })
+    });
+
+    return {
+      log: changeLog,
+      upgrade: changeLog.length ? '0.0.1' : '0.0.0',
+    };
   }
 }

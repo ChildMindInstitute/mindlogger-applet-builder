@@ -78,6 +78,9 @@
           Reset Builder
         </v-btn>
 
+        <v-btn class="mx-2 my-2" color="primary" :disabled="!isEditing" outlined @click="viewHistory">
+          View History
+        </v-btn>
       </div>
     </v-layout>
     <v-dialog v-model="dialog" width="800" persistent>
@@ -85,6 +88,21 @@
         :key="componentKey"
         :initial-activity-data="initialActivityData"
         @closeModal="onCloseActivityModal"
+      />
+    </v-dialog>
+
+    <v-dialog
+      v-model="changeHistoryDialog.visibility"
+      width="800"
+      class="historyDialog"
+    >
+      <ChangeHistoryComponent
+        :history="changeHistoryDialog.data"
+        :currentVersion="changeHistoryDialog.currentVersion"
+        :defaultVersion="changeHistoryDialog.defaultVersion"
+        :versions="versions"
+        :key="componentKey + historyComponentKey"
+        @updateHistoryView="updateHistoryView"
       />
     </v-dialog>
   </v-container>
@@ -95,11 +113,13 @@
 import Protocol from '../../models/Protocol';
 import Activity from '../../models/Activity';
 import Item from '../../models/Item';
+import ChangeHistoryComponent from './ChangeHistoryComponent.vue';
+import util from '../../utilities/util';
 
 import api from "../../utilities/api";
 import ActivityBuilder from "./ActivityBuilder.vue";
 import { saveAs } from "file-saver";
-import { cloneDeep } from "lodash";
+import _ from "lodash";
 
 const getInitialData = (model) => {
   return {
@@ -111,18 +131,26 @@ const getInitialData = (model) => {
     error: "",
     initialActivityData: {},
     componentKey: 0,
+    historyComponentKey: 0,
     editIndex: -1,
     applet: null,
     isEditing: false,
     id: null,
+    protocolVersion: '1.0.0',
     model,
     original: null,
+    changeHistoryDialog: {
+      visibility: false,
+      defaultVersion: null,
+      data: []
+    },
   };
 }
 
 export default {
   components: {
     ActivityBuilder,
+    ChangeHistoryComponent,
   },
   props: {
     exportButton: {
@@ -134,6 +162,16 @@ export default {
       type: Object,
       required: false,
       default: null
+    },
+    versions: {
+      type: Array,
+      required: false,
+      default: null
+    },
+    getProtocols: {
+      type: Function,
+      require: false,
+      default: null
     }
   },
   data: function() {
@@ -144,6 +182,13 @@ export default {
   },
   async beforeMount() {
     await this.fillBuilderWithAppletData();
+
+    const protocolData = await this.model.getProtocolData();
+    this.original = JSON.parse(JSON.stringify(protocolData));
+    if (!this.versions.length) {
+      /** upload first version */
+      this.$emit("prepareApplet", this.original);
+    }
   },
   methods: {
     async fillBuilderWithAppletData() {
@@ -156,6 +201,7 @@ export default {
       this.name = applet["@id"].replace("_schema", "");
       this.description = applet["schema:description"][0]["@value"];
       this.id = protocol._id.split('/')[1];
+      this.protocolVersion = _.get(applet, 'schema:schemaVersion[0].@value', this.protocolVersion);
 
       Object.values(activities).forEach((act) => {
         const activitiesObj = act;
@@ -342,9 +388,6 @@ export default {
 
         this.activities.push(activityModel.getActivityData());
       });
-
-      const protocolData = await this.model.getProtocolData();
-      this.original = JSON.parse(JSON.stringify(protocolData));
     },
     validate() {
       if (this.$refs.form.validate()) {
@@ -448,7 +491,16 @@ export default {
         if (!this.isEditing) {
           this.$emit("uploadProtocol", data)
         } else {
-          this.$emit("updateProtocol", data);
+          const { upgrade } = Protocol.getChangeInfo(this.original, data);
+
+          let newVersion = util.upgradeVersion(this.protocolVersion, upgrade);
+          if (newVersion != this.protocolVersion) {
+            data.protocol.data['schema:schemaVersion'] = data.protocol.data['schema:version'] = newVersion;
+
+            this.$emit("updateProtocol", data);
+          } else {
+            this.$emit("onUploadError", 'Please make changes to update applet');
+          }
         }
       }).catch(e => {
         console.log(e);
@@ -457,6 +509,42 @@ export default {
     resetBuilder() {
       Object.assign(this.$data, getInitialData(this.model));
       this.resetValidation();
+    },
+    viewHistory() {
+      if (this.isEditing) {
+        this.model.getProtocolData().then(current => {
+          const { log, upgrade } = Protocol.getChangeInfo(this.original, current);
+          this.changeHistoryDialog.visibility = true;
+          this.changeHistoryDialog.data = log;
+          this.changeHistoryDialog.currentVersion = util.upgradeVersion(this.protocolVersion, upgrade);
+
+          this.historyComponentKey++;
+        });
+      }
+    },
+    updateHistoryView(version) {
+      const index = this.versions.indexOf(version);
+
+      /** viewing current changes */
+      if (index < 0) {
+        this.changeHistoryDialog.defaultVersion = version;
+
+        this.viewHistory();
+        return ;
+      }
+
+      /** viewing old changes */
+      this.getProtocols([this.versions[index], this.versions[index + 1]]).then(resp => {
+        const data = resp.data;
+
+        const { log, upgrade } = Protocol.getChangeInfo(data[1].content, data[0].content);
+
+        this.changeHistoryDialog.visibility = true;
+        this.changeHistoryDialog.data = log;
+        this.changeHistoryDialog.defaultVersion = version;
+
+        this.historyComponentKey++;
+      });
     },
     resetValidation() {
       this.$refs.form.resetValidation();

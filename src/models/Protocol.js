@@ -203,10 +203,12 @@ export default class Protocol {
 
     /** display log for new activities */
     activityChanges.inserted.forEach(id => {
+      const changeLog = Activity.getChangeInfo({ data: {}, items: {} }, currentActivities[id]);
+
       activityLogs.push({
         name: `activity ${currentActivities[id]['data']['skos:prefLabel']} was inserted`,
         type: 'inserted',
-        children: []
+        children: changeLog.log
       });
     });
 

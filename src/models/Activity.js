@@ -142,6 +142,7 @@ export default class Activity {
     return {
       'skos:prefLabel': {
         updated: (field) => `Activity name was changed to ${_.get(newValue, field)}`,
+        inserted: (field) => `Activity name set to ${_.get(newValue, field)}`,
       },
       'schema:description': {
         updated: (field) => `Activity description was changed to ${_.get(newValue, field)}`,
@@ -150,6 +151,10 @@ export default class Activity {
       }, 
       'ui.shuffle': {
         updated: (field) => `shuffle item order was ${_.get(newValue, field, false) ? 'enabled' : 'disabled'}`
+      },
+      'preamble': {
+        updated: (field) => `preamble was updated to ${_.get(newValue, field)}`,
+        inserted: (field) => `preamble was set to ${_.get(newValue, field)}`
       },
       'ui.allow': {
         updated: (field) => {
@@ -247,10 +252,12 @@ export default class Activity {
 
     /** display log for new activities */
     itemChanges.inserted.forEach(id => {
+      const changeLog = Item.getChangeInfo({}, currentItems[id]);
+
       itemLogs.push({
         name: `item ${currentItems[id]['skos:prefLabel']} was inserted`,
         type: 'inserted',
-        children: []
+        children: changeLog.log
       });
     });
 

@@ -221,17 +221,22 @@ export default class Item {
     const valueUpdate = name => field =>
           `${name} was updated to ${_.get(newValue, field)}`
 
+    const valueInsert = name => field =>
+          `${name} was set to ${_.get(newValue, field)}`;
+
     return {
       'skos:prefLabel': {
         updated: valueUpdate('Item name'),
+        inserted: valueInsert('Item name')
       },
       'schema:description': {
         updated: (field) => `Item description was changed to ${_.get(newValue, field)}`,
         removed: (field) => `Item description was removed`,
         inserted: (field) => `Item description was added (${_.get(newValue, field)})`
       }, 
-      'ui:inputType': {
+      'ui.inputType': {
         updated: valueUpdate('Input type'),
+        inserted: valueInsert('Input type'),
       },
       'options.isMultipleChoice': {
         updated: optionUpdate('Multiple choice option'),
@@ -241,24 +246,30 @@ export default class Item {
       },
       'options.schema:minValue': {
         updated: valueUpdate('minValue'),
+        inserted: valueInsert('minValue'),
       },
       'options.schema:maxValue': {
         updated: valueUpdate('maxValue'),
+        inserted: valueInsert('maxValue'),
       },
       'options.minValue': {
         updated: valueUpdate('minValue'),
+        inserted: valueInsert('minValue'),
       },
       'options.maxValue': {
         updated: valueUpdate('maxValue'),
+        inserted: valueInsert('maxValue'),
       },
       'options.requiredValue': {
         updated: optionUpdate('Required option'),
       },
       'options.numOptions': {
-        updated: valueUpdate('Scale value')
+        updated: valueUpdate('Scale value'),
+        inserted: valueInsert('Scale value'),
       },
       'options.maxLength': {
-        updated: valueUpdate('maxLength')
+        updated: valueUpdate('maxLength'),
+        inserted: valueInsert('maxLength'),
       }
     }
   }

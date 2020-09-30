@@ -191,6 +191,8 @@ import ItemBuilder from "./ItemBuilder.vue";
 import ConditionalItemBuilder from "./ConditionalItemBuilder.vue";
 import UrlItemUploader from "./UrlItemUploader.vue";
 import ConditionalItemList from "./ConditionalItemList.vue";
+import { string } from 'prop-types';
+import Activity from '../../models/Activity';
 
 export default {
   components: {
@@ -205,35 +207,14 @@ export default {
       required: true,
     },
   },
-  data: function() {
+  data: function () {
+    const model = new Activity();
+    model.updateReferenceObject(this);
+
     return {
-      name: this.initialActivityData.name || "",
-      description: this.initialActivityData.description || "",
-      preamble: this.initialActivityData.preamble || "",
-      shuffleActivityOrder: this.initialActivityData.shuffle || false,
-      isSkippable: this.initialActivityData.isSkippable || false,
-      items: this.initialActivityData.items || [],
-      textRules: [(v) => !!v || "This field is required"],
-      editItemDialog: false,
-      editConditionalItemDialog: false,
-      urlDialog: false,
-      error: "",
-      componentKey: 0,
-      initialItemData: {
-        options: {},
-      },
-      initialConditionalItemData: {},
-      editConditionalItemIndex: -1,
-      isItemEditable: true,
-      editIndex: -1,
-      conditionalRadioItems: [],
-      conditionalSliderItems: [],
-      ifConditionalAvailable: false,
-      isConditionalEditMode: false,
-      conditionalItems: [],
-      conditionalBuilderType: "",
-      conditionalItemsForBuilder: [],
-    };
+      model,
+      ...model.getActivityBuilderData(this.initialActivityData)
+    }
   },
   watch: {
     items() {
@@ -378,127 +359,8 @@ export default {
       }
       return true;
     },
-    getItemVisibility() {
-      const visibilityObj = {};
-      this.items.forEach(function(item) {
-        visibilityObj[item.name] = true;
-      });
-      return visibilityObj;
-    },
-    getAddProperties() {
-      const addProperties = [];
-
-      this.items.forEach((item) => {
-        const conditionalItems = this.conditionalItems.filter((cond) => {
-          return cond.showValue === item.question;
-        });
-
-        let isVis = true;
-
-        if (conditionalItems.length) {
-          const visibleItems = conditionalItems.map((cond) => {
-            if (cond.stateValue.val === "within") {
-              return `${cond.ifValue.name} > ${cond.minValue} && ${cond.ifValue.name} < ${cond.maxValue}`;
-            } else if (cond.stateValue.val === "outsideof") {
-              return `${cond.ifValue.name} < ${cond.minValue} && ${cond.ifValue.name} > ${cond.maxValue}`;
-            } else if (!cond.answerValue) {
-              return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.minValue}`;
-            } else {
-              return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.answerValue.value}`;
-            }
-          });
-          isVis = visibleItems.join(" && ");
-        }
-
-        const property = {
-          variableName: item.name,
-          isAbout: item.name,
-          isVis: isVis,
-        };
-        addProperties.push(property);
-      });
-
-      return addProperties;
-    },
-    getItemOrder() {
-      const itemNamesArray = this.items.map((item) => item.name);
-      return itemNamesArray;
-    },
-    getAllowed() {
-      return this.isSkippable ? ["skipped"] : [];
-    },
-    getCompressedSchema() {
-      const addProperties = this.getAddProperties();
-      const visibility = this.getItemVisibility();
-      const itemOrder = this.getItemOrder();
-      const allowed = this.getAllowed();
-      return {
-        "@context": [
-          "https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json",
-        ],
-        "@type": "reproschema:Activity",
-        "@id": this.name,
-        "skos:prefLabel": this.name,
-        "skos:altLabel": this.name,
-        "schema:description": this.description,
-        "schema:schemaVersion": "0.0.1",
-        "schema:version": "0.0.1",
-        preamble: this.preamble,
-        scoringLogic: {},
-        "repronim:timeUnit": "yearmonthdate",
-        ui: {
-          order: itemOrder,
-          shuffle: this.shuffleActivityOrder,
-          addProperties: addProperties,
-          allow: allowed,
-        },
-      };
-    },
-    getContext() {
-      const activityName = this.name;
-      const contextObj = {
-        "@version": 1.1,
-      };
-      var isPrefixNeeded = false;
-      this.items.forEach(function(item) {
-        if ("iri" in item) {
-          contextObj[item.name] = {
-            "@id": item.iri,
-            "@type": "@id",
-          };
-        } else {
-          contextObj[item.name] = {
-            "@id": `${activityName}:${item.name}`,
-            "@type": "@id",
-          };
-          isPrefixNeeded = true;
-        }
-      });
-      if (isPrefixNeeded) {
-        contextObj[
-          activityName
-        ] = `https://raw.githubusercontent.com/YOUR-PATH-TO-ITEM-FOLDER`;
-      }
-
-      return {
-        "@context": contextObj,
-      };
-    },
     saveActivity() {
-      const schema = this.getCompressedSchema();
-      const context = this.getContext();
-      const items = this.items;
-
-      this.$emit("closeModal", {
-        name: this.name,
-        description: this.description,
-        preamble: this.preamble,
-        shuffle: this.shuffleActivityOrder,
-        isSkippable: this.isSkippable,
-        schema: schema,
-        context: context,
-        items: items,
-      });
+      this.$emit('closeModal', this.model.getActivityData());
     },
     onDiscardActivity() {
       this.$emit("closeModal", null);

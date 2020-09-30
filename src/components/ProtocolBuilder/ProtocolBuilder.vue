@@ -64,26 +64,22 @@
       </v-alert>
       <div>
         <v-btn
-          v-if="isForDuplicate"
-          class="mx-2 my-2"
-          color="primary"
-          @click="onClickDuplicate"
-        >
-          Duplicate
-        </v-btn>
-        <v-btn
           v-if="exportButton"
           class="mx-2 my-2"
           color="primary"
           @click="onClickExport"
         >
-          Export Schema
+          Save to dashboard
         </v-btn>
         <v-btn class="mx-2 my-2" color="primary" @click="onClickSaveProtocol">
           Download Schema
         </v-btn>
         <v-btn class="mx-2 my-2" color="primary" outlined @click="resetBuilder">
           Reset Builder
+        </v-btn>
+
+        <v-btn class="mx-2 my-2" color="primary" :disabled="!isEditing" outlined @click="viewHistory">
+          View History
         </v-btn>
       </div>
     </v-layout>
@@ -94,11 +90,38 @@
         @closeModal="onCloseActivityModal"
       />
     </v-dialog>
+
+    <v-dialog
+      v-model="changeHistoryDialog.visibility"
+      width="800"
+      class="historyDialog"
+    >
+      <ChangeHistoryComponent
+        :history="changeHistoryDialog.data"
+        :currentVersion="changeHistoryDialog.currentVersion"
+        :defaultVersion="changeHistoryDialog.defaultVersion"
+        :versions="versions"
+        :key="componentKey + historyComponentKey"
+        @updateHistoryView="updateHistoryView"
+      />
+    </v-dialog>
   </v-container>
 </template>
 
 <script>
-function initialData() {
+
+import Protocol from '../../models/Protocol';
+import Activity from '../../models/Activity';
+import Item from '../../models/Item';
+import ChangeHistoryComponent from './ChangeHistoryComponent.vue';
+import util from '../../utilities/util';
+
+import api from "../../utilities/api";
+import ActivityBuilder from "./ActivityBuilder.vue";
+import { saveAs } from "file-saver";
+import _ from "lodash";
+
+const getInitialData = (model) => {
   return {
     name: "",
     description: "",
@@ -108,20 +131,26 @@ function initialData() {
     error: "",
     initialActivityData: {},
     componentKey: 0,
+    historyComponentKey: 0,
     editIndex: -1,
-    applet: {},
-    isForDuplicate: false,
+    applet: null,
+    isEditing: false,
+    id: null,
+    protocolVersion: '1.0.0',
+    model,
+    original: null,
+    changeHistoryDialog: {
+      visibility: false,
+      defaultVersion: null,
+      data: []
+    },
   };
 }
-
-import api from "../../utilities/api";
-import ActivityBuilder from "./ActivityBuilder.vue";
-import { saveAs } from "file-saver";
-import { cloneDeep } from "lodash";
 
 export default {
   components: {
     ActivityBuilder,
+    ChangeHistoryComponent,
   },
   props: {
     exportButton: {
@@ -129,24 +158,55 @@ export default {
       required: false,
       default: true,
     },
+    initialData: {
+      type: Object,
+      required: false,
+      default: null
+    },
+    versions: {
+      type: Array,
+      required: false,
+      default: null
+    },
+    getProtocols: {
+      type: Function,
+      require: false,
+      default: null
+    }
   },
   data: function() {
-    return initialData();
+    const model = new Protocol();
+    model.updateReferenceObject(this);
+
+    return getInitialData(model);
   },
-  created() {
-    this.fillBuilderWithAppletData();
+  async beforeMount() {
+    await this.fillBuilderWithAppletData();
+
+    const protocolData = await this.model.getProtocolData();
+    this.original = JSON.parse(JSON.stringify(protocolData));
+    if (!this.versions.length) {
+      /** upload first version */
+      this.$emit("prepareApplet", this.original);
+    }
   },
   methods: {
-    fillBuilderWithAppletData() {
-      if (!this.$route || !this.$route.params || !this.$route.params.applet)
-        return;
+    // fillBuilderWithAppletData() {
+    //   if (!this.$route || !this.$route.params || !this.$route.params.applet)
+    //     return;
 
-      const { applet, activities, items } = this.$route.params.applet;
+    //   const { applet, activities, items } = this.$route.params.applet;
+    async fillBuilderWithAppletData() {
+      if (!this.initialData) return;
 
-      this.isForDuplicate = true;
+      const { applet, activities, items, protocol } = this.initialData;
+
+      this.isEditing = true;
       this.applet = applet;
       this.name = applet["@id"].replace("_schema", "");
       this.description = applet["schema:description"][0]["@value"];
+      this.id = protocol._id.split('/')[1];
+      this.protocolVersion = _.get(applet, 'schema:schemaVersion[0].@value', this.protocolVersion);
 
       Object.values(activities).forEach((act) => {
         const activitiesObj = act;
@@ -156,9 +216,11 @@ export default {
           ["reprolib:terms/preamble"]: activityPreamble,
           ["reprolib:terms/shuffle"]: shuffle,
           ["reprolib:terms/allow"]: isSkippable,
+          ["_id"]: id,
         } = activitiesObj;
 
         const activityInfo = {
+          _id: id && id.split("/")[1],
           name,
           description:
             description && description[0] && description[0]["@value"],
@@ -187,6 +249,7 @@ export default {
 
         activityInfo.items = Object.values(items).map((item) => {
           let itemContent = {
+            _id: item["_id"] && item["_id"].split("/")[1],
             name: item["@id"],
             question:
               item["schema:question"] &&
@@ -320,20 +383,15 @@ export default {
             }
           }
 
-          return itemContent;
+          const itemModel = new Item();
+          itemModel.updateReferenceObject(itemModel.getItemBuilderData(itemContent));
+          return itemModel.getItemData();
         });
 
-        this.activities.push(activityInfo);
-      });
-    },
-    onClickDuplicate() {
-      const name =
-        this.applet["@id"].replace("_schema", "") === this.name
-          ? `${this.name} (1)`
-          : this.name;
-      this.$emit("duplicateApplet", {
-        id: this.applet._id.replace("applet/", ""),
-        name,
+        const activityModel = new Activity();
+        activityModel.updateReferenceObject(activityModel.getActivityBuilderData(activityInfo));
+
+        this.activities.push(activityModel.getActivityData());
       });
     },
     validate() {
@@ -395,80 +453,9 @@ export default {
       }
       return true;
     },
-    getVariableMap() {
-      const variableMap = this.activities.map((activity) => ({
-        variableName: `${activity.name}_schema`,
-        isAbout: `${activity.name}_schema`,
-        prefLabel: activity.name,
-        isVis: true,
-      }));
-      return variableMap;
-    },
-    getActivityOrder() {
-      const activityNamesArray = this.activities.map(
-        (activity) => activity.name
-      );
-      return activityNamesArray;
-    },
-    getActivityDisplayNames() {
-      const displayNamesObj = {};
-      this.activities.forEach(function(activity) {
-        displayNamesObj[activity.name] = activity.name;
-      });
-      return displayNamesObj;
-    },
-    getActivityVisibility() {
-      const visibilityObj = {};
-      this.activities.forEach(function(activity) {
-        visibilityObj[activity.name] = true;
-      });
-      return visibilityObj;
-    },
-    getCompressedSchema() {
-      const variableMap = this.getVariableMap();
-      const activityDisplayNames = this.getActivityDisplayNames();
-      const activityOrder = this.getActivityOrder();
-      const activityVisibility = this.getActivityVisibility();
-      const schema = {
-        "@context": [
-          "https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json",
-          "https://raw.githubusercontent.com/YOUR-PROTOCOL-CONTEXT-FILE",
-        ],
-        "@type": "reproschema:Protocol",
-        "@id": `${this.name}_schema`,
-        "skos:prefLabel": this.name,
-        "schema:description": this.description,
-        "schema:schemaVersion": "0.0.1",
-        "schema:version": "0.0.1",
-        landingPage: this.description, //point to the readme of protocol
-        // variableMap: variableMap,
-        ui: {
-          addProperties: variableMap,
-          order: activityOrder,
-          shuffle: false,
-        },
-      };
-      return schema;
-    },
-    getContext() {
-      const contextObj = {
-        "@version": 1.1,
-        activity_path:
-          "https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/",
-      };
-      // this.activities.forEach(function(activity) {
-      //   contextObj[activity.name] = {
-      //     "@id": `activity_path:${activity.name}/${activity.name}_schema`,
-      //     "@type": "@id",
-      //   };
-      // });
-      return {
-        "@context": contextObj,
-      };
-    },
     downloadSchema() {
-      const schemaObj = this.getCompressedSchema();
-      const contextObj = this.getContext();
+      const schemaObj = this.model.getCompressedSchema();
+      const contextObj = this.model.getContext();
 
       var JSZip = require("jszip");
       var zip = new JSZip();
@@ -505,47 +492,64 @@ export default {
       });
     },
     onClickExport() {
-      let contexts = {};
-      const protocol = {
-        data: this.getCompressedSchema(),
-        activities: {},
-      };
+      this.model.getProtocolData().then( data => {
+        if (!this.isEditing) {
+          this.$emit("uploadProtocol", data)
+        } else {
+          const { upgrade } = Protocol.getChangeInfo(this.original, data);
 
-      this.activities.forEach((activity) => {
-        protocol.activities[activity.name] = {
-          data: activity.schema,
-          items: {},
-        };
-        activity.items.forEach((item) => {
-          protocol.activities[activity.name].items[item.name] = item;
-        });
-      });
+          let newVersion = util.upgradeVersion(this.protocolVersion, upgrade);
+          if (newVersion != this.protocolVersion) {
+            data.protocol.data['schema:schemaVersion'] = data.protocol.data['schema:version'] = newVersion;
 
-      protocol.data["@context"].forEach((contextURL, index) => {
-        if (index < protocol.data["@context"].length - 1) {
-          api
-            .getSchema(contextURL)
-            .then((resp) => {
-              contexts[contextURL] = resp.data["@context"];
-              if (index === protocol.data["@context"].length - 2) {
-                const contextObj = this.getContext();
-                contexts[protocol.data["@context"][index + 1]] =
-                  contextObj["@context"];
-                this.$emit("uploadProtocol", {
-                  contexts,
-                  protocol,
-                });
-              }
-            })
-            .catch((e) => {
-              console.log(e);
-            });
+            this.$emit("updateProtocol", data);
+          } else {
+            this.$emit("onUploadError", 'Please make changes to update applet');
+          }
         }
+      }).catch(e => {
+        console.log(e);
       });
     },
     resetBuilder() {
-      Object.assign(this.$data, initialData());
+      Object.assign(this.$data, getInitialData(this.model));
       this.resetValidation();
+    },
+    viewHistory() {
+      if (this.isEditing) {
+        this.model.getProtocolData().then(current => {
+          const { log, upgrade } = Protocol.getChangeInfo(this.original, current);
+          this.changeHistoryDialog.visibility = true;
+          this.changeHistoryDialog.data = log;
+          this.changeHistoryDialog.currentVersion = util.upgradeVersion(this.protocolVersion, upgrade);
+
+          this.historyComponentKey++;
+        });
+      }
+    },
+    updateHistoryView(version) {
+      const index = this.versions.indexOf(version);
+
+      /** viewing current changes */
+      if (index < 0) {
+        this.changeHistoryDialog.defaultVersion = version;
+
+        this.viewHistory();
+        return ;
+      }
+
+      /** viewing old changes */
+      this.getProtocols([this.versions[index], this.versions[index + 1]]).then(resp => {
+        const data = resp.data;
+
+        const { log, upgrade } = Protocol.getChangeInfo(data[1].content, data[0].content);
+
+        this.changeHistoryDialog.visibility = true;
+        this.changeHistoryDialog.data = log;
+        this.changeHistoryDialog.defaultVersion = version;
+
+        this.historyComponentKey++;
+      });
     },
     resetValidation() {
       this.$refs.form.resetValidation();

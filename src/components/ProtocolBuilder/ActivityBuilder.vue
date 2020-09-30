@@ -178,6 +178,7 @@ import ItemBuilder from './ItemBuilder.vue';
 import UrlItemUploader from './UrlItemUploader.vue';
 import { string } from 'prop-types';
 import Activity from '../../models/Activity';
+import Item from '../../models/Item';
 
 export default {
   components: {
@@ -247,7 +248,21 @@ export default {
       }
     },
     duplicateItem(index) {
-      this.items.push(this.items[index]);
+      const itemModel = new Item();
+      const names = this.items.map(item => item.name);
+
+      let suffix = 1;
+      while( names.includes(`${this.items[index].name} (${suffix})`) ) {
+        suffix++;
+      }
+
+      itemModel.updateReferenceObject(itemModel.getItemBuilderData({
+        ...this.items[index],
+        _id: null,
+        name: `${this.items[index].name} (${suffix})`
+      }));
+
+      this.items.push(itemModel.getItemData());
     },
     editItem(index) {
       this.editIndex = index;

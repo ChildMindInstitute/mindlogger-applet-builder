@@ -417,7 +417,21 @@ export default {
       }
     },
     duplicateActivity(index) {
-      this.activities.push(this.activities[index]);
+      const activityModel = new Activity();
+      const names = this.activities.map(activity => activity.name);
+
+      let suffix = 1;
+      while( names.includes(`${this.activities[index].name} (${suffix})`) ) {
+        suffix++;
+      }
+
+      activityModel.updateReferenceObject(activityModel.getActivityBuilderData({
+        ...this.activities[index],
+        _id: null,
+        name: `${this.activities[index].name} (${suffix})`
+      }));
+
+      this.activities.push(activityModel.getActivityData());
     },
     editActivity(index) {
       this.editIndex = index;

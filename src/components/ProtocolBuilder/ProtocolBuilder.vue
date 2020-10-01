@@ -183,11 +183,13 @@ export default {
   async beforeMount() {
     await this.fillBuilderWithAppletData();
 
-    const protocolData = await this.model.getProtocolData();
-    this.original = JSON.parse(JSON.stringify(protocolData));
-    if (!this.versions.length) {
-      /** upload first version */
-      this.$emit("prepareApplet", this.original);
+    if (this.isEditing) {
+      const protocolData = await this.model.getProtocolData();
+      this.original = JSON.parse(JSON.stringify(protocolData));
+      if (!this.versions.length) {
+        /** upload first version */
+        this.$emit("prepareApplet", this.original);
+      }
     }
   },
   methods: {
@@ -505,11 +507,15 @@ export default {
         if (!this.isEditing) {
           this.$emit("uploadProtocol", data)
         } else {
-          const { upgrade } = Protocol.getChangeInfo(this.original, data);
+          let { upgrade, updates, removed } = Protocol.getChangeInfo(this.original, data, true);
 
           let newVersion = util.upgradeVersion(this.protocolVersion, upgrade);
           if (newVersion != this.protocolVersion) {
-            data.protocol.data['schema:schemaVersion'] = data.protocol.data['schema:version'] = newVersion;
+            updates.data['schema:schemaVersion'] = updates.data['schema:version'] = newVersion;
+
+            data.protocol = updates;
+            data.removed = removed;
+            data.baseVersion = this.protocolVersion;
 
             this.$emit("updateProtocol", data);
           } else {

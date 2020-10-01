@@ -173,7 +173,7 @@ export default class Activity {
     }
   }
 
-  static getChangeInfo(old, current) {
+  static getChangeInfo(old, current, getDataUpdates=false) {
     const {
       "data": oldData,
       "items": oldItems
@@ -189,6 +189,8 @@ export default class Activity {
 
     const metaInfoChanges = util.compareValues(oldData, currentData, Object.keys(logTemplates));
     const itemChanges = util.compareIDs(oldItems, currentItems, '_id');
+    let updates = { items: {} };
+    let removed = [];
 
     const changeLog = [];
 
@@ -225,6 +227,10 @@ export default class Activity {
       })
 
       versionUpgrade = '0.0.1';
+
+      if (getDataUpdates) {
+        updates.data = currentData;
+      }
     }
 
     const itemLogs = [];
@@ -247,10 +253,15 @@ export default class Activity {
           type: 'updated',
           children: changeLog.log
         });
+
+        if (getDataUpdates) {
+          updates.items[entry[1]] = currentItems[entry[1]];
+          updates.data = currentData;
+        }
       }
     });
 
-    /** display log for new activities */
+    /** display log for new items */
     itemChanges.inserted.forEach(id => {
       const changeLog = Item.getChangeInfo({}, currentItems[id]);
 
@@ -259,15 +270,24 @@ export default class Activity {
         type: 'inserted',
         children: changeLog.log
       });
+
+      if (getDataUpdates) {
+        updates.items[id] = currentItems[id];
+        updates.data = currentData;
+      }
     });
 
-    /** display log for removed activities */
+    /** display log for removed items */
     itemChanges.removed.forEach(id => {
       itemLogs.push({
-        name: `activity ${oldItems[id]['skos:prefLabel']} was removed`,
+        name: `item ${oldItems[id]['skos:prefLabel']} was removed`,
         type: 'removed',
         children: []
       })
+
+      if (getDataUpdates) {
+        removed.push(oldItems[id]._id);
+      }
     })
 
     /** log activity changes */
@@ -281,6 +301,8 @@ export default class Activity {
     return {
       log: result,
       upgrade: versionUpgrade,
+      updates,
+      removed
     };
   }
 };

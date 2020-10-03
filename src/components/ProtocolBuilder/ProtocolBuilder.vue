@@ -170,7 +170,7 @@ export default {
     },
     getProtocols: {
       type: Function,
-      require: false,
+      required: false,
       default: null
     }
   },
@@ -181,24 +181,30 @@ export default {
     return getInitialData(model);
   },
   async beforeMount() {
-    await this.fillBuilderWithAppletData();
+    if (this.initialData) {
+      this.isEditing = true;
 
-    if (this.isEditing) {
+      if (!this.versions.length) {
+        this.$emit("setLoading", true);
+      }
+
+      await this.fillBuilderWithAppletData();
+
       const protocolData = await this.model.getProtocolData();
       this.original = JSON.parse(JSON.stringify(protocolData));
       if (!this.versions.length) {
         /** upload first version */
         this.$emit("prepareApplet", this.original);
+        return;
       }
     }
+
+    this.$emit("setLoading", false);
   },
   methods: {
     async fillBuilderWithAppletData() {
-      if (!this.initialData) return;
-
       const { applet, activities, items, protocol } = this.initialData;
 
-      this.isEditing = true;
       this.applet = applet;
       this.name = applet["@id"].replace("_schema", "");
       this.description = applet["schema:description"][0]["@value"];
@@ -244,7 +250,9 @@ export default {
           }
         }
 
-        activityInfo.items = Object.values(items).map((item) => {
+        activityInfo.items = _.get(activitiesObj, 'reprolib:terms/order.0.@list', []).map((key) => {
+          const item = items[key['@id']];
+
           let itemContent = {
             _id: item["_id"] && item["_id"].split("/")[1],
             name: item["@id"],
@@ -285,6 +293,7 @@ export default {
                 nextOptionName: "",
                 options:
                   responseOptions[0] &&
+                  responseOptions[0]["schema:itemListElement"] &&
                   responseOptions[0]["schema:itemListElement"].map(
                     (itemListElement) => {
                       return {
@@ -327,6 +336,7 @@ export default {
                   responseOptions[0]["schema:minValue"][0]["@value"],
                 numOptions:
                   responseOptions[0] &&
+                  responseOptions[0]["schema:itemListElement"] &&
                   responseOptions[0]["schema:itemListElement"].length,
               };
             }
@@ -537,6 +547,7 @@ export default {
           this.changeHistoryDialog.visibility = true;
           this.changeHistoryDialog.data = log;
           this.changeHistoryDialog.currentVersion = util.upgradeVersion(this.protocolVersion, upgrade);
+          this.changeHistoryDialog.defaultVersion = null;
 
           this.historyComponentKey++;
         });

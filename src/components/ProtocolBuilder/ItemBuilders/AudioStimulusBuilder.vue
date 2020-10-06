@@ -16,6 +16,12 @@
       @change="update"
     />
     <v-checkbox
+      v-model="isSkippable"
+      label="Skippable Item"
+      :disabled="!isItemEditable"
+      @change="updateAllow"
+    />
+    <v-checkbox
       v-model="allowReplay"
       label="Media Replay Allowed"
       :disabled="!isItemEditable"
@@ -39,6 +45,10 @@ export default {
       type: Object,
       required: true
     },
+    isSkippableItem: {
+      type: Boolean,
+      default: false,
+    },
     initialItemMedia: {
       type: Object,
       required: true
@@ -56,6 +66,7 @@ export default {
       allowReplay: Array.isArray(this.initialItemInputOptions)
         ? this.initialItemInputOptions[1]["schema:value"]
         : true,
+      isSkippable: this.isSkippableItem || false,
       valid: true,
       urlRules: [v => !!v || "Media URL cannot be empty"]
     };
@@ -85,6 +96,10 @@ export default {
         "schema:transcript": this.transcript
       };
       this.$emit("updateMedia", media);
+    },
+    updateAllow() {
+      const allow = this.isSkippable
+      this.$emit('updateAllow', allow);
     }
   }
 };

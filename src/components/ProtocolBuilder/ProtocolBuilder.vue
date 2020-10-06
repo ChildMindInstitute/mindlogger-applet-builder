@@ -188,15 +188,11 @@ export default {
         this.$emit("setLoading", true);
       }
 
-      await this.fillBuilderWithAppletData();
-
-      const protocolData = await this.model.getProtocolData();
-      this.original = JSON.parse(JSON.stringify(protocolData));
-      if (!this.versions.length) {
-        /** upload first version */
-        this.$emit("prepareApplet", this.original);
-        return;
-      }
+    const protocolData = await this.model.getProtocolData();
+    this.original = JSON.parse(JSON.stringify(protocolData));
+    if (this.versions && !this.versions.length) {
+      /** upload first version */
+      this.$emit("prepareApplet", this.original);
     }
 
     this.$emit("setLoading", false);

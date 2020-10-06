@@ -176,6 +176,7 @@ export default {
     },
     updateOptions(newOptions) {
       this.options = newOptions;
+      this.responseOptions = this.model.getResponseOptions();
     },
     onSaveItem() {
       if (this.isItemEditable) {

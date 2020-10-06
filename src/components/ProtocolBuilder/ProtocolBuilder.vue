@@ -185,7 +185,7 @@ export default {
 
     const protocolData = await this.model.getProtocolData();
     this.original = JSON.parse(JSON.stringify(protocolData));
-    if (!this.versions.length) {
+    if (this.versions && !this.versions.length) {
       /** upload first version */
       this.$emit("prepareApplet", this.original);
     }

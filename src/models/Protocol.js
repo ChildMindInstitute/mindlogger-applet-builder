@@ -2,6 +2,7 @@ import api from '../utilities/api';
 import util from '../utilities/util';
 import Activity from './Activity';
 import _ from 'lodash';
+import { version } from 'core-js';
 
 export default class Protocol {
   constructor() {
@@ -141,7 +142,7 @@ export default class Protocol {
     }
   }
 
-  static getChangeInfo(old, current) {
+  static getChangeInfo(old, current, getDataUpdates=false) {
     const {
       "data": oldData,
       "activities": oldActivities
@@ -154,7 +155,9 @@ export default class Protocol {
 
     const logTemplates = Protocol.getHistoryTemplate(oldData, currentData);
     let versionUpgrade = '0.0.0';
-
+    let updates = { activities: {} };
+    let removed = {activities: [], items: []};
+  
     const metaInfoChanges = util.compareValues(oldData, currentData, Object.keys(logTemplates));
     const activityChanges = util.compareIDs(oldActivities, currentActivities, 'data._id');
 
@@ -186,7 +189,7 @@ export default class Protocol {
 
     /** display log for updated activities */
     Object.entries(activityChanges.keyReferences).forEach(entry => {
-      const changeLog = Activity.getChangeInfo(oldActivities[entry[0]], currentActivities[entry[1]]);
+      const changeLog = Activity.getChangeInfo(oldActivities[entry[0]], currentActivities[entry[1]], getDataUpdates);
 
       if (versionUpgrade < changeLog.upgrade) {
         versionUpgrade = changeLog.upgrade;
@@ -198,18 +201,27 @@ export default class Protocol {
           type: 'updated',
           children: changeLog.log
         });
+
+        if (getDataUpdates) {
+          updates.activities[entry[1]] = changeLog.updates;
+          removed.items.push(...changeLog.removed);
+        }
       }
     });
 
     /** display log for new activities */
     activityChanges.inserted.forEach(id => {
-      const changeLog = Activity.getChangeInfo({ data: {}, items: {} }, currentActivities[id]);
+      const changeLog = Activity.getChangeInfo({ data: {}, items: {} }, currentActivities[id], getDataUpdates);
 
       activityLogs.push({
         name: `activity ${currentActivities[id]['data']['skos:prefLabel']} was inserted`,
         type: 'inserted',
         children: changeLog.log
       });
+
+      if (getDataUpdates) {
+        updates.activities[id] = changeLog.updates;
+      }
     });
 
     /** display log for removed activities */
@@ -219,7 +231,16 @@ export default class Protocol {
         type: 'removed',
         children: []
       })
+
+      if (getDataUpdates) {
+        removed.activities.push(oldActivities[id].data._id);
+        removed.items.push(...Object.values(oldActivities[id].items).map(item => item._id))
+      }
     })
+
+    if (versionUpgrade && getDataUpdates) {
+      updates.data = currentData;
+    }
 
     /** log activity changes */
     if (activityLogs.length) {
@@ -249,6 +270,8 @@ export default class Protocol {
     return {
       log: result,
       upgrade: versionUpgrade,
+      updates,
+      removed
     };
   }
 }

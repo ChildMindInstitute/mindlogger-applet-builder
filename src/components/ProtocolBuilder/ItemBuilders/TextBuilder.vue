@@ -12,6 +12,12 @@
       @change="update"
     />
     <v-checkbox
+      v-model="isSkippable"
+      label="Skippable Item"
+      :disabled="!isItemEditable"
+      @change="updateAllow"
+    />
+    <v-checkbox
       v-model="requiredValue"
       label="Response required"
       :disabled="!isItemEditable"
@@ -27,6 +33,10 @@ export default {
       type: Object,
       required: true
     },
+    isSkippableItem: {
+      type: Boolean,
+      default: false,
+    },
     isItemEditable: {
       type: Boolean,
       default: true,
@@ -36,6 +46,7 @@ export default {
     return {
       maxLength: this.initialItemData.maxLength || 50,
       requiredValue: this.initialItemData.requiredValue || false,
+      isSkippable: this.isSkippableItem || false,
       type: this.initialItemData.type || 'xsd:string',
       valid: true,
       textRules: [
@@ -55,6 +66,10 @@ export default {
       };
       this.$emit('updateOptions', responseOptions);
     },
+    updateAllow() {
+      const allow = this.isSkippable
+      this.$emit('updateAllow', allow);
+    }
   }
 }
 </script>

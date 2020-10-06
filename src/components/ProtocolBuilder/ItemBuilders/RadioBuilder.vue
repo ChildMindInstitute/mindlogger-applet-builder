@@ -4,6 +4,12 @@
     v-model="valid"
   >
     <v-checkbox
+      v-model="isSkippable"
+      label="Skippable Item"
+      :disabled="!isItemEditable"
+      @change="updateAllow"
+    />
+    <v-checkbox
       v-model="isMultipleChoice"
       label="Multiple Choice"
       :disabled="!isItemEditable"
@@ -68,6 +74,10 @@ export default {
       type: Object,
       required: true
     },
+    isSkippableItem: {
+      type: Boolean,
+      default: false,
+    },
     isItemEditable: {
       type: Boolean,
       default: true,
@@ -76,6 +86,7 @@ export default {
   data: function () {
     return {
       isMultipleChoice: this.initialItemData.isMultipleChoice || false,
+      isSkippable: this.isSkippableItem || false,
       nextOptionName: this.initialItemData.nextOptionName || '',
       nextOptionImage: this.initialItemData.nextOptionImage || '',
       options: this.initialItemData.options || [],
@@ -109,11 +120,16 @@ export default {
     update() {
       const responseOptions = {
         'isMultipleChoice': this.isMultipleChoice,
+        'isSkippableItem': this.isSkippableItem,
         'nextOptionName': this.nextOptionName,
         'nextOptionImage': this.nextOptionImage,
         'options': this.options,
       };
       this.$emit('updateOptions', responseOptions);
+    },
+    updateAllow() {
+      const allow = this.isSkippable
+      this.$emit('updateAllow', allow);
     }
   }
 }

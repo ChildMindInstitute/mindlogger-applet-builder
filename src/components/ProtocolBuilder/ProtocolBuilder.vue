@@ -193,6 +193,8 @@ export default {
     if (this.versions && !this.versions.length) {
       /** upload first version */
       this.$emit("prepareApplet", this.original);
+        return;
+      }
     }
 
     this.$emit("setLoading", false);

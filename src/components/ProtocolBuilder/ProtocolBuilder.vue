@@ -301,9 +301,9 @@ export default {
                     (itemListElement) => {
                       return {
                         image:
-                          itemListElement["schema:value"] &&
-                          itemListElement["schema:value"][0] &&
-                          itemListElement["schema:value"][0]["@value"],
+                          itemListElement["schema:image"] &&
+                          itemListElement["schema:image"][0] &&
+                          itemListElement["schema:image"][0]["@value"].toString(),
                         name:
                           itemListElement["schema:name"] &&
                           itemListElement["schema:name"][0] &&

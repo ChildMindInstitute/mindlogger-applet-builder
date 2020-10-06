@@ -105,7 +105,7 @@ export default {
         'name': this.nextOptionName,
       };
       if (this.nextOptionImage) {
-        nextOption.image = this.nextOptionImage;
+        nextOption.image = this.nextOptionImage.toString();
       }
       this.options.push(nextOption);
       this.nextOptionName = '';

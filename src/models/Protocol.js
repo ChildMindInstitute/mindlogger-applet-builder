@@ -63,7 +63,7 @@ export default class Protocol {
       "schema:description": this.ref.description,
       "schema:schemaVersion": this.ref.protocolVersion,
       "schema:version": this.ref.protocolVersion,
-      landingPage: this.ref.description, //point to the readme of protocol
+      landingPage: this.ref.markdownData, //point to the readme of protocol
       // variableMap: variableMap,
       ui: {
         addProperties: variableMap,

@@ -188,11 +188,16 @@ export default {
         this.$emit("setLoading", true);
       }
 
-    const protocolData = await this.model.getProtocolData();
-    this.original = JSON.parse(JSON.stringify(protocolData));
-    if (this.versions && !this.versions.length) {
-      /** upload first version */
-      this.$emit("prepareApplet", this.original);
+      await this.fillBuilderWithAppletData();
+
+      const protocolData = await this.model.getProtocolData();
+      this.original = JSON.parse(JSON.stringify(protocolData));
+      if (!this.versions.length) {
+        /** upload first version */
+
+        this.original.protocol.data['schema:schemaVersion'] = this.original.protocol.data['schema:version']  = util.upgradeVersion(this.protocolVersion, '0.0.1');
+
+        this.$emit("prepareApplet", this.original);
         return;
       }
     }
@@ -296,9 +301,9 @@ export default {
                     (itemListElement) => {
                       return {
                         image:
-                          itemListElement["schema:value"] &&
-                          itemListElement["schema:value"][0] &&
-                          itemListElement["schema:value"][0]["@value"],
+                          itemListElement["schema:image"] &&
+                          itemListElement["schema:image"][0] &&
+                          itemListElement["schema:image"][0]["@value"].toString(),
                         name:
                           itemListElement["schema:name"] &&
                           itemListElement["schema:name"][0] &&

@@ -120,7 +120,7 @@
     </v-dialog>
     <MarkdownEditor 
       :visibility="markdownDialog" 
-      :markdownText="markdownText"
+      :markdownText="markdownData"
       @close="onCloseEditor"
       @submit="onSubmitEditor"
     />
@@ -140,6 +140,7 @@ import util from '../../utilities/util';
 import api from "../../utilities/api";
 import ActivityBuilder from "./ActivityBuilder.vue";
 import { saveAs } from "file-saver";
+import axios from 'axios';
 import _ from "lodash";
 
 const getInitialData = (model) => {
@@ -160,7 +161,7 @@ const getInitialData = (model) => {
     protocolVersion: '1.0.0',
     model,
     markdownDialog: false,
-    markdownText: "",
+    markdownData: "",
     original: null,
     changeHistoryDialog: {
       visibility: false,
@@ -207,16 +208,19 @@ export default {
   async beforeMount() {
     if (this.initialData) {
       this.isEditing = true;
-
       if (!this.versions.length) {
         this.$emit("setLoading", true);
       }
 
       await this.fillBuilderWithAppletData();
+
       const protocolData = await this.model.getProtocolData();
       this.original = JSON.parse(JSON.stringify(protocolData));
-      if (!this.versions || !this.versions.length) {
+      if (!this.versions.length) {
         /** upload first version */
+
+        this.original.protocol.data['schema:schemaVersion'] = this.original.protocol.data['schema:version']  = util.upgradeVersion(this.protocolVersion, '0.0.1');
+
         this.$emit("prepareApplet", this.original);
         return;
       }
@@ -232,7 +236,13 @@ export default {
       this.name = applet["@id"].replace("_schema", "");
       this.description = applet["schema:description"][0]["@value"];
       this.id = protocol._id.split('/')[1];
-      this.markdownData = applet["landingPage"][0]["@value"];
+      const markdownData = applet["reprolib:terms/landingPage"][0]["@value"];
+      if (markdownData) {
+        this.markdownData = (await axios.get(markdownData)).data;
+      } else {
+        this.markdownData = applet["reprolib:terms/landingPageContent"] ? applet["reprolib:terms/landingPageContent"][0]["@value"] : "";
+      }
+
       this.protocolVersion = _.get(applet, 'schema:schemaVersion[0].@value', this.protocolVersion);
 
       Object.values(activities).forEach((act) => {
@@ -322,9 +332,9 @@ export default {
                     (itemListElement) => {
                       return {
                         image:
-                          itemListElement["schema:value"] &&
-                          itemListElement["schema:value"][0] &&
-                          itemListElement["schema:value"][0]["@value"],
+                          itemListElement["schema:image"] &&
+                          itemListElement["schema:image"][0] &&
+                          itemListElement["schema:image"][0]["@value"].toString(),
                         name:
                           itemListElement["schema:name"] &&
                           itemListElement["schema:name"][0] &&
@@ -453,7 +463,6 @@ export default {
       }
     },
     onSubmitEditor(markdownData) {
-      console.log('markdown data---->', markdownData)
       this.markdownData = markdownData;
       this.onCloseEditor();
     },
@@ -462,7 +471,6 @@ export default {
     },
     onEditAboutPage() {
       this.markdownDialog = true;
-      this.markdownData = "";
     },
     duplicateActivity(index) {
       const activityModel = new Activity();
@@ -558,7 +566,8 @@ export default {
           let newVersion = util.upgradeVersion(this.protocolVersion, upgrade);
           if (newVersion != this.protocolVersion) {
             updates.data['schema:schemaVersion'] = updates.data['schema:version'] = newVersion;
-            updates.data['landingPage'] = this.markdownData;
+            updates.data['landingPageContent'] = this.markdownData;
+            updates.data['landingPage'] = "";
 
             data.protocol = updates;
             data.removed = removed;

@@ -202,7 +202,7 @@ export default class Item {
         this.ref.inputType === "geolocation") &&
       Object.keys(this.ref.responseOptions).length
     ) {
-      itemObj.responseOptions = this.ref.responseOptions;
+      itemObj.responseOptions = itemObj.responseOptions || this.ref.responseOptions;
     } else if (this.ref.inputType === "audioStimulus") {
       itemObj.inputOptions = this.inputOptions;
       itemObj.media = this.ref.media;

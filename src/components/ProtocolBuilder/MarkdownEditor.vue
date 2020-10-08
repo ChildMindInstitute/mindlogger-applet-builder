@@ -65,7 +65,6 @@ export default {
   },
   data() {
     return {
-      markdown: "",
       dialog: false,
       editorOptions: {
         hideModeSwitch: false
@@ -96,9 +95,6 @@ export default {
   watch: {
     visibility: function (vis) {
       this.dialog = vis
-      if (this.dialog) {
-        this.markdown = this.markdownText
-      }
     }
   }
 }

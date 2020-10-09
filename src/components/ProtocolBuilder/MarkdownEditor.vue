@@ -113,3 +113,9 @@ export default {
   height: 405px !important;
 }
 </style>
+
+<style lang="scss">
+.v-card__text {
+  padding: 16px !important;
+}
+</style>

@@ -115,7 +115,7 @@ export default {
 </style>
 
 <style lang="scss">
-.v-card__text {
-  padding: 16px !important;
-}
+// .v-card__text {
+//   padding: 16px !important;
+// }
 </style>

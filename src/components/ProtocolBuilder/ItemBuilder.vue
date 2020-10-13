@@ -40,6 +40,7 @@
         <RadioBuilder
           v-if="inputType === 'radio'"
           :is-skippable-item="allow"
+          :response-options="responseOptions"
           :initial-item-data="options"
           :is-item-editable="isItemEditable"
           @updateOptions="updateOptions"

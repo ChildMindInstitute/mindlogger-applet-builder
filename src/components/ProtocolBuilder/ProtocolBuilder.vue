@@ -560,6 +560,7 @@ export default {
       this.model.getProtocolData().then( data => {
         if (!this.isEditing) {
           this.$emit("uploadProtocol", data)
+          console.log('appletdata-------->', data)
         } else {
           let { upgrade, updates, removed } = Protocol.getChangeInfo(this.original, data, true);
 
@@ -572,7 +573,7 @@ export default {
             data.protocol = updates;
             data.removed = removed;
             data.baseVersion = this.protocolVersion;
-
+            console.log('appletdata-------->', data);
             this.$emit("updateProtocol", data);
           } else {
             this.$emit("onUploadError", 'Please make changes to update applet');

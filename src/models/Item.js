@@ -5,6 +5,7 @@ export default class Item {
   }
 
   getItemBuilderData(initialItemData) {
+    console.log('data---->', initialItemData)
     return {
         id: initialItemData._id || null,
         name: initialItemData.name || '',
@@ -56,7 +57,7 @@ export default class Item {
             const choiceSchema = {
                 "@type": "schema:option",
                 "schema:name": option.name,
-                "schema:value": index + 1
+                "schema:value": option.value,
             };
             if (option.image) {
                 choiceSchema["schema:image"] = option.image;
@@ -71,7 +72,7 @@ export default class Item {
     if (this.ref.inputType === "radio") {
         const choices = this.getRadioChoices();
         return {
-        "@valueType": "xsd:anyURI",
+        "valueType": this.ref.options.isTokenValue ? "xsd:token" : "xsd:anyURI",
         "multipleChoice": this.ref.options.isMultipleChoice,
         "schema:minValue": 1,
         "schema:maxValue": choices.length,
@@ -84,7 +85,7 @@ export default class Item {
     if (this.ref.inputType === "slider") {
         const choices = this.getSliderChoices();
         return {
-        "@valueType": "xsd:integer",
+        "valueType": "xsd:integer",
         "schema:minValue": this.ref.options.minValue,
         "schema:maxValue": this.ref.options.maxValue,
         choices: choices

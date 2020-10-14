@@ -18,6 +18,19 @@
           label="Protocol Description"
           required
         />
+        <div class="d-flex flex-row mt-6">
+          <v-subheader class="ml-2"> Edit About Page </v-subheader>
+          <v-btn
+            class="ml-10"
+            fab
+            small
+            @click="onEditAboutPage"
+          >
+            <v-icon color="grey darken-1">
+              mdi-pencil
+            </v-icon>
+          </v-btn>
+        </div>
         <v-list>
           <v-col>
             <v-subheader>Activities</v-subheader>
@@ -105,6 +118,13 @@
         @updateHistoryView="updateHistoryView"
       />
     </v-dialog>
+    <MarkdownEditor 
+      :visibility="markdownDialog" 
+      :markdownText="markdownData"
+      @close="onCloseEditor"
+      @submit="onSubmitEditor"
+    />
+
   </v-container>
 </template>
 
@@ -114,11 +134,13 @@ import Protocol from '../../models/Protocol';
 import Activity from '../../models/Activity';
 import Item from '../../models/Item';
 import ChangeHistoryComponent from './ChangeHistoryComponent.vue';
+import MarkdownEditor from "./MarkdownEditor"
 import util from '../../utilities/util';
 
 import api from "../../utilities/api";
 import ActivityBuilder from "./ActivityBuilder.vue";
 import { saveAs } from "file-saver";
+import axios from 'axios';
 import _ from "lodash";
 
 const getInitialData = (model) => {
@@ -138,6 +160,8 @@ const getInitialData = (model) => {
     id: null,
     protocolVersion: '1.0.0',
     model,
+    markdownDialog: false,
+    markdownData: "",
     original: null,
     changeHistoryDialog: {
       visibility: false,
@@ -151,6 +175,7 @@ export default {
   components: {
     ActivityBuilder,
     ChangeHistoryComponent,
+    MarkdownEditor,
   },
   props: {
     exportButton: {
@@ -183,7 +208,6 @@ export default {
   async beforeMount() {
     if (this.initialData) {
       this.isEditing = true;
-
       if (!this.versions.length) {
         this.$emit("setLoading", true);
       }
@@ -212,6 +236,13 @@ export default {
       this.name = applet["@id"].replace("_schema", "");
       this.description = applet["schema:description"][0]["@value"];
       this.id = protocol._id.split('/')[1];
+      const markdownData = applet["reprolib:terms/landingPage"][0]["@value"];
+      if (markdownData) {
+        this.markdownData = (await axios.get(markdownData)).data;
+      } else {
+        this.markdownData = applet["reprolib:terms/landingPageContent"] ? applet["reprolib:terms/landingPageContent"][0]["@value"] : "";
+      }
+
       this.protocolVersion = _.get(applet, 'schema:schemaVersion[0].@value', this.protocolVersion);
 
       Object.values(activities).forEach((act) => {
@@ -431,6 +462,16 @@ export default {
         this.activities.push(activity);
       }
     },
+    onSubmitEditor(markdownData) {
+      this.markdownData = markdownData;
+      this.onCloseEditor();
+    },
+    onCloseEditor() {
+      this.markdownDialog = false;
+    },
+    onEditAboutPage() {
+      this.markdownDialog = true;
+    },
     duplicateActivity(index) {
       const activityModel = new Activity();
       const names = this.activities.map(activity => activity.name);
@@ -525,6 +566,8 @@ export default {
           let newVersion = util.upgradeVersion(this.protocolVersion, upgrade);
           if (newVersion != this.protocolVersion) {
             updates.data['schema:schemaVersion'] = updates.data['schema:version'] = newVersion;
+            updates.data['landingPageContent'] = this.markdownData;
+            updates.data['landingPage'] = "";
 
             data.protocol = updates;
             data.removed = removed;

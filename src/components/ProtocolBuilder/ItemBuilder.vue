@@ -41,21 +41,27 @@
         />
         <RadioBuilder
           v-if="inputType === 'radio'"
+          :is-skippable-item="allow"
           :initial-item-data="options"
           :is-item-editable="isItemEditable"
           @updateOptions="updateOptions"
+          @updateAllow="updateAllow"
         />
         <TextBuilder
           v-if="inputType === 'text'"
+          :is-skippable-item="allow"
           :initial-item-data="options"
           :is-item-editable="isItemEditable"
           @updateOptions="updateOptions"
+          @updateAllow="updateAllow"
         />
         <SliderBuilder
           v-if="inputType === 'slider'"
+          :is-skippable-item="allow"
           :initial-item-data="options"
           :is-item-editable="isItemEditable"
           @updateOptions="updateOptions"
+          @updateAllow="updateAllow"
         />
         <VideoBuilder v-if="inputType === 'video'" />
         <PhotoBuilder v-if="inputType === 'photo'" />
@@ -64,21 +70,27 @@
         <DrawingBuilder v-if="inputType === 'drawing'" />
         <AudioRecordBuilder
           v-if="inputType === 'audioRecord'"
+          :is-skippable-item="allow"
           :initial-item-data="options"
           @updateOptions="updateOptions"
+          @updateAllow="updateAllow"
         />
         <AudioImageRecordBuilder
           v-if="inputType === 'audioImageRecord'"
+          :is-skippable-item="allow"
           :initial-item-data="options"
           @updateOptions="updateOptions"
+          @updateAllow="updateAllow"
         />
         <GeolocationBuilder v-if="inputType === 'geolocation'" @update="updateResponseOptions" />
         <AudioStimulusBuilder
           v-if="inputType === 'audioStimulus'"
+          :is-skippable-item="allow"
           :initial-item-input-options="inputOptions"
           :initial-item-media="media"
           :initial-item-data="options"
           :is-item-editable="isItemEditable"
+          @updateAllow="updateAllow"
           @updateInputOptions="updateInputOptions"
           @updateMedia="updateMedia"
         />
@@ -163,11 +175,15 @@ export default {
     updateInputOptions(newInputOptions) {
       this.inputOptions = newInputOptions;
     },
+    updateAllow(allowItem) {
+      this.allow = allowItem;
+    },
     updateMedia(newMedia) {
       this.media = newMedia;
     },
     updateOptions(newOptions) {
       this.options = newOptions;
+      this.responseOptions = this.model.getResponseOptions();
     },
     onSaveItem() {
       if (this.isItemEditable) {

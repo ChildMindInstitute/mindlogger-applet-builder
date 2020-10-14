@@ -12,6 +12,7 @@ export default class Item {
         description: initialItemData.description || '',
         inputType: initialItemData.ui ? initialItemData.ui.inputType : '',
         options: initialItemData.options || [],
+        allow: initialItemData.ui && initialItemData.ui.allow && initialItemData.ui.allow.includes("dontKnow"),
         responseOptions: initialItemData.responseOptions || {},
         inputOptions: initialItemData.inputOptions || {},
         media: initialItemData.media || {},
@@ -141,7 +142,7 @@ export default class Item {
         "schema:schemaVersion": "0.0.1",
         "schema:version": "0.0.1",
         ui: {
-        inputType: this.ref.inputType
+          inputType: this.ref.inputType,
         },
     };
     if (Object.keys(responseOptions).length !== 0) {
@@ -160,9 +161,9 @@ export default class Item {
         };
         } else {
         schema["ui"] = {
-            "inputType": this.ref.inputType,
-            "allow": [
-            "autoAdvance"
+            inputType: this.ref.inputType,
+            allow: [
+              "autoAdvance"
             ]
         };
         }
@@ -174,6 +175,13 @@ export default class Item {
 
     if (this.ref.id) {
         schema["_id"] = this.ref.id;
+    }
+
+    if (this.ref.allow) {
+      if (!schema["ui"]["allow"]) {
+        schema["ui"]["allow"] = []
+      }
+      schema["ui"]["allow"].push("dontKnow")
     }
 
     return schema;
@@ -199,7 +207,7 @@ export default class Item {
         this.ref.inputType === "geolocation") &&
       Object.keys(this.ref.responseOptions).length
     ) {
-      itemObj.responseOptions = this.ref.responseOptions;
+      itemObj.responseOptions = itemObj.responseOptions || this.ref.responseOptions;
     } else if (this.ref.inputType === "audioStimulus") {
       itemObj.inputOptions = this.inputOptions;
       itemObj.media = this.ref.media;

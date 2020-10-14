@@ -126,13 +126,13 @@
               </template>
               <v-list>
                 <v-list-item
-                  :disabled="conditionalRadioItems.length < 2"
+                  :disabled="!conditionalRadioItems.length || items.length < 2"
                   @click="createConditionalItem('radio')"
                 >
                   <v-list-item-title>Radio/Checkbox</v-list-item-title>
                 </v-list-item>
                 <v-list-item
-                  :disabled="conditionalSliderItems.length < 2"
+                  :disabled="!conditionalSliderItems.length || items.length < 2"
                   @click="createConditionalItem('slider')"
                 >
                   <v-list-item-title>Slider</v-list-item-title>
@@ -172,6 +172,7 @@
         :key="componentKey"
         :initial-conditional-item-data="initialConditionalItemData"
         :items="conditionalItemsForBuilder"
+        :showItems="items"
         :editMode="isConditionalEditMode"
         :editConditionalItemIndex="editConditionalItemIndex"
         :editConditionalCallback="onEditConditionalCallback"
@@ -187,12 +188,13 @@
 </template>
 
 <script>
-import ItemBuilder from "./ItemBuilder.vue";
-import ConditionalItemBuilder from "./ConditionalItemBuilder.vue";
-import UrlItemUploader from "./UrlItemUploader.vue";
-import ConditionalItemList from "./ConditionalItemList.vue";
+import ItemBuilder from './ItemBuilder.vue';
+import ConditionalItemBuilder from './ConditionalItemBuilder.vue';
+import UrlItemUploader from './UrlItemUploader.vue';
+import ConditionalItemList from './ConditionalItemList.vue';
 import { string } from 'prop-types';
 import Activity from '../../models/Activity';
+import Item from '../../models/Item';
 
 export default {
   components: {
@@ -207,34 +209,34 @@ export default {
       required: true,
     },
   },
-  data: function () {
+  data: function() {
     const model = new Activity();
     model.updateReferenceObject(this);
 
     return {
       model,
-      ...model.getActivityBuilderData(this.initialActivityData)
-    }
+      ...model.getActivityBuilderData(this.initialActivityData),
+    };
   },
   watch: {
     items() {
-      this.conditionalRadioItems = this.collectConditionals("radio");
-      this.conditionalSliderItems = this.collectConditionals("slider");
+      this.conditionalRadioItems = this.collectConditionals('radio');
+      this.conditionalSliderItems = this.collectConditionals('slider');
 
       this.checkIfConditionalAvailable();
     },
   },
   created() {
-    this.conditionalRadioItems = this.collectConditionals("radio");
-    this.conditionalSliderItems = this.collectConditionals("slider");
+    this.conditionalRadioItems = this.collectConditionals('radio');
+    this.conditionalSliderItems = this.collectConditionals('slider');
 
     this.checkIfConditionalAvailable();
   },
   methods: {
     checkIfConditionalAvailable() {
       this.ifConditionalAvailable =
-        this.conditionalRadioItems.length >= 2 ||
-        this.conditionalSliderItems.length >= 2 ||
+        (this.conditionalRadioItems.length && this.items.length >= 2) ||
+        (this.conditionalSliderItems.length && this.items.length >= 2) ||
         this.conditionalItems.length;
     },
     collectConditionals(type) {
@@ -263,7 +265,7 @@ export default {
       this.isConditionalEditMode = false;
       this.conditionalBuilderType = type;
       this.conditionalItemsForBuilder =
-        type === "radio"
+        type === 'radio'
           ? this.conditionalRadioItems
           : this.conditionalSliderItems;
       this.editConditionalItemIndex = -1;
@@ -327,7 +329,23 @@ export default {
       }
     },
     duplicateItem(index) {
-      this.items.push(this.items[index]);
+      const itemModel = new Item();
+      const names = this.items.map((item) => item.name);
+
+      let suffix = 1;
+      while (names.includes(`${this.items[index].name} (${suffix})`)) {
+        suffix++;
+      }
+
+      itemModel.updateReferenceObject(
+        itemModel.getItemBuilderData({
+          ...this.items[index],
+          _id: null,
+          name: `${this.items[index].name} (${suffix})`,
+        })
+      );
+
+      this.items.push(itemModel.getItemData());
     },
     editItem(index) {
       this.editIndex = index;
@@ -346,16 +364,16 @@ export default {
     },
     isActivityValid() {
       if (!this.name) {
-        this.error = "Activity Name is required";
+        this.error = 'Activity Name is required';
         return false;
       } else if (!this.description) {
-        this.error = "Activity Description is required";
+        this.error = 'Activity Description is required';
         return false;
       } else if (this.items.length == 0) {
-        this.error = "Activities must contain at least one item";
+        this.error = 'Activities must contain at least one item';
         return false;
       } else {
-        this.error = "";
+        this.error = '';
       }
       return true;
     },
@@ -363,7 +381,7 @@ export default {
       this.$emit('closeModal', this.model.getActivityData());
     },
     onDiscardActivity() {
-      this.$emit("closeModal", null);
+      this.$emit('closeModal', null);
     },
   },
 };

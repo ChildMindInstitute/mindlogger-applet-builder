@@ -18,6 +18,11 @@
       @change="update"
     />
     <v-checkbox
+      v-model="isSkippable"
+      label="Skippable Item"
+      @change="updateAllow"
+    />
+    <v-checkbox
       v-model="requiredValue"
       label="Response required"
       @change="update"
@@ -31,12 +36,17 @@ export default {
     initialItemData: {
       type: Object,
       required: true
-    }
+    },
+    isSkippableItem: {
+      type: Boolean,
+      default: false,
+    },
   },
   data: function () {
     return {
       minValue: this.initialItemData['schema:minValue'] || 0,
       maxValue: this.initialItemData['schema:maxValue'] || 3000,
+      isSkippable: this.isSkippableItem || false,
       requiredValue: this.initialItemData.requiredValue != null ? this.initialItemData.requiredValue : true,
       valid: true,
       minValueRules: [
@@ -56,6 +66,10 @@ export default {
       };
       this.$emit('updateOptions', responseOptions);
     },
+    updateAllow() {
+      const allow = this.isSkippable
+      this.$emit('updateAllow', allow);
+    }
   }
 }
 </script>

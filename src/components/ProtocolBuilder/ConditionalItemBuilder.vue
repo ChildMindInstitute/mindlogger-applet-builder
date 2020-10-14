@@ -2,9 +2,9 @@
   <v-card>
     <v-card-title class="headline grey lighten-2" primary-title>
       <v-icon left>
-        {{ isItemEditable ? "mdi-pencil" : "mdi-eye" }}
+        {{ isItemEditable ? 'mdi-pencil' : 'mdi-eye' }}
       </v-icon>
-      {{ isItemEditable ? "Edit Item" : "View Item" }}
+      {{ isItemEditable ? 'Edit Item' : 'View Item' }}
     </v-card-title>
     <v-container>
       <v-row no-gutters>
@@ -65,7 +65,7 @@
             <v-select
               v-model="showValue"
               item-text="question"
-              :items="showItems"
+              :items="showItemsFiltered"
               label="Show"
             />
           </v-form>
@@ -78,7 +78,7 @@
 
       <v-card-actions>
         <v-btn outlined color="primary" @click="onDiscardItem">
-          {{ isItemEditable ? "Discard Changes" : "Close" }}
+          {{ isItemEditable ? 'Discard Changes' : 'Close' }}
         </v-btn>
         <v-spacer />
         <v-btn color="primary" @click="onSaveItem">
@@ -90,7 +90,7 @@
 </template>
 
 <script>
-import ConditionalItemList from "./ConditionalItemList.vue";
+import ConditionalItemList from './ConditionalItemList.vue';
 
 export default {
   components: {
@@ -113,6 +113,10 @@ export default {
       type: Array,
       required: true,
     },
+    showItems: {
+      type: Array,
+      required: true,
+    },
     isItemEditable: {
       type: Boolean,
       default: true,
@@ -123,21 +127,21 @@ export default {
     },
     type: {
       type: String,
-      default: "radio",
+      default: 'radio',
     },
   },
   data: function() {
     return {
       minValue: this.initialConditionalItemData.minValue || 1,
       maxValue: this.initialConditionalItemData.maxValue || 0,
-      ifValue: this.initialConditionalItemData.ifValue || "",
-      stateValue: this.initialConditionalItemData.stateValue || "",
+      ifValue: this.initialConditionalItemData.ifValue || '',
+      stateValue: this.initialConditionalItemData.stateValue || '',
       stateItems: [],
-      showValue: this.initialConditionalItemData.showValue || "",
-      showItems: [],
+      showValue: this.initialConditionalItemData.showValue || '',
+      showItemsFiltered: [],
       options: [],
       answerItems: [],
-      answerValue: this.initialConditionalItemData.answerValue || "",
+      answerValue: this.initialConditionalItemData.answerValue || '',
       sliderNumOptions: 0,
     };
   },
@@ -147,7 +151,7 @@ export default {
     },
   },
   created() {
-    this.$watch("$props", this.setStateItems, { deep: true });
+    this.$watch('$props', this.setStateItems, { deep: true });
 
     this.setStateItems();
     this.fillAnswerAndShowItems();
@@ -155,40 +159,39 @@ export default {
   methods: {
     setStateItems() {
       this.stateItems =
-        this.type === "radio"
+        this.type === 'radio'
           ? [
-              { name: "IS EQUAL TO", val: "==" },
-              { name: "IS NOT EQUAL TO", val: "!=" },
+              { name: 'IS EQUAL TO', val: '==' },
+              { name: 'IS NOT EQUAL TO', val: '!=' },
             ]
           : [
-              { name: "GREATER THEN", val: ">" },
-              { name: "LESS THEN", val: "<" },
-              { name: "EQUAL TO", val: "=" },
-              { name: "WITHIN", val: "within" },
-              { name: "OUTSIDE OF", val: "outsideof" },
+              { name: 'GREATER THEN', val: '>' },
+              { name: 'LESS THEN', val: '<' },
+              { name: 'EQUAL TO', val: '=' },
+              { name: 'WITHIN', val: 'within' },
+              { name: 'OUTSIDE OF', val: 'outsideof' },
             ];
     },
     fillAnswerAndShowItems() {
-      if (this.ifValue === "") return;
+      if (this.ifValue === '') return;
       let answerItemsObj = this.items.find((item) => {
         return item.question === this.ifValue.question;
       });
 
-      if (this.type === "radio") {
+      if (this.type === 'radio') {
         this.answerItems = answerItemsObj.responseOptions.choices.map(
           (choice) => {
             return {
-              name: choice["schema:name"],
-              value: choice["schema:value"],
+              name: choice['schema:name'],
+              value: choice['schema:value'],
             };
           }
         );
-        console.log("this.answerItems: ", this.answerItems);
       } else {
         this.sliderNumOptions = answerItemsObj.options.numOptions;
       }
 
-      this.showItems = this.items.filter((item) => {
+      this.showItemsFiltered = this.showItems.filter((item) => {
         return item.question !== this.ifValue.question;
       });
     },
@@ -212,7 +215,7 @@ export default {
       }
     },
     onDiscardItem() {
-      this.$emit("closeConditionalItemModal", null);
+      this.$emit('closeConditionalItemModal', null);
     },
     addOption() {
       const obj = {
@@ -221,7 +224,7 @@ export default {
         showValue: this.showValue,
       };
 
-      if (this.type === "radio") obj.answerValue = this.answerValue;
+      if (this.type === 'radio') obj.answerValue = this.answerValue;
       else {
         obj.minValue = this.minValue;
         obj.maxValue = this.maxValue;
@@ -229,12 +232,12 @@ export default {
 
       this.options.push(obj);
 
-      this.ifValue = "";
-      this.stateValue = "";
-      this.answerValue = "";
+      this.ifValue = '';
+      this.stateValue = '';
+      this.answerValue = '';
       this.showValue = {};
-      this.minValue = "";
-      this.maxValue = "";
+      this.minValue = '';
+      this.maxValue = '';
     },
   },
 };

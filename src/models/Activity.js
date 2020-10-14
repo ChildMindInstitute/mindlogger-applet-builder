@@ -1,5 +1,5 @@
-import util from "../utilities/util";
-import Item from "./Item";
+import util from '../utilities/util';
+import Item from './Item';
 export default class Activity {
   constructor() {
     this.ref = null;
@@ -7,17 +7,17 @@ export default class Activity {
 
   getActivityBuilderData(initialActivityData) {
     return {
-      name: initialActivityData.name || "",
-      description: initialActivityData.description || "",
-      preamble: initialActivityData.preamble || "",
+      name: initialActivityData.name || '',
+      description: initialActivityData.description || '',
+      preamble: initialActivityData.preamble || '',
       shuffleActivityOrder: initialActivityData.shuffle || false,
       isSkippable: initialActivityData.isSkippable || false,
       items: initialActivityData.items || [],
       id: initialActivityData._id || null,
-      textRules: [(v) => !!v || "This field is required"],
+      textRules: [(v) => !!v || 'This field is required'],
       editItemDialog: false,
       urlDialog: false,
-      error: "",
+      error: '',
       componentKey: 0,
       initialItemData: {
         options: {},
@@ -32,7 +32,7 @@ export default class Activity {
       isConditionalEditMode: false,
       editConditionalItemDialog: false,
       conditionalItems: [],
-      conditionalBuilderType: "",
+      conditionalBuilderType: '',
       conditionalItemsForBuilder: [],
     };
   }
@@ -60,9 +60,9 @@ export default class Activity {
 
       if (conditionalItems.length) {
         const visibleItems = conditionalItems.map((cond) => {
-          if (cond.stateValue.val === "within") {
+          if (cond.stateValue.val === 'within') {
             return `${cond.ifValue.name} > ${cond.minValue} && ${cond.ifValue.name} < ${cond.maxValue}`;
-          } else if (cond.stateValue.val === "outsideof") {
+          } else if (cond.stateValue.val === 'outsideof') {
             return `${cond.ifValue.name} < ${cond.minValue} && ${cond.ifValue.name} > ${cond.maxValue}`;
           } else if (!cond.answerValue) {
             return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.minValue}`;
@@ -70,7 +70,7 @@ export default class Activity {
             return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.answerValue.value}`;
           }
         });
-        isVis = visibleItems.join(" && ");
+        isVis = visibleItems.join(' && ');
       }
 
       const property = {
@@ -89,7 +89,7 @@ export default class Activity {
   }
 
   getAllowed() {
-    return this.ref.isSkippable ? ["skipped"] : [];
+    return this.ref.isSkippable ? ['skipped'] : [];
   }
 
   getCompressedSchema() {
@@ -98,20 +98,20 @@ export default class Activity {
     const itemOrder = this.getItemOrder();
     const allowed = this.getAllowed();
     return {
-      "@context": [
-        "https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json",
+      '@context': [
+        'https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json',
       ],
-      "@type": "reproschema:Activity",
+      '@type': 'reproschema:Activity',
       _id: this.ref.id,
-      "@id": this.ref.name,
-      "skos:prefLabel": this.ref.name,
-      "skos:altLabel": this.ref.name,
-      "schema:description": this.ref.description,
-      "schema:schemaVersion": "0.0.1",
-      "schema:version": "0.0.1",
+      '@id': this.ref.name,
+      'skos:prefLabel': this.ref.name,
+      'skos:altLabel': this.ref.name,
+      'schema:description': this.ref.description,
+      'schema:schemaVersion': '0.0.1',
+      'schema:version': '0.0.1',
       preamble: this.ref.preamble,
       scoringLogic: {},
-      "repronim:timeUnit": "yearmonthdate",
+      'repronim:timeUnit': 'yearmonthdate',
       ui: {
         order: itemOrder,
         shuffle: this.ref.shuffleActivityOrder,
@@ -124,19 +124,19 @@ export default class Activity {
   getContext() {
     const activityName = this.ref.name;
     const contextObj = {
-      "@version": 1.1,
+      '@version': 1.1,
     };
     var isPrefixNeeded = false;
     this.ref.items.forEach(function(item) {
-      if ("iri" in item) {
+      if ('iri' in item) {
         contextObj[item.name] = {
-          "@id": item.iri,
-          "@type": "@id",
+          '@id': item.iri,
+          '@type': '@id',
         };
       } else {
         contextObj[item.name] = {
-          "@id": `${activityName}:${item.name}`,
-          "@type": "@id",
+          '@id': `${activityName}:${item.name}`,
+          '@type': '@id',
         };
         isPrefixNeeded = true;
       }
@@ -148,7 +148,7 @@ export default class Activity {
     }
 
     return {
-      "@context": contextObj,
+      '@context': contextObj,
     };
   }
 
@@ -171,29 +171,29 @@ export default class Activity {
 
   static getHistoryTemplate(oldValue, newValue) {
     return {
-      "skos:prefLabel": {
+      'skos:prefLabel': {
         updated: (field) =>
           `Activity name was changed to ${_.get(newValue, field)}`,
         inserted: (field) => `Activity name set to ${_.get(newValue, field)}`,
       },
-      "schema:description": {
+      'schema:description': {
         updated: (field) =>
           `Activity description was changed to ${_.get(newValue, field)}`,
         removed: (field) => `Activity description was removed`,
         inserted: (field) =>
           `Activity description was added (${_.get(newValue, field)})`,
       },
-      "ui.shuffle": {
+      'ui.shuffle': {
         updated: (field) =>
           `shuffle item order was ${
-            _.get(newValue, field, false) ? "enabled" : "disabled"
+            _.get(newValue, field, false) ? 'enabled' : 'disabled'
           }`,
       },
       preamble: {
         updated: (field) => `preamble was updated to ${_.get(newValue, field)}`,
         inserted: (field) => `preamble was set to ${_.get(newValue, field)}`,
       },
-      "ui.allow": {
+      'ui.allow': {
         updated: (field) => {
           const oldOptions = _.get(oldValue, field, []);
           const newOptions = _.get(newValue, field, []);
@@ -214,20 +214,22 @@ export default class Activity {
     };
   }
 
-  static getChangeInfo(old, current) {
+  static getChangeInfo(old, current, getDataUpdates = false) {
     const { data: oldData, items: oldItems } = old;
 
     const { data: currentData, items: currentItems } = current;
 
     const logTemplates = Activity.getHistoryTemplate(oldData, currentData);
-    let versionUpgrade = "0.0.0";
+    let versionUpgrade = '0.0.0';
 
     const metaInfoChanges = util.compareValues(
       oldData,
       currentData,
       Object.keys(logTemplates)
     );
-    const itemChanges = util.compareIDs(oldItems, currentItems, "_id");
+    const itemChanges = util.compareIDs(oldItems, currentItems, '_id');
+    let updates = { items: {} };
+    let removed = [];
 
     const changeLog = [];
 
@@ -238,7 +240,7 @@ export default class Activity {
       if (logTemplates[key][changeType]) {
         logs = logTemplates[key][changeType](key);
       } else {
-        logs = logTemplates[key]["updated"](key);
+        logs = logTemplates[key]['updated'](key);
       }
 
       if (!Array.isArray(logs)) {
@@ -259,17 +261,21 @@ export default class Activity {
 
     if (changeLog.length) {
       result.push({
-        name: "activity metadata",
+        name: 'activity metadata',
         children: changeLog,
       });
 
-      versionUpgrade = "0.0.1";
+      versionUpgrade = '0.0.1';
+
+      if (getDataUpdates) {
+        updates.data = currentData;
+      }
     }
 
     const itemLogs = [];
 
     if (itemChanges.inserted.length || itemChanges.removed.length) {
-      versionUpgrade = "0.1.0";
+      versionUpgrade = '0.1.0';
     }
 
     /** display log for updated activities */
@@ -283,39 +289,53 @@ export default class Activity {
         versionUpgrade = changeLog.upgrade;
       }
 
-      if (changeLog.upgrade !== "0.0.0") {
+      if (changeLog.upgrade !== '0.0.0') {
         itemLogs.push({
-          name: `item ${currentItems[entry[1]]["skos:prefLabel"]} was updated`,
-          type: "updated",
+          name: `item ${currentItems[entry[1]]['skos:prefLabel']} was updated`,
+          type: 'updated',
           children: changeLog.log,
         });
+
+        if (getDataUpdates) {
+          updates.items[entry[1]] = currentItems[entry[1]];
+          updates.data = currentData;
+        }
       }
     });
 
-    /** display log for new activities */
+    /** display log for new items */
     itemChanges.inserted.forEach((id) => {
       const changeLog = Item.getChangeInfo({}, currentItems[id]);
 
       itemLogs.push({
-        name: `item ${currentItems[id]["skos:prefLabel"]} was inserted`,
-        type: "inserted",
+        name: `item ${currentItems[id]['skos:prefLabel']} was inserted`,
+        type: 'inserted',
         children: changeLog.log,
       });
+
+      if (getDataUpdates) {
+        updates.items[id] = currentItems[id];
+        updates.data = currentData;
+      }
     });
 
-    /** display log for removed activities */
+    /** display log for removed items */
     itemChanges.removed.forEach((id) => {
       itemLogs.push({
-        name: `activity ${oldItems[id]["skos:prefLabel"]} was removed`,
-        type: "removed",
+        name: `item ${oldItems[id]['skos:prefLabel']} was removed`,
+        type: 'removed',
         children: [],
       });
+
+      if (getDataUpdates) {
+        removed.push(oldItems[id]._id);
+      }
     });
 
     /** log activity changes */
     if (itemLogs.length) {
       result.push({
-        name: "items",
+        name: 'items',
         children: itemLogs,
       });
     }
@@ -323,6 +343,8 @@ export default class Activity {
     return {
       log: result,
       upgrade: versionUpgrade,
+      updates,
+      removed,
     };
   }
 }

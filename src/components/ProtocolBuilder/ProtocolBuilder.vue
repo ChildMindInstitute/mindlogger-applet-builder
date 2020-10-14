@@ -115,25 +115,25 @@
 </template>
 
 <script>
-import Protocol from "../../models/Protocol";
-import Activity from "../../models/Activity";
-import Item from "../../models/Item";
-import ChangeHistoryComponent from "./ChangeHistoryComponent.vue";
-import util from "../../utilities/util";
+import Protocol from '../../models/Protocol';
+import Activity from '../../models/Activity';
+import Item from '../../models/Item';
+import ChangeHistoryComponent from './ChangeHistoryComponent.vue';
+import util from '../../utilities/util';
 
-import api from "../../utilities/api";
-import ActivityBuilder from "./ActivityBuilder.vue";
-import { saveAs } from "file-saver";
-import _ from "lodash";
+import api from '../../utilities/api';
+import ActivityBuilder from './ActivityBuilder.vue';
+import { saveAs } from 'file-saver';
+import _ from 'lodash';
 
 const getInitialData = (model) => {
   return {
-    name: "",
-    description: "",
+    name: '',
+    description: '',
     activities: [],
-    textRules: [(v) => !!v || "This field is required"],
+    textRules: [(v) => !!v || 'This field is required'],
     dialog: false,
-    error: "",
+    error: '',
     initialActivityData: {},
     componentKey: 0,
     historyComponentKey: 0,
@@ -141,7 +141,7 @@ const getInitialData = (model) => {
     applet: null,
     isEditing: false,
     id: null,
-    protocolVersion: "1.0.0",
+    protocolVersion: '1.0.0',
     model,
     original: null,
     changeHistoryDialog: {
@@ -175,7 +175,7 @@ export default {
     },
     getProtocols: {
       type: Function,
-      require: false,
+      required: false,
       default: null,
     },
   },
@@ -186,14 +186,33 @@ export default {
     return getInitialData(model);
   },
   async beforeMount() {
-    await this.fillBuilderWithAppletData();
+    if (this.initialData) {
+      this.isEditing = true;
 
-    const protocolData = await this.model.getProtocolData();
-    this.original = JSON.parse(JSON.stringify(protocolData));
-    if (this.versions && !this.versions.length) {
-      /** upload first version */
-      this.$emit("prepareApplet", this.original);
+      if (!this.versions.length) {
+        this.$emit('setLoading', true);
+      }
+
+      await this.fillBuilderWithAppletData();
+
+      const protocolData = await this.model.getProtocolData();
+      this.original = JSON.parse(JSON.stringify(protocolData));
+      if (!this.versions.length) {
+        /** upload first version */
+
+        this.original.protocol.data[
+          'schema:schemaVersion'
+        ] = this.original.protocol.data['schema:version'] = util.upgradeVersion(
+          this.protocolVersion,
+          '0.0.1'
+        );
+
+        this.$emit('prepareApplet', this.original);
+        return;
+      }
     }
+
+    this.$emit('setLoading', false);
   },
   methods: {
     // fillBuilderWithAppletData() {
@@ -202,172 +221,179 @@ export default {
 
     //   const { applet, activities, items } = this.$route.params.applet;
     async fillBuilderWithAppletData() {
-      if (!this.initialData) return;
-
       const { applet, activities, items, protocol } = this.initialData;
 
-      this.isEditing = true;
       this.applet = applet;
-      this.name = applet["@id"].replace("_schema", "");
-      this.description = applet["schema:description"][0]["@value"];
-      this.id = protocol._id.split("/")[1];
+      this.name = applet['@id'].replace('_schema', '');
+      this.description = applet['schema:description'][0]['@value'];
+      this.id = protocol._id.split('/')[1];
       this.protocolVersion = _.get(
         applet,
-        "schema:schemaVersion[0].@value",
+        'schema:schemaVersion[0].@value',
         this.protocolVersion
       );
 
       Object.values(activities).forEach((act) => {
         const activitiesObj = act;
         const {
-          ["@id"]: name,
-          ["schema:description"]: description,
-          ["reprolib:terms/preamble"]: activityPreamble,
-          ["reprolib:terms/shuffle"]: shuffle,
-          ["reprolib:terms/allow"]: isSkippable,
-          ["_id"]: id,
+          ['@id']: name,
+          ['schema:description']: description,
+          ['reprolib:terms/preamble']: activityPreamble,
+          ['reprolib:terms/shuffle']: shuffle,
+          ['reprolib:terms/allow']: isSkippable,
+          ['_id']: id,
         } = activitiesObj;
 
         const activityInfo = {
-          _id: id && id.split("/")[1],
+          _id: id && id.split('/')[1],
           name,
           description:
-            description && description[0] && description[0]["@value"],
+            description && description[0] && description[0]['@value'],
           preamble:
             activityPreamble &&
             activityPreamble[0] &&
-            activityPreamble[0]["@value"],
-          shuffle: shuffle && shuffle[0] && shuffle[0]["@value"],
+            activityPreamble[0]['@value'],
+          shuffle: shuffle && shuffle[0] && shuffle[0]['@value'],
         };
 
         let isSkippableList =
-          (isSkippable && isSkippable[0] && isSkippable[0]["@list"]) || [];
+          (isSkippable && isSkippable[0] && isSkippable[0]['@list']) || [];
 
         if (isSkippableList.length) {
           if (
             (isSkippableList[0] &&
-              isSkippableList[0]["@id"] &&
-              isSkippableList[0]["@id"].includes("refused_to_answer")) ||
+              isSkippableList[0]['@id'] &&
+              isSkippableList[0]['@id'].includes('refused_to_answer')) ||
             (isSkippableList[0] &&
-              isSkippableList[0]["@id"] &&
-              isSkippableList[0]["@id"].includes("dontKnow"))
+              isSkippableList[0]['@id'] &&
+              isSkippableList[0]['@id'].includes('dontKnow'))
           ) {
             activityInfo.isSkippable = true;
           }
         }
 
-        activityInfo.items = Object.values(items).map((item) => {
+        activityInfo.items = _.get(
+          activitiesObj,
+          'reprolib:terms/order.0.@list',
+          []
+        ).map((key) => {
+          const item = items[key['@id']];
+
           let itemContent = {
-            _id: item["_id"] && item["_id"].split("/")[1],
-            name: item["@id"],
+            _id: item['_id'] && item['_id'].split('/')[1],
+            name: item['@id'],
             question:
-              item["schema:question"] &&
-              item["schema:question"][0] &&
-              item["schema:question"][0]["@value"],
+              item['schema:question'] &&
+              item['schema:question'][0] &&
+              item['schema:question'][0]['@value'],
             description:
-              item["schema:description"] &&
-              item["schema:description"][0] &&
-              item["schema:description"][0]["@value"],
+              item['schema:description'] &&
+              item['schema:description'][0] &&
+              item['schema:description'][0]['@value'],
             ui: {
               inputType:
-                item["reprolib:terms/inputType"] &&
-                item["reprolib:terms/inputType"][0] &&
-                item["reprolib:terms/inputType"][0]["@value"],
+                item['reprolib:terms/inputType'] &&
+                item['reprolib:terms/inputType'][0] &&
+                item['reprolib:terms/inputType'][0]['@value'],
             },
           };
 
-          let responseOptions = item["reprolib:terms/responseOptions"];
+          let responseOptions = item['reprolib:terms/responseOptions'];
 
           let itemType = itemContent.ui.inputType;
 
           if (responseOptions) {
             let multipleChoice =
               responseOptions[0] &&
-              responseOptions[0]["reprolib:terms/multipleChoice"];
+              responseOptions[0]['reprolib:terms/multipleChoice'];
 
             if (multipleChoice) {
               itemContent.multipleChoice =
-                multipleChoice[0] && multipleChoice[0]["@value"];
+                multipleChoice[0] && multipleChoice[0]['@value'];
             }
 
-            if (itemType === "radio") {
+            if (itemType === 'radio') {
               itemContent.options = {
                 isMultipleChoice: itemContent.multipleChoice || false,
-                nextOptionImage: "",
-                nextOptionName: "",
+                nextOptionImage: '',
+                nextOptionName: '',
                 options:
                   responseOptions[0] &&
-                  responseOptions[0]["schema:itemListElement"].map(
+                  responseOptions[0]['schema:itemListElement'] &&
+                  responseOptions[0]['schema:itemListElement'].map(
                     (itemListElement) => {
                       return {
                         image:
-                          itemListElement["schema:value"] &&
-                          itemListElement["schema:value"][0] &&
-                          itemListElement["schema:value"][0]["@value"],
+                          itemListElement['schema:image'] &&
+                          itemListElement['schema:image'][0] &&
+                          itemListElement['schema:image'][0][
+                            '@value'
+                          ].toString(),
                         name:
-                          itemListElement["schema:name"] &&
-                          itemListElement["schema:name"][0] &&
-                          itemListElement["schema:name"][0]["@value"],
+                          itemListElement['schema:name'] &&
+                          itemListElement['schema:name'][0] &&
+                          itemListElement['schema:name'][0]['@value'],
                       };
                     }
                   ),
               };
             }
-            if (itemType === "text") {
+            if (itemType === 'text') {
               itemContent.options = {
                 requiredValue:
                   responseOptions[0] &&
-                  responseOptions[0]["reprolib:terms/requiredValue"] &&
-                  responseOptions[0]["reprolib:terms/requiredValue"][0] &&
-                  responseOptions[0]["reprolib:terms/requiredValue"][0][
-                    "@value"
+                  responseOptions[0]['reprolib:terms/requiredValue'] &&
+                  responseOptions[0]['reprolib:terms/requiredValue'][0] &&
+                  responseOptions[0]['reprolib:terms/requiredValue'][0][
+                    '@value'
                   ],
                 // TODO: add 'maximum response length' value which is absent for now
               };
             }
-            if (itemType === "slider") {
+            if (itemType === 'slider') {
               itemContent.options = {
                 maxValue:
                   responseOptions[0] &&
-                  responseOptions[0]["schema:maxValue"] &&
-                  responseOptions[0]["schema:maxValue"][0] &&
-                  responseOptions[0]["schema:maxValue"][0]["@value"],
+                  responseOptions[0]['schema:maxValue'] &&
+                  responseOptions[0]['schema:maxValue'][0] &&
+                  responseOptions[0]['schema:maxValue'][0]['@value'],
                 minValue:
                   responseOptions[0] &&
-                  responseOptions[0]["schema:minValue"] &&
-                  responseOptions[0]["schema:minValue"][0] &&
-                  responseOptions[0]["schema:minValue"][0]["@value"],
+                  responseOptions[0]['schema:minValue'] &&
+                  responseOptions[0]['schema:minValue'][0] &&
+                  responseOptions[0]['schema:minValue'][0]['@value'],
                 numOptions:
                   responseOptions[0] &&
-                  responseOptions[0]["schema:itemListElement"].length,
+                  responseOptions[0]['schema:itemListElement'] &&
+                  responseOptions[0]['schema:itemListElement'].length,
               };
             }
-            if (itemType === "audioRecord" || itemType === "audioImageRecord") {
+            if (itemType === 'audioRecord' || itemType === 'audioImageRecord') {
               itemContent.options = {
                 requiredValue:
                   responseOptions[0] &&
-                  responseOptions[0]["reprolib:terms/requiredValue"] &&
-                  responseOptions[0]["reprolib:terms/requiredValue"][0] &&
-                  responseOptions[0]["reprolib:terms/requiredValue"][0][
-                    "@value"
+                  responseOptions[0]['reprolib:terms/requiredValue'] &&
+                  responseOptions[0]['reprolib:terms/requiredValue'][0] &&
+                  responseOptions[0]['reprolib:terms/requiredValue'][0][
+                    '@value'
                   ],
-                "schema:maxValue":
+                'schema:maxValue':
                   responseOptions[0] &&
-                  responseOptions[0]["schema:maxValue"] &&
-                  responseOptions[0]["schema:maxValue"][0] &&
-                  responseOptions[0]["schema:maxValue"][0]["@value"],
-                "schema:minValue":
+                  responseOptions[0]['schema:maxValue'] &&
+                  responseOptions[0]['schema:maxValue'][0] &&
+                  responseOptions[0]['schema:maxValue'][0]['@value'],
+                'schema:minValue':
                   responseOptions[0] &&
-                  responseOptions[0]["schema:minValue"] &&
-                  responseOptions[0]["schema:minValue"][0] &&
-                  responseOptions[0]["schema:minValue"][0]["@value"],
+                  responseOptions[0]['schema:minValue'] &&
+                  responseOptions[0]['schema:minValue'][0] &&
+                  responseOptions[0]['schema:minValue'][0]['@value'],
               };
             }
           }
 
-          if (itemType === "audioStimulus") {
+          if (itemType === 'audioStimulus') {
             let mediaObj = Object.entries(
-              item["reprolib:terms/media"] && item["reprolib:terms/media"][0]
+              item['reprolib:terms/media'] && item['reprolib:terms/media'][0]
             );
 
             if (mediaObj) {
@@ -376,17 +402,17 @@ export default {
 
               itemContent.media = {
                 [mediaUrl]: {
-                  "schema:contentUrl": [mediaUrl],
-                  "schema:name":
+                  'schema:contentUrl': [mediaUrl],
+                  'schema:name':
                     mediaData[0] &&
-                    mediaData[0]["schema:name"] &&
-                    mediaData[0]["schema:name"][0] &&
-                    mediaData[0]["schema:name"][0]["@value"],
-                  "schema:transcript":
+                    mediaData[0]['schema:name'] &&
+                    mediaData[0]['schema:name'][0] &&
+                    mediaData[0]['schema:name'][0]['@value'],
+                  'schema:transcript':
                     mediaData[0] &&
-                    mediaData[0]["schema:transcript"] &&
-                    mediaData[0]["schema:transcript"][0] &&
-                    mediaData[0]["schema:transcript"][0]["@value"],
+                    mediaData[0]['schema:transcript'] &&
+                    mediaData[0]['schema:transcript'][0] &&
+                    mediaData[0]['schema:transcript'][0]['@value'],
                 },
               };
             }
@@ -435,7 +461,23 @@ export default {
       }
     },
     duplicateActivity(index) {
-      this.activities.push(this.activities[index]);
+      const activityModel = new Activity();
+      const names = this.activities.map((activity) => activity.name);
+
+      let suffix = 1;
+      while (names.includes(`${this.activities[index].name} (${suffix})`)) {
+        suffix++;
+      }
+
+      activityModel.updateReferenceObject(
+        activityModel.getActivityBuilderData({
+          ...this.activities[index],
+          _id: null,
+          name: `${this.activities[index].name} (${suffix})`,
+        })
+      );
+
+      this.activities.push(activityModel.getActivityData());
     },
     editActivity(index) {
       this.editIndex = index;
@@ -453,16 +495,16 @@ export default {
     },
     isProtocolValid() {
       if (!this.name) {
-        this.error = "Protocol Name is required";
+        this.error = 'Protocol Name is required';
         return false;
       } else if (!this.description) {
-        this.error = "Protocol Description is required";
+        this.error = 'Protocol Description is required';
         return false;
       } else if (this.activities.length == 0) {
-        this.error = "Protocol must contain at least one activity";
+        this.error = 'Protocol must contain at least one activity';
         return false;
       } else {
-        this.error = "";
+        this.error = '';
       }
       return true;
     },
@@ -470,15 +512,15 @@ export default {
       const schemaObj = this.model.getCompressedSchema();
       const contextObj = this.model.getContext();
 
-      var JSZip = require("jszip");
+      var JSZip = require('jszip');
       var zip = new JSZip();
 
       zip
-        .folder("protocols")
-        .file("schema", JSON.stringify(schemaObj, null, 2));
+        .folder('protocols')
+        .file('schema', JSON.stringify(schemaObj, null, 2));
       zip
-        .folder("protocols")
-        .file("context", JSON.stringify(contextObj, null, 2));
+        .folder('protocols')
+        .file('context', JSON.stringify(contextObj, null, 2));
 
       this.activities.forEach(function(activity) {
         zip
@@ -500,7 +542,7 @@ export default {
         });
       });
 
-      zip.generateAsync({ type: "blob" }).then((blob) => {
+      zip.generateAsync({ type: 'blob' }).then((blob) => {
         saveAs(blob, `${this.name}.zip`);
       });
     },
@@ -509,22 +551,44 @@ export default {
         .getProtocolData()
         .then((data) => {
           if (!this.isEditing) {
-            this.$emit("uploadProtocol", data);
+            this.$emit('uploadProtocol', data);
           } else {
-            const { upgrade } = Protocol.getChangeInfo(this.original, data);
+            let { upgrade, updates, removed } = Protocol.getChangeInfo(
+              this.original,
+              data,
+              true
+            );
 
             let newVersion = util.upgradeVersion(this.protocolVersion, upgrade);
             if (newVersion != this.protocolVersion) {
-              data.protocol.data["schema:schemaVersion"] = data.protocol.data[
-                "schema:version"
+              updates.data['schema:schemaVersion'] = updates.data[
+                'schema:version'
               ] = newVersion;
 
-              this.$emit("updateProtocol", data);
+              data.protocol = updates;
+              data.removed = removed;
+              data.baseVersion = this.protocolVersion;
+
+              this.$emit('updateProtocol', data);
             } else {
-              this.$emit(
-                "onUploadError",
-                "Please make changes to update applet"
+              const { upgrade } = Protocol.getChangeInfo(this.original, data);
+
+              let newVersion = util.upgradeVersion(
+                this.protocolVersion,
+                upgrade
               );
+              if (newVersion != this.protocolVersion) {
+                data.protocol.data['schema:schemaVersion'] = data.protocol.data[
+                  'schema:version'
+                ] = newVersion;
+
+                this.$emit('updateProtocol', data);
+              } else {
+                this.$emit(
+                  'onUploadError',
+                  'Please make changes to update applet'
+                );
+              }
             }
           }
         })
@@ -549,6 +613,7 @@ export default {
             this.protocolVersion,
             upgrade
           );
+          this.changeHistoryDialog.defaultVersion = null;
 
           this.historyComponentKey++;
         });

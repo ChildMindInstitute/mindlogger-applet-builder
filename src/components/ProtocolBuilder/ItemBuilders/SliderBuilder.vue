@@ -3,6 +3,12 @@
     ref="form"
     v-model="valid"
   >
+    <v-checkbox
+      v-model="isSkippable"
+      label="Skippable Item"
+      :disabled="!isItemEditable"
+      @change="updateAllow"
+    />
     <v-text-field
       v-model="numOptions"
       label="On a scale of 1 to "
@@ -36,6 +42,10 @@ export default {
       type: Object,
       required: true
     },
+    isSkippableItem: {
+      type: Boolean,
+      default: false,
+    },
     isItemEditable: {
       type: Boolean,
       default: true,
@@ -46,6 +56,7 @@ export default {
       numOptions: this.initialItemData.numOptions || 5,
       minValue: this.initialItemData.minValue || '',
       maxValue: this.initialItemData.maxValue || '',
+      isSkippable: this.isSkippableItem || false,
       valid: true,
       textRules: [
         v => !!v || 'Radio options cannot be empty',
@@ -60,6 +71,10 @@ export default {
         'maxValue': this.maxValue
       };
       this.$emit('updateOptions', responseOptions);
+    },
+    updateAllow() {
+      const allow = this.isSkippable
+      this.$emit('updateAllow', allow);
     }
   }
 }

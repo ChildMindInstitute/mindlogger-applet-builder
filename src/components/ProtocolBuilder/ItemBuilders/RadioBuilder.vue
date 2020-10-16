@@ -40,10 +40,41 @@
           @change="update"
         />      
       </v-col>
+      <v-col 
+        class="d-flex align-center"
+        cols="12"
+        sm="3"
+      >
+        <v-menu offset-y>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              class="deep-orange"
+              color="primary"
+              dark
+              v-bind="attrs"
+              v-on="on"
+            >
+              Slide X Transition
+            </v-btn>
+          </template>
+
+          <v-list>
+            <v-list-item
+              v-for="(item, i) in items"
+              :key="i"
+            >
+              <v-list-item-title>{{ item.text }} | {{ item.value }}</v-list-item-title>
+              <v-btn
+                icon
+                color="grey darken-1 ml-2"
+              >
+                <v-icon>mdi-delete</v-icon>
+              </v-btn>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </v-col>
     </v-row>
-
-
-
     <v-list>
       <v-subheader>
         Options
@@ -156,6 +187,20 @@ export default {
       valid: true,
       textRules: [
         v => !!v || 'Radio options cannot be empty',
+      ],
+      items: [
+        { 
+          text: "Lied to parents",
+          value: "-3"
+        },
+        { 
+          text: "Yelled at teacher",
+          value: "-5"
+        },
+        { 
+          text: "Missed class",
+          value: "-2"
+        }
       ]
     };
   },

@@ -245,8 +245,13 @@ export default class Item {
       'schema:description': {
         updated: (field) => `Item description was changed to ${_.get(newValue, field)}`,
         removed: (field) => `Item description was removed`,
-        inserted: (field) => `Item description was added (${_.get(newValue, field)})`
+        inserted: (field) => `Item description was set (${_.get(newValue, field)})`
       }, 
+      'question': {
+        updated: (field) => `Item Question was changed to ${_.get(newValue, field)}`,
+        removed: (field) => `Item Question was removed`,
+        inserted: (field) => `Item Question was set to ${_.get(newValue, field)}`,
+      },
       'ui.inputType': {
         updated: valueUpdate('Input type'),
         inserted: valueInsert('Input type'),

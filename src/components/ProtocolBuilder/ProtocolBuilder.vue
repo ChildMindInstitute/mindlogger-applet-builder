@@ -597,18 +597,15 @@ export default {
           let { upgrade, updates, removed } = Protocol.getChangeInfo(this.original, data, true);
 
           let newVersion = util.upgradeVersion(this.protocolVersion, upgrade);
-          if (newVersion != this.protocolVersion) {
-            updates.data['schema:schemaVersion'] = updates.data['schema:version'] = newVersion;
-            updates.data['landingPageContent'] = this.markdownData;
-            updates.data['landingPage'] = "";
+          updates.data['schema:schemaVersion'] = updates.data['schema:version'] = newVersion;
+          updates.data['landingPageContent'] = this.markdownData;
+          updates.data['landingPage'] = "";
 
-            data.protocol = updates;
-            data.removed = removed;
-            data.baseVersion = this.protocolVersion;
-            this.$emit("updateProtocol", data);
-          } else {
-            this.$emit("onUploadError", 'Please make changes to update applet');
-          }
+          data.protocol = updates;
+          data.removed = removed;
+          data.baseVersion = this.protocolVersion;
+          this.$emit("updateProtocol", data);
+
         }
       }).catch(e => {
         console.log(e);

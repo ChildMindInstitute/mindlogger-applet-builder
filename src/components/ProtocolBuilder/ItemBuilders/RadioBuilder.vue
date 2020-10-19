@@ -41,6 +41,7 @@
         />      
       </v-col>
       <v-col 
+        v-if="isTokenValue"
         class="d-flex align-center"
         cols="12"
         sm="3"
@@ -63,10 +64,13 @@
               v-for="(item, i) in items"
               :key="i"
             >
-              <v-list-item-title>{{ item.text }} | {{ item.value }}</v-list-item-title>
+              <v-list-item-title @click="addTemplateOption(item)">
+                {{ item.text }} | {{ item.value }}
+              </v-list-item-title>
               <v-btn
                 icon
                 color="grey darken-1 ml-2"
+                @click="removeTemplate(item)"
               >
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
@@ -103,7 +107,7 @@
           <v-row>
             <v-col 
               cols="12"
-              sm="6"
+              sm="4"
             >
               <v-text-field
                 v-model="nextOptionName"
@@ -116,16 +120,33 @@
               />
             </v-col>
             <v-col 
+              v-if="isTokenValue"
               cols="12"
-              sm="6"
+              sm="4"
             >
               <v-text-field
-                v-if="isTokenValue"
                 v-model="nextOptionValue"
                 :rules="textRules"
                 label="Option Value"
                 counter="5"
                 maxlength="5"
+                :disabled="!isItemEditable"
+                @change="update"
+              />
+            </v-col>
+            <v-col 
+              v-if="isTokenValue"
+              cols="12"
+              sm="1"
+            />
+            <v-col 
+              v-if="isTokenValue"
+              cols="12"
+              sm="3"
+            >
+              <v-checkbox
+                v-model="isTemplate"
+                label="Set as a template"
                 :disabled="!isItemEditable"
                 @change="update"
               />
@@ -174,12 +195,17 @@ export default {
       type: Boolean,
       default: true,
     },
+    itemTemplates: {
+      type: Array,
+      default: null
+    }
   },
   data: function () {
     return {
       isTokenValue: Object.keys(this.responseOptions).length ? (this.responseOptions.valueType.includes("token") ? true : false) : false,
       isMultipleChoice: this.initialItemData.isMultipleChoice || false,
       isSkippable: this.isSkippableItem || false,
+      isTemplate: false,
       nextOptionName: this.initialItemData.nextOptionName || '',
       nextOptionValue: this.initialItemData.nextOptionValue || '',
       nextOptionImage: this.initialItemData.nextOptionImage || '',
@@ -188,21 +214,11 @@ export default {
       textRules: [
         v => !!v || 'Radio options cannot be empty',
       ],
-      items: [
-        { 
-          text: "Lied to parents",
-          value: "-3"
-        },
-        { 
-          text: "Yelled at teacher",
-          value: "-5"
-        },
-        { 
-          text: "Missed class",
-          value: "-2"
-        }
-      ]
+      items: []
     };
+  },
+  async beforeMount() {
+    this.items = this.itemTemplates
   },
   methods: {
     resetValidation () {
@@ -216,11 +232,34 @@ export default {
       if (this.nextOptionImage) {
         nextOption.image = this.nextOptionImage.toString();
       }
+      if (this.isTemplate) {
+        const newOption = {
+          text: this.nextOptionName,
+          value: this.nextOptionValue
+        }
+        this.$emit('updateTemplates', newOption);
+        this.isTemplate = false;
+      }
       this.options.push(nextOption);
       this.nextOptionName = '';
       this.nextOptionValue = '';
       this.nextOptionImage = '';
       this.resetValidation();
+      this.update();
+    },
+    removeTemplate(item) {
+      const { items } = this;
+      const updatedItems = items.filter(({ text, value }) => text !== item.text || value !== item.value)
+      this.items = [...updatedItems]
+      this.$emit('removeTemplate', item);
+    },
+    addTemplateOption(item) {
+      const nextOption = {
+        'name': item.text,
+        'value': item.value,
+        'image': ''
+      };
+      this.options.push(nextOption);
       this.update();
     },
     deleteOption(index) {

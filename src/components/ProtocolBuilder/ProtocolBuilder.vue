@@ -99,7 +99,10 @@
     <v-dialog v-model="dialog" width="800" persistent>
       <ActivityBuilder
         :key="componentKey"
+        :templates="itemTemplates"
         :initial-activity-data="initialActivityData"
+        @removeTemplate="onRemoveTemplate"
+        @updateTemplates="onUpdateTemplates"
         @closeModal="onCloseActivityModal"
       />
     </v-dialog>
@@ -148,6 +151,7 @@ const getInitialData = (model) => {
     name: "",
     description: "",
     activities: [],
+    itemTemplates: [],
     textRules: [(v) => !!v || "This field is required"],
     dialog: false,
     error: "",
@@ -168,6 +172,20 @@ const getInitialData = (model) => {
       defaultVersion: null,
       data: []
     },
+    itemplates: [
+    { 
+      text: "Lied to parents",
+      value: "-3"
+    },
+    { 
+      text: "Yelled at teacher",
+      value: "-5"
+    },
+    { 
+      text: "Missed class",
+      value: "-2"
+    }
+  ]
   };
 }
 
@@ -187,6 +205,11 @@ export default {
       type: Object,
       required: false,
       default: null
+    },
+    templates: {
+      type: Array,
+      required: false,
+      default: null,
     },
     versions: {
       type: Array,
@@ -225,7 +248,7 @@ export default {
         return;
       }
     }
-
+    this.itemTemplates = this.templates
     this.$emit("setLoading", false);
   },
   methods: {
@@ -435,6 +458,16 @@ export default {
         this.activities.push(activityModel.getActivityData());
       });
     },
+    onUpdateTemplates(option) {
+      this.itemTemplates.push(option)
+      this.$emit("updateTemplates", option)
+    },
+    onRemoveTemplate(item) {
+      const { itemTemplates } = this;
+      const updatedItems = itemTemplates.filter(({ text, value }) => text !== item.text || value !== item.value)
+      this.itemTemplates = [...updatedItems]
+      this.$emit('removeTemplate', item);
+    },
     validate() {
       if (this.$refs.form.validate()) {
         this.snackbar = true;
@@ -560,7 +593,6 @@ export default {
       this.model.getProtocolData().then( data => {
         if (!this.isEditing) {
           this.$emit("uploadProtocol", data)
-          console.log('appletdata-------->', data)
         } else {
           let { upgrade, updates, removed } = Protocol.getChangeInfo(this.original, data, true);
 
@@ -573,7 +605,6 @@ export default {
             data.protocol = updates;
             data.removed = removed;
             data.baseVersion = this.protocolVersion;
-            console.log('appletdata-------->', data);
             this.$emit("updateProtocol", data);
           } else {
             this.$emit("onUploadError", 'Please make changes to update applet');

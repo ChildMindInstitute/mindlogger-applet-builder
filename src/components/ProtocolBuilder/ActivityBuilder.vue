@@ -157,6 +157,9 @@
         :key="componentKey"
         :initial-item-data="initialItemData"
         :is-item-editable="isItemEditable"
+        :templates="itemTemplates"
+        @removeTemplate="onRemoveTemplate"
+        @updateTemplates="onUpdateTemplates"
         @closeItemModal="onCloseItemModal"
       />
     </v-dialog>
@@ -189,6 +192,11 @@ export default {
     initialActivityData: {
       type: Object,
       required: true
+    },
+    templates: {
+      type: Array,
+      required: false,
+      default: null,
     }
   },
   data: function () {
@@ -197,8 +205,12 @@ export default {
 
     return {
       model,
-      ...model.getActivityBuilderData(this.initialActivityData)
+      ...model.getActivityBuilderData(this.initialActivityData),
+      itemTemplates: []
     }
+  },
+  beforeMount() {
+    this.itemTemplates = this.templates
   },
   methods: {
     validate () {
@@ -225,6 +237,12 @@ export default {
       };
       this.forceUpdate();
       this.urlDialog = true;
+    },
+    onUpdateTemplates(option) {
+      this.$emit('updateTemplates', option);
+    },
+    onRemoveTemplate(option) {
+      this.$emit('removeTemplate', option);
     },
     onCloseItemModal(response) {
       this.editItemDialog = false;

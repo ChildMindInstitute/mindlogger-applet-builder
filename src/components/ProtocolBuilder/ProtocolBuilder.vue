@@ -91,7 +91,13 @@
           Reset Builder
         </v-btn>
 
-        <v-btn class="mx-2 my-2" color="primary" :disabled="!isEditing" outlined @click="viewHistory">
+        <v-btn
+          class="mx-2 my-2"
+          color="primary"
+          :disabled="!isEditing"
+          outlined
+          @click="viewHistory"
+        >
           View History
         </v-btn>
       </div>
@@ -110,11 +116,11 @@
       class="historyDialog"
     >
       <ChangeHistoryComponent
+        :key="componentKey + historyComponentKey"
         :history="changeHistoryDialog.data"
         :currentVersion="changeHistoryDialog.currentVersion"
         :defaultVersion="changeHistoryDialog.defaultVersion"
         :versions="versions"
-        :key="componentKey + historyComponentKey"
         @updateHistoryView="updateHistoryView"
       />
     </v-dialog>
@@ -129,28 +135,26 @@
 </template>
 
 <script>
-
 import Protocol from '../../models/Protocol';
 import Activity from '../../models/Activity';
 import Item from '../../models/Item';
 import ChangeHistoryComponent from './ChangeHistoryComponent.vue';
 import MarkdownEditor from "./MarkdownEditor"
 import util from '../../utilities/util';
-
-import api from "../../utilities/api";
-import ActivityBuilder from "./ActivityBuilder.vue";
-import { saveAs } from "file-saver";
+import api from '../../utilities/api';
+import ActivityBuilder from './ActivityBuilder.vue';
+import { saveAs } from 'file-saver';
 import axios from 'axios';
-import _ from "lodash";
+import _ from 'lodash';
 
 const getInitialData = (model) => {
   return {
-    name: "",
-    description: "",
+    name: '',
+    description: '',
     activities: [],
-    textRules: [(v) => !!v || "This field is required"],
+    textRules: [(v) => !!v || 'This field is required'],
     dialog: false,
-    error: "",
+    error: '',
     initialActivityData: {},
     componentKey: 0,
     historyComponentKey: 0,
@@ -166,10 +170,10 @@ const getInitialData = (model) => {
     changeHistoryDialog: {
       visibility: false,
       defaultVersion: null,
-      data: []
+      data: [],
     },
   };
-}
+};
 
 export default {
   components: {
@@ -181,23 +185,23 @@ export default {
     exportButton: {
       type: Boolean,
       required: false,
-      default: false,
+      default: true,
     },
     initialData: {
       type: Object,
       required: false,
-      default: null
+      default: null,
     },
     versions: {
       type: Array,
       required: false,
-      default: null
+      default: null,
     },
     getProtocols: {
       type: Function,
       required: false,
-      default: null
-    }
+      default: null,
+    },
   },
   data: function() {
     const model = new Protocol();
@@ -209,7 +213,7 @@ export default {
     if (this.initialData) {
       this.isEditing = true;
       if (!this.versions.length) {
-        this.$emit("setLoading", true);
+        this.$emit('setLoading', true);
       }
 
       await this.fillBuilderWithAppletData();
@@ -219,22 +223,32 @@ export default {
       if (!this.versions.length) {
         /** upload first version */
 
-        this.original.protocol.data['schema:schemaVersion'] = this.original.protocol.data['schema:version']  = util.upgradeVersion(this.protocolVersion, '0.0.1');
+        this.original.protocol.data[
+          'schema:schemaVersion'
+        ] = this.original.protocol.data['schema:version'] = util.upgradeVersion(
+          this.protocolVersion,
+          '0.0.1'
+        );
 
-        this.$emit("prepareApplet", this.original);
+        this.$emit('prepareApplet', this.original);
         return;
       }
     }
 
-    this.$emit("setLoading", false);
+    this.$emit('setLoading', false);
   },
   methods: {
+    // fillBuilderWithAppletData() {
+    //   if (!this.$route || !this.$route.params || !this.$route.params.applet)
+    //     return;
+
+    //   const { applet, activities, items } = this.$route.params.applet;
     async fillBuilderWithAppletData() {
       const { applet, activities, items, protocol } = this.initialData;
 
       this.applet = applet;
-      this.name = applet["@id"].replace("_schema", "");
-      this.description = applet["schema:description"][0]["@value"];
+      this.name = applet['@id'].replace('_schema', '');
+      this.description = applet['schema:description'][0]['@value'];
       this.id = protocol._id.split('/')[1];
       const markdownData = applet["reprolib:terms/landingPage"][0]["@value"];
       if (markdownData) {
@@ -248,158 +262,164 @@ export default {
       Object.values(activities).forEach((act) => {
         const activitiesObj = act;
         const {
-          ["@id"]: name,
-          ["schema:description"]: description,
-          ["reprolib:terms/preamble"]: activityPreamble,
-          ["reprolib:terms/shuffle"]: shuffle,
-          ["reprolib:terms/allow"]: isSkippable,
-          ["_id"]: id,
+          ['@id']: name,
+          ['schema:description']: description,
+          ['reprolib:terms/preamble']: activityPreamble,
+          ['reprolib:terms/shuffle']: shuffle,
+          ['reprolib:terms/allow']: isSkippable,
+          ['_id']: id,
         } = activitiesObj;
 
         const activityInfo = {
-          _id: id && id.split("/")[1],
+          _id: id && id.split('/')[1],
           name,
           description:
-            description && description[0] && description[0]["@value"],
+            description && description[0] && description[0]['@value'],
           preamble:
             activityPreamble &&
             activityPreamble[0] &&
-            activityPreamble[0]["@value"],
-          shuffle: shuffle && shuffle[0] && shuffle[0]["@value"],
+            activityPreamble[0]['@value'],
+          shuffle: shuffle && shuffle[0] && shuffle[0]['@value'],
         };
 
         let isSkippableList =
-          (isSkippable && isSkippable[0] && isSkippable[0]["@list"]) || [];
+          (isSkippable && isSkippable[0] && isSkippable[0]['@list']) || [];
 
         if (isSkippableList.length) {
           if (
             (isSkippableList[0] &&
-              isSkippableList[0]["@id"] &&
-              isSkippableList[0]["@id"].includes("refused_to_answer")) ||
+              isSkippableList[0]['@id'] &&
+              isSkippableList[0]['@id'].includes('refused_to_answer')) ||
             (isSkippableList[0] &&
-              isSkippableList[0]["@id"] &&
-              isSkippableList[0]["@id"].includes("dontKnow"))
+              isSkippableList[0]['@id'] &&
+              isSkippableList[0]['@id'].includes('dontKnow'))
           ) {
             activityInfo.isSkippable = true;
           }
         }
 
-        activityInfo.items = _.get(activitiesObj, 'reprolib:terms/order.0.@list', []).map((key) => {
+        activityInfo.items = _.get(
+          activitiesObj,
+          'reprolib:terms/order.0.@list',
+          []
+        ).map((key) => {
           const item = items[key['@id']];
 
           let itemContent = {
-            _id: item["_id"] && item["_id"].split("/")[1],
-            name: item["@id"],
+            _id: item['_id'] && item['_id'].split('/')[1],
+            name: item['@id'],
             question:
-              item["schema:question"] &&
-              item["schema:question"][0] &&
-              item["schema:question"][0]["@value"],
+              item['schema:question'] &&
+              item['schema:question'][0] &&
+              item['schema:question'][0]['@value'],
             description:
-              item["schema:description"] &&
-              item["schema:description"][0] &&
-              item["schema:description"][0]["@value"],
+              item['schema:description'] &&
+              item['schema:description'][0] &&
+              item['schema:description'][0]['@value'],
             ui: {
               inputType:
-                item["reprolib:terms/inputType"] &&
-                item["reprolib:terms/inputType"][0] &&
-                item["reprolib:terms/inputType"][0]["@value"],
+                item['reprolib:terms/inputType'] &&
+                item['reprolib:terms/inputType'][0] &&
+                item['reprolib:terms/inputType'][0]['@value'],
             },
           };
 
-          let responseOptions = item["reprolib:terms/responseOptions"];
+          let responseOptions = item['reprolib:terms/responseOptions'];
 
           let itemType = itemContent.ui.inputType;
 
           if (responseOptions) {
             let multipleChoice =
               responseOptions[0] &&
-              responseOptions[0]["reprolib:terms/multipleChoice"];
+              responseOptions[0]['reprolib:terms/multipleChoice'];
 
             if (multipleChoice) {
               itemContent.multipleChoice =
-                multipleChoice[0] && multipleChoice[0]["@value"];
+                multipleChoice[0] && multipleChoice[0]['@value'];
             }
 
-            if (itemType === "radio") {
+            if (itemType === 'radio') {
               itemContent.options = {
                 isMultipleChoice: itemContent.multipleChoice || false,
-                nextOptionImage: "",
-                nextOptionName: "",
+                nextOptionImage: '',
+                nextOptionName: '',
                 options:
                   responseOptions[0] &&
-                  responseOptions[0]["schema:itemListElement"] &&
-                  responseOptions[0]["schema:itemListElement"].map(
+                  responseOptions[0]['schema:itemListElement'] &&
+                  responseOptions[0]['schema:itemListElement'].map(
                     (itemListElement) => {
                       return {
                         image:
-                          itemListElement["schema:image"] &&
-                          itemListElement["schema:image"][0] &&
-                          itemListElement["schema:image"][0]["@value"].toString(),
+                          itemListElement['schema:image'] &&
+                          itemListElement['schema:image'][0] &&
+                          itemListElement['schema:image'][0][
+                            '@value'
+                          ].toString(),
                         name:
-                          itemListElement["schema:name"] &&
-                          itemListElement["schema:name"][0] &&
-                          itemListElement["schema:name"][0]["@value"],
+                          itemListElement['schema:name'] &&
+                          itemListElement['schema:name'][0] &&
+                          itemListElement['schema:name'][0]['@value'],
                       };
                     }
                   ),
               };
             }
-            if (itemType === "text") {
+            if (itemType === 'text') {
               itemContent.options = {
                 requiredValue:
                   responseOptions[0] &&
-                  responseOptions[0]["reprolib:terms/requiredValue"] &&
-                  responseOptions[0]["reprolib:terms/requiredValue"][0] &&
-                  responseOptions[0]["reprolib:terms/requiredValue"][0][
-                    "@value"
+                  responseOptions[0]['reprolib:terms/requiredValue'] &&
+                  responseOptions[0]['reprolib:terms/requiredValue'][0] &&
+                  responseOptions[0]['reprolib:terms/requiredValue'][0][
+                    '@value'
                   ],
                 // TODO: add 'maximum response length' value which is absent for now
               };
             }
-            if (itemType === "slider") {
+            if (itemType === 'slider') {
               itemContent.options = {
                 maxValue:
                   responseOptions[0] &&
-                  responseOptions[0]["schema:maxValue"] &&
-                  responseOptions[0]["schema:maxValue"][0] &&
-                  responseOptions[0]["schema:maxValue"][0]["@value"],
+                  responseOptions[0]['schema:maxValue'] &&
+                  responseOptions[0]['schema:maxValue'][0] &&
+                  responseOptions[0]['schema:maxValue'][0]['@value'],
                 minValue:
                   responseOptions[0] &&
-                  responseOptions[0]["schema:minValue"] &&
-                  responseOptions[0]["schema:minValue"][0] &&
-                  responseOptions[0]["schema:minValue"][0]["@value"],
+                  responseOptions[0]['schema:minValue'] &&
+                  responseOptions[0]['schema:minValue'][0] &&
+                  responseOptions[0]['schema:minValue'][0]['@value'],
                 numOptions:
                   responseOptions[0] &&
-                  responseOptions[0]["schema:itemListElement"] &&
-                  responseOptions[0]["schema:itemListElement"].length,
+                  responseOptions[0]['schema:itemListElement'] &&
+                  responseOptions[0]['schema:itemListElement'].length,
               };
             }
-            if (itemType === "audioRecord" || itemType === "audioImageRecord") {
+            if (itemType === 'audioRecord' || itemType === 'audioImageRecord') {
               itemContent.options = {
                 requiredValue:
                   responseOptions[0] &&
-                  responseOptions[0]["reprolib:terms/requiredValue"] &&
-                  responseOptions[0]["reprolib:terms/requiredValue"][0] &&
-                  responseOptions[0]["reprolib:terms/requiredValue"][0][
-                    "@value"
+                  responseOptions[0]['reprolib:terms/requiredValue'] &&
+                  responseOptions[0]['reprolib:terms/requiredValue'][0] &&
+                  responseOptions[0]['reprolib:terms/requiredValue'][0][
+                    '@value'
                   ],
-                "schema:maxValue":
+                'schema:maxValue':
                   responseOptions[0] &&
-                  responseOptions[0]["schema:maxValue"] &&
-                  responseOptions[0]["schema:maxValue"][0] &&
-                  responseOptions[0]["schema:maxValue"][0]["@value"],
-                "schema:minValue":
+                  responseOptions[0]['schema:maxValue'] &&
+                  responseOptions[0]['schema:maxValue'][0] &&
+                  responseOptions[0]['schema:maxValue'][0]['@value'],
+                'schema:minValue':
                   responseOptions[0] &&
-                  responseOptions[0]["schema:minValue"] &&
-                  responseOptions[0]["schema:minValue"][0] &&
-                  responseOptions[0]["schema:minValue"][0]["@value"],
+                  responseOptions[0]['schema:minValue'] &&
+                  responseOptions[0]['schema:minValue'][0] &&
+                  responseOptions[0]['schema:minValue'][0]['@value'],
               };
             }
           }
 
-          if (itemType === "audioStimulus") {
+          if (itemType === 'audioStimulus') {
             let mediaObj = Object.entries(
-              item["reprolib:terms/media"] && item["reprolib:terms/media"][0]
+              item['reprolib:terms/media'] && item['reprolib:terms/media'][0]
             );
 
             if (mediaObj) {
@@ -408,29 +428,33 @@ export default {
 
               itemContent.media = {
                 [mediaUrl]: {
-                  "schema:contentUrl": [mediaUrl],
-                  "schema:name":
+                  'schema:contentUrl': [mediaUrl],
+                  'schema:name':
                     mediaData[0] &&
-                    mediaData[0]["schema:name"] &&
-                    mediaData[0]["schema:name"][0] &&
-                    mediaData[0]["schema:name"][0]["@value"],
-                  "schema:transcript":
+                    mediaData[0]['schema:name'] &&
+                    mediaData[0]['schema:name'][0] &&
+                    mediaData[0]['schema:name'][0]['@value'],
+                  'schema:transcript':
                     mediaData[0] &&
-                    mediaData[0]["schema:transcript"] &&
-                    mediaData[0]["schema:transcript"][0] &&
-                    mediaData[0]["schema:transcript"][0]["@value"],
+                    mediaData[0]['schema:transcript'] &&
+                    mediaData[0]['schema:transcript'][0] &&
+                    mediaData[0]['schema:transcript'][0]['@value'],
                 },
               };
             }
           }
 
           const itemModel = new Item();
-          itemModel.updateReferenceObject(itemModel.getItemBuilderData(itemContent));
+          itemModel.updateReferenceObject(
+            itemModel.getItemBuilderData(itemContent)
+          );
           return itemModel.getItemData();
         });
 
         const activityModel = new Activity();
-        activityModel.updateReferenceObject(activityModel.getActivityBuilderData(activityInfo));
+        activityModel.updateReferenceObject(
+          activityModel.getActivityBuilderData(activityInfo)
+        );
 
         this.activities.push(activityModel.getActivityData());
       });
@@ -474,18 +498,20 @@ export default {
     },
     duplicateActivity(index) {
       const activityModel = new Activity();
-      const names = this.activities.map(activity => activity.name);
+      const names = this.activities.map((activity) => activity.name);
 
       let suffix = 1;
-      while( names.includes(`${this.activities[index].name} (${suffix})`) ) {
+      while (names.includes(`${this.activities[index].name} (${suffix})`)) {
         suffix++;
       }
 
-      activityModel.updateReferenceObject(activityModel.getActivityBuilderData({
-        ...this.activities[index],
-        _id: null,
-        name: `${this.activities[index].name} (${suffix})`
-      }));
+      activityModel.updateReferenceObject(
+        activityModel.getActivityBuilderData({
+          ...this.activities[index],
+          _id: null,
+          name: `${this.activities[index].name} (${suffix})`,
+        })
+      );
 
       this.activities.push(activityModel.getActivityData());
     },
@@ -505,16 +531,16 @@ export default {
     },
     isProtocolValid() {
       if (!this.name) {
-        this.error = "Protocol Name is required";
+        this.error = 'Protocol Name is required';
         return false;
       } else if (!this.description) {
-        this.error = "Protocol Description is required";
+        this.error = 'Protocol Description is required';
         return false;
       } else if (this.activities.length == 0) {
-        this.error = "Protocol must contain at least one activity";
+        this.error = 'Protocol must contain at least one activity';
         return false;
       } else {
-        this.error = "";
+        this.error = '';
       }
       return true;
     },
@@ -522,15 +548,15 @@ export default {
       const schemaObj = this.model.getCompressedSchema();
       const contextObj = this.model.getContext();
 
-      var JSZip = require("jszip");
+      var JSZip = require('jszip');
       var zip = new JSZip();
 
       zip
-        .folder("protocols")
-        .file("schema", JSON.stringify(schemaObj, null, 2));
+        .folder('protocols')
+        .file('schema', JSON.stringify(schemaObj, null, 2));
       zip
-        .folder("protocols")
-        .file("context", JSON.stringify(contextObj, null, 2));
+        .folder('protocols')
+        .file('context', JSON.stringify(contextObj, null, 2));
 
       this.activities.forEach(function(activity) {
         zip
@@ -552,7 +578,7 @@ export default {
         });
       });
 
-      zip.generateAsync({ type: "blob" }).then((blob) => {
+      zip.generateAsync({ type: 'blob' }).then((blob) => {
         saveAs(blob, `${this.name}.zip`);
       });
     },
@@ -588,11 +614,17 @@ export default {
     },
     viewHistory() {
       if (this.isEditing) {
-        this.model.getProtocolData().then(current => {
-          const { log, upgrade } = Protocol.getChangeInfo(this.original, current);
+        this.model.getProtocolData().then((current) => {
+          const { log, upgrade } = Protocol.getChangeInfo(
+            this.original,
+            current
+          );
           this.changeHistoryDialog.visibility = true;
           this.changeHistoryDialog.data = log;
-          this.changeHistoryDialog.currentVersion = util.upgradeVersion(this.protocolVersion, upgrade);
+          this.changeHistoryDialog.currentVersion = util.upgradeVersion(
+            this.protocolVersion,
+            upgrade
+          );
           this.changeHistoryDialog.defaultVersion = null;
 
           this.historyComponentKey++;
@@ -607,21 +639,26 @@ export default {
         this.changeHistoryDialog.defaultVersion = version;
 
         this.viewHistory();
-        return ;
+        return;
       }
 
       /** viewing old changes */
-      this.getProtocols([this.versions[index], this.versions[index + 1]]).then(resp => {
-        const data = resp.data;
+      this.getProtocols([this.versions[index], this.versions[index + 1]]).then(
+        (resp) => {
+          const data = resp.data;
 
-        const { log, upgrade } = Protocol.getChangeInfo(data[1].content, data[0].content);
+          const { log, upgrade } = Protocol.getChangeInfo(
+            data[1].content,
+            data[0].content
+          );
 
-        this.changeHistoryDialog.visibility = true;
-        this.changeHistoryDialog.data = log;
-        this.changeHistoryDialog.defaultVersion = version;
+          this.changeHistoryDialog.visibility = true;
+          this.changeHistoryDialog.data = log;
+          this.changeHistoryDialog.defaultVersion = version;
 
-        this.historyComponentKey++;
-      });
+          this.historyComponentKey++;
+        }
+      );
     },
     resetValidation() {
       this.$refs.form.resetValidation();

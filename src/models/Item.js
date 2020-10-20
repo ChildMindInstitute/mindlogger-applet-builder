@@ -17,6 +17,11 @@ export default class Item {
         inputOptions: initialItemData.inputOptions || {},
         media: initialItemData.media || {},
         textRules: [v => !!v || "This field is required"],
+        nameRules: [
+          v =>
+            /^[a-zA-Z0-9-_]+$/.test(v) ||
+            "Item name must be contain only alphanumeric symbols or underscore"
+        ],
         inputTypes: [
           "radio",
           "text",

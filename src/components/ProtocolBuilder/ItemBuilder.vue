@@ -1,8 +1,8 @@
 <template>
   <v-card>
     <v-card-title class="headline grey lighten-2" primary-title>
-      <v-icon left>{{ isItemEditable ? 'mdi-pencil' : 'mdi-eye' }}</v-icon>
-      {{ isItemEditable ? 'Edit Item' : 'View Item' }}
+      <v-icon left>{{ isItemEditable ? "mdi-pencil" : "mdi-eye" }}</v-icon>
+      {{ isItemEditable ? "Edit Item" : "View Item" }}
     </v-card-title>
     <v-card-text>
       <v-form ref="form" lazy-validation>
@@ -11,8 +11,10 @@
           label="Item Name"
           counter="50"
           maxlength="50"
+          :rules="nameRules"
           :disabled="!isItemEditable"
           required
+          @keydown="nameKeydown($event)"
         />
         <v-text-field
           v-model="description"
@@ -100,7 +102,7 @@
         outlined
         color="primary"
         @click="onDiscardItem"
-      >{{ isItemEditable ? 'Discard Changes' : 'Close' }}</v-btn>
+      >{{ isItemEditable ? "Discard Changes" : "Close" }}</v-btn>
       <v-spacer />
       <v-btn color="primary" @click="onSaveItem">Save Item</v-btn>
     </v-card-actions>
@@ -157,6 +159,11 @@ export default {
     };
   },
   methods: {
+    nameKeydown(e) {
+      if (!/^[a-zA-Z0-9-_]+$/.test(e.key)) {
+        e.preventDefault();
+      }
+    },
     validate() {
       if (this.$refs.form.validate()) {
         this.snackbar = true;
@@ -191,4 +198,3 @@ export default {
   }
 };
 </script>
-

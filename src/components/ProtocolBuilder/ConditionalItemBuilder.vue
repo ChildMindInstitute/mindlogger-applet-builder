@@ -192,6 +192,7 @@ export default {
       this.showItemsFiltered = showItems.splice(index + 1);
     },
     onSaveItem() {
+      this.addOption();
       if (this.editConditionalItemIndex !== -1) {
         const payload = {
           index: this.editConditionalItemIndex,

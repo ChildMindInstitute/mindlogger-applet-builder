@@ -350,15 +350,19 @@ export default {
                     (itemListElement) => {
                       return {
                         image:
-                          itemListElement['schema:image'] &&
-                          itemListElement['schema:image'][0] &&
-                          itemListElement['schema:image'][0][
-                            '@value'
-                          ].toString(),
+                          typeof itemListElement["schema:image"] === "object" &&
+                          itemListElement["schema:image"] &&
+                          itemListElement["schema:image"][0] &&
+                          itemListElement["schema:image"][0]["@value"].toString() || 
+
+                          typeof itemListElement["schema:image"] == "string" && itemListElement["schema:image"],
                         name:
-                          itemListElement['schema:name'] &&
-                          itemListElement['schema:name'][0] &&
-                          itemListElement['schema:name'][0]['@value'],
+                          typeof itemListElement["schema:name"] === "object" &&
+                          itemListElement["schema:name"] &&
+                          itemListElement["schema:name"][0] &&
+                          itemListElement["schema:name"][0]["@value"] ||
+
+                          typeof itemListElement["schema:name"] == "string" && itemListElement["schema:name"],
                       };
                     }
                   ),

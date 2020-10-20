@@ -601,48 +601,12 @@ export default {
 
             this.$emit("updateProtocol", data);
           } else {
-            let { upgrade, updates, removed } = Protocol.getChangeInfo(
-              this.original,
-              data,
-              true
-            );
-
-            let newVersion = util.upgradeVersion(this.protocolVersion, upgrade);
-            if (newVersion != this.protocolVersion) {
-              updates.data['schema:schemaVersion'] = updates.data[
-                'schema:version'
-              ] = newVersion;
-
-              data.protocol = updates;
-              data.removed = removed;
-              data.baseVersion = this.protocolVersion;
-
-              this.$emit('updateProtocol', data);
-            } else {
-              const { upgrade } = Protocol.getChangeInfo(this.original, data);
-
-              let newVersion = util.upgradeVersion(
-                this.protocolVersion,
-                upgrade
-              );
-              if (newVersion != this.protocolVersion) {
-                data.protocol.data['schema:schemaVersion'] = data.protocol.data[
-                  'schema:version'
-                ] = newVersion;
-
-                this.$emit('updateProtocol', data);
-              } else {
-                this.$emit(
-                  'onUploadError',
-                  'Please make changes to update applet'
-                );
-              }
-            }
+            this.$emit("onUploadError", 'Please make changes to update applet');
           }
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+        }
+      }).catch(e => {
+        console.log(e);
+      });
     },
     resetBuilder() {
       Object.assign(this.$data, getInitialData(this.model));

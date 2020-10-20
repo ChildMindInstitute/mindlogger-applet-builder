@@ -1,6 +1,6 @@
 {
   "name": "applet-schema-builder",
-  "version": "0.3.1",
+  "version": "0.3.5",
   "private": false,
   "main": "./dist/applet-schema-builder.common.js",
   "scripts": {
@@ -13,6 +13,7 @@
   "dependencies": {
     "@sentry/browser": "^5.26.0",
     "@sentry/integrations": "^5.26.0",
+    "@toast-ui/vue-editor": "^2.4.0",
     "axios": "^0.19.2",
     "core-js": "^3.6.4",
     "file-saver": "^2.0.2",

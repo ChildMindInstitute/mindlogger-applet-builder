@@ -252,7 +252,11 @@ export default {
       this.id = protocol._id.split('/')[1];
       const markdownData = applet["reprolib:terms/landingPage"][0]["@value"];
       if (markdownData) {
-        this.markdownData = (await axios.get(markdownData)).data;
+        try {
+          this.markdownData = (await axios.get(markdownData)).data;
+        } catch (e) {
+          this.markdownData = '';
+        }
       } else {
         this.markdownData = applet["reprolib:terms/landingPageContent"] ? applet["reprolib:terms/landingPageContent"][0]["@value"] : "";
       }

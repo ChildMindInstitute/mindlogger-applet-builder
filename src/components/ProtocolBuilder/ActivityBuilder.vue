@@ -1,20 +1,14 @@
 <template>
   <div>
     <v-card>
-      <v-card-title
-        class="headline grey lighten-2"
-        primary-title
-      >
+      <v-card-title class="headline grey lighten-2" primary-title>
         <v-icon left>
           mdi-pencil
         </v-icon>
         Edit Activity
       </v-card-title>
       <v-card-text>
-        <v-form
-          ref="form"
-          lazy-validation
-        >
+        <v-form ref="form" lazy-validation>
           <v-text-field
             v-model="name"
             :rules="textRules"
@@ -42,76 +36,78 @@
             v-model="shuffleActivityOrder"
             label="Shuffle item order"
           />
-          <v-checkbox
-            v-model="isSkippable"
-            label="Allow items to be skipped"
-          />
-          <v-subheader>
-            Items
-          </v-subheader>
-          <v-list>
-            <v-list-item
-              v-for="(item, index) in items"
-              :key="item.id"
-            >
-              <v-list-item-content>
-                <v-list-item-title v-text="item.name" />
-                <v-list-item-title v-text="item.inputType" />
-              </v-list-item-content>
-              <v-list-item-action>
-                <v-btn
-                  icon
-                  @click="duplicateItem(index)"
-                >
-                  <v-icon
-                    color="grey lighten-1"
-                  >
-                    content_copy
-                  </v-icon>
+          <v-checkbox v-model="isSkippable" label="Allow items to be skipped" />
+          <v-tabs centered>
+            <v-tab>
+              Items
+            </v-tab>
+            <v-tab v-if="conditionalItems.length">
+              Conditional logic items
+            </v-tab>
+
+            <v-tab-item>
+              <v-card flat>
+                <v-card-text>
+                  <v-list>
+                    <v-list-item v-for="(item, index) in items" :key="item.id">
+                      <v-list-item-content>
+                        <v-list-item-title v-text="item.name" />
+                        <v-list-item-title v-text="item.inputType" />
+                      </v-list-item-content>
+                      <v-list-item-action>
+                        <v-btn icon @click="duplicateItem(index)">
+                          <v-icon color="grey lighten-1">
+                            content_copy
+                          </v-icon>
+                        </v-btn>
+                      </v-list-item-action>
+                      <v-list-item-action>
+                        <v-btn icon @click="editItem(index)">
+                          <v-icon
+                            v-if="item.isItemEditable"
+                            color="grey lighten-1"
+                          >
+                            edit
+                          </v-icon>
+                          <v-icon v-else color="grey lighten-1">
+                            mdi-eye
+                          </v-icon>
+                        </v-btn>
+                      </v-list-item-action>
+                      <v-list-item-action>
+                        <v-btn icon @click="deleteItem(index)">
+                          <v-icon color="grey lighten-1">
+                            mdi-delete
+                          </v-icon>
+                        </v-btn>
+                      </v-list-item-action>
+                    </v-list-item>
+                  </v-list>
+                </v-card-text>
+              </v-card>
+            </v-tab-item>
+            <v-tab-item v-if="conditionalItems.length">
+              <v-card flat>
+                <v-card-text>
+                  <conditional-item-list
+                    :options="conditionalItems"
+                    :deleteConditionalCallback="onDeleteConditionalCallback"
+                    @editConditionalItem="onEditConditionalItem"
+                    @dragConditionalItem="onDragConditionalItem"
+                  />
+                </v-card-text>
+              </v-card>
+            </v-tab-item>
+          </v-tabs>
+
+          <v-row justify="space-around">
+            <v-menu bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn color="primary" v-bind="attrs" v-on="on">
+                  Add item
                 </v-btn>
-              </v-list-item-action>
-              <v-list-item-action>
-                <v-btn
-                  icon
-                  @click="editItem(index)"
-                >
-                  <v-icon 
-                    v-if="item.isItemEditable"
-                    color="grey lighten-1"
-                  >
-                    edit
-                  </v-icon>
-                  <v-icon
-                    v-else
-                    color="grey lighten-1"
-                  >
-                    mdi-eye
-                  </v-icon>
-                </v-btn>
-              </v-list-item-action>
-              <v-list-item-action>
-                <v-btn
-                  icon
-                  @click="deleteItem(index)"
-                >
-                  <v-icon
-                    color="grey lighten-1"
-                  >
-                    mdi-delete
-                  </v-icon>
-                </v-btn>
-              </v-list-item-action>
-            </v-list-item>
-            <v-menu>
-              <template v-slot:activator="{ on }">
-                <v-list-item
-                  v-on="on"
-                >
-                  <v-icon color="grey lighten-1">
-                    add
-                  </v-icon>
-                </v-list-item>
               </template>
+
               <v-list>
                 <v-list-item @click="createItem">
                   <v-list-item-title>Blank item</v-list-item-title>
@@ -121,38 +117,48 @@
                 </v-list-item>
               </v-list>
             </v-menu>
-          </v-list>
+
+            <v-menu :disabled="!ifConditionalAvailable" bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn color="primary" v-bind="attrs" v-on="on">
+                  Add conditional logic
+                </v-btn>
+              </template>
+              <v-list>
+                <v-list-item
+                  :disabled="!conditionalRadioItems.length || items.length < 2"
+                  @click="createConditionalItem('radio')"
+                >
+                  <v-list-item-title>Radio/Checkbox</v-list-item-title>
+                </v-list-item>
+                <v-list-item
+                  :disabled="!conditionalSliderItems.length || items.length < 2"
+                  @click="createConditionalItem('slider')"
+                >
+                  <v-list-item-title>Slider</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+          </v-row>
         </v-form>
-        <v-alert
-          v-if="error !== ''"
-          type="error"
-        >
+        <v-alert v-if="error !== ''" type="error">
           {{ error }}
         </v-alert>
       </v-card-text>
       <v-divider />
 
       <v-card-actions>
-        <v-btn
-          outlined
-          color="primary"
-          @click="onDiscardActivity"
-        >
+        <v-btn outlined color="primary" @click="onDiscardActivity">
           Discard Changes
         </v-btn>
         <v-spacer />
-        <v-btn
-          color="primary"
-          @click="onClickSaveActivity"
-        >
+        <v-btn color="primary" @click="onClickSaveActivity">
           Save Activity
         </v-btn>
       </v-card-actions>
     </v-card>
-    <v-dialog
-      v-model="editItemDialog"
-      persistent
-    >
+
+    <v-dialog v-model="editItemDialog" persistent>
       <ItemBuilder
         :key="componentKey"
         :initial-item-data="initialItemData"
@@ -163,22 +169,32 @@
         @closeItemModal="onCloseItemModal"
       />
     </v-dialog>
-    <v-dialog
-      v-model="urlDialog"
-      persistent
-    >
-      <UrlItemUploader
+
+    <v-dialog v-model="editConditionalItemDialog" persistent>
+      <ConditionalItemBuilder
         :key="componentKey"
-        @uploadItem="onUploadItem"
+        :initial-conditional-item-data="initialConditionalItemData"
+        :items="conditionalItemsForBuilder"
+        :showItems="items"
+        :editMode="isConditionalEditMode"
+        :editConditionalItemIndex="editConditionalItemIndex"
+        :editConditionalCallback="onEditConditionalCallback"
+        :type="conditionalBuilderType"
+        @closeConditionalItemModal="onCloseConditionalItemModal"
       />
+    </v-dialog>
+
+    <v-dialog v-model="urlDialog" persistent>
+      <UrlItemUploader :key="componentKey" @uploadItem="onUploadItem" />
     </v-dialog>
   </div>
 </template>
 
 <script>
-
 import ItemBuilder from './ItemBuilder.vue';
+import ConditionalItemBuilder from './ConditionalItemBuilder.vue';
 import UrlItemUploader from './UrlItemUploader.vue';
+import ConditionalItemList from './ConditionalItemList.vue';
 import { string } from 'prop-types';
 import Activity from '../../models/Activity';
 import Item from '../../models/Item';
@@ -186,7 +202,9 @@ import Item from '../../models/Item';
 export default {
   components: {
     ItemBuilder,
+    ConditionalItemBuilder,
     UrlItemUploader,
+    ConditionalItemList,
   },
   props: {
     initialActivityData: {
@@ -199,7 +217,7 @@ export default {
       default: null,
     }
   },
-  data: function () {
+  data: function() {
     const model = new Activity();
     model.updateReferenceObject(this);
 
@@ -207,15 +225,40 @@ export default {
       model,
       ...model.getActivityBuilderData(this.initialActivityData),
       itemTemplates: []
-    }
+    };
+  },
+  watch: {
+    items() {
+      this.conditionalRadioItems = this.collectConditionals('radio');
+      this.conditionalSliderItems = this.collectConditionals('slider');
+
+      this.checkIfConditionalAvailable();
+    },
+  },
+  created() {
+    this.conditionalRadioItems = this.collectConditionals('radio');
+    this.conditionalSliderItems = this.collectConditionals('slider');
+
+    this.checkIfConditionalAvailable();
   },
   beforeMount() {
     this.itemTemplates = this.templates
   },
   methods: {
-    validate () {
+    checkIfConditionalAvailable() {
+      this.ifConditionalAvailable =
+        (this.conditionalRadioItems.length && this.items.length >= 2) ||
+        (this.conditionalSliderItems.length && this.items.length >= 2) ||
+        this.conditionalItems.length;
+    },
+    collectConditionals(type) {
+      return this.items.filter((item) => {
+        return item.ui.inputType === type;
+      });
+    },
+    validate() {
       if (this.$refs.form.validate()) {
-        this.snackbar = true
+        this.snackbar = true;
       }
     },
     forceUpdate() {
@@ -229,6 +272,16 @@ export default {
       };
       this.forceUpdate();
       this.editItemDialog = true;
+    },
+    createConditionalItem(type) {
+      this.isConditionalEditMode = false;
+      this.conditionalBuilderType = type;
+      this.conditionalItemsForBuilder =
+        type === 'radio'
+          ? this.conditionalRadioItems
+          : this.conditionalSliderItems;
+      this.editConditionalItemIndex = -1;
+      this.editConditionalItemDialog = true;
     },
     importItem() {
       this.editIndex = -1;
@@ -250,6 +303,34 @@ export default {
         this.onNewItem(response);
       }
     },
+    onDragConditionalItem(items) {
+      this.conditionalItems = items;
+    },
+    onCloseConditionalItemModal(response) {
+      this.editConditionalItemDialog = false;
+    },
+    onEditConditionalCallback(payload, isForEdit) {
+      this.editConditionalItemDialog = false;
+      if (isForEdit) {
+        this.$set(this.conditionalItems, payload.index, payload.item);
+      } else {
+        let condItems = this.conditionalItems.concat(payload);
+        this.conditionalItems = condItems;
+      }
+
+      this.forceUpdate();
+    },
+    onDeleteConditionalCallback(index) {
+      this.conditionalItems.splice(index, 1);
+    },
+    onEditConditionalItem(index) {
+      this.editConditionalItemIndex = index;
+
+      this.initialConditionalItemData = this.conditionalItems[index];
+      this.forceUpdate();
+      this.isConditionalEditMode = true;
+      this.editConditionalItemDialog = true;
+    },
     onUploadItem(response) {
       this.urlDialog = false;
       if (response) {
@@ -267,18 +348,20 @@ export default {
     },
     duplicateItem(index) {
       const itemModel = new Item();
-      const names = this.items.map(item => item.name);
+      const names = this.items.map((item) => item.name);
 
       let suffix = 1;
-      while( names.includes(`${this.items[index].name} (${suffix})`) ) {
+      while (names.includes(`${this.items[index].name} (${suffix})`)) {
         suffix++;
       }
 
-      itemModel.updateReferenceObject(itemModel.getItemBuilderData({
-        ...this.items[index],
-        _id: null,
-        name: `${this.items[index].name} (${suffix})`
-      }));
+      itemModel.updateReferenceObject(
+        itemModel.getItemBuilderData({
+          ...this.items[index],
+          _id: null,
+          name: `${this.items[index].name} (${suffix})`,
+        })
+      );
 
       this.items.push(itemModel.getItemData());
     },
@@ -317,7 +400,7 @@ export default {
     },
     onDiscardActivity() {
       this.$emit('closeModal', null);
-    }
+    },
   },
 };
 </script>

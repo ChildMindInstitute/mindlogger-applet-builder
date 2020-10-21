@@ -11,8 +11,8 @@
     "publish-package": "npm publish --access=public"
   },
   "dependencies": {
-    "@sentry/browser": "^5.25.0",
-    "@sentry/integrations": "^5.25.0",
+    "@sentry/browser": "^5.26.0",
+    "@sentry/integrations": "^5.26.0",
     "@toast-ui/vue-editor": "^2.4.0",
     "axios": "^0.19.2",
     "core-js": "^3.6.4",
@@ -20,7 +20,11 @@
     "jszip": "^3.2.2",
     "prop-types": "^15.7.2",
     "vue": "^2.6.10",
-    "vuetify": "^2.2.15"
+    "vue-router": "^3.4.3",
+    "vuedraggable": "^2.24.2",
+    "vuetify": "^2.2.15",
+    "vuex": "^3.5.1",
+    "vuex-persistedstate": "^3.1.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.2.3",

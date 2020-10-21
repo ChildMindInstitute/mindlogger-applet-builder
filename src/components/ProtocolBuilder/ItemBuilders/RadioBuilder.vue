@@ -55,7 +55,7 @@
               v-bind="attrs"
               v-on="on"
             >
-              Slide X Transition
+              Saved Templates
             </v-btn>
           </template>
 

@@ -261,16 +261,16 @@ export default {
     this.$emit("setLoading", false);
   },
   methods: {
-    // fillBuilderWithAppletData() {
-    //   if (!this.$route || !this.$route.params || !this.$route.params.applet)
-    //     return;
-
-    //   const { applet, activities, items } = this.$route.params.applet;
     async fillBuilderWithAppletData() {
       const { applet, activities, items, protocol } = this.initialData;
 
       this.applet = applet;
-      this.name = applet['@id'].replace('_schema', '');
+      const prefLabel = applet['http://www.w3.org/2004/02/skos/core#prefLabel'];
+
+      this.name = prefLabel &&
+                    prefLabel[0] &&
+                    prefLabel[0]['@value'] || 'applet';
+
       this.description = applet['schema:description'][0]['@value'];
       this.id = protocol._id.split('/')[1];
       const markdownData = applet["reprolib:terms/landingPage"][0]["@value"];

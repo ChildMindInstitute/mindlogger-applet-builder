@@ -382,6 +382,10 @@ export default {
                           itemListElement['schema:name'] &&
                           itemListElement['schema:name'][0] &&
                           itemListElement['schema:name'][0]['@value'],
+                        value:
+                          itemListElement['schema:value'] &&
+                          itemListElement['schema:value'][0] &&
+                          itemListElement['schema:value'][0]['@value'],
                       };
                     }
                   ),

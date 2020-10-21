@@ -202,7 +202,7 @@ export default {
   },
   data: function () {
     return {
-      isTokenValue: Object.keys(this.responseOptions).length ? (this.responseOptions.valueType.includes("token") ? true : false) : false,
+      isTokenValue: (this.responseOptions.valueType && this.responseOptions.valueType.includes("token")) || false,
       isMultipleChoice: this.initialItemData.isMultipleChoice || false,
       isSkippable: this.isSkippableItem || false,
       isTemplate: false,

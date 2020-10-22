@@ -252,7 +252,11 @@ export default {
       this.id = protocol._id.split('/')[1];
       const markdownData = applet["reprolib:terms/landingPage"][0]["@value"];
       if (markdownData) {
-        this.markdownData = (await axios.get(markdownData)).data;
+        try {
+          this.markdownData = (await axios.get(markdownData)).data;
+        } catch (e) {
+          this.markdownData = '';
+        }
       } else {
         this.markdownData = applet["reprolib:terms/landingPageContent"] ? applet["reprolib:terms/landingPageContent"][0]["@value"] : "";
       }
@@ -350,15 +354,19 @@ export default {
                     (itemListElement) => {
                       return {
                         image:
-                          itemListElement['schema:image'] &&
-                          itemListElement['schema:image'][0] &&
-                          itemListElement['schema:image'][0][
-                            '@value'
-                          ].toString(),
+                          typeof itemListElement["schema:image"] === "object" &&
+                          itemListElement["schema:image"] &&
+                          itemListElement["schema:image"][0] &&
+                          itemListElement["schema:image"][0]["@value"].toString() || 
+
+                          typeof itemListElement["schema:image"] == "string" && itemListElement["schema:image"],
                         name:
-                          itemListElement['schema:name'] &&
-                          itemListElement['schema:name'][0] &&
-                          itemListElement['schema:name'][0]['@value'],
+                          typeof itemListElement["schema:name"] === "object" &&
+                          itemListElement["schema:name"] &&
+                          itemListElement["schema:name"][0] &&
+                          itemListElement["schema:name"][0]["@value"] ||
+
+                          typeof itemListElement["schema:name"] == "string" && itemListElement["schema:name"],
                       };
                     }
                   ),

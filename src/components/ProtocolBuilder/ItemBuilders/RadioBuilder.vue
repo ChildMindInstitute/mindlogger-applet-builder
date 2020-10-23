@@ -127,6 +127,7 @@
               <v-text-field
                 v-model="nextOptionValue"
                 :rules="textRules"
+                type="number"
                 label="Option Value"
                 counter="5"
                 maxlength="5"
@@ -227,7 +228,7 @@ export default {
     addOption() {
       const nextOption = {
         'name': this.nextOptionName,
-        'value': this.nextOptionValue,
+        'value': Number(this.nextOptionValue),
       };
       if (this.nextOptionImage) {
         nextOption.image = this.nextOptionImage.toString();
@@ -240,6 +241,7 @@ export default {
         this.$emit('updateTemplates', newOption);
         this.isTemplate = false;
       }
+
       this.options.push(nextOption);
       this.nextOptionName = '';
       this.nextOptionValue = '';
@@ -256,7 +258,7 @@ export default {
     addTemplateOption(item) {
       const nextOption = {
         'name': item.text,
-        'value': item.value,
+        'value': Number(item.value),
         'image': ''
       };
       this.options.push(nextOption);

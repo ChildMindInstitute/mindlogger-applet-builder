@@ -275,7 +275,11 @@ export default {
       this.id = protocol._id.split('/')[1];
       const markdownData = applet["reprolib:terms/landingPage"][0]["@value"];
       if (markdownData) {
-        this.markdownData = (await axios.get(markdownData)).data;
+        try {
+          this.markdownData = (await axios.get(markdownData)).data;
+        } catch (e) {
+          this.markdownData = '';
+        }
       } else {
         this.markdownData = applet["reprolib:terms/landingPageContent"] ? applet["reprolib:terms/landingPageContent"][0]["@value"] : "";
       }
@@ -373,15 +377,19 @@ export default {
                     (itemListElement) => {
                       return {
                         image:
-                          itemListElement['schema:image'] &&
-                          itemListElement['schema:image'][0] &&
-                          itemListElement['schema:image'][0][
-                            '@value'
-                          ].toString(),
+                          typeof itemListElement["schema:image"] === "object" &&
+                          itemListElement["schema:image"] &&
+                          itemListElement["schema:image"][0] &&
+                          itemListElement["schema:image"][0]["@value"].toString() || 
+
+                          typeof itemListElement["schema:image"] == "string" && itemListElement["schema:image"],
                         name:
-                          itemListElement['schema:name'] &&
-                          itemListElement['schema:name'][0] &&
-                          itemListElement['schema:name'][0]['@value'],
+                          typeof itemListElement["schema:name"] === "object" &&
+                          itemListElement["schema:name"] &&
+                          itemListElement["schema:name"][0] &&
+                          itemListElement["schema:name"][0]["@value"] ||
+
+                          typeof itemListElement["schema:name"] == "string" && itemListElement["schema:name"],
                         value:
                           itemListElement['schema:value'] &&
                           itemListElement['schema:value'][0] &&
@@ -627,15 +635,18 @@ export default {
           let { upgrade, updates, removed } = Protocol.getChangeInfo(this.original, data, true);
 
           let newVersion = util.upgradeVersion(this.protocolVersion, upgrade);
-          updates.data['schema:schemaVersion'] = updates.data['schema:version'] = newVersion;
-          updates.data['landingPageContent'] = this.markdownData;
-          updates.data['landingPage'] = "";
+          if (newVersion != this.protocolVersion) {
+            updates.data['schema:schemaVersion'] = updates.data['schema:version'] = newVersion;
+            updates.data['landingPageContent'] = this.markdownData;
+            updates.data['landingPage'] = "";
 
-          data.protocol = updates;
-          data.removed = removed;
-          data.baseVersion = this.protocolVersion;
-          this.$emit("updateProtocol", data);
-
+            data.protocol = updates;
+            data.removed = removed;
+            data.baseVersion = this.protocolVersion;
+            this.$emit("updateProtocol", data);
+          } else {
+            this.$emit("onUploadError", 'Please make changes to update applet');
+          }
         }
       }).catch(e => {
         console.log(e);

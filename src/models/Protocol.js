@@ -132,6 +132,9 @@ export default class Protocol {
 
   static getHistoryTemplate(oldValue, newValue) {
     return {
+      'landingPageContent': {
+        updated: (field) => `About page was changed}`,
+      },
       'skos:prefLabel': {
         updated: (field) => `Protocol name was changed to ${_.get(newValue, field)}`,
       },

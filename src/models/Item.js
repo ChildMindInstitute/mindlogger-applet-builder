@@ -5,7 +5,6 @@ export default class Item {
   }
 
   getItemBuilderData(initialItemData) {
-    console.log('data---->', initialItemData)
     return {
         id: initialItemData._id || null,
         name: initialItemData.name || '',
@@ -219,15 +218,33 @@ export default class Item {
 
   static getHistoryTemplate(oldValue, newValue) {
     const radioOptionListUpdate = (field) => {
-      const oldOptions = _.get(oldValue, field, []).map(option => option.name);
-      const newOptions = _.get(newValue, field, []).map(option => option.name);
+      const oldOptions = _.get(oldValue, field, []).map(({ name, value }) => {
+        return {
+          name,
+          value
+        }
+      });
+      const newOptions = _.get(newValue, field, []).map(({ name, value }) => {
+        return {
+          name,
+          value
+        }
+      });
 
-      const removedOptions = oldOptions.filter(option => newOptions.indexOf(option) < 0);
-      const insertedOptions = newOptions.filter(option => oldOptions.indexOf(option) < 0);
+      const removedOptions = oldOptions.filter(option => {
+        return newOptions.find(newOption => {
+          return option.name === newOption.name && option.value === newOption.value
+        }) ? false : true
+      });
+      const insertedOptions = newOptions.filter(newOption => {
+        return oldOptions.find(option => {
+          return option.name === newOption.name && option.value === newOption.value
+        }) ? false : true
+      });
 
       return [
-        ...removedOptions.map(option => `${option} option was removed`),
-        ...insertedOptions.map(option => `${option} option was inserted`)
+        ...removedOptions.map(option => `${option.name} | ${option.value} option was removed`),
+        ...insertedOptions.map(option => `${option.name} | ${option.value} option was inserted`)
       ];
     };
     const optionUpdate = name => field => 

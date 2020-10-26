@@ -61,7 +61,7 @@ export default class Item {
             const choiceSchema = {
                 "@type": "schema:option",
                 "schema:name": option.name,
-                "schema:value": index + 1
+                "schema:value": option.value,
             };
             if (option.image) {
                 choiceSchema["schema:image"] = option.image;
@@ -76,7 +76,7 @@ export default class Item {
     if (this.ref.inputType === "radio") {
         const choices = this.getRadioChoices();
         return {
-        "@valueType": "xsd:anyURI",
+        "valueType": this.ref.options.isTokenValue ? "xsd:token" : "xsd:anyURI",
         "multipleChoice": this.ref.options.isMultipleChoice,
         "schema:minValue": 1,
         "schema:maxValue": choices.length,
@@ -89,7 +89,7 @@ export default class Item {
     if (this.ref.inputType === "slider") {
         const choices = this.getSliderChoices();
         return {
-        "@valueType": "xsd:integer",
+        "valueType": "xsd:integer",
         "schema:minValue": this.ref.options.minValue,
         "schema:maxValue": this.ref.options.maxValue,
         choices: choices
@@ -218,15 +218,33 @@ export default class Item {
 
   static getHistoryTemplate(oldValue, newValue) {
     const radioOptionListUpdate = (field) => {
-      const oldOptions = _.get(oldValue, field, []).map(option => option.name);
-      const newOptions = _.get(newValue, field, []).map(option => option.name);
+      const oldOptions = _.get(oldValue, field, []).map(({ name, value }) => {
+        return {
+          name,
+          value
+        }
+      });
+      const newOptions = _.get(newValue, field, []).map(({ name, value }) => {
+        return {
+          name,
+          value
+        }
+      });
 
-      const removedOptions = oldOptions.filter(option => newOptions.indexOf(option) < 0);
-      const insertedOptions = newOptions.filter(option => oldOptions.indexOf(option) < 0);
+      const removedOptions = oldOptions.filter(option => {
+        return newOptions.find(newOption => {
+          return option.name === newOption.name && option.value === newOption.value
+        }) ? false : true
+      });
+      const insertedOptions = newOptions.filter(newOption => {
+        return oldOptions.find(option => {
+          return option.name === newOption.name && option.value === newOption.value
+        }) ? false : true
+      });
 
       return [
-        ...removedOptions.map(option => `${option} option was removed`),
-        ...insertedOptions.map(option => `${option} option was inserted`)
+        ...removedOptions.map(option => `${option.name} | ${option.value} option was removed`),
+        ...insertedOptions.map(option => `${option.name} | ${option.value} option was inserted`)
       ];
     };
     const optionUpdate = name => field => 

@@ -3,18 +3,82 @@
     ref="form"
     v-model="valid"
   >
-    <v-checkbox
-      v-model="isSkippable"
-      label="Skippable Item"
-      :disabled="!isItemEditable"
-      @change="updateAllow"
-    />
-    <v-checkbox
-      v-model="isMultipleChoice"
-      label="Multiple Choice"
-      :disabled="!isItemEditable"
-      @change="update"
-    />
+    <v-row>
+      <v-col 
+        class="d-flex align-center"
+        cols="12"
+        sm="3"
+      >
+        <v-checkbox
+          v-model="isTokenValue"
+          label="Token Value"
+          :disabled="!isItemEditable"
+          @change="update"
+        />
+      </v-col>
+      <v-col 
+        class="d-flex align-center"
+        cols="12"
+        sm="3"
+      >
+        <v-checkbox
+          v-model="isSkippable"
+          label="Skippable Item"
+          :disabled="!isItemEditable"
+          @change="updateAllow"
+        />
+      </v-col>
+      <v-col 
+        class="d-flex align-center"
+        cols="12"
+        sm="3"
+      >
+        <v-checkbox
+          v-model="isMultipleChoice"
+          label="Multiple Choice"
+          :disabled="!isItemEditable"
+          @change="update"
+        />      
+      </v-col>
+      <v-col 
+        v-if="isTokenValue"
+        class="d-flex align-center"
+        cols="12"
+        sm="3"
+      >
+        <v-menu offset-y>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              class="deep-orange"
+              color="primary"
+              dark
+              v-bind="attrs"
+              v-on="on"
+            >
+              Saved Templates
+            </v-btn>
+          </template>
+
+          <v-list>
+            <v-list-item
+              v-for="(item, i) in items"
+              :key="i"
+            >
+              <v-list-item-title @click="addTemplateOption(item)">
+                {{ item.text }} | {{ item.value }}
+              </v-list-item-title>
+              <v-btn
+                icon
+                color="grey darken-1 ml-2"
+                @click="removeTemplate(item)"
+              >
+                <v-icon>mdi-delete</v-icon>
+              </v-btn>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </v-col>
+    </v-row>
     <v-list>
       <v-subheader>
         Options
@@ -38,23 +102,70 @@
           </v-btn>
         </v-list-item-action>
       </v-list-item>
-      <v-list-item>
+      <v-list-item class="d-block">
         <v-form>
-          <v-text-field
-            v-model="nextOptionName"
-            :rules="textRules"
-            label="Option Text"
-            counter="55"
-            maxlength="55"
-            :disabled="!isItemEditable"
-            @change="update"
-          />
-          <v-text-field
-            v-model="nextOptionImage"
-            label="Option Image"
-            :disabled="!isItemEditable"
-            @change="update"
-          />
+          <v-row>
+            <v-col 
+              cols="12"
+              sm="4"
+            >
+              <v-text-field
+                v-model="nextOptionName"
+                :rules="textRules"
+                label="Option Text"
+                counter="55"
+                maxlength="55"
+                :disabled="!isItemEditable"
+                @change="update"
+              />
+            </v-col>
+            <v-col 
+              v-if="isTokenValue"
+              cols="12"
+              sm="4"
+            >
+              <v-text-field
+                v-model="nextOptionValue"
+                :rules="textRules"
+                type="number"
+                label="Option Value"
+                counter="5"
+                maxlength="5"
+                :disabled="!isItemEditable"
+                @change="update"
+              />
+            </v-col>
+            <v-col 
+              v-if="isTokenValue"
+              cols="12"
+              sm="1"
+            />
+            <v-col 
+              v-if="isTokenValue"
+              cols="12"
+              sm="3"
+            >
+              <v-checkbox
+                v-model="isTemplate"
+                label="Set as a template"
+                :disabled="!isItemEditable"
+                @change="update"
+              />
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col 
+              cols="12"
+              sm="12"
+            >
+              <v-text-field
+                v-model="nextOptionImage"
+                label="Option Image"
+                :disabled="!isItemEditable"
+                @change="update"
+              />
+            </v-col>
+          </v-row>
           <v-btn
             :disabled="!valid || !isItemEditable"
             @click="addOption"
@@ -78,23 +189,37 @@ export default {
       type: Boolean,
       default: false,
     },
+    responseOptions: {
+      type: Object,
+    },
     isItemEditable: {
       type: Boolean,
       default: true,
     },
+    itemTemplates: {
+      type: Array,
+      default: null
+    }
   },
   data: function () {
     return {
+      isTokenValue: (this.responseOptions.valueType && this.responseOptions.valueType.includes("token")) || false,
       isMultipleChoice: this.initialItemData.isMultipleChoice || false,
       isSkippable: this.isSkippableItem || false,
+      isTemplate: false,
       nextOptionName: this.initialItemData.nextOptionName || '',
+      nextOptionValue: this.initialItemData.nextOptionValue || '',
       nextOptionImage: this.initialItemData.nextOptionImage || '',
       options: this.initialItemData.options || [],
       valid: true,
       textRules: [
         v => !!v || 'Radio options cannot be empty',
-      ]
+      ],
+      items: []
     };
+  },
+  async beforeMount() {
+    this.items = this.itemTemplates
   },
   methods: {
     resetValidation () {
@@ -103,14 +228,40 @@ export default {
     addOption() {
       const nextOption = {
         'name': this.nextOptionName,
+        'value': Number(this.nextOptionValue),
       };
       if (this.nextOptionImage) {
         nextOption.image = this.nextOptionImage.toString();
       }
+      if (this.isTemplate) {
+        const newOption = {
+          text: this.nextOptionName,
+          value: this.nextOptionValue
+        }
+        this.$emit('updateTemplates', newOption);
+        this.isTemplate = false;
+      }
+
       this.options.push(nextOption);
       this.nextOptionName = '';
+      this.nextOptionValue = '';
       this.nextOptionImage = '';
       this.resetValidation();
+      this.update();
+    },
+    removeTemplate(item) {
+      const { items } = this;
+      const updatedItems = items.filter(({ text, value }) => text !== item.text || value !== item.value)
+      this.items = [...updatedItems]
+      this.$emit('removeTemplate', item);
+    },
+    addTemplateOption(item) {
+      const nextOption = {
+        'name': item.text,
+        'value': Number(item.value),
+        'image': ''
+      };
+      this.options.push(nextOption);
       this.update();
     },
     deleteOption(index) {
@@ -119,9 +270,11 @@ export default {
     },
     update() {
       const responseOptions = {
+        'isTokenValue': this.isTokenValue,
         'isMultipleChoice': this.isMultipleChoice,
         'isSkippableItem': this.isSkippableItem,
         'nextOptionName': this.nextOptionName,
+        'nextOptionValue': this.nextOptionValue,
         'nextOptionImage': this.nextOptionImage,
         'options': this.options,
       };

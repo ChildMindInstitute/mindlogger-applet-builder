@@ -105,7 +105,10 @@
     <v-dialog v-model="dialog" width="800" persistent>
       <ActivityBuilder
         :key="componentKey"
+        :templates="itemTemplates"
         :initial-activity-data="initialActivityData"
+        @removeTemplate="onRemoveTemplate"
+        @updateTemplates="onUpdateTemplates"
         @closeModal="onCloseActivityModal"
       />
     </v-dialog>
@@ -152,7 +155,8 @@ const getInitialData = (model) => {
     name: '',
     description: '',
     activities: [],
-    textRules: [(v) => !!v || 'This field is required'],
+    itemTemplates: [],
+    textRules: [(v) => !!v || "This field is required"],
     dialog: false,
     error: '',
     initialActivityData: {},
@@ -172,6 +176,20 @@ const getInitialData = (model) => {
       defaultVersion: null,
       data: [],
     },
+    itemplates: [
+    { 
+      text: "Lied to parents",
+      value: "-3"
+    },
+    { 
+      text: "Yelled at teacher",
+      value: "-5"
+    },
+    { 
+      text: "Missed class",
+      value: "-2"
+    }
+  ]
   };
 };
 
@@ -189,6 +207,11 @@ export default {
     },
     initialData: {
       type: Object,
+      required: false,
+      default: null,
+    },
+    templates: {
+      type: Array,
       required: false,
       default: null,
     },
@@ -234,8 +257,8 @@ export default {
         return;
       }
     }
-
-    this.$emit('setLoading', false);
+    this.itemTemplates = this.templates
+    this.$emit("setLoading", false);
   },
   methods: {
     // fillBuilderWithAppletData() {
@@ -367,6 +390,10 @@ export default {
                           itemListElement["schema:name"][0]["@value"] ||
 
                           typeof itemListElement["schema:name"] == "string" && itemListElement["schema:name"],
+                        value:
+                          itemListElement['schema:value'] &&
+                          itemListElement['schema:value'][0] &&
+                          itemListElement['schema:value'][0]['@value'],
                       };
                     }
                   ),
@@ -466,6 +493,16 @@ export default {
 
         this.activities.push(activityModel.getActivityData());
       });
+    },
+    onUpdateTemplates(option) {
+      this.itemTemplates.push(option)
+      this.$emit("updateTemplates", option)
+    },
+    onRemoveTemplate(item) {
+      const { itemTemplates } = this;
+      const updatedItems = itemTemplates.filter(({ text, value }) => text !== item.text || value !== item.value)
+      this.itemTemplates = [...updatedItems]
+      this.$emit('removeTemplate', item);
     },
     validate() {
       if (this.$refs.form.validate()) {
@@ -606,7 +643,6 @@ export default {
             data.protocol = updates;
             data.removed = removed;
             data.baseVersion = this.protocolVersion;
-
             this.$emit("updateProtocol", data);
           } else {
             this.$emit("onUploadError", 'Please make changes to update applet');

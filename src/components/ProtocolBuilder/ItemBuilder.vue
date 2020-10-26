@@ -42,8 +42,12 @@
         <RadioBuilder
           v-if="inputType === 'radio'"
           :is-skippable-item="allow"
+          :response-options="responseOptions"
           :initial-item-data="options"
           :is-item-editable="isItemEditable"
+          :item-templates="itemTemplates"
+          @removeTemplate="onRemoveTemplate"
+          @updateTemplates="onUpdateTemplates"
           @updateOptions="updateOptions"
           @updateAllow="updateAllow"
         />
@@ -147,6 +151,10 @@ export default {
     isItemEditable: {
       type: Boolean,
       default: true
+    },
+    templates: {
+      type: Array,
+      default: null
     }
   },
   data: function() {
@@ -157,6 +165,9 @@ export default {
       model,
       ...model.getItemBuilderData(this.initialItemData)
     };
+  },
+  beforeMount() {
+    this.itemTemplates = this.templates
   },
   methods: {
     nameKeydown(e) {
@@ -180,6 +191,12 @@ export default {
     },
     updateMedia(newMedia) {
       this.media = newMedia;
+    },
+    onUpdateTemplates(option) {
+      this.$emit('updateTemplates', option);
+    },
+    onRemoveTemplate(option) {
+      this.$emit('removeTemplate', option);
     },
     updateOptions(newOptions) {
       this.options = newOptions;

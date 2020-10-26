@@ -163,6 +163,9 @@
         :key="componentKey"
         :initial-item-data="initialItemData"
         :is-item-editable="isItemEditable"
+        :templates="itemTemplates"
+        @removeTemplate="onRemoveTemplate"
+        @updateTemplates="onUpdateTemplates"
         @closeItemModal="onCloseItemModal"
       />
     </v-dialog>
@@ -206,8 +209,13 @@ export default {
   props: {
     initialActivityData: {
       type: Object,
-      required: true,
+      required: true
     },
+    templates: {
+      type: Array,
+      required: false,
+      default: null,
+    }
   },
   data: function() {
     const model = new Activity();
@@ -216,6 +224,7 @@ export default {
     return {
       model,
       ...model.getActivityBuilderData(this.initialActivityData),
+      itemTemplates: []
     };
   },
   watch: {
@@ -231,6 +240,9 @@ export default {
     this.conditionalSliderItems = this.collectConditionals('slider');
 
     this.checkIfConditionalAvailable();
+  },
+  beforeMount() {
+    this.itemTemplates = this.templates
   },
   methods: {
     checkIfConditionalAvailable() {
@@ -278,6 +290,12 @@ export default {
       };
       this.forceUpdate();
       this.urlDialog = true;
+    },
+    onUpdateTemplates(option) {
+      this.$emit('updateTemplates', option);
+    },
+    onRemoveTemplate(option) {
+      this.$emit('removeTemplate', option);
     },
     onCloseItemModal(response) {
       this.editItemDialog = false;

@@ -261,16 +261,16 @@ export default {
     this.$emit("setLoading", false);
   },
   methods: {
-    // fillBuilderWithAppletData() {
-    //   if (!this.$route || !this.$route.params || !this.$route.params.applet)
-    //     return;
-
-    //   const { applet, activities, items } = this.$route.params.applet;
     async fillBuilderWithAppletData() {
       const { applet, activities, items, protocol } = this.initialData;
 
       this.applet = applet;
-      this.name = applet['@id'].replace('_schema', '');
+      const prefLabel = applet['http://www.w3.org/2004/02/skos/core#prefLabel'];
+
+      this.name = prefLabel &&
+                    prefLabel[0] &&
+                    prefLabel[0]['@value'] || 'applet';
+
       this.description = applet['schema:description'][0]['@value'];
       this.id = protocol._id.split('/')[1];
       const markdownData = applet["reprolib:terms/landingPage"][0]["@value"];
@@ -375,25 +375,16 @@ export default {
                   responseOptions[0]['schema:itemListElement'] &&
                   responseOptions[0]['schema:itemListElement'].map(
                     (itemListElement) => {
+                      const image = itemListElement['schema:image'];
+                      const name = itemListElement["schema:name"];
+
                       return {
-                        image:
-                          typeof itemListElement["schema:image"] === "object" &&
-                          itemListElement["schema:image"] &&
-                          itemListElement["schema:image"][0] &&
-                          itemListElement["schema:image"][0]["@value"].toString() || 
-
-                          typeof itemListElement["schema:image"] == "string" && itemListElement["schema:image"],
+                        image: 
+                          typeof image === 'string' && image ||
+                          Array.isArray(image) && image[0] && image[0]['@value'].toString(),
                         name:
-                          typeof itemListElement["schema:name"] === "object" &&
-                          itemListElement["schema:name"] &&
-                          itemListElement["schema:name"][0] &&
-                          itemListElement["schema:name"][0]["@value"] ||
-
-                          typeof itemListElement["schema:name"] == "string" && itemListElement["schema:name"],
-                        value:
-                          itemListElement['schema:value'] &&
-                          itemListElement['schema:value'][0] &&
-                          itemListElement['schema:value'][0]['@value'],
+                          typeof name == "string" && name ||
+                          Array.isArray(name) && name[0] && name[0]['@value'].toString()
                       };
                     }
                   ),

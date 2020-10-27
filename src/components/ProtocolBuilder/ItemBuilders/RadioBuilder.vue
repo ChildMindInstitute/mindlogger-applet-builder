@@ -226,17 +226,19 @@ export default {
       this.$refs.form.resetValidation()
     },
     addOption() {
+      const { isTokenValue, nextOptionName, nextOptionValue } = this;
+      const currentVal = this.options.length ? this.getMaxValue(this.options) : 0
       const nextOption = {
-        'name': this.nextOptionName,
-        'value': Number(this.nextOptionValue),
+        'name': nextOptionName,
+        'value': isTokenValue ? Number(nextOptionValue) : currentVal + 1,
       };
       if (this.nextOptionImage) {
         nextOption.image = this.nextOptionImage.toString();
       }
       if (this.isTemplate) {
         const newOption = {
-          text: this.nextOptionName,
-          value: this.nextOptionValue
+          text: nextOptionName,
+          value: nextOptionValue
         }
         this.$emit('updateTemplates', newOption);
         this.isTemplate = false;
@@ -283,6 +285,12 @@ export default {
     updateAllow() {
       const allow = this.isSkippable
       this.$emit('updateAllow', allow);
+    },
+
+    // Utils
+
+    getMaxValue(array) {
+      return Math.max.apply(Math, array.map(option => option.value))
     }
   }
 }

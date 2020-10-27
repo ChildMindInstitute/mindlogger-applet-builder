@@ -5,10 +5,19 @@ export default class Item {
   }
 
   getItemBuilderData(initialItemData) {
+    const question = initialItemData.question || '';
+    const imageMatch = question.match(/[\r\n]*\!\[.*\]\(.*=.*\)[\r\n]*/i);
+
+    const questionImage = imageMatch && imageMatch[0] || '';
+    const questionText = imageMatch ? question.substr(0, imageMatch.index) + question.substr(imageMatch.index + questionImage.length) : question;
+
     return {
         id: initialItemData._id || null,
         name: initialItemData.name || '',
-        question: initialItemData.question || '',
+        question: {
+          image: questionImage,
+          text: questionText,
+        },
         description: initialItemData.description || '',
         inputType: initialItemData.ui ? initialItemData.ui.inputType : '',
         options: initialItemData.options || [],
@@ -191,7 +200,7 @@ export default class Item {
     const schema = this.getCompressedSchema();
     const itemObj = {
       name: this.ref.name,
-      question: this.ref.question,
+      question: this.ref.question.image + this.ref.question.text,
       description: this.ref.description,
       options: this.ref.options,
       isItemEditable: this.ref.isItemEditable,

@@ -176,20 +176,6 @@ const getInitialData = (model) => {
       defaultVersion: null,
       data: [],
     },
-    itemplates: [
-    { 
-      text: "Lied to parents",
-      value: "-3"
-    },
-    { 
-      text: "Yelled at teacher",
-      value: "-5"
-    },
-    { 
-      text: "Missed class",
-      value: "-2"
-    }
-  ]
   };
 };
 
@@ -359,10 +345,18 @@ export default {
             let multipleChoice =
               responseOptions[0] &&
               responseOptions[0]['reprolib:terms/multipleChoice'];
+            let valueType = 
+              responseOptions[0] &&
+              responseOptions[0]['reprolib:terms/valueType']
 
             if (multipleChoice) {
               itemContent.multipleChoice =
                 multipleChoice[0] && multipleChoice[0]['@value'];
+            }
+
+            if (valueType) {
+              itemContent.valueType =
+                valueType[0] && valueType[0]['@id'];
             }
 
             if (itemType === 'radio') {
@@ -377,6 +371,7 @@ export default {
                     (itemListElement) => {
                       const image = itemListElement['schema:image'];
                       const name = itemListElement["schema:name"];
+                      const value = itemListElement["schema:value"];
 
                       return {
                         image: 
@@ -384,7 +379,9 @@ export default {
                           Array.isArray(image) && image[0] && image[0]['@value'].toString(),
                         name:
                           typeof name == "string" && name ||
-                          Array.isArray(name) && name[0] && name[0]['@value'].toString()
+                          Array.isArray(name) && name[0] && name[0]['@value'].toString(),
+                        value:
+                          Array.isArray(value) && value[0] && value[0]['@value']
                       };
                     }
                   ),
@@ -469,7 +466,6 @@ export default {
               };
             }
           }
-
           const itemModel = new Item();
           itemModel.updateReferenceObject(
             itemModel.getItemBuilderData(itemContent)

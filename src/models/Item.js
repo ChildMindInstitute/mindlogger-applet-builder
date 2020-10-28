@@ -4,20 +4,22 @@ export default class Item {
     this.ref = null;
   }
 
-  getItemBuilderData(initialItemData) {
-    const question = initialItemData.question || '';
+  static getQuesionInfo(question) {
     const imageMatch = question.match(/[\r\n]*\!\[.*\]\(.*=.*\)[\r\n]*/i);
 
     const questionImage = imageMatch && imageMatch[0] || '';
     const questionText = imageMatch ? question.substr(0, imageMatch.index) + question.substr(imageMatch.index + questionImage.length) : question;
+    return {
+      image: questionImage,
+      text: questionText
+    }
+  }
 
+  getItemBuilderData(initialItemData) {
     return {
         id: initialItemData._id || null,
         name: initialItemData.name || '',
-        question: {
-          image: questionImage,
-          text: questionText,
-        },
+        question: Item.getQuesionInfo(initialItemData.question || ''),
         description: initialItemData.description || '',
         inputType: initialItemData.ui ? initialItemData.ui.inputType : '',
         options: initialItemData.options || [],
@@ -275,9 +277,9 @@ export default class Item {
         inserted: (field) => `Item description was set (${_.get(newValue, field)})`
       }, 
       'question': {
-        updated: (field) => `Item Question was changed to ${_.get(newValue, field)}`,
+        updated: (field) => `Item Question was changed to ${this.getQuesionInfo(_.get(newValue, field)).text}`,
         removed: (field) => `Item Question was removed`,
-        inserted: (field) => `Item Question was set to ${_.get(newValue, field)}`,
+        inserted: (field) => `Item Question was set to ${this.getQuesionInfo(_.get(newValue, field)).text}`,
       },
       'ui.inputType': {
         updated: valueUpdate('Input type'),

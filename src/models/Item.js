@@ -5,10 +5,12 @@ export default class Item {
   }
 
   static getQuesionInfo(question) {
-    const imageMatch = question.match(/[\r\n]*\!\[.*\]\(.*=.*\)[\r\n]*/i);
+    const imageRE = new RegExp(/[\r\n]*\!\[.*\]\(.*=.*\)[\r\n]*/i);
+    const imageMatch = question.match(imageRE);
+    
+    const questionImage = imageMatch && imageMatch[0] || '';  // The image URL.
+    const questionText = question.replace(imageRE, '');  // Remove the image from the question.
 
-    const questionImage = imageMatch && imageMatch[0] || '';
-    const questionText = imageMatch ? question.substr(0, imageMatch.index) + question.substr(imageMatch.index + questionImage.length) : question;
     return {
       image: questionImage,
       text: questionText

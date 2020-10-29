@@ -23,6 +23,7 @@ export default class Item {
         name: initialItemData.name || '',
         question: Item.getQuesionInfo(initialItemData.question || ''),
         description: initialItemData.description || '',
+        valueType: initialItemData.valueType || '',
         inputType: initialItemData.ui ? initialItemData.ui.inputType : '',
         options: initialItemData.options || [],
         allow: initialItemData.ui && initialItemData.ui.allow && initialItemData.ui.allow.includes("dontKnow"),
@@ -89,7 +90,7 @@ export default class Item {
     if (this.ref.inputType === "radio") {
         const choices = this.getRadioChoices();
         return {
-        "valueType": this.ref.options.isTokenValue ? "xsd:token" : "xsd:anyURI",
+        "valueType": (this.ref.valueType.includes("token") || this.ref.options.isTokenValue) ? "xsd:token" : "xsd:anyURI",
         "multipleChoice": this.ref.options.isMultipleChoice,
         "schema:minValue": 1,
         "schema:maxValue": choices.length,

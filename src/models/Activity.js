@@ -64,6 +64,10 @@ export default class Activity {
             return `${cond.ifValue.name} > ${cond.minValue} && ${cond.ifValue.name} < ${cond.maxValue}`;
           } else if (cond.stateValue.val === 'outsideof') {
             return `${cond.ifValue.name} < ${cond.minValue} && ${cond.ifValue.name} > ${cond.maxValue}`;
+          } else if (cond.stateValue.val === 'includes') { 
+            return `${cond.ifValue.name}.${cond.stateValue.val}(${cond.answerValue.value})`
+          } else if (cond.stateValue.val === '!includes') {
+            return `!${cond.ifValue.name}.includes(${cond.answerValue.value})`
           } else if (!cond.answerValue) {
             return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.minValue}`;
           } else {

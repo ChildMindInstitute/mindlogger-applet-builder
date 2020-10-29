@@ -31,7 +31,7 @@ export default class Activity {
       ifConditionalAvailable: false,
       isConditionalEditMode: false,
       editConditionalItemDialog: false,
-      conditionalItems: [],
+      conditionalItems: initialActivityData.conditionalItems || [],
       conditionalBuilderType: '',
       conditionalItemsForBuilder: [],
     };
@@ -160,6 +160,7 @@ export default class Activity {
     const schema = this.getCompressedSchema();
     const context = this.getContext();
     const items = this.ref.items;
+    const conditionalItems = this.ref.conditionalItems;
     return {
       _id: this.ref.id,
       name: this.ref.name,
@@ -170,6 +171,7 @@ export default class Activity {
       schema: schema,
       context: context,
       items: items,
+      conditionalItems: conditionalItems
     };
   }
 

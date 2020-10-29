@@ -377,6 +377,7 @@ export default {
                     (itemListElement) => {
                       const image = itemListElement['schema:image'];
                       const name = itemListElement["schema:name"];
+                      const value = itemListElement["schema:value"];
 
                       return {
                         image: 
@@ -384,7 +385,9 @@ export default {
                           Array.isArray(image) && image[0] && image[0]['@value'].toString(),
                         name:
                           typeof name == "string" && name ||
-                          Array.isArray(name) && name[0] && name[0]['@value'].toString()
+                          Array.isArray(name) && name[0] && name[0]['@value'].toString(),
+                        value:
+                          value && value[0] && value[0]["@value"]
                       };
                     }
                   ),

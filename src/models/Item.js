@@ -4,11 +4,24 @@ export default class Item {
     this.ref = null;
   }
 
+  static getQuesionInfo(question) {
+    const imageRE = new RegExp(/[\r\n]*\!\[.*\]\(.*=.*\)[\r\n]*/i);
+    const imageMatch = question.match(imageRE);
+    
+    const questionImage = imageMatch && imageMatch[0] || '';  // The image URL.
+    const questionText = question.replace(imageRE, '');  // Remove the image from the question.
+
+    return {
+      image: questionImage,
+      text: questionText
+    }
+  }
+
   getItemBuilderData(initialItemData) {
     return {
         id: initialItemData._id || null,
         name: initialItemData.name || '',
-        question: initialItemData.question || '',
+        question: Item.getQuesionInfo(initialItemData.question || ''),
         description: initialItemData.description || '',
         valueType: initialItemData.valueType || '',
         inputType: initialItemData.ui ? initialItemData.ui.inputType : '',
@@ -192,7 +205,7 @@ export default class Item {
     const schema = this.getCompressedSchema();
     const itemObj = {
       name: this.ref.name,
-      question: this.ref.question,
+      question: this.ref.question.image + this.ref.question.text,
       description: this.ref.description,
       options: this.ref.options,
       isItemEditable: this.ref.isItemEditable,
@@ -267,9 +280,9 @@ export default class Item {
         inserted: (field) => `Item description was set (${_.get(newValue, field)})`
       }, 
       'question': {
-        updated: (field) => `Item Question was changed to ${_.get(newValue, field)}`,
+        updated: (field) => `Item Question was changed to ${this.getQuesionInfo(_.get(newValue, field)).text}`,
         removed: (field) => `Item Question was removed`,
-        inserted: (field) => `Item Question was set to ${_.get(newValue, field)}`,
+        inserted: (field) => `Item Question was set to ${this.getQuesionInfo(_.get(newValue, field)).text}`,
       },
       'ui.inputType': {
         updated: valueUpdate('Input type'),

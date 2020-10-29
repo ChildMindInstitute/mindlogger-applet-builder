@@ -25,7 +25,7 @@
           required
         />
         <v-textarea
-          v-model="question"
+          v-model="question.text"
           label="Question"
           :disabled="!isItemEditable"
           counter="100"

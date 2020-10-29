@@ -140,22 +140,30 @@ export default {
   watch: {
     ifValue() {
       this.fillAnswerAndShowItems();
+      this.setStateItems();
     }
   },
   created() {
     this.$watch("$props", this.setStateItems, { deep: true });
-
-    this.setStateItems();
     this.fillAnswerAndShowItems();
+    if (this.ifValue !== "") {
+      this.setStateItems();
+    }
   },
   methods: {
     setStateItems() {
+      const { type, ifValue } = this
       this.stateItems =
-        this.type === "radio"
-          ? [
-              { name: "IS EQUAL TO", val: "==" },
-              { name: "IS NOT EQUAL TO", val: "!=" }
-            ]
+        type === "radio"
+          ? ifValue.options && ifValue.options.isMultipleChoice
+            ? [
+                { name: "Includes", val: "includes" },
+                { name: "Doesn't include", val: "!includes" }
+              ]
+            : [
+                { name: "IS EQUAL TO", val: "==" },
+                { name: "IS NOT EQUAL TO", val: "!=" }
+              ]
           : [
               { name: "GREATER THEN", val: ">" },
               { name: "LESS THEN", val: "<" },
@@ -212,6 +220,7 @@ export default {
       }
     },
     onDiscardItem() {
+      this.clearValues();
       this.$emit("closeConditionalItemModal", null);
     },
     addOption() {
@@ -228,7 +237,9 @@ export default {
       }
 
       this.options.push(obj);
-
+      this.clearValues();
+    },
+    clearValues() {
       this.ifValue = "";
       this.stateValue = "";
       this.answerValue = "";

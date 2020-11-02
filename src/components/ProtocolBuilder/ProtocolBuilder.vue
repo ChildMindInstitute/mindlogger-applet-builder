@@ -316,8 +316,15 @@ export default {
           'reprolib:terms/order.0.@list',
           []
         ).map((key) => {
+          let allow = []
           const item = items[key['@id']];
-
+          if (item['reprolib:terms/allow'] &&
+              item['reprolib:terms/allow'][0] &&
+              item['reprolib:terms/allow'][0]['@list']) {
+            allow = item['reprolib:terms/allow'][0]['@list'].map(item => {
+              return item['@id'].substr(15)
+            })
+          }
           let itemContent = {
             _id: item['_id'] && item['_id'].split('/')[1],
             name: item['@id'],
@@ -330,6 +337,7 @@ export default {
               item['schema:description'][0] &&
               item['schema:description'][0]['@value'],
             ui: {
+              allow,
               inputType:
                 item['reprolib:terms/inputType'] &&
                 item['reprolib:terms/inputType'][0] &&

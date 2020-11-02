@@ -272,16 +272,16 @@ export default class Activity {
       });
 
       versionUpgrade = '0.0.1';
-
-      if (getDataUpdates) {
-        updates.data = currentData;
-      }
     }
 
     const itemLogs = [];
 
     if (itemChanges.inserted.length || itemChanges.removed.length) {
       versionUpgrade = '0.1.0';
+    }
+
+    if (versionUpgrade !== '0.0.0' && getDataUpdates) {
+      updates.data = currentData;
     }
 
     /** display log for updated activities */

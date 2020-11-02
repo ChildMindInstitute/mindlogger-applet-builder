@@ -215,16 +215,19 @@ export default class Item {
     if (
       (this.ref.inputType === "radio" ||
         this.ref.inputType === "text" ||
-        this.ref.inputType === "slider" ||
         this.ref.inputType === "audioRecord" ||
         this.ref.inputType === "audioImageRecord" ||
         this.ref.inputType === "geolocation") &&
       Object.keys(this.ref.responseOptions).length
-    ) {
+      ) {
       itemObj.responseOptions = itemObj.responseOptions || this.ref.responseOptions;
     } else if (this.ref.inputType === "audioStimulus") {
       itemObj.inputOptions = this.inputOptions;
       itemObj.media = this.ref.media;
+    } else if (this.ref.inputType === "slider") {
+      itemObj.options.minValue = itemObj.options.minValue || "Min";
+      itemObj.options.maxValue = itemObj.options.maxValue || "Max";
+      itemObj.options.numOptions = itemObj.options.numOptions || 5;
     }
 
     return itemObj;

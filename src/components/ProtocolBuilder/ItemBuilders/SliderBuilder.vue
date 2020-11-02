@@ -63,12 +63,15 @@ export default {
       ]
     };
   },
+  mounted() {
+    this.update();
+  },
   methods: {
     update () {
       const responseOptions = {
         'numOptions': this.numOptions,
-        'minValue': this.minValue,
-        'maxValue': this.maxValue
+        'minValue': this.minValue || "Min",
+        'maxValue': this.maxValue || "Max"
       };
       this.$emit('updateOptions', responseOptions);
     },

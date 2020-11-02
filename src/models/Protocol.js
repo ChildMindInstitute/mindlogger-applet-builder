@@ -242,7 +242,7 @@ export default class Protocol {
       }
     })
 
-    if (versionUpgrade && getDataUpdates) {
+    if (versionUpgrade !== '0.0.0' && getDataUpdates) {
       updates.data = currentData;
     }
 

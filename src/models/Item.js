@@ -26,7 +26,9 @@ export default class Item {
         valueType: initialItemData.valueType || '',
         inputType: initialItemData.ui ? initialItemData.ui.inputType : '',
         options: initialItemData.options || [],
-        allow: initialItemData.ui && initialItemData.ui.allow && initialItemData.ui.allow.includes("dontKnow"),
+        allow: initialItemData.ui && initialItemData.ui.allow
+          && (initialItemData.ui.allow.includes("dontKnow")
+            || initialItemData.ui.allow.includes("dont_know_answer")),
         responseOptions: initialItemData.responseOptions || {},
         inputOptions: initialItemData.inputOptions || {},
         media: initialItemData.media || {},

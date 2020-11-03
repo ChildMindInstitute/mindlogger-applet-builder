@@ -490,7 +490,6 @@ export default {
       });
     },
     onUpdateTemplates(option) {
-      this.itemTemplates.push(option)
       this.$emit("updateTemplates", option)
     },
     onRemoveTemplate(item) {

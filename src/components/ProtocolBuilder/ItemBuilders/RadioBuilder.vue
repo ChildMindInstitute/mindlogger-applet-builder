@@ -240,6 +240,7 @@ export default {
           text: nextOptionName,
           value: nextOptionValue
         }
+        this.items = [...this.items, newOption]
         this.$emit('updateTemplates', newOption);
         this.isTemplate = false;
       }

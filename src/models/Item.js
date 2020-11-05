@@ -23,6 +23,7 @@ export default class Item {
         name: initialItemData.name || '',
         question: Item.getQuesionInfo(initialItemData.question || ''),
         description: initialItemData.description || '',
+        correctAnswer: initialItemData.correctAnswer || '',
         valueType: initialItemData.valueType || '',
         inputType: initialItemData.ui ? initialItemData.ui.inputType : '',
         options: initialItemData.options || [],
@@ -216,16 +217,18 @@ export default class Item {
 
     if (
       (this.ref.inputType === "radio" ||
-        this.ref.inputType === "text" ||
         this.ref.inputType === "audioRecord" ||
         this.ref.inputType === "audioImageRecord" ||
         this.ref.inputType === "geolocation") &&
       Object.keys(this.ref.responseOptions).length
-      ) {
+    ) {
       itemObj.responseOptions = itemObj.responseOptions || this.ref.responseOptions;
     } else if (this.ref.inputType === "audioStimulus") {
       itemObj.inputOptions = this.inputOptions;
       itemObj.media = this.ref.media;
+    } else if (this.ref.inputType === "text") {
+      itemObj.responseOptions = itemObj.responseOptions || this.ref.responseOptions;
+      itemObj.correctAnswer = this.ref.correctAnswer;
     } else if (this.ref.inputType === "slider") {
       itemObj.options.minValue = itemObj.options.minValue || "Min";
       itemObj.options.maxValue = itemObj.options.maxValue || "Max";
@@ -288,6 +291,9 @@ export default class Item {
         updated: (field) => `Item Question was changed to ${this.getQuesionInfo(_.get(newValue, field)).text}`,
         removed: (field) => `Item Question was removed`,
         inserted: (field) => `Item Question was set to ${this.getQuesionInfo(_.get(newValue, field)).text}`,
+      },
+      'correctAnswer': {
+        updated: (field) => `Correct answer was changed`
       },
       'ui.inputType': {
         updated: valueUpdate('Input type'),

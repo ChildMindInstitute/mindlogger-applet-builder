@@ -11,6 +11,19 @@
       :rules="maxLengthRules"
       @change="update"
     />
+    <v-text-field
+      v-if="requiredAnswer"
+      v-model="correctAnswer"
+      label="Correct answer"
+      :disabled="!isItemEditable"
+      @change="updateAnswer"
+    />
+    <v-checkbox
+      v-model="requiredAnswer"
+      label="Correct answer required"
+      :disabled="!isItemEditable"
+      @change="updateAnswer"
+    />
     <v-checkbox
       v-model="isSkippable"
       label="Skippable Item"
@@ -37,6 +50,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    initialAnswer: {
+      type: String,
+      default: "",
+    },
     isItemEditable: {
       type: Boolean,
       default: true,
@@ -44,8 +61,10 @@ export default {
   },
   data: function () {
     return {
+      correctAnswer: this.initialAnswer || "",
       maxLength: this.initialItemData.maxLength || 50,
       requiredValue: this.initialItemData.requiredValue || false,
+      requiredAnswer: this.initialAnswer ? true : false,
       isSkippable: this.isSkippableItem || false,
       type: this.initialItemData.type || 'xsd:string',
       valid: true,
@@ -65,6 +84,14 @@ export default {
         'type': this.type,
       };
       this.$emit('updateOptions', responseOptions);
+    },
+    updateAnswer() {
+      const { correctAnswer, requiredAnswer } = this;
+      if (!requiredAnswer) {
+        this.$emit('updateAnswer', "");
+      } else {
+        this.$emit('updateAnswer', correctAnswer);
+      }
     },
     updateAllow() {
       const allow = this.isSkippable

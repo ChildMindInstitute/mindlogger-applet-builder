@@ -9,8 +9,6 @@
         <v-text-field
           v-model="name"
           label="Item Name"
-          counter="50"
-          maxlength="50"
           :rules="nameRules"
           :disabled="!isItemEditable"
           required
@@ -19,8 +17,6 @@
         <v-text-field
           v-model="description"
           label="Description"
-          counter="100"
-          maxlength="100"
           :disabled="!isItemEditable"
           required
         />
@@ -28,8 +24,8 @@
           v-model="question.text"
           label="Question"
           :disabled="!isItemEditable"
-          counter="100"
-          maxlength="100"
+          counter="250"
+          maxlength="250"
           auto-grow
           rows="1"
         />

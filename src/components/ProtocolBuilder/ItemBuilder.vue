@@ -55,7 +55,9 @@
           v-if="inputType === 'text'"
           :is-skippable-item="allow"
           :initial-item-data="options"
+          :initial-answer="correctAnswer"
           :is-item-editable="isItemEditable"
+          @updateAnswer="updateAnswer"
           @updateOptions="updateOptions"
           @updateAllow="updateAllow"
         />
@@ -185,6 +187,9 @@ export default {
     },
     updateInputOptions(newInputOptions) {
       this.inputOptions = newInputOptions;
+    },
+    updateAnswer(correctAnswer) {
+      this.correctAnswer = correctAnswer;
     },
     updateAllow(allowItem) {
       this.allow = allowItem;

@@ -406,6 +406,11 @@ export default {
                   ],
                 // TODO: add 'maximum response length' value which is absent for now
               };
+              if (item['schema:correctAnswer'] &&
+                item['schema:correctAnswer'][0] &&
+                item['schema:correctAnswer'][0]['@value']) {
+                itemContent.correctAnswer = item['schema:correctAnswer'][0]['@value']
+              }
             }
             if (itemType === 'slider') {
               itemContent.options = {
@@ -490,7 +495,6 @@ export default {
       });
     },
     onUpdateTemplates(option) {
-      this.itemTemplates.push(option)
       this.$emit("updateTemplates", option)
     },
     onRemoveTemplate(item) {

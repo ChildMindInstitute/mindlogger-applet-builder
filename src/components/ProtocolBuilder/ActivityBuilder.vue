@@ -12,16 +12,16 @@
           <v-text-field
             v-model="name"
             :rules="textRules"
-            counter="50"
-            maxlength="50"
+            counter="55"
+            maxlength="55"
             label="Activity Name"
             required
           />
           <v-text-field
             v-model="description"
             :rules="textRules"
-            counter="100"
-            maxlength="100"
+            counter="230"
+            maxlength="230"
             label="Activity Description"
             required
           />

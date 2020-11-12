@@ -195,6 +195,22 @@ export default class Activity {
             _.get(newValue, field, false) ? 'enabled' : 'disabled'
           }`,
       },
+      'ui.addProperties': {
+        updated: (field) => {
+          const oldOptions = _.get(oldValue, field, []);
+          const newOptions = _.get(newValue, field, []);
+    
+          const removedOptions = oldOptions.filter(option => !newOptions.some(newOption => newOption.variableName == option.variableName));
+          const insertedOptions = newOptions.filter(option => !oldOptions.some(oldOption => oldOption.variableName == option.variableName));
+          const updatedOptions = newOptions.filter(option => !oldOptions.some(oldOption => oldOption.variableName == option.variableName && oldOption.isVis == option.isVis))
+
+          return [
+            ...removedOptions.map(option => `conditional logic for ${option.variableName} was removed`),
+            ...insertedOptions.map(option => `conditional logic for ${option.variableName} was set to ${option.isVis.toString()}`),
+            ...updatedOptions.map(option => `conditional logic for ${option.variableName} was updated to ${option.isVis.toString()}`)
+          ];
+        }
+      },
       preamble: {
         updated: (field) => `preamble was updated to ${_.get(newValue, field)}`,
         inserted: (field) => `preamble was set to ${_.get(newValue, field)}`,

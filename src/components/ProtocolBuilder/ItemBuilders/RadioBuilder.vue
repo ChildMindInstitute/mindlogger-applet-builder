@@ -227,10 +227,10 @@ export default {
     },
     addOption() {
       const { isTokenValue, nextOptionName, nextOptionValue } = this;
-      const currentVal = this.options.length ? this.getMaxValue(this.options) : 0
+      const currentVal = this.options.length ? this.getMaxValue(this.options) + 1 : 0
       const nextOption = {
         'name': nextOptionName,
-        'value': isTokenValue ? Number(nextOptionValue) : currentVal + 1,
+        'value': isTokenValue ? Number(nextOptionValue) : currentVal,
       };
       if (this.nextOptionImage) {
         nextOption.image = this.nextOptionImage.toString();

@@ -11,9 +11,15 @@
 
           <v-form ref="form" lazy-validation>
             <v-select
+              v-model="showValue"
+              item-text="name"
+              :items="reflectedItems"
+              label="Show"
+            />
+            <v-select
               v-model="ifValue"
-              item-text="question"
-              :items="items"
+              item-text="name"
+              :items="filteredItems"
               return-object
               label="If"
             />
@@ -56,12 +62,6 @@
                 return-object
               />
             </template>
-            <v-select
-              v-model="showValue"
-              item-text="question"
-              :items="showItemsFiltered"
-              label="Show"
-            />
           </v-form>
 
           <v-btn v-if="!editMode" @click="addOption">Add more conditions</v-btn>
@@ -131,6 +131,7 @@ export default {
       stateItems: [],
       showValue: this.initialConditionalItemData.showValue || "",
       showItemsFiltered: [],
+      filteredItems: [],
       options: [],
       answerItems: [],
       answerValue: this.initialConditionalItemData.answerValue || "",
@@ -138,6 +139,9 @@ export default {
     };
   },
   watch: {
+    showValue() {
+      this.setFilteredItems();
+    },
     ifValue() {
       this.fillAnswerAndShowItems();
       this.setStateItems();
@@ -146,8 +150,20 @@ export default {
   created() {
     this.$watch("$props", this.setStateItems, { deep: true });
     this.fillAnswerAndShowItems();
+    if (this.showValue !== "") {
+      this.setFilteredItems();
+    }
     if (this.ifValue !== "") {
       this.setStateItems();
+    }
+  },
+  computed: {
+    reflectedItems() {
+      const showItems = JSON.parse(JSON.stringify(this.showItems));
+      if (showItems.length >= 1) {
+        return showItems.splice(1);
+      }
+      return this.showItems;
     }
   },
   methods: {
@@ -199,6 +215,18 @@ export default {
 
       this.showItemsFiltered = showItems.splice(index + 1);
     },
+    setFilteredItems() {
+      if (this.showValue === "") return;
+      const index = this.showItems.findIndex(item => item.name === this.showValue);
+      const indexedItems = this.items.map(item => {
+        const index = this.showItems.findIndex(showItem => item.name === showItem.name);
+        return {
+          ...item,
+          index
+        };
+      })
+      this.filteredItems = indexedItems.filter(item => item.index < index);
+    },
     onSaveItem() {
       this.addOption();
       if (this.editConditionalItemIndex !== -1) {
@@ -218,6 +246,7 @@ export default {
       } else {
         this.editConditionalCallback(this.options, false);
       }
+      this.clearValues();
     },
     onDiscardItem() {
       this.clearValues();
@@ -237,7 +266,6 @@ export default {
       }
 
       this.options.push(obj);
-      this.clearValues();
     },
     clearValues() {
       this.ifValue = "";

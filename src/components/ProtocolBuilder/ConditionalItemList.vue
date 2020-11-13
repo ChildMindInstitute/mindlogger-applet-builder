@@ -9,7 +9,7 @@
         <v-list-item-content>
           <v-list-item-title>
             <span class="blue--text">IF </span>
-            <span>{{ item.ifValue.question }} </span>
+            <span>{{ item.ifValue.name }} </span>
             <span class="blue--text">{{ item.stateValue.name }} </span>
             <span v-if="item.answerValue">{{ item.answerValue.name }} </span>
             <template v-else>

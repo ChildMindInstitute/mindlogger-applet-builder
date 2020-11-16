@@ -36,7 +36,7 @@
             v-model="shuffleActivityOrder"
             label="Shuffle item order"
           />
-          <v-checkbox v-model="isSkippable" label="Allow items to be skipped" />
+          <v-checkbox v-model="isSkippable" label="Allow user to skip all items" />
           <v-tabs centered>
             <v-tab>
               Items

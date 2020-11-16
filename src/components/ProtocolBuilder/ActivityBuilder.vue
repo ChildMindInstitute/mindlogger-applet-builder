@@ -70,7 +70,7 @@
                             edit
                           </v-icon>
                           <v-icon v-else color="grey lighten-1">
-                            mdi-eye
+                            edit
                           </v-icon>
                         </v-btn>
                       </v-list-item-action>

@@ -56,6 +56,7 @@
           @updateAnswer="updateAnswer"
           @updateOptions="updateOptions"
           @updateAllow="updateAllow"
+          @updateNumericalResponse="updateNumericalResponse"
         />
         <SliderBuilder
           v-if="inputType === 'slider'"
@@ -189,6 +190,9 @@ export default {
     },
     updateAllow(allowItem) {
       this.allow = allowItem;
+    },
+    updateNumericalResponse(numericalResponse) {
+      this.isNumericalResponse = numericalResponse;
     },
     updateMedia(newMedia) {
       this.media = newMedia;

@@ -31,6 +31,12 @@
       @change="updateAllow"
     />
     <v-checkbox
+      v-model="isNumericalResponse"
+      label="Numerical Response Required"
+      :disabled="!isItemEditable"
+      @change="updateNumericalResponse"
+    />
+    <v-checkbox
       v-model="requiredValue"
       label="Response required"
       :disabled="!isItemEditable"
@@ -66,6 +72,7 @@ export default {
       requiredValue: this.initialItemData.requiredValue || false,
       requiredAnswer: this.initialAnswer ? true : false,
       isSkippable: this.isSkippableItem || false,
+      isNumericalResponse: false,
       type: this.initialItemData.type || 'xsd:string',
       valid: true,
       textRules: [
@@ -96,6 +103,9 @@ export default {
     updateAllow() {
       const allow = this.isSkippable
       this.$emit('updateAllow', allow);
+    },
+    updateNumericalResponse() {
+      this.$emit('updateNumericalResponse', this.isNumericalResponse);
     }
   }
 }

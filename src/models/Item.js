@@ -30,6 +30,7 @@ export default class Item {
         allow: initialItemData.ui && initialItemData.ui.allow
           && (initialItemData.ui.allow.includes("dontKnow")
             || initialItemData.ui.allow.includes("dont_know_answer")),
+        isNumericalResponse: initialItemData.isNumericalResponse || false,
         responseOptions: initialItemData.responseOptions || {},
         inputOptions: initialItemData.inputOptions || {},
         media: initialItemData.media || {},

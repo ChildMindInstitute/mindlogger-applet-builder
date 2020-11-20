@@ -14,12 +14,6 @@
           required
           @keydown="nameKeydown($event)"
         />
-        <v-text-field
-          v-model="description"
-          label="Description"
-          :disabled="!isItemEditable"
-          required
-        />
         <v-textarea
           v-model="question.text"
           label="Question"

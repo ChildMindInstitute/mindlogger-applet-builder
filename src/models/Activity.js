@@ -53,9 +53,9 @@ export default class Activity {
     const addProperties = [];
     this.ref.items.forEach((item) => {
       const conditionalItems = this.ref.conditionalItems.filter((cond) => {
-        return cond.showValue === item.question;
+        return cond.showValue === item.name;
       });
-
+      
       let isVis = true;
 
       if (conditionalItems.length) {

@@ -79,6 +79,20 @@
         </v-menu>
       </v-col>
     </v-row>
+    <v-row>
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        sm="3"
+      >
+        <v-checkbox
+          v-model="hasScoreValue"
+          label="Option Score"
+          :disabled="!isItemEditable"
+          @change="update"
+        />
+      </v-col>
+    </v-row>
     <v-list>
       <v-subheader>
         Options
@@ -153,6 +167,26 @@
               />
             </v-col>
           </v-row>
+
+          <v-row>
+            <v-col
+              v-if="hasScoreValue"
+              cols="12"
+              sm="4"
+            >
+              <v-text-field
+                v-model="nextOptionScore"
+                :rules="textRules"
+                type="number"
+                label="Score Value"
+                counter="5"
+                maxlength="5"
+                :disabled="!isItemEditable"
+                @change="update"
+              />
+            </v-col>
+          </v-row>
+
           <v-row>
             <v-col 
               cols="12"
@@ -202,6 +236,19 @@ export default {
     }
   },
   data: function () {
+    let nextOptionScore = 1;
+
+    if (
+      this.initialItemData.hasScoreValue && 
+      this.initialItemData.options.length > 0
+    ) {
+      const lastOption = this.initialItemData.options[this.initialItemData.options.length - 1];
+
+      if (lastOption.score) {
+        nextOptionScore = lastOption.score + 1;
+      }
+    }
+
     return {
       isTokenValue: (this.responseOptions.valueType && this.responseOptions.valueType.includes("token")) || false,
       isMultipleChoice: this.initialItemData.isMultipleChoice || false,
@@ -215,7 +262,9 @@ export default {
       textRules: [
         v => !!v || 'Radio options cannot be empty',
       ],
-      items: []
+      items: [],
+      nextOptionScore,
+      hasScoreValue: this.initialItemData.hasScoreValue || false,
     };
   },
   async beforeMount() {
@@ -226,11 +275,13 @@ export default {
       this.$refs.form.resetValidation()
     },
     addOption() {
-      const { isTokenValue, nextOptionName, nextOptionValue } = this;
+      const { isTokenValue, nextOptionName, nextOptionValue, hasScoreValue, nextOptionScore } = this;
+
       const currentVal = this.options.length ? this.getMaxValue(this.options) + 1 : 0
       const nextOption = {
         'name': nextOptionName,
         'value': isTokenValue ? Number(nextOptionValue) : currentVal,
+        'score': hasScoreValue ? Number(nextOptionScore) : 0,
       };
       if (this.nextOptionImage) {
         nextOption.image = this.nextOptionImage.toString();
@@ -249,6 +300,7 @@ export default {
       this.nextOptionName = '';
       this.nextOptionValue = '';
       this.nextOptionImage = '';
+      this.nextOptionScore = nextOption.score + 1;
       this.resetValidation();
       this.update();
     },
@@ -273,6 +325,7 @@ export default {
     },
     update() {
       const responseOptions = {
+        'hasScoreValue': this.hasScoreValue,
         'isTokenValue': this.isTokenValue,
         'isMultipleChoice': this.isMultipleChoice,
         'isSkippableItem': this.isSkippableItem,

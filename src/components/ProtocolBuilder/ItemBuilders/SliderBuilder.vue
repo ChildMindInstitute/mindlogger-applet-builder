@@ -1,8 +1,5 @@
 <template>
-  <v-form
-    ref="form"
-    v-model="valid"
-  >
+  <v-form>
     <v-row>
       <v-col 
         class="d-flex align-center"
@@ -63,30 +60,51 @@
       </v-col>
     </v-row>
 
-    <v-dialog max-width="250" v-model="scoreDialog">
-      <v-card class="pa-2" v-if="scores">
-        <v-card>
-          <div class="d-flex">
-            <div class="option-value">Value</div>
-            <div class="option-score">Score</div>
-          </div>
-        </v-card>
-        <v-card class="options">
-          <div
-            v-for="(score, i) in scores"
-            :key="i"
-            class="d-flex"
-          >
-            <div class="option-value pt-2">{{i+1}}</div>
-            <v-text-field
-              v-model="scores[i]"
-              class="option-score mt-0 pt-0"
-              type="number"
+    <v-dialog max-width="350" v-model="scoreDialog" persistent>
+      <v-card class="pa-4" v-if="scores">
+        <v-form
+          ref="form"
+          v-model="valid"
+        >
+          <v-card>
+            <div class="d-flex">
+              <div class="option-value">Value</div>
+              <div class="option-score">Score</div>
+            </div>
+          </v-card>
+          <v-card class="options">
+            <div
+              v-for="(score, i) in scores"
+              :key="i"
+              class="d-flex"
+            >
+              <div class="option-value pt-2">{{i+1}}</div>
+              <v-text-field
+                v-model="scores[i]"
+                class="option-score mt-0 pt-0"
+                type="number"
+                :disabled="!isItemEditable"
+                :rules="numberRules"
+              />
+            </div>
+          </v-card>
+
+          <v-card-actions class="d-flex justify-space-around">
+            <v-btn
+              :disabled="!valid || !isItemEditable"
+              @click="saveScores"
+              color="primary"
+            >
+              Save
+            </v-btn>
+            <v-btn
               :disabled="!isItemEditable"
-              @change="update"
-            />
-          </div>
-        </v-card>
+              @click="resetScores"
+            >
+              Reset
+            </v-btn>
+          </v-card-actions>
+        </v-form>
       </v-card>
     </v-dialog>
 
@@ -150,6 +168,9 @@ export default {
       textRules: [
         v => !!v || 'Radio options cannot be empty',
       ],
+      numberRules: [
+        v => !isNaN(parseInt(v)) || 'Please enter a numerical value',
+      ],
       hasScoreValue: this.initialItemData.hasScoreValue || false,
       scoreDialog: false,
       scores: this.initialItemData.scores || null,
@@ -159,6 +180,22 @@ export default {
     this.update();
   },
   methods: {
+    resetScores () {
+      for (let i = 0; i < this.scores.length; i++) {
+        this.$set(this.scores, i, i+1);
+      }
+    },
+
+    saveScores () {
+      for (let i = 0; i < this.scores.length; i++) {
+        this.scores[i] = Number(this.scores[i]);
+      }
+
+      this.scoreDialog = false;
+
+      this.update();
+    },
+
     update () {
       if (this.hasScoreValue) {
         this.scores = this.scores || [];
@@ -183,6 +220,7 @@ export default {
       };
       this.$emit('updateOptions', responseOptions);
     },
+
     updateAllow() {
       const allow = this.isSkippable
       this.$emit('updateAllow', allow);

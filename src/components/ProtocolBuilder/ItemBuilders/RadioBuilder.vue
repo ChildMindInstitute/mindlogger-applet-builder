@@ -1,8 +1,5 @@
 <template>
-  <v-form
-    ref="form"
-    v-model="valid"
-  >
+  <v-form>
     <v-row>
       <v-col 
         class="d-flex align-center"
@@ -117,7 +114,10 @@
         </v-list-item-action>
       </v-list-item>
       <v-list-item class="d-block">
-        <v-form>
+        <v-form
+          ref="form"
+          v-model="valid"
+        >
           <v-row>
             <v-col 
               cols="12"
@@ -176,7 +176,7 @@
             >
               <v-text-field
                 v-model="nextOptionScore"
-                :rules="textRules"
+                :rules="numberRules"
                 type="number"
                 label="Score Value"
                 counter="5"
@@ -261,6 +261,9 @@ export default {
       valid: true,
       textRules: [
         v => !!v || 'Radio options cannot be empty',
+      ],
+      numberRules: [
+        v => !isNaN(parseInt(v)) || 'Please enter a numerical value',
       ],
       items: [],
       nextOptionScore,

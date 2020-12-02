@@ -10,11 +10,13 @@
       @change="updateAllow"
     />
     <v-text-field
+      type="number"
       v-model="numOptions"
+      @change="update"
       label="On a scale of 1 to "
       :disabled="!isItemEditable"
-      type="number"
-      @change="update"
+      min="0"
+      max="12"
     />
     <v-text-field
       v-model="minValue"
@@ -68,6 +70,11 @@ export default {
   },
   methods: {
     update () {
+      if (this.numOptions > 12) {
+        this.numOptions = 12;
+      } else if (this.numOptions < 0) {
+        this.numOptions = 0;
+      }
       const responseOptions = {
         'numOptions': this.numOptions,
         'minValue': this.minValue || "Min",

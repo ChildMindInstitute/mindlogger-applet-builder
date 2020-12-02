@@ -15,7 +15,7 @@
       @change="update"
       label="On a scale of 1 to "
       :disabled="!isItemEditable"
-      min="0"
+      min="1"
       max="12"
     />
     <v-text-field
@@ -72,8 +72,8 @@ export default {
     update () {
       if (this.numOptions > 12) {
         this.numOptions = 12;
-      } else if (this.numOptions < 0) {
-        this.numOptions = 0;
+      } else if (this.numOptions < 1) {
+        this.numOptions = 1;
       }
       const responseOptions = {
         'numOptions': this.numOptions,

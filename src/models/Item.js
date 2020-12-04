@@ -294,11 +294,14 @@ export default class Item {
       },
       'correctAnswer': {
         updated: (field) => `Correct answer was changed`
-      },
+      }, 
       'ui.inputType': {
         updated: valueUpdate('Input type'),
         inserted: valueInsert('Input type'),
       },
+      'ui.allow': {
+        updated: optionUpdate('Skippable option'),
+      },    
       'options.isMultipleChoice': {
         updated: optionUpdate('Multiple choice option'),
       },

@@ -63,11 +63,18 @@ export default class Item {
   getSliderChoices() {
     const choices = [];
     for (let i = 1; i <= this.ref.options.numOptions; i++) {
-        choices.push({
+      let obj = {
         "schema:name": i.toString(),
         "schema:value": i
-        });
+      };
+
+      if (this.ref.options.hasScoreValue) {
+        obj["schema:score"] = this.ref.options.scores[i-1];
+      }
+
+      choices.push(obj);
     }
+
     return choices;
   }
 
@@ -80,6 +87,11 @@ export default class Item {
                 "schema:name": option.name,
                 "schema:value": option.value,
             };
+
+            if (this.ref.options.hasScoreValue) {
+              choiceSchema["schema:score"] = (option.score || 0);
+            }
+
             if (option.image) {
                 choiceSchema["schema:image"] = option.image;
             }
@@ -91,33 +103,35 @@ export default class Item {
 
   getResponseOptions() {
     if (this.ref.inputType === "radio") {
-        const choices = this.getRadioChoices();
-        return {
+      const choices = this.getRadioChoices();
+      return {
         "valueType": (this.ref.valueType.includes("token") || this.ref.options.isTokenValue) ? "xsd:token" : "xsd:anyURI",
+        "scoring": this.ref.options.hasScoreValue,
         "multipleChoice": this.ref.options.isMultipleChoice,
         "schema:minValue": 1,
         "schema:maxValue": choices.length,
         choices: choices
-        };
+      };
     }
     if (this.ref.inputType === "text") {
         return this.ref.options;
     }
     if (this.ref.inputType === "slider") {
-        const choices = this.getSliderChoices();
-        return {
+      const choices = this.getSliderChoices();
+      return {
         "valueType": "xsd:integer",
+        "scoring": this.ref.options.hasScoreValue,
         "schema:minValue": this.ref.options.minValue,
         "schema:maxValue": this.ref.options.maxValue,
         choices: choices
-        };
+      };
     }
     if (this.ref.inputType === "date") {
-        return {
+      return {
         valueType: "xsd:date",
         requiredValue: true,
         "schema:maxValue": "new Date()"
-        };
+      };
     }
     if (
         this.ref.inputType === "audioRecord" ||
@@ -233,6 +247,7 @@ export default class Item {
       itemObj.options.minValue = itemObj.options.minValue || "Min";
       itemObj.options.maxValue = itemObj.options.maxValue || "Max";
       itemObj.options.numOptions = itemObj.options.numOptions || 5;
+      itemObj.options.hasScoreValue = itemObj.options.hasScoreValue || false;
     }
 
     return itemObj;
@@ -240,27 +255,29 @@ export default class Item {
 
   static getHistoryTemplate(oldValue, newValue) {
     const radioOptionListUpdate = (field) => {
-      const oldOptions = _.get(oldValue, field, []).map(({ name, value }) => {
+      const oldOptions = _.get(oldValue, field, []).map(({ name, value, score }) => {
         return {
           name,
-          value
+          value,
+          score
         }
       });
-      const newOptions = _.get(newValue, field, []).map(({ name, value }) => {
+      const newOptions = _.get(newValue, field, []).map(({ name, value, score }) => {
         return {
           name,
-          value
+          value,
+          score
         }
       });
 
       const removedOptions = oldOptions.filter(option => {
         return newOptions.find(newOption => {
-          return option.name === newOption.name && option.value === newOption.value
+          return option.name === newOption.name && option.value === newOption.value && option.score === newOption.score
         }) ? false : true
       });
       const insertedOptions = newOptions.filter(newOption => {
         return oldOptions.find(option => {
-          return option.name === newOption.name && option.value === newOption.value
+          return option.name === newOption.name && option.value === newOption.value && option.score === newOption.score
         }) ? false : true
       });
 
@@ -269,6 +286,32 @@ export default class Item {
         ...insertedOptions.map(option => `${option.name} | ${option.value} option was inserted`)
       ];
     };
+
+    const scoreUpdate = (field) => {
+      const oldScore = _.get(oldValue, field, []);
+      const newScore = _.get(newValue, field, []);
+
+      const updates = [];
+
+      let i;
+      for ( i = 0; i < oldScore.length && newScore.length; i++) {
+        if (oldScore[i] != newScore[i]) {
+          updates.push(`score for ${i+1} is updated to ${newScore[i]}`);
+        }
+      }
+
+      for ( ;i < oldScore.length || i< newScore.length; i++) {
+        if (i < oldScore.length) {
+          updates.push(`score for ${i+1} was removed`);
+        }
+        if (i < newScore.length) {
+          updates.push(`score for ${i+1} was set to ${newScore[i]}`);
+        }
+      }
+
+      return updates;
+    }
+
     const optionUpdate = name => field => 
           `${name} was ${_.get(newValue, field) ? 'enabled' : 'disabled'}`;
     const valueUpdate = name => field =>
@@ -327,6 +370,12 @@ export default class Item {
       'options.numOptions': {
         updated: valueUpdate('Scale value'),
         inserted: valueInsert('Scale value'),
+      },
+      'options.hasScoreValue': {
+        updated: optionUpdate('Scoring option'),
+      },
+      'options.scores': {
+        updated: scoreUpdate,
       },
       'options.maxLength': {
         updated: valueUpdate('maxLength'),

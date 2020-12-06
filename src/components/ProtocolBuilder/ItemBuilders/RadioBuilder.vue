@@ -39,23 +39,25 @@
       </v-col>
       <v-col 
         v-if="isTokenValue"
-        class="d-flex align-center"
+        class="d-flex align-center flex-column"
         cols="12"
         sm="3"
       >
-        <v-menu offset-y>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              class="deep-orange"
-              color="primary"
-              dark
-              v-bind="attrs"
-              v-on="on"
-            >
-              Saved Templates
-            </v-btn>
-          </template>
-
+        <v-btn
+          @click="openTemplateList"
+          v-click-outside="closeTemplateList"
+          class="deep-orange"
+          color="primary"
+          dark
+        >
+          Saved Templates
+        </v-btn>
+        <v-card
+          v-show="templateList"
+          class="mx-auto mx-template-list"
+          min-width="172"
+          tile
+        >
           <v-list>
             <v-list-item
               v-for="(item, i) in items"
@@ -73,7 +75,7 @@
               </v-btn>
             </v-list-item>
           </v-list>
-        </v-menu>
+        </v-card>
       </v-col>
     </v-row>
     <v-row>
@@ -213,6 +215,8 @@
 </template>
 
 <script>
+import ClickOutside from 'vue-click-outside'
+
 export default {
   props: {
     initialItemData: {
@@ -258,6 +262,7 @@ export default {
       nextOptionValue: this.initialItemData.nextOptionValue || '',
       nextOptionImage: this.initialItemData.nextOptionImage || '',
       options: this.initialItemData.options || [],
+      templateList: false,
       valid: true,
       textRules: [
         v => !!v || 'Radio options cannot be empty',
@@ -269,6 +274,9 @@ export default {
       nextOptionScore,
       hasScoreValue: this.initialItemData.hasScoreValue || false,
     };
+  },
+  directives: {
+    ClickOutside
   },
   async beforeMount() {
     this.items = this.itemTemplates
@@ -319,8 +327,15 @@ export default {
         'value': Number(item.value),
         'image': ''
       };
+      this.templateList = false;
       this.options.push(nextOption);
       this.update();
+    },
+    openTemplateList(event) {
+      this.templateList = !this.templateList
+    },
+    closeTemplateList() {
+      this.templateList = false;
     },
     deleteOption(index) {
       this.options.splice(index, 1);
@@ -352,3 +367,11 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.mx-template-list {
+  position: absolute;
+  margin-top: 36px;
+  z-index: 1;
+}
+</style>

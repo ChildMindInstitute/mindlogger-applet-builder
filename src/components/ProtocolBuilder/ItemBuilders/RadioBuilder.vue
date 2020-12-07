@@ -1,8 +1,5 @@
 <template>
-  <v-form
-    ref="form"
-    v-model="valid"
-  >
+  <v-form>
     <v-row>
       <v-col 
         class="d-flex align-center"
@@ -42,23 +39,25 @@
       </v-col>
       <v-col 
         v-if="isTokenValue"
-        class="d-flex align-center"
+        class="d-flex align-center flex-column"
         cols="12"
         sm="3"
       >
-        <v-menu offset-y>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              class="deep-orange"
-              color="primary"
-              dark
-              v-bind="attrs"
-              v-on="on"
-            >
-              Saved Templates
-            </v-btn>
-          </template>
-
+        <v-btn
+          @click="openTemplateList"
+          v-click-outside="closeTemplateList"
+          class="deep-orange"
+          color="primary"
+          dark
+        >
+          Saved Templates
+        </v-btn>
+        <v-card
+          v-show="templateList"
+          class="mx-auto mx-template-list"
+          min-width="172"
+          tile
+        >
           <v-list>
             <v-list-item
               v-for="(item, i) in items"
@@ -76,7 +75,21 @@
               </v-btn>
             </v-list-item>
           </v-list>
-        </v-menu>
+        </v-card>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        sm="3"
+      >
+        <v-checkbox
+          v-model="hasScoreValue"
+          label="Option Score"
+          :disabled="!isItemEditable"
+          @change="update"
+        />
       </v-col>
     </v-row>
     <v-list>
@@ -103,7 +116,10 @@
         </v-list-item-action>
       </v-list-item>
       <v-list-item class="d-block">
-        <v-form>
+        <v-form
+          ref="form"
+          v-model="valid"
+        >
           <v-row>
             <v-col 
               cols="12"
@@ -153,6 +169,26 @@
               />
             </v-col>
           </v-row>
+
+          <v-row>
+            <v-col
+              v-if="hasScoreValue"
+              cols="12"
+              sm="4"
+            >
+              <v-text-field
+                v-model="nextOptionScore"
+                :rules="numberRules"
+                type="number"
+                label="Score Value"
+                counter="5"
+                maxlength="5"
+                :disabled="!isItemEditable"
+                @change="update"
+              />
+            </v-col>
+          </v-row>
+
           <v-row>
             <v-col 
               cols="12"
@@ -179,6 +215,8 @@
 </template>
 
 <script>
+import ClickOutside from 'vue-click-outside'
+
 export default {
   props: {
     initialItemData: {
@@ -202,6 +240,19 @@ export default {
     }
   },
   data: function () {
+    let nextOptionScore = 1;
+
+    if (
+      this.initialItemData.hasScoreValue && 
+      this.initialItemData.options.length > 0
+    ) {
+      const lastOption = this.initialItemData.options[this.initialItemData.options.length - 1];
+
+      if (lastOption.score) {
+        nextOptionScore = lastOption.score + 1;
+      }
+    }
+
     return {
       isTokenValue: (this.responseOptions.valueType && this.responseOptions.valueType.includes("token")) || false,
       isMultipleChoice: this.initialItemData.isMultipleChoice || false,
@@ -211,12 +262,21 @@ export default {
       nextOptionValue: this.initialItemData.nextOptionValue || '',
       nextOptionImage: this.initialItemData.nextOptionImage || '',
       options: this.initialItemData.options || [],
+      templateList: false,
       valid: true,
       textRules: [
         v => !!v || 'Radio options cannot be empty',
       ],
-      items: []
+      numberRules: [
+        v => !isNaN(parseInt(v)) || 'Please enter a numerical value',
+      ],
+      items: [],
+      nextOptionScore,
+      hasScoreValue: this.initialItemData.hasScoreValue || false,
     };
+  },
+  directives: {
+    ClickOutside
   },
   async beforeMount() {
     this.items = this.itemTemplates
@@ -226,11 +286,13 @@ export default {
       this.$refs.form.resetValidation()
     },
     addOption() {
-      const { isTokenValue, nextOptionName, nextOptionValue } = this;
+      const { isTokenValue, nextOptionName, nextOptionValue, hasScoreValue, nextOptionScore } = this;
+
       const currentVal = this.options.length ? this.getMaxValue(this.options) + 1 : 0
       const nextOption = {
         'name': nextOptionName,
         'value': isTokenValue ? Number(nextOptionValue) : currentVal,
+        'score': hasScoreValue ? Number(nextOptionScore) : 0,
       };
       if (this.nextOptionImage) {
         nextOption.image = this.nextOptionImage.toString();
@@ -249,6 +311,7 @@ export default {
       this.nextOptionName = '';
       this.nextOptionValue = '';
       this.nextOptionImage = '';
+      this.nextOptionScore = nextOption.score + 1;
       this.resetValidation();
       this.update();
     },
@@ -264,8 +327,15 @@ export default {
         'value': Number(item.value),
         'image': ''
       };
+      this.templateList = false;
       this.options.push(nextOption);
       this.update();
+    },
+    openTemplateList(event) {
+      this.templateList = !this.templateList
+    },
+    closeTemplateList() {
+      this.templateList = false;
     },
     deleteOption(index) {
       this.options.splice(index, 1);
@@ -273,6 +343,7 @@ export default {
     },
     update() {
       const responseOptions = {
+        'hasScoreValue': this.hasScoreValue,
         'isTokenValue': this.isTokenValue,
         'isMultipleChoice': this.isMultipleChoice,
         'isSkippableItem': this.isSkippableItem,
@@ -296,3 +367,11 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.mx-template-list {
+  position: absolute;
+  margin-top: 36px;
+  z-index: 1;
+}
+</style>

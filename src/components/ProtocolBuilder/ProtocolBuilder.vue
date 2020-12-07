@@ -357,9 +357,18 @@ export default {
               responseOptions[0] &&
               responseOptions[0]['reprolib:terms/valueType']
 
+            let scoring = 
+              responseOptions[0] &&
+              responseOptions[0]['reprolib:terms/scoring'];
+
             if (multipleChoice) {
               itemContent.multipleChoice =
                 multipleChoice[0] && multipleChoice[0]['@value'];
+            }
+
+            if (scoring) {
+              itemContent.scoring = 
+                scoring[0] && scoring[0]['@value'];
             }
 
             if (valueType) {
@@ -370,6 +379,7 @@ export default {
             if (itemType === 'radio') {
               itemContent.options = {
                 isMultipleChoice: itemContent.multipleChoice || false,
+                hasScoreValue: itemContent.scoring || false,
                 nextOptionImage: '',
                 nextOptionName: '',
                 options:
@@ -380,6 +390,7 @@ export default {
                       const image = itemListElement['schema:image'];
                       const name = itemListElement["schema:name"];
                       const value = itemListElement["schema:value"];
+                      const score = itemListElement["schema:score"];
 
                       return {
                         image: 
@@ -389,7 +400,9 @@ export default {
                           typeof name == "string" && name ||
                           Array.isArray(name) && name[0] && name[0]['@value'].toString(),
                         value:
-                          Array.isArray(value) && value[0] && value[0]['@value']
+                          Array.isArray(value) && value[0] && value[0]['@value'],
+                        score:
+                          Array.isArray(score) && score[0] && score[0]['@value'],
                       };
                     }
                   ),
@@ -414,6 +427,7 @@ export default {
             }
             if (itemType === 'slider') {
               itemContent.options = {
+                hasScoreValue: itemContent.scoring || false,
                 maxValue:
                   responseOptions[0] &&
                   responseOptions[0]['schema:maxValue'] &&
@@ -428,6 +442,14 @@ export default {
                   responseOptions[0] &&
                   responseOptions[0]['schema:itemListElement'] &&
                   responseOptions[0]['schema:itemListElement'].length,
+                scores: itemContent.scoring && responseOptions[0] &&
+                  responseOptions[0]['schema:itemListElement'] &&
+                  responseOptions[0]['schema:itemListElement'].map(
+                    (itemListElement) => {
+                      const score = itemListElement["schema:score"];
+                      return Array.isArray(score) && score[0] && score[0]['@value']
+                    }
+                  )
               };
             }
             if (itemType === 'audioRecord' || itemType === 'audioImageRecord') {

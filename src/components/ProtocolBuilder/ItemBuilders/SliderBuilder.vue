@@ -197,13 +197,12 @@ export default {
     },
 
     update () {
-<<<<<<< HEAD
       if (this.numOptions > 12) {
         this.numOptions = 12;
       } else if (this.numOptions < 1) {
         this.numOptions = 1;
       }
-=======
+
       if (this.hasScoreValue) {
         this.scores = this.scores || [];
       }
@@ -218,7 +217,6 @@ export default {
         }
       }
 
->>>>>>> 7fff086f04c53d32b5b3f1e2c9964346e21d5306
       const responseOptions = {
         'numOptions': this.numOptions,
         'minValue': this.minValue || "Min",

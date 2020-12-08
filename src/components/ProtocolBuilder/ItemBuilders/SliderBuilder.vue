@@ -40,6 +40,8 @@
           :disabled="!isItemEditable"
           type="number"
           @change="update"
+          min="1"
+          max="12"
         />
       </v-col>
 

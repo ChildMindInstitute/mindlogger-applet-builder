@@ -88,7 +88,32 @@ export default class Activity {
   }
 
   getItemOrder() {
-    const itemNamesArray = this.ref.items.map((item) => item.name);
+    const { items, conditionalItems } = this.ref;
+    const itemNamesArray = [];
+
+    if (!items.length) return itemNamesArray;
+
+    itemNamesArray.push(items[0].name);
+    for (let i = 0; i != itemNamesArray.length;) {
+      i = itemNamesArray.length;
+      itemNamesArray.forEach(name => {
+        conditionalItems.forEach(item => {
+          if (item.ifValue.name === name && !itemNamesArray.includes(item.showValue)) {
+            itemNamesArray.push(item.showValue);
+          }
+        })
+      })
+
+      if (i === itemNamesArray.length) {
+        items.forEach(({ name }) => {
+          const endedItems = conditionalItems.filter(item => item.showValue === name);
+          if (!itemNamesArray.includes(name) && !endedItems.length) {
+            itemNamesArray.push(name);
+          }
+        })
+      }
+    }
+
     return itemNamesArray;
   }
 

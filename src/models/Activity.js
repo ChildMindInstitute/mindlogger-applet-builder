@@ -6,6 +6,7 @@ export default class Activity {
   }
 
   getActivityBuilderData(initialActivityData) {
+    console.log('initial activity data ---->', initialActivityData);
     return {
       name: initialActivityData.name || '',
       description: initialActivityData.description || '',

@@ -18,8 +18,8 @@
           v-model="question.text"
           label="Question"
           :disabled="!isItemEditable"
-          counter="250"
-          maxlength="250"
+          counter="320"
+          maxlength="320"
           auto-grow
           rows="1"
         />

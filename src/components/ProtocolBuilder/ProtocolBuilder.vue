@@ -275,13 +275,37 @@ export default {
       Object.values(activities).forEach((act) => {
         const activitiesObj = act;
         const {
-          ['@id']: name,
+          ['skos:prefLabel']: name,
           ['schema:description']: description,
           ['reprolib:terms/preamble']: activityPreamble,
           ['reprolib:terms/shuffle']: shuffle,
           ['reprolib:terms/allow']: isSkippable,
+          ['reprolib:terms/addProperties']: addProperties,
           ['_id']: id,
         } = activitiesObj;
+
+        const visibilities = addProperties.map((property) => {
+          const isAbout = _.get(
+            property,
+            'reprolib:terms/isAbout.0.@id',
+            ""
+          );
+          const isVis = _.get(
+            property,
+            'reprolib:terms/isVis.0.@value',
+            ""
+          );
+          const variableName = _.get(
+            property,
+            'reprolib:terms/variableName.0.@value',
+            ""
+          );
+          return {
+            isAbout,
+            isVis,
+            variableName,
+          }
+        });
 
         const activityInfo = {
           _id: id && id.split('/')[1],
@@ -293,6 +317,7 @@ export default {
             activityPreamble[0] &&
             activityPreamble[0]['@value'],
           shuffle: shuffle && shuffle[0] && shuffle[0]['@value'],
+          visibilities,
         };
 
         let isSkippableList =

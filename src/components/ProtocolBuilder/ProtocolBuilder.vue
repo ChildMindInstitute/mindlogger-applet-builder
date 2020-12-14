@@ -275,7 +275,7 @@ export default {
       Object.values(activities).forEach((act) => {
         const activitiesObj = act;
         const {
-          ['@id']: name,
+          ['skos:prefLabel']: name,
           ['schema:description']: description,
           ['reprolib:terms/preamble']: activityPreamble,
           ['reprolib:terms/shuffle']: shuffle,

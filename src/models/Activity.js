@@ -6,6 +6,9 @@ export default class Activity {
   }
 
   getActivityBuilderData(initialActivityData) {
+    if (initialActivityData.schema) {
+      initialActivityData.conditionalItems = this.getConditionalItems(initialActivityData.schema, initialActivityData.items);
+    }
     return {
       name: initialActivityData.name || '',
       description: initialActivityData.description || '',
@@ -25,6 +28,7 @@ export default class Activity {
       isItemEditable: true,
       editIndex: -1,
       initialConditionalItemData: {},
+      visibilities: initialActivityData.visibilities || [],
       editConditionalItemIndex: -1,
       conditionalRadioItems: [],
       conditionalSliderItems: [],
@@ -42,6 +46,132 @@ export default class Activity {
     this.ref = ref;
   }
 
+  getConditionalItems(schema, items) {
+    const addProperties = schema.ui.addProperties;
+    const conditionalItems = [];
+
+    addProperties.forEach((property) => {
+      let ifValue, stateValue, answerValue;
+      const showValue = property.variableName;
+      if (typeof property.isVis === 'boolean') return;
+
+      const isVis = property.isVis.split(' ').join('');
+      const outsideRegExp = /(\w+)<(\d+)\|\|(\w+)>(\d+)/;
+      const outsideValues = isVis.match(outsideRegExp);
+      const insideRegExp = /(\w+)>(\d+)\&\&(\w+)<(\d+)/;
+      const withinValues = isVis.match(insideRegExp);
+
+      const includeRegExp = /(\w+)\.includes\((\w+)\)/;
+      const includeValues = isVis.match(includeRegExp);
+      const excludeRegExp = /!(\w+)\.includes\((\w+)\)/;
+      const excludeValues = isVis.match(excludeRegExp);
+  
+      if (outsideValues) {
+        conditionalItems.push({
+          ifValue: items.find(({ name }) => name === outsideValues[1]),
+          maxValue: outsideValues[4],
+          minValue: outsideValues[2],
+          showValue,
+          stateValue: {
+            name: "OUTSIDE OF",
+            val: "outsideof"
+          }
+        });
+      } else if (withinValues) {
+        conditionalItems.push({
+          ifValue: items.find(({ name }) => name === withinValues[1]),
+          maxValue: withinValues[4],
+          minValue: withinValues[2],
+          showValue,
+          stateValue: {
+            name: "WITHIN",
+            val: "within"
+          }
+        });
+      } else if (excludeValues) {
+        const itemValue = items.find(({ name }) => name === excludeValues[1]);
+        const option = itemValue.responseOptions.choices.find(choice => choice['schema:value'] == excludeValues[2]);
+
+        conditionalItems.push({
+          ifValue: itemValue,
+          showValue,
+          answerValue: {
+            name: option['schema:name'],
+            value: option['schema:value']
+          },
+          stateValue: {
+            name: "Doesn't include",
+            val: "!includes",
+          }
+        })
+      } else if (includeValues) { 
+        const itemValue = items.find(({ name }) => name === includeValues[1]);
+        const option = itemValue.responseOptions.choices.find(choice => choice['schema:value'] == includeValues[2]);
+
+        conditionalItems.push({
+          ifValue: itemValue,
+          showValue,
+          answerValue: {
+            name: option['schema:name'],
+            value: option['schema:value']
+          },
+          stateValue: {
+            name: "Includes",
+            val: "includes",
+          }
+        })
+      } else {
+        let values = [];
+        if (isVis.includes('==')) {
+          values = isVis.split('==');
+          stateValue = {
+            name: 'IS EQUAL TO',
+            val: '==',
+          };
+        } else if (isVis.includes('!=')) {
+          values = isVis.split('!=');
+          stateValue = {
+            name: 'IS NOT EQUAL TO',
+            val: '!=',
+          };
+        } else if (isVis.includes('>')) {
+          values = isVis.split('>');
+          stateValue = {
+            name: 'GREATER THEN',
+            val: '>',
+          };
+        } else if (isVis.includes('<')) {
+          values = isVis.split('<');
+          stateValue = {
+            name: 'LESS THEN',
+            val: '<',
+          };
+        } else if (isVis.includes('=')) {
+          values = isVis.split('=');
+          stateValue = {
+            name: 'EQUAL TO',
+            val: '=',
+          };
+        }
+        ifValue = items.find(({ name }) => name === values[0]);
+        const option = ifValue.responseOptions.choices.find(choice => choice['schema:value'] == values[1]);
+        answerValue = {
+          name: option['schema:name'],
+          value: option['schema:value']
+        };
+
+        conditionalItems.push({
+          ifValue,
+          stateValue,
+          answerValue,
+          showValue,
+        });
+      }
+    });
+
+    return conditionalItems;
+  }
+
   getItemVisibility() {
     const visibilityObj = {};
     this.ref.items.forEach(function(item) {
@@ -50,15 +180,14 @@ export default class Activity {
     return visibilityObj;
   }
 
-  getAddProperties() {
+  getAddProperties(itemOrder) {
     const addProperties = [];
-    this.ref.items.forEach((item) => {
+    itemOrder.forEach((item) => {
       const conditionalItems = this.ref.conditionalItems.filter((cond) => {
-        return cond.showValue === item.name;
+        return cond.showValue === item;
       });
       
       let isVis = true;
-
       if (conditionalItems.length) {
         const visibleItems = conditionalItems.map((cond) => {
           if (cond.stateValue.val === 'within') {
@@ -77,10 +206,14 @@ export default class Activity {
         });
         isVis = visibleItems.join(' && ');
       }
+      if (this.ref.visibilities && this.ref.visibilities.length) {
+        const visibility = this.ref.visibilities.find(({ variableName }) => variableName === item);
+        isVis = visibility.isVis;
+      }
 
       const property = {
-        variableName: item.name,
-        isAbout: item.name,
+        variableName: item,
+        isAbout: item,
         isVis: isVis,
       };
       addProperties.push(property);
@@ -89,7 +222,32 @@ export default class Activity {
   }
 
   getItemOrder() {
-    const itemNamesArray = this.ref.items.map((item) => item.name);
+    const { items, conditionalItems } = this.ref;
+    const itemNamesArray = [];
+
+    if (!items.length) return itemNamesArray;
+
+    itemNamesArray.push(items[0].name);
+    for (let i = 0; i != itemNamesArray.length;) {
+      i = itemNamesArray.length;
+      itemNamesArray.forEach(name => {
+        conditionalItems.forEach(item => {
+          if (item.ifValue.name === name && !itemNamesArray.includes(item.showValue)) {
+            itemNamesArray.push(item.showValue);
+          }
+        })
+      })
+
+      if (i === itemNamesArray.length) {
+        items.forEach(({ name }) => {
+          const endedItems = conditionalItems.filter(item => item.showValue === name);
+          if (!itemNamesArray.includes(name) && !endedItems.length) {
+            itemNamesArray.push(name);
+          }
+        })
+      }
+    }
+
     return itemNamesArray;
   }
 
@@ -98,9 +256,9 @@ export default class Activity {
   }
 
   getCompressedSchema() {
-    const addProperties = this.getAddProperties();
     const visibility = this.getItemVisibility();
     const itemOrder = this.getItemOrder();
+    const addProperties = this.getAddProperties(itemOrder);
     const allowed = this.getAllowed();
     return {
       '@context': [

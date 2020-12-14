@@ -384,8 +384,12 @@ export default {
     },
     onEditConditionalItem(index) {
       this.editConditionalItemIndex = index;
-
       this.initialConditionalItemData = this.conditionalItems[index];
+      this.conditionalBuilderType = this.initialConditionalItemData.ifValue.ui.inputType;
+      this.conditionalItemsForBuilder =
+        this.conditionalBuilderType === 'radio'
+          ? this.conditionalRadioItems
+          : this.conditionalSliderItems;
       this.forceUpdate();
       this.isConditionalEditMode = true;
       this.editConditionalItemDialog = true;

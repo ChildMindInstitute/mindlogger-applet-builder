@@ -44,6 +44,9 @@
             <v-tab v-if="conditionalItems.length">
               Conditional logic items
             </v-tab>
+            <v-tab>
+              Sub-Scales
+            </v-tab>
 
             <v-tab-item>
               <v-card flat>
@@ -98,6 +101,34 @@
                 </v-card-text>
               </v-card>
             </v-tab-item>
+
+            <v-tab-item>
+              <v-card flat>
+                <v-card-text>
+                  <v-list>
+                    <v-list-item v-for="(subScale, index) in subScales" :key="subScale.variableName">
+                      <v-list-item-content>
+                        <v-list-item-title v-text="subScale.variableName" />
+                      </v-list-item-content>
+                      <v-list-item-action>
+                        <v-btn icon @click="editSubScaleScoring(index)">
+                          <v-icon color="grey lighten-1">
+                            edit
+                          </v-icon>
+                        </v-btn>
+                      </v-list-item-action>
+                      <v-list-item-action>
+                        <v-btn icon @click="deleteSubScaleScoring(index)">
+                          <v-icon color="grey lighten-1">
+                            mdi-delete
+                          </v-icon>
+                        </v-btn>
+                      </v-list-item-action>
+                    </v-list-item>
+                  </v-list>
+                </v-card-text>
+              </v-card>
+            </v-tab-item>
           </v-tabs>
 
           <v-row justify="space-around">
@@ -139,6 +170,10 @@
                 </v-list-item>
               </v-list>
             </v-menu>
+
+            <v-btn color="primary" @click="onAddSubScale">
+              Add Sub-Scale
+            </v-btn>
           </v-row>
         </v-form>
         <v-alert v-if="error !== ''" type="error">
@@ -170,6 +205,16 @@
       />
     </v-dialog>
 
+    <v-dialog v-model="subScaleDialog" persistent width="800">
+      <SubScaleBuilder
+        :key="`subScale-${subScaleDlgKey}`"
+        :items="items"
+        :sub-scales="subScales"
+        :edit-index="subScaleEditIndex"
+        @closeSubScaleModal="onCloseSubScaleModal"
+      />
+    </v-dialog>
+
     <v-dialog v-model="editConditionalItemDialog" persistent>
       <ConditionalItemBuilder
         :key="componentKey"
@@ -184,8 +229,15 @@
       />
     </v-dialog>
 
-    <v-dialog v-model="urlDialog" persistent>
+    <v-dialog v-model="urlDialog">
       <UrlItemUploader :key="componentKey" @uploadItem="onUploadItem" />
+    </v-dialog>
+
+    <v-dialog v-model="subScaleAlert" width="350">
+      <v-card>
+        <v-card-title class="grey lighten-2">Sub Scale Alert</v-card-title>
+        <v-card-text class="pa-4">Please insert two or more items with scoring option to add sub-scale.</v-card-text>
+      </v-card>
     </v-dialog>
   </div>
 </template>
@@ -195,6 +247,7 @@ import ItemBuilder from './ItemBuilder.vue';
 import ConditionalItemBuilder from './ConditionalItemBuilder.vue';
 import UrlItemUploader from './UrlItemUploader.vue';
 import ConditionalItemList from './ConditionalItemList.vue';
+import SubScaleBuilder from './SubScaleBuilder.vue';
 import { string } from 'prop-types';
 import Activity from '../../models/Activity';
 import Item from '../../models/Item';
@@ -205,6 +258,7 @@ export default {
     ConditionalItemBuilder,
     UrlItemUploader,
     ConditionalItemList,
+    SubScaleBuilder,
   },
   props: {
     initialActivityData: {
@@ -224,7 +278,12 @@ export default {
     return {
       model,
       ...model.getActivityBuilderData(this.initialActivityData),
-      itemTemplates: []
+      itemTemplates: [],
+
+      subScaleAlert: false,
+      subScaleDialog: false,
+      subScaleDlgKey: 0,
+      subScaleEditIndex: -1,
     };
   },
   watch: {
@@ -325,8 +384,12 @@ export default {
     },
     onEditConditionalItem(index) {
       this.editConditionalItemIndex = index;
-
       this.initialConditionalItemData = this.conditionalItems[index];
+      this.conditionalBuilderType = this.initialConditionalItemData.ifValue.ui.inputType;
+      this.conditionalItemsForBuilder =
+        this.conditionalBuilderType === 'radio'
+          ? this.conditionalRadioItems
+          : this.conditionalSliderItems;
       this.forceUpdate();
       this.isConditionalEditMode = true;
       this.editConditionalItemDialog = true;
@@ -341,6 +404,17 @@ export default {
     },
     onNewItem(item) {
       if (this.editIndex >= 0 && this.editIndex < this.items.length) {
+        if (this.items[this.editIndex].name != item.name) {
+          /** update associated sub-scale names when item name is updated */
+          this.subScales.forEach(subScale => {
+            let itemNames = subScale.jsExpression.split(' + ');
+
+            subScale.jsExpression = itemNames.map(name => 
+              name === this.items[this.editIndex].name ? item.name : name
+            ).join(' + ');
+          })
+        }
+
         this.items[this.editIndex] = item;
       } else {
         this.items.push(item);
@@ -373,6 +447,8 @@ export default {
       this.editItemDialog = true;
     },
     deleteItem(index) {
+      /** delete associated sub-scales */
+      this.subScales = this.subScales.filter(subScale => !subScale.jsExpression.split(' + ').includes(this.items[index].name));
       this.items.splice(index, 1);
     },
     onClickSaveActivity() {
@@ -400,6 +476,47 @@ export default {
     },
     onDiscardActivity() {
       this.$emit('closeModal', null);
+    },
+    editSubScaleScoring(index) {
+      this.subScaleEditIndex = index;
+      this.subScaleDlgKey++;
+      this.subScaleDialog = true;
+    },
+    deleteSubScaleScoring(index) {
+      this.subScales.splice(index, 1);
+    },
+    onAddSubScale() {
+      if (!this.subScaleAvailable()) {
+        this.subScaleAlert = true;
+        return ;
+      }
+
+      this.subScaleEditIndex = -1;
+      this.subScaleDlgKey++;
+      this.subScaleDialog = true;
+    },
+    subScaleAvailable() {
+      let itemsWithScoring = 0;
+
+      for (let item of this.items) {
+        if (item.ui.inputType == 'radio' || item.ui.inputType == 'slider') {
+          if (item.responseOptions.scoring) {
+            itemsWithScoring++;
+          }
+        }
+      }
+      return itemsWithScoring >= 2;
+    },
+    onCloseSubScaleModal(subScale) {
+      this.subScaleDialog = false;
+
+      if (subScale) {
+        if (this.subScaleEditIndex >= 0) {
+          this.$set(this.subScales, this.subScaleEditIndex, subScale);
+        } else {
+          this.subScales.push(subScale);
+        }
+      }
     },
   },
 };

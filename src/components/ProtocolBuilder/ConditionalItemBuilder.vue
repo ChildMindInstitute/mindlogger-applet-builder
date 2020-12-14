@@ -11,12 +11,6 @@
 
           <v-form ref="form" lazy-validation>
             <v-select
-              v-model="showValue"
-              item-text="name"
-              :items="reflectedItems"
-              label="Show"
-            />
-            <v-select
               v-model="ifValue"
               item-text="name"
               :items="filteredItems"
@@ -62,6 +56,12 @@
                 return-object
               />
             </template>
+            <v-select
+              v-model="showValue"
+              item-text="name"
+              :items="reflectedItems"
+              label="Show"
+            />
           </v-form>
 
           <v-btn v-if="!editMode" @click="addOption">Add more conditions</v-btn>
@@ -139,9 +139,6 @@ export default {
     };
   },
   watch: {
-    showValue() {
-      this.setFilteredItems();
-    },
     ifValue() {
       this.fillAnswerAndShowItems();
       this.setStateItems();
@@ -149,10 +146,8 @@ export default {
   },
   created() {
     this.$watch("$props", this.setStateItems, { deep: true });
+    this.setFilteredItems();
     this.fillAnswerAndShowItems();
-    if (this.showValue !== "") {
-      this.setFilteredItems();
-    }
     if (this.ifValue !== "") {
       this.setStateItems();
     }
@@ -193,7 +188,6 @@ export default {
       let answerItemsObj = this.items.find(item => {
         return item.question === this.ifValue.question;
       });
-
       if (this.type === "radio") {
         this.answerItems = answerItemsObj.responseOptions.choices.map(
           choice => {
@@ -203,7 +197,7 @@ export default {
             };
           }
         );
-      } else {
+      } else if (this.type === "slider") {
         this.sliderNumOptions = answerItemsObj.options.numOptions;
       }
 
@@ -216,16 +210,13 @@ export default {
       this.showItemsFiltered = showItems.splice(index + 1);
     },
     setFilteredItems() {
-      if (this.showValue === "") return;
-      const index = this.showItems.findIndex(item => item.name === this.showValue);
-      const indexedItems = this.items.map(item => {
+      this.filteredItems = this.items.map(item => {
         const index = this.showItems.findIndex(showItem => item.name === showItem.name);
         return {
           ...item,
           index
         };
       })
-      this.filteredItems = indexedItems.filter(item => item.index < index);
     },
     onSaveItem() {
       this.addOption();

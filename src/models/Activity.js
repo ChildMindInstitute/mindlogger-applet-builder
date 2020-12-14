@@ -207,13 +207,13 @@ export default class Activity {
       }
       if (this.ref.visibilities && this.ref.visibilities.length) {
         const visibility = this.ref.visibilities.find(({ variableName }) => variableName === item);
-        isVis = visibility.isVis;
+        isVis = visibility ? visibility.isVis : isVis;
       }
 
       const property = {
         variableName: item,
         isAbout: item,
-        isVis: isVis,
+        isVis,
       };
       addProperties.push(property);
     });

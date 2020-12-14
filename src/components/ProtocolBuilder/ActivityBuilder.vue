@@ -67,17 +67,19 @@
                       <v-list-item-action>
                         <v-btn icon @click="editItem(index)">
                           <v-icon
-                            v-if="item.isItemEditable"
+                            v-if="item.allowEdit"
                             color="grey lighten-1"
                           >
                             edit
                           </v-icon>
                           <v-icon v-else color="grey lighten-1">
-                            edit
+                            mdi-eye
                           </v-icon>
                         </v-btn>
                       </v-list-item-action>
-                      <v-list-item-action>
+                      <v-list-item-action
+                        v-if="item.allowEdit"
+                      >
                         <v-btn icon @click="deleteItem(index)">
                           <v-icon color="grey lighten-1">
                             mdi-delete
@@ -108,7 +110,15 @@
                   <v-list>
                     <v-list-item v-for="(subScale, index) in subScales" :key="subScale.variableName">
                       <v-list-item-content>
-                        <v-list-item-title v-text="subScale.variableName" />
+                        <v-list-item-title>
+                          (<v-icon
+                            :color="!subScale.lookupTable ? 'grey' : 'primary'"
+                          >
+                            mdi-table-search
+                          </v-icon>)
+
+                          {{ subScale.variableName }}
+                        </v-list-item-title>
                       </v-list-item-content>
                       <v-list-item-action>
                         <v-btn icon @click="editSubScaleScoring(index)">
@@ -116,6 +126,34 @@
                             edit
                           </v-icon>
                         </v-btn>
+                      </v-list-item-action>
+                      <v-list-item-action>
+                        <v-menu bottom>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn icon v-bind="attrs" v-on="on">
+                              <v-icon color="grey lighten-1">
+                                mdi-table-search
+                              </v-icon>
+                            </v-btn>
+                          </template>
+
+                          <v-list>
+                            <v-list-item
+                              @click="onCreateLookupTable(index)"
+                            >
+                              <v-list-item-title>
+                                {{ !!subScale.lookupTable ? 'Replace Lookup Table' : 'Set Lookup Table' }}
+                              </v-list-item-title>
+                            </v-list-item>
+
+                            <v-list-item
+                              :disabled="!subScale.lookupTable"
+                              @click="onDeleteLookupTable(index)"
+                            >
+                              <v-list-item-title>Delete Lookup Table</v-list-item-title>
+                            </v-list-item>
+                          </v-list>
+                        </v-menu>
                       </v-list-item-action>
                       <v-list-item-action>
                         <v-btn icon @click="deleteSubScaleScoring(index)">
@@ -197,7 +235,7 @@
       <ItemBuilder
         :key="componentKey"
         :initial-item-data="initialItemData"
-        :is-item-editable="isItemEditable"
+        :is-item-editable="allowEdit"
         :templates="itemTemplates"
         @removeTemplate="onRemoveTemplate"
         @updateTemplates="onUpdateTemplates"
@@ -239,6 +277,14 @@
         <v-card-text class="pa-4">Please insert two or more items with scoring option to add sub-scale.</v-card-text>
       </v-card>
     </v-dialog>
+
+    <v-dialog v-model="lookupTableDialog" persistent>
+      <LookUpTableUploader
+        :sub-scale="subScales[subScaleEditIndex]"
+        :key="`lookup-table-${lookupTableUploadDlgKey}`"
+        @closeLookupTableModal="onCloseLookUpTableModal"
+      />
+    </v-dialog>
   </div>
 </template>
 
@@ -248,9 +294,11 @@ import ConditionalItemBuilder from './ConditionalItemBuilder.vue';
 import UrlItemUploader from './UrlItemUploader.vue';
 import ConditionalItemList from './ConditionalItemList.vue';
 import SubScaleBuilder from './SubScaleBuilder.vue';
+import LookUpTableUploader from './LookUpTableUploader';
 import { string } from 'prop-types';
 import Activity from '../../models/Activity';
 import Item from '../../models/Item';
+import { ageScreen, genderScreen } from './lookupTable';
 
 export default {
   components: {
@@ -259,6 +307,7 @@ export default {
     UrlItemUploader,
     ConditionalItemList,
     SubScaleBuilder,
+    LookUpTableUploader,
   },
   props: {
     initialActivityData: {
@@ -284,6 +333,8 @@ export default {
       subScaleDialog: false,
       subScaleDlgKey: 0,
       subScaleEditIndex: -1,
+      lookupTableDialog: false,
+      lookupTableUploadDlgKey: 0,
     };
   },
   watch: {
@@ -324,7 +375,7 @@ export default {
       this.componentKey += 1;
     },
     createItem() {
-      this.isItemEditable = true;
+      this.allowEdit = true;
       this.editIndex = -1;
       this.initialItemData = {
         options: {},
@@ -417,7 +468,13 @@ export default {
 
         this.items[this.editIndex] = item;
       } else {
-        this.items.push(item);
+        let ageItemIndex = this.items.findIndex(item => item.allowEdit);
+
+        if (ageItemIndex >= 0) {
+          this.items.splice(ageItemIndex, 0, item);
+        } else {
+          this.items.push(item);
+        }
       }
     },
     duplicateItem(index) {
@@ -442,7 +499,7 @@ export default {
     editItem(index) {
       this.editIndex = index;
       this.initialItemData = this.items[index];
-      this.isItemEditable = this.initialItemData.isItemEditable;
+      this.allowEdit = this.initialItemData.allowEdit;
       this.forceUpdate();
       this.editItemDialog = true;
     },
@@ -484,6 +541,11 @@ export default {
     },
     deleteSubScaleScoring(index) {
       this.subScales.splice(index, 1);
+
+      if (!this.subScales.find((subScale) => !!subScale['lookupTable'])) {
+        // delete items asking gender and age
+        this.items = this.items.filter(item => item.allowEdit);
+      }
     },
     onAddSubScale() {
       if (!this.subScaleAvailable()) {
@@ -518,6 +580,45 @@ export default {
         }
       }
     },
+
+    onCloseLookUpTableModal(lookupTable) {
+      this.lookupTableDialog = false;
+
+      if (lookupTable) {
+        if (!this.subScales.find((subScale) => !!subScale['lookupTable'])) {
+          for (let screen of [ageScreen, genderScreen]) {
+            const itemModel = new Item();
+            itemModel.updateReferenceObject(
+              itemModel.getItemBuilderData(screen)
+            );
+
+            this.items.push(
+              itemModel.getItemData()
+            );
+          }
+        }
+
+        this.$set(this.subScales[this.subScaleEditIndex], 'lookupTable', lookupTable);
+      }
+    },
+
+    onCreateLookupTable(index) {
+      this.subScaleEditIndex = index;
+      this.lookupTableDialog = true;
+      this.lookupTableUploadDlgKey++;
+    },
+
+    onDeleteLookupTable(index) {
+      this.$set(this.subScales, index, {
+        variableName: this.subScales[index].variableName,
+        jsExpression: this.subScales[index].jsExpression,
+      });
+
+      if (!this.subScales.find((subScale) => !!subScale['lookupTable'])) {
+        // delete items asking gender and age
+        this.items = this.items.filter(item => item.allowEdit);
+      }
+    }
   },
 };
 </script>

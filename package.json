@@ -16,6 +16,7 @@
     "@toast-ui/vue-editor": "^2.4.0",
     "axios": "^0.19.2",
     "core-js": "^3.6.4",
+    "csvtojson": "^2.0.10",
     "file-saver": "^2.0.2",
     "jszip": "^3.2.2",
     "prop-types": "^15.7.2",

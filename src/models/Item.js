@@ -52,7 +52,8 @@ export default class Item {
           "audioImageRecord",
           "geolocation",
           "audioStimulus"
-        ]
+        ],
+        allowEdit: initialItemData.allowEdit === undefined ? true : initialItemData.allowEdit,
     };
   }
 
@@ -225,7 +226,7 @@ export default class Item {
       question: this.ref.question.image + this.ref.question.text,
       description: this.ref.description,
       options: this.ref.options,
-      isItemEditable: this.ref.isItemEditable,
+      allowEdit: this.ref.allowEdit,
       ...schema
     };
 

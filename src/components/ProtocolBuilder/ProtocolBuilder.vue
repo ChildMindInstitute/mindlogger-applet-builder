@@ -322,12 +322,31 @@ export default {
           subScales: Array.isArray(subScales) && subScales.map((subScale, index) => {
             const jsExpression = subScale['reprolib:terms/jsExpression'];
             const variableName = subScale['reprolib:terms/variableName'];
+            const lookupTable = subScale['reprolib:terms/lookupTable'];
 
-            return {
+            let subScaleData = {
               jsExpression: jsExpression[0] && jsExpression[0]['@value'],
               variableName: variableName[0] && variableName[0]['@value'],
               subScaleId: index + 1,
+            };
+
+            if (lookupTable && Array.isArray(lookupTable)) {
+              subScaleData['lookupTable'] = lookupTable.map(row => {
+                const age = row['reprolib:terms/age'];
+                const rawScore = row['reprolib:terms/rawScore'];
+                const sex = row['reprolib:terms/sex'];
+                const tScore = row['reprolib:terms/tScore'];
+
+                return {
+                  age: age && age[0] && age[0]['@value'] || '',
+                  rawScore: rawScore && rawScore[0] && rawScore[0]['@value'] || '',
+                  sex: sex && sex[0] && sex[0]['@value'] || '',
+                  tScore: tScore && tScore[0] && tScore[0]['@value'] || '',
+                }
+              })
             }
+
+            return subScaleData;
           })
         };
 
@@ -361,6 +380,7 @@ export default {
               return item['@id'].substr(15)
             })
           }
+
           let itemContent = {
             _id: item['_id'] && item['_id'].split('/')[1],
             name: item['@id'],
@@ -379,6 +399,10 @@ export default {
                 item['reprolib:terms/inputType'][0] &&
                 item['reprolib:terms/inputType'][0]['@value'],
             },
+            allowEdit:
+              item['reprolib:terms/allowEdit'] &&
+              item['reprolib:terms/allowEdit'][0] ?
+              item['reprolib:terms/allowEdit'][0]['@value'] : true
           };
 
           let responseOptions = item['reprolib:terms/responseOptions'];

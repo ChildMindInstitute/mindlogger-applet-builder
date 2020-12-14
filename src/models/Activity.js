@@ -12,7 +12,7 @@ export default class Activity {
       preamble: initialActivityData.preamble || '',
       shuffleActivityOrder: initialActivityData.shuffle || false,
       isSkippable: initialActivityData.isSkippable || false,
-      items: initialActivityData.items || [],
+      items: initialActivityData.items && initialActivityData.items.map(item => item) || [],
       id: initialActivityData._id || null,
       textRules: [(v) => !!v || 'This field is required'],
       editItemDialog: false,
@@ -34,6 +34,7 @@ export default class Activity {
       conditionalItems: initialActivityData.conditionalItems || [],
       conditionalBuilderType: '',
       conditionalItemsForBuilder: [],
+      subScales: initialActivityData.subScales && initialActivityData.subScales.map(subScale => subScale) || [],
     };
   }
 
@@ -122,6 +123,7 @@ export default class Activity {
         addProperties: addProperties,
         allow: allowed,
       },
+      subScales: this.ref.subScales
     };
   }
 
@@ -171,7 +173,8 @@ export default class Activity {
       schema: schema,
       context: context,
       items: items,
-      conditionalItems: conditionalItems
+      conditionalItems: conditionalItems,
+      subScales: this.ref.subScales,
     };
   }
 
@@ -211,7 +214,7 @@ export default class Activity {
           ];
         }
       },
-      preamble: {
+      'preamble': {
         updated: (field) => `preamble was updated to ${_.get(newValue, field)}`,
         inserted: (field) => `preamble was set to ${_.get(newValue, field)}`,
       },
@@ -233,6 +236,36 @@ export default class Activity {
           ];
         },
       },
+      'subScales': {
+        updated: (field) => {
+          const updates = [];
+          let newSubScales = _.get(newValue, field, []);
+          let oldSubScales = _.get(oldValue, field, []);
+
+          newSubScales.forEach(newSubScale => {
+            if (newSubScale.subScaleId === undefined) {
+              updates.push(`subscale (${newSubScale.variableName} | ${newSubScale.jsExpression.replaceAll(' + ', ', ')}) was added`)
+            } else {
+              let oldSubScale = oldSubScales.find(old => old.subScaleId == newSubScale.subScaleId);
+
+              if (
+                oldSubScale.variableName != newSubScale.variableName || 
+                oldSubScale.jsExpression != newSubScale.jsExpression
+              ) {
+                updates.push(`subscale (${oldSubScale.variableName} | ${oldSubScale.jsExpression.replaceAll(' + ', ', ')}) was updated to ${newSubScale.variableName} | ${newSubScale.jsExpression.replaceAll(' + ', ', ')}`);
+              }
+            }
+          })
+
+          oldSubScales.forEach(oldSubScale => {
+            if (!newSubScales.find(newSubScale => newSubScale.subScaleId == oldSubScale.subScaleId)) {
+              updates.push(`subscale (${oldSubScale.variableName} | ${oldSubScale.jsExpression.replaceAll(' + ', ', ')}) was removed`)
+            }
+          })
+
+          return updates;
+        }
+      }
     };
   }
 

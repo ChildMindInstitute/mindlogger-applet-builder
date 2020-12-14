@@ -280,6 +280,7 @@ export default {
           ['reprolib:terms/preamble']: activityPreamble,
           ['reprolib:terms/shuffle']: shuffle,
           ['reprolib:terms/allow']: isSkippable,
+          ['reprolib:terms/subScales']: subScales,
           ['_id']: id,
         } = activitiesObj;
 
@@ -293,6 +294,16 @@ export default {
             activityPreamble[0] &&
             activityPreamble[0]['@value'],
           shuffle: shuffle && shuffle[0] && shuffle[0]['@value'],
+          subScales: Array.isArray(subScales) && subScales.map((subScale, index) => {
+            const jsExpression = subScale['reprolib:terms/jsExpression'];
+            const variableName = subScale['reprolib:terms/variableName'];
+
+            return {
+              jsExpression: jsExpression[0] && jsExpression[0]['@value'],
+              variableName: variableName[0] && variableName[0]['@value'],
+              subScaleId: index + 1,
+            }
+          })
         };
 
         let isSkippableList =

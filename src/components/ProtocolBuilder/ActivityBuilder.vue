@@ -609,10 +609,11 @@ export default {
     },
 
     onDeleteLookupTable(index) {
-      this.$set(this.subScales, index, {
-        variableName: this.subScales[index].variableName,
-        jsExpression: this.subScales[index].jsExpression,
-      });
+      let updatedSubScale = {...this.subScales[index]};
+
+      delete updatedSubScale['lookupTable'];
+
+      this.$set(this.subScales, index, updatedSubScale);
 
       if (!this.subScales.find((subScale) => !!subScale['lookupTable'])) {
         // delete items asking gender and age

@@ -275,7 +275,7 @@ export default {
       Object.values(activities).forEach((act) => {
         const activitiesObj = act;
         const {
-          ['skos:prefLabel']: name,
+          ['http://www.w3.org/2004/02/skos/core#prefLabel']: name,
           ['schema:description']: description,
           ['reprolib:terms/preamble']: activityPreamble,
           ['reprolib:terms/shuffle']: shuffle,
@@ -310,7 +310,8 @@ export default {
 
         const activityInfo = {
           _id: id && id.split('/')[1],
-          name,
+          name:
+            name && name[0] && name[0]['@value'],
           description:
             description && description[0] && description[0]['@value'],
           preamble:

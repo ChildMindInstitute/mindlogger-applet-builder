@@ -155,9 +155,6 @@ export default {
   computed: {
     reflectedItems() {
       const showItems = JSON.parse(JSON.stringify(this.showItems));
-      if (showItems.length >= 1) {
-        return showItems.splice(1);
-      }
       return this.showItems;
     }
   },

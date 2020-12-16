@@ -115,7 +115,10 @@ export default class Item {
       };
     }
     if (this.ref.inputType === "text") {
-        return this.ref.options;
+      return {
+        'valueType': this.ref.options.type,
+      }
+      return this.ref.options;
     }
     if (this.ref.inputType === "slider") {
       const choices = this.getSliderChoices();

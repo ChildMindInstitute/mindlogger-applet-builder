@@ -2,7 +2,7 @@
   <v-form
     ref="form"
     v-model="valid"
-  >
+  > 
     <v-text-field
       v-model="maxLength"
       label="Maximum response length"
@@ -18,24 +18,56 @@
       :disabled="!isItemEditable"
       @change="updateAnswer"
     />
-    <v-checkbox
-      v-model="requiredAnswer"
-      label="Correct answer required"
-      :disabled="!isItemEditable"
-      @change="updateAnswer"
-    />
-    <v-checkbox
-      v-model="isSkippable"
-      label="Skippable Item"
-      :disabled="!isItemEditable"
-      @change="updateAllow"
-    />
-    <v-checkbox
-      v-model="requiredValue"
-      label="Response required"
-      :disabled="!isItemEditable"
-      @change="update"
-    />
+    <v-row>
+      <v-col 
+        class="d-flex align-center"
+        cols="12"
+        sm="3"
+      >
+        <v-checkbox
+          v-model="requiredAnswer"
+          label="Correct answer required"
+          :disabled="!isItemEditable"
+          @change="updateAnswer"
+        />
+      </v-col>
+      <v-col 
+        class="d-flex align-center"
+        cols="12"
+        sm="3"
+      >
+        <v-checkbox
+          v-model="isSkippable"
+          label="Skippable Item"
+          :disabled="!isItemEditable"
+          @change="updateAllow"
+        />
+      </v-col>
+      <v-col 
+        class="d-flex align-center"
+        cols="12"
+        sm="3"
+      >
+        <v-checkbox
+          v-model="isNumerical"
+          label="Numerical Response Required"
+          :disabled="!isItemEditable"
+          @change="update"
+        />
+      </v-col>
+      <v-col 
+        class="d-flex align-center"
+        cols="12"
+        sm="3"
+      >
+        <v-checkbox
+          v-model="requiredValue"
+          label="Response required"
+          :disabled="!isItemEditable"
+          @change="update"
+        />
+      </v-col>
+    </v-row>
   </v-form>
 </template>
 
@@ -66,7 +98,7 @@ export default {
       requiredValue: this.initialItemData.requiredValue || false,
       requiredAnswer: this.initialAnswer ? true : false,
       isSkippable: this.isSkippableItem || false,
-      type: this.initialItemData.type || 'xsd:string',
+      isNumerical: (this.initialItemData.type && this.initialItemData.type === 'xsd:integer') || false,
       valid: true,
       textRules: [
         v => !!v || 'Radio options cannot be empty',
@@ -81,7 +113,7 @@ export default {
       const responseOptions = {
         'maxLength': this.maxLength,
         'requiredValue': this.requiredValue,
-        'type': this.type,
+        'type': this.isNumerical ? 'xsd:integer' : 'xsd:string',
       };
       this.$emit('updateOptions', responseOptions);
     },

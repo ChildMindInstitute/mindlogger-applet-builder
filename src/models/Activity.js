@@ -403,6 +403,10 @@ export default class Activity {
           newSubScales.forEach(newSubScale => {
             if (newSubScale.subScaleId === undefined) {
               updates.push(`subscale (${newSubScale.variableName} | ${newSubScale.jsExpression.replaceAll(' + ', ', ')}) was added`)
+
+              if (newSubScale.lookupTable) {
+                updates.push(`lookup table for subscale (${newSubScale.variableName}) was set`);
+              }
             } else {
               let oldSubScale = oldSubScales.find(old => old.subScaleId == newSubScale.subScaleId);
 
@@ -411,6 +415,12 @@ export default class Activity {
                 oldSubScale.jsExpression != newSubScale.jsExpression
               ) {
                 updates.push(`subscale (${oldSubScale.variableName} | ${oldSubScale.jsExpression.replaceAll(' + ', ', ')}) was updated to ${newSubScale.variableName} | ${newSubScale.jsExpression.replaceAll(' + ', ', ')}`);
+              }
+
+              if (
+                JSON.stringify(oldSubScale.lookupTable) !== JSON.stringify(newSubScale.lookupTable)
+              ) {
+                updates.push(`lookup table for subscale (${oldSubScale.variableName}) was updated`);
               }
             }
           })

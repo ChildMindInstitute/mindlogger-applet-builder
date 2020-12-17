@@ -121,12 +121,17 @@ export default class Activity {
           }
         })
       } else {
-        let values = [];
+        let values = [], minValue;
         if (isVis.includes('==')) {
           values = isVis.split('==');
           stateValue = {
             name: 'IS EQUAL TO',
             val: '==',
+          };
+          const option = ifValue.responseOptions.choices.find(choice => choice['schema:value'] == values[1]);
+          answerValue = {
+            name: option['schema:name'],
+            value: option['schema:value']
           };
         } else if (isVis.includes('!=')) {
           values = isVis.split('!=');
@@ -134,36 +139,43 @@ export default class Activity {
             name: 'IS NOT EQUAL TO',
             val: '!=',
           };
+          const option = ifValue.responseOptions.choices.find(choice => choice['schema:value'] == values[1]);
+          answerValue = {
+            name: option['schema:name'],
+            value: option['schema:value']
+          };
         } else if (isVis.includes('>')) {
           values = isVis.split('>');
           stateValue = {
             name: 'GREATER THEN',
             val: '>',
           };
+          ifValue = items.find(({ name }) => name === values[0]);
+          minValue = values[1];
         } else if (isVis.includes('<')) {
           values = isVis.split('<');
           stateValue = {
             name: 'LESS THEN',
             val: '<',
           };
+          ifValue = items.find(({ name }) => name === values[0]);
+          minValue = values[1];
         } else if (isVis.includes('=')) {
           values = isVis.split('=');
           stateValue = {
             name: 'EQUAL TO',
             val: '=',
           };
+          ifValue = items.find(({ name }) => name === values[0]);
+          minValue = values[1];
         }
         ifValue = items.find(({ name }) => name === values[0]);
-        const option = ifValue.responseOptions.choices.find(choice => choice['schema:value'] == values[1]);
-        answerValue = {
-          name: option['schema:name'],
-          value: option['schema:value']
-        };
 
         conditionalItems.push({
           ifValue,
           stateValue,
           answerValue,
+          minValue,
           showValue,
         });
       }

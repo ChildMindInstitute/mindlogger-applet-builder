@@ -464,17 +464,21 @@ export default {
               name === this.items[this.editIndex].name ? item.name : name
             ).join(' + ');
           })
-        }
 
+          this.conditionalItems.forEach(condition => {
+            if (condition.ifValue.name === this.items[this.editIndex].name) {
+              condition.ifValue.name = item.name;
+              condition.ifValue["@id"] = item.name;
+            }
+            if (condition.showValue === this.items[this.editIndex].name) {
+              condition.showValue = item.name;
+            }
+          })
+        }
         this.items[this.editIndex] = item;
       } else {
         let ageItemIndex = this.items.findIndex(item => item.allowEdit);
-
-        if (ageItemIndex >= 0) {
-          this.items.splice(ageItemIndex, 0, item);
-        } else {
-          this.items.push(item);
-        }
+        this.items.push(item);
       }
     },
     duplicateItem(index) {

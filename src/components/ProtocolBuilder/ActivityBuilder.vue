@@ -496,9 +496,9 @@ export default {
           _id: null,
           name: `${this.items[index].name} (${suffix})`,
         })
-      );
-
-      this.items.push(itemModel.getItemData());
+      ); 
+      const pureItem = JSON.parse(JSON.stringify(itemModel.getItemData()));
+      this.items.push(pureItem);
     },
     editItem(index) {
       this.editIndex = index;

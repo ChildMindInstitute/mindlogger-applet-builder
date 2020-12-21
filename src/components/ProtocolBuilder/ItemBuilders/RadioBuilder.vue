@@ -4,7 +4,8 @@
       <v-col 
         class="d-flex align-center"
         cols="12"
-        sm="3"
+        md="3"
+        sm="6"
       >
         <v-checkbox
           v-model="isTokenValue"
@@ -16,7 +17,8 @@
       <v-col 
         class="d-flex align-center"
         cols="12"
-        sm="3"
+        md="3"
+        sm="6"
       >
         <v-checkbox
           v-model="isSkippable"
@@ -28,7 +30,8 @@
       <v-col 
         class="d-flex align-center"
         cols="12"
-        sm="3"
+        md="3"
+        sm="6"
       >
         <v-checkbox
           v-model="isMultipleChoice"
@@ -37,11 +40,22 @@
           @change="update"
         />      
       </v-col>
+      <v-col
+        v-if="isTokenValue"
+        class="d-flex align-center"
+        cols="auto"
+      >
+        <v-btn
+          outlined
+          color="primary"
+        >
+          Create Token Prizes
+        </v-btn>
+      </v-col>
       <v-col 
         v-if="isTokenValue"
-        class="d-flex align-center flex-column"
-        cols="12"
-        sm="3"
+        class="d-flex align-center flex-column justify-center"
+        cols="auto"
       >
         <v-btn
           @click="openTemplateList"
@@ -82,7 +96,6 @@
       <v-col
         class="d-flex align-center"
         cols="12"
-        sm="3"
       >
         <v-checkbox
           v-model="hasScoreValue"

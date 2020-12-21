@@ -1,236 +1,252 @@
 <template>
-  <v-form>
-    <v-row>
-      <v-col 
-        class="d-flex align-center"
-        cols="12"
-        md="3"
-        sm="6"
-      >
-        <v-checkbox
-          v-model="isTokenValue"
-          label="Token Value"
-          :disabled="!isItemEditable"
-          @change="update"
-        />
-      </v-col>
-      <v-col 
-        class="d-flex align-center"
-        cols="12"
-        md="3"
-        sm="6"
-      >
-        <v-checkbox
-          v-model="isSkippable"
-          label="Skippable Item"
-          :disabled="!isItemEditable"
-          @change="updateAllow"
-        />
-      </v-col>
-      <v-col 
-        class="d-flex align-center"
-        cols="12"
-        md="3"
-        sm="6"
-      >
-        <v-checkbox
-          v-model="isMultipleChoice"
-          label="Multiple Choice"
-          :disabled="!isItemEditable"
-          @change="update"
-        />      
-      </v-col>
-      <v-col
-        v-if="isTokenValue"
-        class="d-flex align-center"
-        cols="auto"
-      >
-        <v-btn
-          outlined
-          color="primary"
+  <div>
+    <v-form>
+      <v-row>
+        <v-col 
+          class="d-flex align-center"
+          cols="12"
+          md="3"
+          sm="6"
         >
-          Create Token Prizes
-        </v-btn>
-      </v-col>
-      <v-col 
-        v-if="isTokenValue"
-        class="d-flex align-center flex-column justify-center"
-        cols="auto"
-      >
-        <v-btn
-          @click="openTemplateList"
-          v-click-outside="closeTemplateList"
-          class="deep-orange"
-          color="primary"
-          dark
-        >
-          Saved Templates
-        </v-btn>
-        <v-card
-          v-show="templateList"
-          class="mx-auto mx-template-list"
-          min-width="172"
-          tile
-        >
-          <v-list>
-            <v-list-item
-              v-for="(item, i) in items"
-              :key="i"
-            >
-              <v-list-item-title @click="addTemplateOption(item)">
-                {{ item.text }} | {{ item.value }}
-              </v-list-item-title>
-              <v-btn
-                icon
-                color="grey darken-1 ml-2"
-                @click="removeTemplate(item)"
-              >
-                <v-icon>mdi-delete</v-icon>
-              </v-btn>
-            </v-list-item>
-          </v-list>
-        </v-card>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col
-        class="d-flex align-center"
-        cols="12"
-      >
-        <v-checkbox
-          v-model="hasScoreValue"
-          label="Option Score"
-          :disabled="!isItemEditable"
-          @change="update"
-        />
-      </v-col>
-    </v-row>
-    <v-list>
-      <v-subheader>
-        Options
-      </v-subheader>
-      <v-list-item
-        v-for="(option, index) in options"
-        :key="index"
-      >
-        <v-list-item-content>
-          <v-list-item-title v-text="option.name" />
-        </v-list-item-content>
-        <v-list-item-action>
-          <v-btn
-            icon
+          <v-checkbox
+            v-model="isTokenValue"
+            label="Token Value"
             :disabled="!isItemEditable"
-            @click="deleteOption(index)"
-          >
-            <v-icon color="grey lighten-1">
-              delete
-            </v-icon>
-          </v-btn>
-        </v-list-item-action>
-      </v-list-item>
-      <v-list-item class="d-block">
-        <v-form
-          ref="form"
-          v-model="valid"
+            @change="update"
+          />
+        </v-col>
+        <v-col 
+          class="d-flex align-center"
+          cols="12"
+          md="3"
+          sm="6"
         >
-          <v-row>
-            <v-col 
-              cols="12"
-              sm="4"
-            >
-              <v-text-field
-                v-model="nextOptionName"
-                :rules="textRules"
-                label="Option Text"
-                counter="75"
-                maxlength="75"
-                :disabled="!isItemEditable"
-                @change="update"
-              />
-            </v-col>
-            <v-col 
-              v-if="isTokenValue"
-              cols="12"
-              sm="4"
-            >
-              <v-text-field
-                v-model="nextOptionValue"
-                :rules="textRules"
-                type="number"
-                label="Option Value"
-                counter="5"
-                maxlength="5"
-                :disabled="!isItemEditable"
-                @change="update"
-              />
-            </v-col>
-            <v-col 
-              v-if="isTokenValue"
-              cols="12"
-              sm="1"
-            />
-            <v-col 
-              v-if="isTokenValue"
-              cols="12"
-              sm="3"
-            >
-              <v-checkbox
-                v-model="isTemplate"
-                label="Set as a template"
-                :disabled="!isItemEditable"
-                @change="update"
-              />
-            </v-col>
-          </v-row>
-
-          <v-row>
-            <v-col
-              v-if="hasScoreValue"
-              cols="12"
-              sm="4"
-            >
-              <v-text-field
-                v-model="nextOptionScore"
-                :rules="numberRules"
-                type="number"
-                label="Score Value"
-                counter="5"
-                maxlength="5"
-                :disabled="!isItemEditable"
-                @change="update"
-              />
-            </v-col>
-          </v-row>
-
-          <v-row>
-            <v-col 
-              cols="12"
-              sm="12"
-            >
-              <v-text-field
-                v-model="nextOptionImage"
-                label="Option Image"
-                :disabled="!isItemEditable"
-                @change="update"
-              />
-            </v-col>
-          </v-row>
+          <v-checkbox
+            v-model="isSkippable"
+            label="Skippable Item"
+            :disabled="!isItemEditable"
+            @change="updateAllow"
+          />
+        </v-col>
+        <v-col 
+          class="d-flex align-center"
+          cols="12"
+          md="3"
+          sm="6"
+        >
+          <v-checkbox
+            v-model="isMultipleChoice"
+            label="Multiple Choice"
+            :disabled="!isItemEditable"
+            @change="update"
+          />      
+        </v-col>
+        <v-col
+          v-if="isTokenValue"
+          class="d-flex align-center"
+          cols="auto"
+        >
           <v-btn
-            :disabled="!valid || !isItemEditable"
-            @click="addOption"
+            @click="openTokenPrizes"
+            outlined
+            color="primary"
           >
-            Add Option
+            {{ prizesItems && prizesItems.length > 0 ? 'Edit' : 'Create' }} Token Prizes
           </v-btn>
-        </v-form>
-      </v-list-item>
-    </v-list>
-  </v-form>
+        </v-col>
+        <v-col 
+          v-if="isTokenValue"
+          class="d-flex align-center flex-column justify-center"
+          cols="auto"
+        >
+          <v-btn
+            @click="openTemplateList"
+            v-click-outside="closeTemplateList"
+            class="deep-orange"
+            color="primary"
+            dark
+          >
+            Saved Templates
+          </v-btn>
+          <v-card
+            v-show="templateList"
+            class="mx-auto mx-template-list"
+            min-width="172"
+            tile
+          >
+            <v-list>
+              <v-list-item
+                v-for="(item, i) in items"
+                :key="i"
+              >
+                <v-list-item-title @click="addTemplateOption(item)">
+                  {{ item.text }} | {{ item.value }}
+                </v-list-item-title>
+                <v-btn
+                  icon
+                  color="grey darken-1 ml-2"
+                  @click="removeTemplate(item)"
+                >
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
+              </v-list-item>
+            </v-list>
+          </v-card>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col
+          class="d-flex align-center"
+          cols="12"
+        >
+          <v-checkbox
+            v-model="hasScoreValue"
+            label="Option Score"
+            :disabled="!isItemEditable"
+            @change="update"
+          />
+        </v-col>
+      </v-row>
+      <v-list>
+        <v-subheader>
+          Options
+        </v-subheader>
+        <v-list-item
+          v-for="(option, index) in options"
+          :key="index"
+        >
+          <v-list-item-content>
+            <v-list-item-title v-text="option.name" />
+          </v-list-item-content>
+          <v-list-item-action>
+            <v-btn
+              icon
+              :disabled="!isItemEditable"
+              @click="deleteOption(index)"
+            >
+              <v-icon color="grey lighten-1">
+                delete
+              </v-icon>
+            </v-btn>
+          </v-list-item-action>
+        </v-list-item>
+        <v-list-item class="d-block">
+          <v-form
+            ref="form"
+            v-model="valid"
+          >
+            <v-row>
+              <v-col 
+                cols="12"
+                sm="4"
+              >
+                <v-text-field
+                  v-model="nextOptionName"
+                  :rules="textRules"
+                  label="Option Text"
+                  counter="75"
+                  maxlength="75"
+                  :disabled="!isItemEditable"
+                  @change="update"
+                />
+              </v-col>
+              <v-col 
+                v-if="isTokenValue"
+                cols="12"
+                sm="4"
+              >
+                <v-text-field
+                  v-model="nextOptionValue"
+                  :rules="textRules"
+                  type="number"
+                  label="Option Value"
+                  counter="5"
+                  maxlength="5"
+                  :disabled="!isItemEditable"
+                  @change="update"
+                />
+              </v-col>
+              <v-col 
+                v-if="isTokenValue"
+                cols="12"
+                sm="1"
+              />
+              <v-col 
+                v-if="isTokenValue"
+                cols="12"
+                sm="3"
+              >
+                <v-checkbox
+                  v-model="isTemplate"
+                  label="Set as a template"
+                  :disabled="!isItemEditable"
+                  @change="update"
+                />
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col
+                v-if="hasScoreValue"
+                cols="12"
+                sm="4"
+              >
+                <v-text-field
+                  v-model="nextOptionScore"
+                  :rules="numberRules"
+                  type="number"
+                  label="Score Value"
+                  counter="5"
+                  maxlength="5"
+                  :disabled="!isItemEditable"
+                  @change="update"
+                />
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col 
+                cols="12"
+                sm="12"
+              >
+                <v-text-field
+                  v-model="nextOptionImage"
+                  label="Option Image"
+                  :disabled="!isItemEditable"
+                  @change="update"
+                />
+              </v-col>
+            </v-row>
+            <v-btn
+              :disabled="!valid || !isItemEditable"
+              @click="addOption"
+            >
+              Add Option
+            </v-btn>
+          </v-form>
+        </v-list-item>
+      </v-list>
+    </v-form>
+
+    <v-dialog v-model="tokenPrizes" persistent width="800">
+      <TokenPrizesBuilder
+        :prizesItems="prizesItems"
+        @updatePrizesItems="prizesItems = $event"
+        @savePrizes="onSavePrizes"
+        @discardPrizes="onDiscardPrizes"
+      />
+    </v-dialog>
+  </div>
 </template>
 
 <script>
-import ClickOutside from 'vue-click-outside'
+import ClickOutside from 'vue-click-outside';
+import TokenPrizesBuilder from './RadioBuilder/TokenPrizesBuilder.vue';
 
 export default {
+  components: {
+    TokenPrizesBuilder
+  },
   props: {
     initialItemData: {
       type: Object,
@@ -275,6 +291,7 @@ export default {
       nextOptionValue: this.initialItemData.nextOptionValue || '',
       nextOptionImage: this.initialItemData.nextOptionImage || '',
       options: this.initialItemData.options || [],
+      tokenPrizes: false,
       templateList: false,
       valid: true,
       textRules: [
@@ -286,6 +303,7 @@ export default {
       items: [],
       nextOptionScore,
       hasScoreValue: this.initialItemData.hasScoreValue || false,
+      prizesItems: this.getTokenPrizes(),
     };
   },
   directives: {
@@ -295,6 +313,17 @@ export default {
     this.items = this.itemTemplates
   },
   methods: {
+    getTokenPrizes() {
+      console.log('getTokenPrizes Func');
+      const tokenPrizes = [
+        { id: '1', prize: 10, description: 'Go out to dinner with mom', imgURL: 'Image URL' },
+        { id: '2', prize: 15, description: 'See a movie', imgURL: 'Image URL' },
+        { id: '3', prize: 5, description: 'See a movie', imgURL: 'Image URL' }
+      ];
+      console.log(tokenPrizes);
+      console.log('------------------');
+      return tokenPrizes;
+    },
     resetValidation () {
       this.$refs.form.resetValidation()
     },
@@ -344,6 +373,11 @@ export default {
       this.options.push(nextOption);
       this.update();
     },
+    openTokenPrizes() {
+      console.log('openTokenPrizes Func');
+      this.tokenPrizes = !this.tokenPrizes;
+      console.log('------------------');
+    },
     openTemplateList(event) {
       this.templateList = !this.templateList
     },
@@ -370,6 +404,18 @@ export default {
     updateAllow() {
       const allow = this.isSkippable
       this.$emit('updateAllow', allow);
+    },
+    onSavePrizes() {
+      console.log('onSavePrizes Func');
+      this.tokenPrizes = false;
+      // update prizes here
+      console.log('------------------');
+    },
+    onDiscardPrizes() {
+      console.log('onDiscardPrizes Func');
+      this.tokenPrizes = false;
+      this.prizesItems = this.getTokenPrizes();
+      console.log('------------------');
     },
 
     // Utils

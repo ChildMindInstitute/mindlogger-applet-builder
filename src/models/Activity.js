@@ -128,6 +128,8 @@ export default class Activity {
             name: 'IS EQUAL TO',
             val: '==',
           };
+          ifValue = items.find(({ name }) => name === values[0]);
+
           const option = ifValue.responseOptions.choices.find(choice => choice['schema:value'] == values[1]);
           answerValue = {
             name: option['schema:name'],
@@ -139,6 +141,8 @@ export default class Activity {
             name: 'IS NOT EQUAL TO',
             val: '!=',
           };
+          ifValue = items.find(({ name }) => name === values[0]);
+          
           const option = ifValue.responseOptions.choices.find(choice => choice['schema:value'] == values[1]);
           answerValue = {
             name: option['schema:name'],
@@ -169,7 +173,6 @@ export default class Activity {
           ifValue = items.find(({ name }) => name === values[0]);
           minValue = values[1];
         }
-        ifValue = items.find(({ name }) => name === values[0]);
 
         conditionalItems.push({
           ifValue,
@@ -259,7 +262,7 @@ export default class Activity {
         })
       }
     }
-
+    console.log('order', itemNamesArray)
     return itemNamesArray;
   }
 

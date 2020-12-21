@@ -12,8 +12,8 @@
         <v-card-text>
           <v-container>
             <Editor 
-              class="p-markdown mt-5"
               ref="markdownEditor"
+              class="p-markdown mt-5"
               :initialValue="markdownText"
               :options="editorOptions"
               previewStyle="vertical"
@@ -21,7 +21,7 @@
           </v-container>
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
+          <v-spacer />
           <v-btn
             color="blue darken-1"
             text
@@ -71,6 +71,11 @@ export default {
       }
     }
   },
+  watch: {
+    visibility: function (vis) {
+      this.dialog = vis
+    }
+  },
   methods: {
     /**
      * Submit markdown dialog
@@ -91,11 +96,6 @@ export default {
       this.dialog = false;
       this.$emit("close");
     },
-  },
-  watch: {
-    visibility: function (vis) {
-      this.dialog = vis
-    }
   }
 }
 </script>

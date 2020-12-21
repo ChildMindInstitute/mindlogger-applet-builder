@@ -34,6 +34,7 @@ export default class Activity {
       conditionalItems: initialActivityData.conditionalItems || [],
       conditionalBuilderType: '',
       conditionalItemsForBuilder: [],
+      tokenPrizes: initialActivityData.tokenPrizes ||  [],
     };
   }
 
@@ -97,6 +98,7 @@ export default class Activity {
   }
 
   getCompressedSchema() {
+    const tokenPrizes = this.ref.items && this.ref.items[0].tokenPrizes
     const addProperties = this.getAddProperties();
     const visibility = this.getItemVisibility();
     const itemOrder = this.getItemOrder();
@@ -116,6 +118,7 @@ export default class Activity {
       preamble: this.ref.preamble,
       scoringLogic: {},
       'repronim:timeUnit': 'yearmonthdate',
+      tokenPrizes: tokenPrizes || [],
       ui: {
         order: itemOrder,
         shuffle: this.ref.shuffleActivityOrder,
@@ -171,7 +174,8 @@ export default class Activity {
       schema: schema,
       context: context,
       items: items,
-      conditionalItems: conditionalItems
+      conditionalItems: conditionalItems,
+      tokenPrizes: this.ref.tokenPrizes
     };
   }
 

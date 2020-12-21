@@ -58,6 +58,7 @@ import api from '../../utilities/api.vue';
 export default {
   data: function () {
     return {
+      valid: null,
       url: '',
       textRules: [
         v => !!v || 'URL is required',

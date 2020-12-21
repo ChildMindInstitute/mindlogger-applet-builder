@@ -1,14 +1,20 @@
 <template>
   <div>
     <v-card>
-      <v-card-title class="headline grey lighten-2" primary-title>
+      <v-card-title
+        class="headline grey lighten-2"
+        primary-title
+      >
         <v-icon left>
           mdi-pencil
         </v-icon>
         Edit Activity
       </v-card-title>
       <v-card-text>
-        <v-form ref="form" lazy-validation>
+        <v-form
+          ref="form"
+          lazy-validation
+        >
           <v-text-field
             v-model="name"
             :rules="textRules"
@@ -36,7 +42,10 @@
             v-model="shuffleActivityOrder"
             label="Shuffle item order"
           />
-          <v-checkbox v-model="isSkippable" label="Allow user to skip all items" />
+          <v-checkbox
+            v-model="isSkippable"
+            label="Allow user to skip all items"
+          />
           <v-tabs centered>
             <v-tab>
               Items
@@ -49,33 +58,48 @@
               <v-card flat>
                 <v-card-text>
                   <v-list>
-                    <v-list-item v-for="(item, index) in items" :key="item.id">
+                    <v-list-item
+                      v-for="(item, index) in items"
+                      :key="item.id"
+                    >
                       <v-list-item-content>
                         <v-list-item-title v-text="item.name" />
                         <v-list-item-title v-text="item.inputType" />
                       </v-list-item-content>
                       <v-list-item-action>
-                        <v-btn icon @click="duplicateItem(index)">
+                        <v-btn
+                          icon
+                          @click="duplicateItem(index)"
+                        >
                           <v-icon color="grey lighten-1">
                             content_copy
                           </v-icon>
                         </v-btn>
                       </v-list-item-action>
                       <v-list-item-action>
-                        <v-btn icon @click="editItem(index)">
+                        <v-btn
+                          icon
+                          @click="editItem(index)"
+                        >
                           <v-icon
                             v-if="item.isItemEditable"
                             color="grey lighten-1"
                           >
                             edit
                           </v-icon>
-                          <v-icon v-else color="grey lighten-1">
+                          <v-icon
+                            v-else
+                            color="grey lighten-1"
+                          >
                             edit
                           </v-icon>
                         </v-btn>
                       </v-list-item-action>
                       <v-list-item-action>
-                        <v-btn icon @click="deleteItem(index)">
+                        <v-btn
+                          icon
+                          @click="deleteItem(index)"
+                        >
                           <v-icon color="grey lighten-1">
                             mdi-delete
                           </v-icon>
@@ -103,7 +127,11 @@
           <v-row justify="space-around">
             <v-menu bottom>
               <template v-slot:activator="{ on, attrs }">
-                <v-btn color="primary" v-bind="attrs" v-on="on">
+                <v-btn
+                  color="primary"
+                  v-bind="attrs"
+                  v-on="on"
+                >
                   Add item
                 </v-btn>
               </template>
@@ -118,9 +146,16 @@
               </v-list>
             </v-menu>
 
-            <v-menu :disabled="!ifConditionalAvailable" bottom>
+            <v-menu
+              :disabled="!ifConditionalAvailable"
+              bottom
+            >
               <template v-slot:activator="{ on, attrs }">
-                <v-btn color="primary" v-bind="attrs" v-on="on">
+                <v-btn
+                  color="primary"
+                  v-bind="attrs"
+                  v-on="on"
+                >
                   Add conditional logic
                 </v-btn>
               </template>
@@ -141,24 +176,37 @@
             </v-menu>
           </v-row>
         </v-form>
-        <v-alert v-if="error !== ''" type="error">
+        <v-alert
+          v-if="error !== ''"
+          type="error"
+        >
           {{ error }}
         </v-alert>
       </v-card-text>
       <v-divider />
 
       <v-card-actions>
-        <v-btn outlined color="primary" @click="onDiscardActivity">
+        <v-btn
+          outlined
+          color="primary"
+          @click="onDiscardActivity"
+        >
           Discard Changes
         </v-btn>
         <v-spacer />
-        <v-btn color="primary" @click="onClickSaveActivity">
+        <v-btn
+          color="primary"
+          @click="onClickSaveActivity"
+        >
           Save Activity
         </v-btn>
       </v-card-actions>
     </v-card>
 
-    <v-dialog v-model="editItemDialog" persistent>
+    <v-dialog
+      v-model="editItemDialog"
+      persistent
+    >
       <ItemBuilder
         :key="componentKey"
         :initial-item-data="initialItemData"
@@ -170,7 +218,10 @@
       />
     </v-dialog>
 
-    <v-dialog v-model="editConditionalItemDialog" persistent>
+    <v-dialog
+      v-model="editConditionalItemDialog"
+      persistent
+    >
       <ConditionalItemBuilder
         :key="componentKey"
         :initial-conditional-item-data="initialConditionalItemData"
@@ -184,8 +235,14 @@
       />
     </v-dialog>
 
-    <v-dialog v-model="urlDialog" persistent>
-      <UrlItemUploader :key="componentKey" @uploadItem="onUploadItem" />
+    <v-dialog
+      v-model="urlDialog"
+      persistent
+    >
+      <UrlItemUploader
+        :key="componentKey"
+        @uploadItem="onUploadItem"
+      />
     </v-dialog>
   </div>
 </template>

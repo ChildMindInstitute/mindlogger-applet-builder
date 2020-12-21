@@ -1,7 +1,13 @@
 <template>
   <v-container>
-    <v-layout wrap column>
-      <v-form ref="form" lazy-validation>
+    <v-layout
+      wrap
+      column
+    >
+      <v-form
+        ref="form"
+        lazy-validation
+      >
         <v-text-field
           v-model="name"
           :rules="textRules"
@@ -19,7 +25,9 @@
           required
         />
         <div class="d-flex flex-row mt-6">
-          <v-subheader class="ml-2"> Edit About Page </v-subheader>
+          <v-subheader class="ml-2">
+            Edit About Page
+          </v-subheader>
           <v-btn
             class="ml-10"
             fab
@@ -43,21 +51,30 @@
                 <v-list-item-title v-text="activity.description" />
               </v-list-item-content>
               <v-list-item-action>
-                <v-btn icon @click="duplicateActivity(index)">
+                <v-btn
+                  icon
+                  @click="duplicateActivity(index)"
+                >
                   <v-icon color="grey lighten-1">
                     content_copy
                   </v-icon>
                 </v-btn>
               </v-list-item-action>
               <v-list-item-action>
-                <v-btn icon @click="editActivity(index)">
+                <v-btn
+                  icon
+                  @click="editActivity(index)"
+                >
                   <v-icon color="grey lighten-1">
                     edit
                   </v-icon>
                 </v-btn>
               </v-list-item-action>
               <v-list-item-action>
-                <v-btn icon @click="deleteActivity(index)">
+                <v-btn
+                  icon
+                  @click="deleteActivity(index)"
+                >
                   <v-icon color="grey lighten-1">
                     delete
                   </v-icon>
@@ -72,7 +89,10 @@
           </v-col>
         </v-list>
       </v-form>
-      <v-alert v-if="error !== ''" type="error">
+      <v-alert
+        v-if="error !== ''"
+        type="error"
+      >
         {{ error }}
       </v-alert>
       <div>
@@ -84,10 +104,19 @@
         >
           Save to dashboard
         </v-btn>
-        <v-btn class="mx-2 my-2" color="primary" @click="onClickSaveProtocol">
+        <v-btn
+          class="mx-2 my-2"
+          color="primary"
+          @click="onClickSaveProtocol"
+        >
           Download Schema
         </v-btn>
-        <v-btn class="mx-2 my-2" color="primary" outlined @click="resetBuilder">
+        <v-btn
+          class="mx-2 my-2"
+          color="primary"
+          outlined
+          @click="resetBuilder"
+        >
           Reset Builder
         </v-btn>
 
@@ -102,7 +131,12 @@
         </v-btn>
       </div>
     </v-layout>
-    <v-dialog v-model="dialog" width="800" persistent>
+    <v-dialog
+      v-model="dialog"
+      hide-overlay
+      width="800"
+      persistent
+    >
       <ActivityBuilder
         :key="componentKey"
         :templates="itemTemplates"
@@ -133,7 +167,6 @@
       @close="onCloseEditor"
       @submit="onSubmitEditor"
     />
-
   </v-container>
 </template>
 

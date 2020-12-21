@@ -1,11 +1,19 @@
 <template>
   <v-card>
-    <v-card-title class="headline grey lighten-2" primary-title>
-      <v-icon left>{{ isItemEditable ? "mdi-pencil" : "mdi-eye" }}</v-icon>
+    <v-card-title
+      class="headline grey lighten-2"
+      primary-title
+    >
+      <v-icon left>
+        {{ isItemEditable ? "mdi-pencil" : "mdi-eye" }}
+      </v-icon>
       {{ isItemEditable ? "Edit Item" : "View Item" }}
     </v-card-title>
     <v-card-text>
-      <v-form ref="form" lazy-validation>
+      <v-form
+        ref="form"
+        lazy-validation
+      >
         <v-text-field
           v-model="name"
           label="Item Name"
@@ -78,7 +86,10 @@
           @updateOptions="updateOptions"
           @updateAllow="updateAllow"
         />
-        <GeolocationBuilder v-if="inputType === 'geolocation'" @update="updateResponseOptions" />
+        <GeolocationBuilder
+          v-if="inputType === 'geolocation'"
+          @update="updateResponseOptions"
+        />
         <AudioStimulusBuilder
           v-if="inputType === 'audioStimulus'"
           :is-skippable-item="allow"
@@ -98,9 +109,16 @@
         outlined
         color="primary"
         @click="onDiscardItem"
-      >{{ isItemEditable ? "Discard Changes" : "Close" }}</v-btn>
+      >
+        {{ isItemEditable ? "Discard Changes" : "Close" }}
+      </v-btn>
       <v-spacer />
-      <v-btn color="primary" @click="onSaveItem">Save Item</v-btn>
+      <v-btn
+        color="primary"
+        @click="onSaveItem"
+      >
+        Save Item
+      </v-btn>
     </v-card-actions>
   </v-card>
 </template>

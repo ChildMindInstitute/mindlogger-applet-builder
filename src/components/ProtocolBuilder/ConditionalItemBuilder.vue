@@ -1,15 +1,30 @@
 <template>
   <v-card>
-    <v-card-title class="headline grey lighten-2" primary-title>
-      <v-icon left>{{ isItemEditable ? 'mdi-pencil' : 'mdi-eye' }}</v-icon>
+    <v-card-title
+      class="headline grey lighten-2"
+      primary-title
+    >
+      <v-icon left>
+        {{ isItemEditable ? 'mdi-pencil' : 'mdi-eye' }}
+      </v-icon>
       {{ isItemEditable ? 'Edit Item' : 'View Item' }}
     </v-card-title>
     <v-container>
       <v-row no-gutters>
-        <v-col md="6" offset-md="3">
-          <conditional-item-list v-if="!editMode" :options="options" noActions />
+        <v-col
+          md="6"
+          offset-md="3"
+        >
+          <conditional-item-list
+            v-if="!editMode"
+            :options="options"
+            noActions
+          />
 
-          <v-form ref="form" lazy-validation>
+          <v-form
+            ref="form"
+            lazy-validation
+          >
             <v-select
               v-model="showValue"
               item-text="name"
@@ -64,7 +79,12 @@
             </template>
           </v-form>
 
-          <v-btn v-if="!editMode" @click="addOption">Add more conditions</v-btn>
+          <v-btn
+            v-if="!editMode"
+            @click="addOption"
+          >
+            Add more conditions
+          </v-btn>
         </v-col>
       </v-row>
 
@@ -73,9 +93,16 @@
           outlined
           color="primary"
           @click="onDiscardItem"
-        >{{ isItemEditable ? 'Discard Changes' : 'Close' }}</v-btn>
+        >
+          {{ isItemEditable ? 'Discard Changes' : 'Close' }}
+        </v-btn>
         <v-spacer />
-        <v-btn color="primary" @click="onSaveItem">Save</v-btn>
+        <v-btn
+          color="primary"
+          @click="onSaveItem"
+        >
+          Save
+        </v-btn>
       </v-card-actions>
     </v-container>
   </v-card>
@@ -138,6 +165,15 @@ export default {
       sliderNumOptions: 0
     };
   },
+  computed: {
+    reflectedItems() {
+      const showItems = JSON.parse(JSON.stringify(this.showItems));
+      if (showItems.length >= 1) {
+        return showItems.splice(1);
+      }
+      return this.showItems;
+    }
+  },
   watch: {
     showValue() {
       this.setFilteredItems();
@@ -155,15 +191,6 @@ export default {
     }
     if (this.ifValue !== "") {
       this.setStateItems();
-    }
-  },
-  computed: {
-    reflectedItems() {
-      const showItems = JSON.parse(JSON.stringify(this.showItems));
-      if (showItems.length >= 1) {
-        return showItems.splice(1);
-      }
-      return this.showItems;
     }
   },
   methods: {

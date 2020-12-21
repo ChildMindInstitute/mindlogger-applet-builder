@@ -1,6 +1,9 @@
 <template>
   <div>
-    <draggable v-model="items" @end="onDragEnd">
+    <draggable
+      v-model="items"
+      @end="onDragEnd"
+    >
       <v-list-item
         v-for="(item, index) in items"
         :key="item + index"
@@ -21,14 +24,20 @@
           </v-list-item-title>
         </v-list-item-content>
         <v-list-item-action v-if="!noActions">
-          <v-btn icon @click="editItem(index)">
+          <v-btn
+            icon
+            @click="editItem(index)"
+          >
             <v-icon color="grey lighten-1">
               edit
             </v-icon>
           </v-btn>
         </v-list-item-action>
         <v-list-item-action v-if="!noActions">
-          <v-btn icon @click="deleteConditionalCallback(index)">
+          <v-btn
+            icon
+            @click="deleteConditionalCallback(index)"
+          >
             <v-icon color="grey lighten-1">
               delete
             </v-icon>

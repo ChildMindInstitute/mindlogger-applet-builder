@@ -64,6 +64,7 @@ export default class Protocol {
       "schema:schemaVersion": this.ref.protocolVersion,
       "schema:version": this.ref.protocolVersion,
       landingPageContent: this.ref.markdownData, //point to the readme of protocol
+      tokenPrizes: this.ref.tokenPrizes,
       landingPage: "",
       // variableMap: variableMap,
       ui: {

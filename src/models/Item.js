@@ -23,6 +23,7 @@ export default class Item {
         name: initialItemData.name || '',
         question: Item.getQuesionInfo(initialItemData.question || ''),
         description: initialItemData.description || '',
+        tokenPrizes: initialItemData.tokenPrizes || [],
         correctAnswer: initialItemData.correctAnswer || '',
         valueType: initialItemData.valueType || '',
         inputType: initialItemData.ui ? initialItemData.ui.inputType : '',
@@ -172,6 +173,7 @@ export default class Item {
         "schema:description": this.ref.description,
         "schema:schemaVersion": "0.0.1",
         "schema:version": "0.0.1",
+        'schema:tokenprizes': this.ref.tokenPrizes,
         ui: {
           inputType: this.ref.inputType,
         },
@@ -224,6 +226,7 @@ export default class Item {
       name: this.ref.name,
       question: this.ref.question.image + this.ref.question.text,
       description: this.ref.description,
+      tokenPrizes: this.ref.options.tokenPrizes,
       options: this.ref.options,
       isItemEditable: this.ref.isItemEditable,
       ...schema

@@ -1,5 +1,8 @@
 <template>
-  <v-form ref="form" v-model="valid">
+  <v-form
+    ref="form"
+    v-model="valid"
+  >
     <v-text-field
       v-model="url"
       label="Media URL"

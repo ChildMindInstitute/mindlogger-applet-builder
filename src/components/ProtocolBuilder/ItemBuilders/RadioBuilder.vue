@@ -51,7 +51,7 @@
             outlined
             color="primary"
           >
-            {{ prizesItems && prizesItems.length > 0 ? 'Edit' : 'Create' }} Token Prizes
+            {{ getPrizesState() }} Token Prizes
           </v-btn>
         </v-col>
         <v-col 
@@ -229,11 +229,13 @@
     </v-form>
 
     <v-dialog v-model="tokenPrizes" persistent width="800">
+      <!-- :prizesItems="prizesItems"
+      @updatePrizesItems="prizesItems = $event"
+      @savePrizes="onSavePrizes"
+      @discardPrizes="onDiscardPrizes" -->
       <TokenPrizesBuilder
-        :prizesItems="prizesItems"
-        @updatePrizesItems="prizesItems = $event"
-        @savePrizes="onSavePrizes"
-        @discardPrizes="onDiscardPrizes"
+        :prizeActivity="prizeActivity"
+        @closeTokenPrizes="onClosePrizes" 
       />
     </v-dialog>
   </div>
@@ -241,7 +243,7 @@
 
 <script>
 import ClickOutside from 'vue-click-outside';
-import TokenPrizesBuilder from './RadioBuilder/TokenPrizesBuilder.vue';
+import TokenPrizesBuilder from '../TokenPrizesBuilder.vue';
 
 export default {
   components: {
@@ -266,6 +268,9 @@ export default {
     itemTemplates: {
       type: Array,
       default: null
+    },
+    prizeActivity: {
+      type: Function
     }
   },
   data: function () {
@@ -303,7 +308,7 @@ export default {
       items: [],
       nextOptionScore,
       hasScoreValue: this.initialItemData.hasScoreValue || false,
-      prizesItems: this.getTokenPrizes(),
+      // prizesItems: this.getTokenPrizes(),
     };
   },
   directives: {
@@ -313,17 +318,13 @@ export default {
     this.items = this.itemTemplates
   },
   methods: {
-    getTokenPrizes() {
-      console.log('getTokenPrizes Func');
-      const tokenPrizes = [
-        { id: '1', prize: 10, description: 'Go out to dinner with mom', imgURL: 'Image URL' },
-        { id: '2', prize: 15, description: 'See a movie', imgURL: 'Image URL' },
-        { id: '3', prize: 5, description: 'See a movie', imgURL: 'Image URL' }
-      ];
-      console.log(tokenPrizes);
-      console.log('------------------');
-      return tokenPrizes;
-    },
+    // getTokenPrizes() {
+    //   console.log('getTokenPrizes Func');
+    //   const tokenPrizes = [];
+    //   console.log(tokenPrizes);
+    //   console.log('------------------');
+    //   return tokenPrizes;
+    // },
     resetValidation () {
       this.$refs.form.resetValidation()
     },
@@ -375,7 +376,7 @@ export default {
     },
     openTokenPrizes() {
       console.log('openTokenPrizes Func');
-      this.tokenPrizes = !this.tokenPrizes;
+      this.tokenPrizes = true;
       console.log('------------------');
     },
     openTemplateList(event) {
@@ -405,18 +406,30 @@ export default {
       const allow = this.isSkippable
       this.$emit('updateAllow', allow);
     },
-    onSavePrizes() {
-      console.log('onSavePrizes Func');
+
+    getPrizesState() {
+      const prizeActivity = this.prizeActivity('searching');
+      return prizeActivity && prizeActivity.items && prizeActivity.items.length > 0 ? 'Edit' : 'Create'; 
+    },
+
+    onClosePrizes() {
+      console.log('onClosePrizes Func');
       this.tokenPrizes = false;
-      // update prizes here
       console.log('------------------');
     },
-    onDiscardPrizes() {
-      console.log('onDiscardPrizes Func');
-      this.tokenPrizes = false;
-      this.prizesItems = this.getTokenPrizes();
-      console.log('------------------');
-    },
+
+    // onSavePrizes() {
+    //   console.log('onSavePrizes Func');
+    //   this.tokenPrizes = false;
+    //   // update prizes here
+    //   console.log('------------------');
+    // },
+    // onDiscardPrizes() {
+    //   console.log('onDiscardPrizes Func');
+    //   this.tokenPrizes = false;
+    //   this.prizesItems = this.getTokenPrizes();
+    //   console.log('------------------');
+    // },
 
     // Utils
 

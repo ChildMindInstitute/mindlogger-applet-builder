@@ -36,6 +36,7 @@
           :initial-item-data="options"
           :is-item-editable="isItemEditable"
           :item-templates="itemTemplates"
+          :prizeActivity="prizeActivity"
           @removeTemplate="onRemoveTemplate"
           @updateTemplates="onUpdateTemplates"
           @updateOptions="updateOptions"
@@ -147,6 +148,9 @@ export default {
     templates: {
       type: Array,
       default: null
+    },
+    prizeActivity: {
+      type: Function
     }
   },
   data: function() {

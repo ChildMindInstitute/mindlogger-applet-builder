@@ -35,7 +35,7 @@
           <v-col>
             <v-subheader>Activities</v-subheader>
             <v-list-item
-              v-for="(activity, index) in activities"
+              v-for="(activity, index) in withoutPrize(activities)"
               :key="activity.id"
             >
               <v-list-item-content>
@@ -613,7 +613,6 @@ export default {
       } else {
         this.activities.push(activity);
       }
-      console.log(this.activities);
     },
     onSubmitEditor(markdownData) {
       this.markdownData = markdownData;
@@ -791,33 +790,26 @@ export default {
     resetValidation() {
       this.$refs.form.resetValidation();
     },
-
-    // findPrizeActivity() {
-    //   return this.activities.find(activity => activity['isPrize'] === true);
-    // },
-
+    withoutPrize(arr) {
+      return arr.filter(item => Boolean(item['isPrize']) === false);
+    },
     prizeActivity(action, activityInput) {
-      console.log(action, activityInput);
       switch(action) {
         case 'searching':
           return this.activities.find(activity => activity['isPrize'] === true);
         case 'creating':
           if(activityInput) this.activities.push(activityInput);
-          console.log(this.activities);
           break;
         case 'editing':
           this.activities.splice(this.activities.findIndex(activity => activity['isPrize'] === true), 1, activityInput);
-          console.log(this.activities);
           break;
         case 'deleting':
           this.activities.splice(this.activities.findIndex(activity => activity['isPrize'] === true), 1);
-          console.log(this.activities);
           break;
         default:
           break;
       }
     }
-
   },
 };
 </script>

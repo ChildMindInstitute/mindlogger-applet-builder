@@ -229,10 +229,6 @@
     </v-form>
 
     <v-dialog v-model="tokenPrizes" persistent width="800">
-      <!-- :prizesItems="prizesItems"
-      @updatePrizesItems="prizesItems = $event"
-      @savePrizes="onSavePrizes"
-      @discardPrizes="onDiscardPrizes" -->
       <TokenPrizesBuilder
         :prizeActivity="prizeActivity"
         @closeTokenPrizes="onClosePrizes" 
@@ -308,7 +304,6 @@ export default {
       items: [],
       nextOptionScore,
       hasScoreValue: this.initialItemData.hasScoreValue || false,
-      // prizesItems: this.getTokenPrizes(),
     };
   },
   directives: {
@@ -318,13 +313,6 @@ export default {
     this.items = this.itemTemplates
   },
   methods: {
-    // getTokenPrizes() {
-    //   console.log('getTokenPrizes Func');
-    //   const tokenPrizes = [];
-    //   console.log(tokenPrizes);
-    //   console.log('------------------');
-    //   return tokenPrizes;
-    // },
     resetValidation () {
       this.$refs.form.resetValidation()
     },
@@ -374,11 +362,6 @@ export default {
       this.options.push(nextOption);
       this.update();
     },
-    openTokenPrizes() {
-      console.log('openTokenPrizes Func');
-      this.tokenPrizes = true;
-      console.log('------------------');
-    },
     openTemplateList(event) {
       this.templateList = !this.templateList
     },
@@ -407,32 +390,18 @@ export default {
       this.$emit('updateAllow', allow);
     },
 
+    openTokenPrizes() {
+      this.tokenPrizes = true;
+    },
     getPrizesState() {
       const prizeActivity = this.prizeActivity('searching');
       return prizeActivity && prizeActivity.items && prizeActivity.items.length > 0 ? 'Edit' : 'Create'; 
     },
-
     onClosePrizes() {
-      console.log('onClosePrizes Func');
       this.tokenPrizes = false;
-      console.log('------------------');
     },
 
-    // onSavePrizes() {
-    //   console.log('onSavePrizes Func');
-    //   this.tokenPrizes = false;
-    //   // update prizes here
-    //   console.log('------------------');
-    // },
-    // onDiscardPrizes() {
-    //   console.log('onDiscardPrizes Func');
-    //   this.tokenPrizes = false;
-    //   this.prizesItems = this.getTokenPrizes();
-    //   console.log('------------------');
-    // },
-
     // Utils
-
     getMaxValue(array) {
       return Math.max.apply(Math, array.map(option => option.value))
     }

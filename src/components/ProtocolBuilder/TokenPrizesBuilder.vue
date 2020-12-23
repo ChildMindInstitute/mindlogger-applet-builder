@@ -83,14 +83,10 @@ export default {
     }
   },
   data() {
-
-    //
     let initialActivityData = {
-      isPrice: true,
       items: [ 
         {
           name: "PrizeSelection",
-          description: "",
           options: {
             hasScoreValue: false,
             isTokenValue: false,
@@ -117,7 +113,6 @@ export default {
 
     const itemBuilder = new Item();
     itemBuilder.updateReferenceObject(this);
-    //
 
     return {
       activityState,
@@ -129,10 +124,10 @@ export default {
       ...itemBuilder.getItemBuilderData(initialItemData),
 
       prizesItems: initialItemData['options']['options'],
+      discardPrizesItems: [...initialItemData['options']['options']],
       editState: [],
       isError: ''
     }
-
   },
   methods: {
     nextPrizeItemValue() {
@@ -141,54 +136,42 @@ export default {
       else return (this.prizesItems[length - 1]['value'] + 1)
     },
     addPrizeItem() {
-      console.log('addPrizeItem Func');
       /** option { name: string, price: number } */
       this.prizesItems.push({ value: this.nextPrizeItemValue(), name: '', price: null });
       this.editState[this.prizesItems.length - 1] = true;
-      console.log('------------------');
     },
     editPrizesState(index) {
-      console.log('editPrizesState Func', index);
       this.editState[index] = this.editState[index] ? false : true;
       this.editState = [...this.editState];
-      console.log(this.editState);
-      console.log('------------------');
     },
     deletePrizeItem(index) {
-      console.log('deletePrizeItem Func');
       this.prizesItems.splice(index, 1);
       this.editState.splice(index, 1);
-      console.log('------------------');
     },
     validatePrizesItems() {
       let err = '';
-      // if(this.prizesItems.length < 1) err = 'Please add at least one option';
       this.prizesItems.forEach(item => {
         if(item.price < 1 || !item.name) err = 'Please fill options with correct info';
       });
       return err;
     },
-
     onClickSavePrizes() {
-      console.log('onClickSavePrizes Func');
       this.isError = this.validatePrizesItems();
       if(!this.isError) {
+        this.discardPrizesItems = [...this.prizesItems];
         if(this.prizesItems.length < 1) this.activityState = 'deleting';
-        console.log(this.activityBuilder.getActivityData());
-        // this.prizeActivity(this.activityState, this.activityBuilder.getActivityData());
+        const activityData = this.activityBuilder.getActivityData();
+        activityData['isPrize'] = true;
+        this.prizeActivity(this.activityState, activityData);
         this.$emit('closeTokenPrizes');
         this.editState = [];
       }
-      console.log('------------------');
     },
-
     onClickDiscardPrizes() {
-      console.log('onClickDiscardPrizes Func');
+      this.prizesItems = [...this.discardPrizesItems];
       this.$emit('closeTokenPrizes');
       this.editState = [];
-      console.log('------------------');
     }
-
   }
 }
 </script>

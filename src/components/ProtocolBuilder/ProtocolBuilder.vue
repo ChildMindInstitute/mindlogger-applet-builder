@@ -368,7 +368,7 @@ export default {
             return {
               jsExpression: jsExpression && jsExpression[0] && jsExpression[0]['@value'],
               message: message && message[0] && message[0]['@value'],
-              outputType: outputType && outputType[0] && outputType[0]['@value'],
+              outputType: outputType && outputType[0] && outputType[0]['@value'] || 'cumulative',
             }
           })
         };

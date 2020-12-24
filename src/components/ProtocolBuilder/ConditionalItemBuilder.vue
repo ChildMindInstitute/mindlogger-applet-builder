@@ -139,6 +139,9 @@ export default {
     };
   },
   watch: {
+    items() {
+      this.setFilteredItems();
+    },
     ifValue() {
       this.fillAnswerAndShowItems();
       this.setStateItems();
@@ -214,6 +217,7 @@ export default {
           index
         };
       })
+      console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@', this.filteredItems)
     },
     onSaveItem() {
       this.addOption();

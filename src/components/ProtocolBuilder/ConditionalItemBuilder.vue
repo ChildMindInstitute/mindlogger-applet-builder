@@ -217,7 +217,6 @@ export default {
           index
         };
       })
-      console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@', this.filteredItems)
     },
     onSaveItem() {
       this.addOption();

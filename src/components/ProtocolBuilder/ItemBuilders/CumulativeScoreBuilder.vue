@@ -28,6 +28,7 @@
             v-model="rule.name"
             label="Cumulative Score Title"
             type="text"
+            maxlength="55"
             :disabled="!isItemEditable"
             @input="onUpdateRule(rule)"
             @keydown="nameKeydown($event)"
@@ -218,7 +219,7 @@ export default {
   },
   methods: {
     nameKeydown(e) {
-      if (!/^[a-zA-Z0-9_]+$/.test(e.key)) {
+      if (!/^[a-zA-Z0-9_\s]+$/.test(e.key)) {
         e.preventDefault();
       }
     },

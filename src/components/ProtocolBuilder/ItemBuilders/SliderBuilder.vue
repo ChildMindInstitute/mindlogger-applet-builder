@@ -110,22 +110,48 @@
       </v-card>
     </v-dialog>
 
-    <v-text-field
-      v-model="minValue"
-      label="First option"
-      counter="20"
-      maxlength="20"
-      :disabled="!isItemEditable"
-      @change="update"
-    />
-    <v-text-field
-      v-model="maxValue"
-      label="Last option"
-      counter="20"
-      maxlength="20"
-      :disabled="!isItemEditable"
-      @change="update"
-    />
+    <v-row>
+      <v-col cols="auto">
+        <ImageUploader
+          :uploadFor="'item-radio-option-pc'"
+          :itemImg="imgFirstName"
+          @onAddImg="onUploadImg('first', $event)"
+          @onRemoveImg="onRemoveImg('first')"
+        />
+      </v-col>
+      <v-col>
+        <v-text-field
+          v-model="minValue"
+          label="First option"
+          counter="20"
+          maxlength="20"
+          :disabled="!isItemEditable"
+          @change="update"
+        />
+      </v-col>
+    </v-row>
+
+    <v-row>
+      <v-col cols="auto">
+        <ImageUploader
+          :uploadFor="'item-radio-option-pc'"
+          :itemImg="imgLastName"
+          @onAddImg="onUploadImg('last', $event)"
+          @onRemoveImg="onRemoveImg('last')"
+        />
+      </v-col>
+      <v-col>
+        <v-text-field
+          v-model="maxValue"
+          label="Last option"
+          counter="20"
+          maxlength="20"
+          :disabled="!isItemEditable"
+          @change="update"
+        />
+      </v-col>
+    </v-row>
+
   </v-form>
 </template>
 
@@ -145,7 +171,13 @@
 </style>
 
 <script>
+import ImageUploader from '../ImageUploader.vue';
+import ImageUpldr from '../../../models/ImageUploader';
+
 export default {
+  components: {
+    ImageUploader
+  },
   props: {
     initialItemData: {
       type: Object,
@@ -161,6 +193,8 @@ export default {
     },
   },
   data: function () {
+    const imgUpldr = new ImageUpldr();
+    
     return {
       numOptions: this.initialItemData.numOptions || 5,
       minValue: this.initialItemData.minValue || '',
@@ -176,6 +210,9 @@ export default {
       hasScoreValue: this.initialItemData.hasScoreValue || false,
       scoreDialog: false,
       scores: this.initialItemData.scores || null,
+      imgUpldr,
+      imgFirstName: this.initialItemData.minValueImg || '',
+      imgLastName: this.initialItemData.maxValueImg || ''
     };
   },
   mounted() {
@@ -222,7 +259,9 @@ export default {
       const responseOptions = {
         'numOptions': this.numOptions,
         'minValue': this.minValue || "Min",
+        'minValueImg': this.imgFirstName,
         'maxValue': this.maxValue || "Max",
+        'maxValueImg': this.imgLastName,
         'hasScoreValue': this.hasScoreValue,
         'scores': this.hasScoreValue ? this.scores : null
       };
@@ -232,7 +271,27 @@ export default {
     updateAllow() {
       const allow = this.isSkippable
       this.$emit('updateAllow', allow);
+    },
+
+    async onUploadImg(option, data) {
+      try {
+        this.$emit('error', '');
+        this.$emit('uploading', true);
+        const response = await this.imgUpldr.uploadImage(data);
+        if(option === 'first') this.imgFirstName = response.location;
+        else if(option === 'last') this.imgLastName = response.location;
+        this.$emit('uploading', false);
+        this.update();
+      } catch(e) {
+        this.$emit('uploading', false);
+        this.$emit('error', 'Something went wrong with uploading image for score option');
+      }
+    },
+    onRemoveImg(option) {
+      if(option === 'first') this.imgFirstName = '';
+      else if(option === 'last') this.imgLastName = '';
     }
+
   }
 }
 </script>

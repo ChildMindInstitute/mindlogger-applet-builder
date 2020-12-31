@@ -521,6 +521,16 @@ export default {
                   responseOptions[0]['schema:minValue'] &&
                   responseOptions[0]['schema:minValue'][0] &&
                   responseOptions[0]['schema:minValue'][0]['@value'],
+                maxValueImg:
+                  responseOptions[0] &&
+                  responseOptions[0]['schema:maxValueImg'] &&
+                  responseOptions[0]['schema:maxValueImg'][0] &&
+                  responseOptions[0]['schema:maxValueImg'][0]['@value'],
+                minValueImg:
+                  responseOptions[0] &&
+                  responseOptions[0]['schema:minValueImg'] &&
+                  responseOptions[0]['schema:minValueImg'][0] &&
+                  responseOptions[0]['schema:minValueImg'][0]['@value'],
                 numOptions:
                   responseOptions[0] &&
                   responseOptions[0]['schema:itemListElement'] &&
@@ -664,9 +674,9 @@ export default {
 
       this.activities.push(activityModel.getActivityData());
     },
-    editActivity(index) {
+    editActivity(index) { 
       this.editIndex = index;
-      this.initialActivityData = this.activities[index];
+      this.initialActivityData = this.activities[this.editIndex];
       this.forceUpdate();
       this.dialog = true;
     },
@@ -810,7 +820,7 @@ export default {
     },
     resetValidation() {
       this.$refs.form.resetValidation();
-    },
+    }
   },
 };
 </script>

@@ -1,5 +1,7 @@
 # Applet Schema Builder
 
+AccessKey
+
 Visual user interface used to design, edit, and generate [ReproSchema](https://github.com/ReproNim/reproschema) protocols. Written in Vue, hosted on [GitHub](https://github.com/henryrossiter/Protocol-Builder), and distributed with [NPM](https://www.npmjs.com/package/activity-set-builder).
 
 

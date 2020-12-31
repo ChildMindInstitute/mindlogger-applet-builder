@@ -47,11 +47,10 @@
           cols="auto"
         >
           <v-btn
-            @click="openTokenPrizes"
             outlined
             color="primary"
           >
-            {{ getPrizesState() }} Token Prizes
+            Create Token Prizes
           </v-btn>
         </v-col>
         <v-col 
@@ -229,26 +228,17 @@
         </v-list-item>
       </v-list>
     </v-form>
-
-    <v-dialog v-model="tokenPrizes" persistent width="800">
-      <TokenPrizesBuilder
-        :prizeActivity="prizeActivity"
-        @closeTokenPrizes="onClosePrizes" 
-      />
-    </v-dialog>
   </div>
 </template>
 
 <script>
 import ClickOutside from 'vue-click-outside';
 import ImageUploader from '../ImageUploader.vue';
-import TokenPrizesBuilder from '../TokenPrizesBuilder.vue';
 import ImageUpldr from '../../../models/ImageUploader';
 
 export default {
   components: {
-    ImageUploader,
-    TokenPrizesBuilder
+    ImageUploader
   },
   props: {
     initialItemData: {
@@ -269,9 +259,6 @@ export default {
     itemTemplates: {
       type: Array,
       default: null
-    },
-    prizeActivity: {
-      type: Function
     }
   },
   data: function () {
@@ -300,7 +287,6 @@ export default {
       nextOptionValue: this.initialItemData.nextOptionValue || '',
       nextOptionImage: this.initialItemData.nextOptionImage || '',
       options: this.initialItemData.options || [],
-      tokenPrizes: false,
       templateList: false,
       valid: true,
       textRules: [
@@ -414,16 +400,6 @@ export default {
       this.$emit('updateAllow', allow);
     },
 
-    openTokenPrizes() {
-      this.tokenPrizes = true;
-    },
-    getPrizesState() {
-      const prizeActivity = this.prizeActivity('searching');
-      return prizeActivity && prizeActivity.items && prizeActivity.items.length > 0 ? 'Edit' : 'Create'; 
-    },
-    onClosePrizes() {
-      this.tokenPrizes = false;
-    },
     onAddImg(data) {
       if(typeof data !== 'string') {
         this.nextOptionImageFile = data;

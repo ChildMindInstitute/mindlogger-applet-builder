@@ -1,4 +1,5 @@
 <template>
+  <div>
   <v-card>
     <v-card-title class="headline grey lighten-2" primary-title>
       <v-icon left>{{ isItemEditable ? "mdi-pencil" : "mdi-eye" }}</v-icon>
@@ -15,7 +16,7 @@
           @keydown="nameKeydown($event)"
         />
         <v-textarea
-          v-model="question.text"
+          v-model="questionBuilder.text"
           label="Question"
           :disabled="!isItemEditable"
           counter="320"
@@ -23,7 +24,16 @@
           auto-grow
           rows="1"
         />
+        <ImageUploader
+          class="mt-3 mb-4"
+          style="max-width: 300px"
+          :uploadFor="'activity-item'"
+          :itemImg="questionBuilder.imgURL"
+          @onAddImg="onAddImg"
+          @onRemoveImg="onRemoveImg"
+        />
         <v-select
+          class="mt-6"
           v-model="inputType"
           :items="inputTypes"
           label="Input Type"
@@ -36,11 +46,13 @@
           :initial-item-data="options"
           :is-item-editable="isItemEditable"
           :item-templates="itemTemplates"
-          :prizeActivity="prizeActivity"
+          @openPrize="$emit('openPrize')"
           @removeTemplate="onRemoveTemplate"
           @updateTemplates="onUpdateTemplates"
           @updateOptions="updateOptions"
           @updateAllow="updateAllow"
+          @uploading="isUploadingState = $event"
+          @error="isError = $event"
         />
         <TextBuilder
           v-if="inputType === 'text'"
@@ -59,6 +71,8 @@
           :is-item-editable="isItemEditable"
           @updateOptions="updateOptions"
           @updateAllow="updateAllow"
+          @uploading="isUploadingState = $event"
+          @error="isError = $event"
         />
         <VideoBuilder v-if="inputType === 'video'" />
         <PhotoBuilder v-if="inputType === 'photo'" />
@@ -93,6 +107,7 @@
         />
       </v-form>
     </v-card-text>
+    <v-alert v-if="isError" type="error" class="mx-2">{{ isError }}</v-alert>
     <v-divider />
     <v-card-actions>
       <v-btn
@@ -104,9 +119,17 @@
       <v-btn color="primary" @click="onSaveItem">Save Item</v-btn>
     </v-card-actions>
   </v-card>
+  <v-dialog v-model="isUploadingState" persistent width="400">
+    <v-card class="pt-5 pb-6">
+      <v-progress-circular class="d-block mx-auto mt-2" color="primary" indeterminate :size="50">
+      </v-progress-circular>
+    </v-card>
+  </v-dialog>
+  </div>
 </template>
 
 <script>
+import ImageUploader from './ImageUploader.vue';
 import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
 import TextBuilder from "./ItemBuilders/TextBuilder.vue";
 import SliderBuilder from "./ItemBuilders/SliderBuilder.vue";
@@ -120,9 +143,11 @@ import AudioImageRecordBuilder from "./ItemBuilders/AudioImageRecordBuilder.vue"
 import GeolocationBuilder from "./ItemBuilders/GeolocationBuilder.vue";
 import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
 import Item from '../../models/Item';
+import ImageUpldr from '../../models/ImageUploader';
 
 export default {
   components: {
+    ImageUploader,
     RadioBuilder,
     TextBuilder,
     SliderBuilder,
@@ -148,22 +173,32 @@ export default {
     templates: {
       type: Array,
       default: null
-    },
-    prizeActivity: {
-      type: Function
     }
   },
   data: function() {
     const model = new Item();
     model.updateReferenceObject(this);
 
+    const imgUploader = new ImageUpldr();
+
+    const questionBuilder = { text: '', imgURL: '', imgFile: null };
+
+    let isUploadingState = false;
+    let isError = '';
+
     return {
       model,
-      ...model.getItemBuilderData(this.initialItemData)
+      ...model.getItemBuilderData(this.initialItemData),
+      imgUploader,
+      questionBuilder,
+      isUploadingState,
+      isError
     };
   },
   beforeMount() {
-    this.itemTemplates = this.templates
+    this.itemTemplates = this.templates;
+    this.questionBuilder.text = this.question.text;
+    this.questionBuilder.imgURL = this.question.image;
   },
   methods: {
     nameKeydown(e) {
@@ -201,11 +236,43 @@ export default {
       this.options = newOptions;
       this.responseOptions = this.model.getResponseOptions();
     },
-    onSaveItem() {
-      if (this.isItemEditable) {
-        this.$emit("closeItemModal", this.model.getItemData());
+    onAddImg(data) {
+      if(typeof data !== 'string') {
+        this.questionBuilder.imgFile = data;
+        this.questionBuilder.imgURL = data.name;
       } else {
-        this.$emit("closeItemModal", null);
+        this.questionBuilder.imgURL = data;
+      }
+    },
+    onRemoveImg() {
+      this.questionBuilder.imgFile = null;
+      this.questionBuilder.imgURL = '';
+    },
+    async onSaveItem() {
+      try {
+
+        if (!this.isItemEditable) {
+          this.$emit("closeItemModal", null);
+          return;
+        }
+
+        this.question.text = this.questionBuilder.text;
+        if(!this.questionBuilder.imgFile) {
+          this.question.image = this.questionBuilder.imgURL;
+        } else {
+          this.isError = '';
+          this.isUploadingState = true;
+          const response = await this.imgUploader.uploadImage(this.questionBuilder.imgFile);
+          this.question.image = response.location;
+          this.questionBuilder.imgFile = null;
+          this.isUploadingState = false;
+        }
+
+        this.$emit("closeItemModal", this.model.getItemData());
+
+      } catch(e) {
+        this.isUploadingState = false;
+        this.isError = 'Something went wrong with uploading Header Image for Item. Please try another image or remove current!!!';
       }
     },
     onDiscardItem() {

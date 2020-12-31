@@ -22,9 +22,7 @@ export default class Activity {
       urlDialog: false,
       error: '',
       componentKey: 0,
-      initialItemData: {
-        options: {},
-      },
+      initialItemData: initialActivityData.isPrize && initialActivityData.items ? initialActivityData.items[0] : { options: {}, },
       isItemEditable: true,
       editIndex: -1,
       initialConditionalItemData: {},
@@ -39,6 +37,7 @@ export default class Activity {
       conditionalBuilderType: '',
       conditionalItemsForBuilder: [],
       subScales: initialActivityData.subScales && initialActivityData.subScales.map(subScale => subScale) || [],
+      isPrize: initialActivityData.isPrize || false
     };
   }
 
@@ -290,6 +289,7 @@ export default class Activity {
       preamble: this.ref.preamble,
       scoringLogic: {},
       'repronim:timeUnit': 'yearmonthdate',
+      isPrize: this.ref.isPrize,
       ui: {
         order: itemOrder,
         shuffle: this.ref.shuffleActivityOrder,
@@ -348,6 +348,7 @@ export default class Activity {
       items: items,
       conditionalItems: conditionalItems,
       subScales: this.ref.subScales,
+      isPrize: this.ref.isPrize,
     };
   }
 

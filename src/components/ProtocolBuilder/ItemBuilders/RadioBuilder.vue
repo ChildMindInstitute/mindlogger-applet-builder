@@ -47,11 +47,11 @@
           cols="auto"
         >
           <v-btn
-            @click="openTokenPrizes"
             outlined
             color="primary"
+            @click="$emit('openPrize')"
           >
-            {{ getPrizesState() }} Token Prizes
+            Create Token Prizes
           </v-btn>
         </v-col>
         <v-col 
@@ -137,8 +137,18 @@
           >
             <v-row>
               <v-col 
+                cols="auto">
+                <ImageUploader
+                  :uploadFor="'item-radio-option-pc'"
+                  :itemImg="nextOptionImage"
+                  @onAddImg="onAddImg"
+                  @onRemoveImg="onRemoveImg"
+                />
+              </v-col>
+              <v-col 
                 cols="12"
-                sm="4"
+                sm="5"
+                md="4"
               >
                 <v-text-field
                   v-model="nextOptionName"
@@ -153,7 +163,8 @@
               <v-col 
                 v-if="isTokenValue"
                 cols="12"
-                sm="4"
+                sm="5"
+                md="4"
               >
                 <v-text-field
                   v-model="nextOptionValue"
@@ -168,13 +179,7 @@
               </v-col>
               <v-col 
                 v-if="isTokenValue"
-                cols="12"
-                sm="1"
-              />
-              <v-col 
-                v-if="isTokenValue"
-                cols="12"
-                sm="3"
+                cols="auto"
               >
                 <v-checkbox
                   v-model="isTemplate"
@@ -183,13 +188,11 @@
                   @change="update"
                 />
               </v-col>
-            </v-row>
-
-            <v-row>
               <v-col
                 v-if="hasScoreValue"
                 cols="12"
-                sm="4"
+                sm="5"
+                md="4"
               >
                 <v-text-field
                   v-model="nextOptionScore"
@@ -209,11 +212,10 @@
                 cols="12"
                 sm="12"
               >
-                <v-text-field
-                  v-model="nextOptionImage"
-                  label="Option Image"
-                  :disabled="!isItemEditable"
-                  @change="update"
+                <ImageUploader
+                  :uploadFor="'item-radio-option-url'"
+                  :itemImg="nextOptionImage"
+                  @onAddImg="onAddImg"
                 />
               </v-col>
             </v-row>
@@ -227,23 +229,17 @@
         </v-list-item>
       </v-list>
     </v-form>
-
-    <v-dialog v-model="tokenPrizes" persistent width="800">
-      <TokenPrizesBuilder
-        :prizeActivity="prizeActivity"
-        @closeTokenPrizes="onClosePrizes" 
-      />
-    </v-dialog>
   </div>
 </template>
 
 <script>
 import ClickOutside from 'vue-click-outside';
-import TokenPrizesBuilder from '../TokenPrizesBuilder.vue';
+import ImageUploader from '../ImageUploader.vue';
+import ImageUpldr from '../../../models/ImageUploader';
 
 export default {
   components: {
-    TokenPrizesBuilder
+    ImageUploader
   },
   props: {
     initialItemData: {
@@ -264,12 +260,12 @@ export default {
     itemTemplates: {
       type: Array,
       default: null
-    },
-    prizeActivity: {
-      type: Function
     }
   },
   data: function () {
+    const imgUpldr = new ImageUpldr();
+
+    let nextOptionImageFile = null;
     let nextOptionScore = 1;
 
     if (
@@ -292,7 +288,6 @@ export default {
       nextOptionValue: this.initialItemData.nextOptionValue || '',
       nextOptionImage: this.initialItemData.nextOptionImage || '',
       options: this.initialItemData.options || [],
-      tokenPrizes: false,
       templateList: false,
       valid: true,
       textRules: [
@@ -304,6 +299,7 @@ export default {
       items: [],
       nextOptionScore,
       hasScoreValue: this.initialItemData.hasScoreValue || false,
+      imgUpldr
     };
   },
   directives: {
@@ -316,35 +312,50 @@ export default {
     resetValidation () {
       this.$refs.form.resetValidation()
     },
-    addOption() {
-      const { isTokenValue, nextOptionName, nextOptionValue, hasScoreValue, nextOptionScore } = this;
+    async addOption() {
+      try {
 
-      const currentVal = this.options.length ? this.getMaxValue(this.options) + 1 : 0
-      const nextOption = {
-        'name': nextOptionName,
-        'value': isTokenValue ? Number(nextOptionValue) : currentVal,
-        'score': hasScoreValue ? Number(nextOptionScore) : 0,
-      };
-      if (this.nextOptionImage) {
-        nextOption.image = this.nextOptionImage.toString();
-      }
-      if (this.isTemplate) {
-        const newOption = {
-          text: nextOptionName,
-          value: nextOptionValue
+        if(this.nextOptionImageFile) {
+          this.$emit('error', '');
+          this.$emit('uploading', true);
+          const response = await this.imgUpldr.uploadImage(this.nextOptionImageFile);
+          this.nextOptionImage = response.location;
+          this.nextOptionImageFile = null;
+          this.$emit('uploading', false);
         }
-        this.items = [...this.items, newOption]
-        this.$emit('updateTemplates', newOption);
-        this.isTemplate = false;
-      }
 
-      this.options.push(nextOption);
-      this.nextOptionName = '';
-      this.nextOptionValue = '';
-      this.nextOptionImage = '';
-      this.nextOptionScore = nextOption.score + 1;
-      this.resetValidation();
-      this.update();
+        const { isTokenValue, nextOptionName, nextOptionValue, hasScoreValue, nextOptionScore } = this;
+
+        const currentVal = this.options.length ? this.getMaxValue(this.options) + 1 : 0
+        const nextOption = {
+          'name': nextOptionName,
+          'value': isTokenValue ? Number(nextOptionValue) : currentVal,
+          'score': hasScoreValue ? Number(nextOptionScore) : 0,
+        };
+        if (this.nextOptionImage) {
+          nextOption.image = this.nextOptionImage.toString();
+        }
+        if (this.isTemplate) {
+          const newOption = {
+            text: nextOptionName,
+            value: nextOptionValue
+          }
+          this.items = [...this.items, newOption]
+          this.$emit('updateTemplates', newOption);
+          this.isTemplate = false;
+        }
+
+        this.options.push(nextOption);
+        this.nextOptionName = '';
+        this.nextOptionValue = '';
+        this.nextOptionImage = '';
+        this.nextOptionScore = nextOption.score + 1;
+        this.resetValidation();
+        this.update();
+      } catch(e) {
+        this.$emit('uploading', false);
+        this.$emit('error', 'Something went wrong with uploading option image. Please try another image or remove current!!!');
+      }
     },
     removeTemplate(item) {
       const { items } = this;
@@ -390,15 +401,17 @@ export default {
       this.$emit('updateAllow', allow);
     },
 
-    openTokenPrizes() {
-      this.tokenPrizes = true;
+    onAddImg(data) {
+      if(typeof data !== 'string') {
+        this.nextOptionImageFile = data;
+        this.nextOptionImage = data.name;
+      } else {
+        this.nextOptionImage = data;
+      }
     },
-    getPrizesState() {
-      const prizeActivity = this.prizeActivity('searching');
-      return prizeActivity && prizeActivity.items && prizeActivity.items.length > 0 ? 'Edit' : 'Create'; 
-    },
-    onClosePrizes() {
-      this.tokenPrizes = false;
+    onRemoveImg() {
+      this.nextOptionImage = '';
+      this.nextOptionImageFile = null;
     },
 
     // Utils

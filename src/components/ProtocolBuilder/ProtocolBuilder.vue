@@ -107,7 +107,7 @@
         :key="componentKey"
         :templates="itemTemplates"
         :initial-activity-data="initialActivityData"
-        :prizeActivity="prizeActivity"
+        @openPrize="tokenPrizes = true"
         @removeTemplate="onRemoveTemplate"
         @updateTemplates="onUpdateTemplates"
         @closeModal="onCloseActivityModal"
@@ -135,6 +135,15 @@
       @submit="onSubmitEditor"
     />
 
+
+    <v-dialog v-model="tokenPrizes" persistent width="800">
+      <PrizeActivityBuilder
+        :initial-activity-data="withPrize() ? activities[0] : {}"
+        @closeModal="onClosePrizeActivityModal"
+        @deleteOptions="onDeletePrizeActivity"
+      />
+    </v-dialog>
+
   </v-container>
 </template>
 
@@ -150,6 +159,8 @@ import ActivityBuilder from './ActivityBuilder.vue';
 import { saveAs } from 'file-saver';
 import axios from 'axios';
 import _ from 'lodash';
+
+import PrizeActivityBuilder from './PrizeActivity/PrizeActivityBuilder.vue';
 
 const getInitialData = (model) => {
   return {
@@ -185,6 +196,7 @@ export default {
     ActivityBuilder,
     ChangeHistoryComponent,
     MarkdownEditor,
+    PrizeActivityBuilder
   },
   props: {
     exportButton: {
@@ -217,7 +229,10 @@ export default {
     const model = new Protocol();
     model.updateReferenceObject(this);
 
-    return getInitialData(model);
+    return {
+      tokenPrizes: false,
+      ...getInitialData(model)
+    }
   },
   async beforeMount() {
     if (this.initialData) {
@@ -500,6 +515,16 @@ export default {
                   responseOptions[0]['schema:minValue'] &&
                   responseOptions[0]['schema:minValue'][0] &&
                   responseOptions[0]['schema:minValue'][0]['@value'],
+                maxValueImg:
+                  responseOptions[0] &&
+                  responseOptions[0]['schema:maxValueImg'] &&
+                  responseOptions[0]['schema:maxValueImg'][0] &&
+                  responseOptions[0]['schema:maxValueImg'][0]['@value'],
+                minValueImg:
+                  responseOptions[0] &&
+                  responseOptions[0]['schema:minValueImg'] &&
+                  responseOptions[0]['schema:minValueImg'][0] &&
+                  responseOptions[0]['schema:minValueImg'][0]['@value'],
                 numOptions:
                   responseOptions[0] &&
                   responseOptions[0]['schema:itemListElement'] &&
@@ -607,12 +632,33 @@ export default {
         this.onNewActivity(response);
       }
     },
+
+    onClosePrizeActivityModal(response) {
+      if(!response) {
+        this.tokenPrizes = false;
+        return;
+      } 
+
+      if(this.withPrize()) {
+        this.activities.splice(0, 1, response);
+      } else {
+        this.activities.unshift(response);
+      }
+
+      this.tokenPrizes = false;
+    },
+
+    onDeletePrizeActivity() {
+      this.tokenPrizes = false;
+      if(this.withPrize) this.activities.splice(0, 1);
+      console.log(this.activities);
+    },
+
     onNewActivity(activity) {
       if (this.editIndex >= 0 && this.editIndex < this.activities.length) {
         this.activities[this.editIndex] = activity;
       } else {
         this.activities.push(activity);
-        console.log(this.activities);
       }
     },
     onSubmitEditor(markdownData) {
@@ -646,7 +692,7 @@ export default {
     },
     editActivity(index) { 
       this.editIndex = index;
-      if(this.prizeActivity('searching')) this.editIndex++;
+      if(this.withPrize()) this.editIndex++;
       this.initialActivityData = this.activities[this.editIndex];
       this.forceUpdate();
       this.dialog = true;
@@ -715,7 +761,7 @@ export default {
     onClickExport() {
       this.model.getProtocolData().then( data => {
         if (!this.isEditing) {
-          this.$emit("uploadProtocol", data)
+          this.$emit("uploadProtocol", data);
         } else {
           let { upgrade, updates, removed } = Protocol.getChangeInfo(this.original, data, true);
 
@@ -792,26 +838,16 @@ export default {
     resetValidation() {
       this.$refs.form.resetValidation();
     },
-    withoutPrize(arr) {
-      return arr.filter(item => Boolean(item['isPrize']) === false);
+
+
+    withPrize() {
+      return this.activities.find(activity => activity['isPrize'] === true);
     },
-    prizeActivity(action, activityInput) {
-      switch(action) {
-        case 'searching':
-          return this.activities.find(activity => activity['isPrize'] === true);
-        case 'creating':
-          if(activityInput) this.activities.unshift(activityInput);
-          break;
-        case 'editing':
-          this.activities.splice(0, 1, activityInput);
-          break;
-        case 'deleting':
-          this.activities.splice(0, 1);
-          break;
-        default:
-          break;
-      }
+
+    withoutPrize(arr) {
+      return arr.filter(activity => Boolean(activity['isPrize']) === false);
     }
+
   },
 };
 </script>

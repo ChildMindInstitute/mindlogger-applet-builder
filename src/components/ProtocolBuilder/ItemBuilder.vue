@@ -11,13 +11,14 @@
           v-model="name"
           label="Item Name"
           :rules="nameRules"
-          :disabled="!isItemEditable"
+          :disabled="!isItemEditable || inputType == 'cumulativeScore'"
           required
           @keydown="nameKeydown($event)"
         />
         <v-textarea
           v-model="questionBuilder.text"
           label="Question"
+          v-if="inputType !== 'cumulativeScore'"
           :disabled="!isItemEditable"
           counter="320"
           maxlength="320"
@@ -38,7 +39,33 @@
           :items="inputTypes"
           label="Input Type"
           :disabled="!isItemEditable"
-        />
+          @change="onUpdateInputType"
+        >
+          <template v-slot:item="{ item, attrs, on }">
+            <v-list-item v-on="on" v-bind="attrs">
+              <v-tooltip
+                v-if="!hasScoringItem && item == 'cumulativeScore'"
+                top
+              >
+                <template v-slot:activator="{ on }">
+                  <div
+                    class="disabled-option"
+                    v-on="on"
+                    @click.stop=""
+                  >
+                    <span>{{ item }}</span>
+                  </div>
+                </template>
+                <span>Please create an item with scores before creating this page</span>
+              </v-tooltip>
+              <div
+                v-else
+              >
+                {{item}}
+              </div>
+            </v-list-item>
+          </template>
+        </v-select>
         <RadioBuilder
           v-if="inputType === 'radio'"
           :is-skippable-item="allow"
@@ -104,6 +131,13 @@
           @updateInputOptions="updateInputOptions"
           @updateMedia="updateMedia"
         />
+        <CumulativeScoreBuilder
+          v-if="inputType === 'cumulativeScore'"
+          :items="items"
+          :is-item-editable="isItemEditable"
+          :initial-item-data="initialItemData"
+          @updateCumulativeScore="updateCumulativeScore"
+        />
       </v-form>
     </v-card-text>
     <v-alert v-if="isError" type="error" class="mx-2">{{ isError }}</v-alert>
@@ -115,7 +149,13 @@
         @click="onDiscardItem"
       >{{ isItemEditable ? "Discard Changes" : "Close" }}</v-btn>
       <v-spacer />
-      <v-btn color="primary" @click="onSaveItem">Save Item</v-btn>
+      <v-btn
+        :disabled="!valid && inputType === 'cumulativeScore' || !name"
+        color="primary"
+        @click="onSaveItem"
+      >
+        Save Item
+      </v-btn>
     </v-card-actions>
   </v-card>
   <v-dialog v-model="isUploadingState" persistent width="400">
@@ -126,6 +166,14 @@
   </v-dialog>
   </div>
 </template>
+
+<style scoped>
+
+.disabled-option {
+  color: grey;
+}
+
+</style>
 
 <script>
 import ImageUploader from './ImageUploader.vue';
@@ -141,6 +189,7 @@ import AudioRecordBuilder from "./ItemBuilders/AudioRecordBuilder.vue";
 import AudioImageRecordBuilder from "./ItemBuilders/AudioImageRecordBuilder.vue";
 import GeolocationBuilder from "./ItemBuilders/GeolocationBuilder.vue";
 import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
+import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
 import Item from '../../models/Item';
 import ImageUpldr from '../../models/ImageUploader';
 
@@ -158,7 +207,8 @@ export default {
     AudioRecordBuilder,
     AudioImageRecordBuilder,
     GeolocationBuilder,
-    AudioStimulusBuilder
+    AudioStimulusBuilder,
+    CumulativeScoreBuilder,
   },
   props: {
     initialItemData: {
@@ -172,7 +222,11 @@ export default {
     templates: {
       type: Array,
       default: null
-    }
+    },
+    items: {
+      type: Array,
+      required: true,
+    },
   },
   data: function() {
     const model = new Item();
@@ -188,6 +242,8 @@ export default {
     return {
       model,
       ...model.getItemBuilderData(this.initialItemData),
+      hasScoringItem: this.items.some((item) => item.options.hasScoreValue),
+      valid: (builderData.name.length > 0),
       imgUploader,
       questionBuilder,
       isUploadingState,
@@ -276,6 +332,17 @@ export default {
     },
     onDiscardItem() {
       this.$emit("closeItemModal", null);
+    },
+
+    updateCumulativeScore (scoreRules) {
+      this.valid = !scoreRules.some(rule => !rule.valid) && scoreRules.length > 0;
+      this.cumulativeScores = scoreRules;
+    },
+
+    onUpdateInputType() {
+      if (this.inputType === 'cumulativeScore') {
+        this.name = 'cumulatives';
+      }
     }
   }
 };

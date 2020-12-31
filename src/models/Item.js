@@ -34,6 +34,7 @@ export default class Item {
         responseOptions: initialItemData.responseOptions || {},
         inputOptions: initialItemData.inputOptions || {},
         media: initialItemData.media || {},
+        cumulativeScores: initialItemData.cumulativeScores  || [],
         textRules: [v => !!v || "This field is required"],
         nameRules: [
           v =>
@@ -52,7 +53,8 @@ export default class Item {
           "audioRecord",
           "audioImageRecord",
           "geolocation",
-          "audioStimulus"
+          "audioStimulus",
+          "cumulativeScore"
         ],
         allowEdit: initialItemData.allowEdit === undefined ? true : initialItemData.allowEdit,
     };
@@ -158,25 +160,34 @@ export default class Item {
 
   getInputOptions() {
     if (this.ref.inputType === "audioStimulus") {
-        return this.ref.inputOptions;
+      return this.ref.inputOptions;
     }
     return {};
   }
 
   getMedia() {
     if (this.ref.inputType === "audioStimulus") {
-        return this.ref.media;
+      return this.ref.media;
     }
     return {};
+  }
+
+  getCumulativeScores() {
+    if (this.ref.inputType === 'cumulativeScore') {
+      return this.ref.cumulativeScores.map(({ compute, messages }) => ({ compute, messages }));
+    }
+    return [];
   }
 
   getCompressedSchema() {
     const responseOptions = this.getResponseOptions();
     const inputOptions = this.getInputOptions();
     const media = this.getMedia();
+    const cumulativeScores = this.getCumulativeScores();
+
     const schema = {
         "@context": [
-        "https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json"
+          "https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json"
         ],
         "@type": "reproschema:Field",
         "@id": this.ref.name,
@@ -190,31 +201,40 @@ export default class Item {
         },
     };
     if (Object.keys(responseOptions).length !== 0) {
-        schema["responseOptions"] = responseOptions;
+      schema["responseOptions"] = responseOptions;
     }
     if (this.ref.inputType === "audioStimulus") {
-        schema["inputOptions"] = inputOptions;
+      schema["inputOptions"] = inputOptions;
     }
     if (this.ref.inputType === "audioStimulus") {
-        schema["media"] = media;
+      schema["media"] = media;
+    }
+
+    if (this.ref.inputType === 'cumulativeScore') {
+      schema['cumulativeScores'] = cumulativeScores;
     }
     if (this.ref.inputType === 'radio') {
-        if (this.ref.options.isMultipleChoice) {
+      if (this.ref.options.isMultipleChoice) {
         schema["ui"] = {
-            "inputType": this.ref.inputType
+          "inputType": this.ref.inputType
         };
-        } else {
+      } else {
         schema["ui"] = {
             inputType: this.ref.inputType,
             allow: [
               "autoAdvance"
             ]
         };
-        }
+      }
     } else {
-        schema["ui"] = {
+      schema["ui"] = {
         inputType: this.ref.inputType
-        };
+      };
+
+      if (this.ref.inputType === "cumulativeScore") {
+        schema["ui"]["allow"] = schema["ui"]["allow"] || [];
+        schema["ui"]["allow"].push("disableBack");
+      }
     }
 
     if (this.ref.id) {
@@ -406,7 +426,7 @@ export default class Item {
       'options.maxLength': {
         updated: valueUpdate('maxLength'),
         inserted: valueInsert('maxLength'),
-      }
+      },
     }
   }
 

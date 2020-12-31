@@ -139,6 +139,9 @@ export default {
     };
   },
   watch: {
+    items() {
+      this.setFilteredItems();
+    },
     ifValue() {
       this.fillAnswerAndShowItems();
       this.setStateItems();

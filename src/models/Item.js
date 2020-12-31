@@ -6,8 +6,9 @@ export default class Item {
 
   static getQuesionInfo(question) {
     const imageRE = new RegExp(/[\r\n]*\!\[.*\]\(.*=.*\)[\r\n]*/i);
-    const imageMatch = question.match(imageRE);
-    
+    const imageUrlRE = new RegExp(/\h([^ =]+)/i);
+    const imageMatch = question.match(imageUrlRE);
+
     const questionImage = imageMatch && imageMatch[0] || '';  // The image URL.
     const questionText = question.replace(imageRE, '');  // Remove the image from the question.
 
@@ -73,9 +74,15 @@ export default class Item {
         obj["schema:score"] = this.ref.options.scores[i-1];
       }
 
+      if (this.ref.options.minValueImg && i === 1)
+        obj["schema:image"] = this.ref.options.minValueImg;
+      
+      if(this.ref.options.maxValueImg && i === this.ref.options.numOptions)
+        obj["schema:image"] = this.ref.options.maxValueImg;
+
       choices.push(obj);
     }
-
+    
     return choices;
   }
 
@@ -127,6 +134,8 @@ export default class Item {
         "scoring": this.ref.options.hasScoreValue,
         "schema:minValue": this.ref.options.minValue,
         "schema:maxValue": this.ref.options.maxValue,
+        "schema:minValueImg": this.ref.options.minValueImg,
+        "schema:maxValueImg": this.ref.options.maxValueImg,
         choices: choices
       };
     }
@@ -226,7 +235,7 @@ export default class Item {
     const schema = this.getCompressedSchema();
     const itemObj = {
       name: this.ref.name,
-      question: this.ref.question.image + this.ref.question.text,
+      question: this.ref.question.image ? `\r\n\r\n![''](${this.ref.question.image} =250x250)\r\n\r\n${this.ref.question.text}` : this.ref.question.text,
       description: this.ref.description,
       options: this.ref.options,
       allowEdit: this.ref.allowEdit,
@@ -249,7 +258,9 @@ export default class Item {
       itemObj.correctAnswer = this.ref.correctAnswer;
     } else if (this.ref.inputType === "slider") {
       itemObj.options.minValue = itemObj.options.minValue || "Min";
+      itemObj.options.minValueImg = itemObj.options.minValueImg || "";
       itemObj.options.maxValue = itemObj.options.maxValue || "Max";
+      itemObj.options.maxValueImg = itemObj.options.maxValueImg || "";
       itemObj.options.numOptions = itemObj.options.numOptions || 5;
       itemObj.options.hasScoreValue = itemObj.options.hasScoreValue || false;
     }
@@ -370,6 +381,14 @@ export default class Item {
       'options.maxValue': {
         updated: valueUpdate('maxValue'),
         inserted: valueInsert('maxValue'),
+      },
+      'options.minValueImg': {
+        updated: valueUpdate('minValueImg'),
+        inserted: valueInsert('minValueImg'),
+      },
+      'options.maxValueImg': {
+        updated: valueUpdate('maxValueImg'),
+        inserted: valueInsert('maxValueImg'),
       },
       'options.requiredValue': {
         updated: optionUpdate('Required option'),

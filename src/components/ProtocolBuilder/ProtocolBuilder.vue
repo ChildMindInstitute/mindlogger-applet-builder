@@ -35,7 +35,7 @@
           <v-col>
             <v-subheader>Activities</v-subheader>
             <v-list-item
-              v-for="(activity, index) in activities"
+              v-for="(activity, index) in withoutPrize(activities)"
               :key="activity.id"
             >
               <v-list-item-content>
@@ -107,6 +107,7 @@
         :key="componentKey"
         :templates="itemTemplates"
         :initial-activity-data="initialActivityData"
+        :prizeActivity="prizeActivity"
         @removeTemplate="onRemoveTemplate"
         @updateTemplates="onUpdateTemplates"
         @closeModal="onCloseActivityModal"
@@ -499,6 +500,16 @@ export default {
                   responseOptions[0]['schema:minValue'] &&
                   responseOptions[0]['schema:minValue'][0] &&
                   responseOptions[0]['schema:minValue'][0]['@value'],
+                maxValueImg:
+                  responseOptions[0] &&
+                  responseOptions[0]['schema:maxValueImg'] &&
+                  responseOptions[0]['schema:maxValueImg'][0] &&
+                  responseOptions[0]['schema:maxValueImg'][0]['@value'],
+                minValueImg:
+                  responseOptions[0] &&
+                  responseOptions[0]['schema:minValueImg'] &&
+                  responseOptions[0]['schema:minValueImg'][0] &&
+                  responseOptions[0]['schema:minValueImg'][0]['@value'],
                 numOptions:
                   responseOptions[0] &&
                   responseOptions[0]['schema:itemListElement'] &&
@@ -642,9 +653,10 @@ export default {
 
       this.activities.push(activityModel.getActivityData());
     },
-    editActivity(index) {
+    editActivity(index) { 
       this.editIndex = index;
-      this.initialActivityData = this.activities[index];
+      if(this.prizeActivity('searching')) this.editIndex++;
+      this.initialActivityData = this.activities[this.editIndex];
       this.forceUpdate();
       this.dialog = true;
     },
@@ -789,6 +801,26 @@ export default {
     resetValidation() {
       this.$refs.form.resetValidation();
     },
+    withoutPrize(arr) {
+      return arr.filter(item => Boolean(item['isPrize']) === false);
+    },
+    prizeActivity(action, activityInput) {
+      switch(action) {
+        case 'searching':
+          return this.activities.find(activity => activity['isPrize'] === true);
+        case 'creating':
+          if(activityInput) this.activities.unshift(activityInput);
+          break;
+        case 'editing':
+          this.activities.splice(0, 1, activityInput);
+          break;
+        case 'deleting':
+          this.activities.splice(0, 1);
+          break;
+        default:
+          break;
+      }
+    }
   },
 };
 </script>

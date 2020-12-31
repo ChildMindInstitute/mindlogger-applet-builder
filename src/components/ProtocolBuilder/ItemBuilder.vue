@@ -24,14 +24,7 @@
           auto-grow
           rows="1"
         />
-        <ImageUploader
-          class="mt-3 mb-4"
-          style="max-width: 300px"
-          :uploadFor="'activity-item'"
-          :itemImg="questionBuilder.imgURL"
-          @onAddImg="onAddImg"
-          @onRemoveImg="onRemoveImg"
-        />
+        <!-- Image Uplaoder Here -->
         <v-select
           class="mt-6"
           v-model="inputType"
@@ -129,7 +122,6 @@
 </template>
 
 <script>
-import ImageUploader from './ImageUploader.vue';
 import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
 import TextBuilder from "./ItemBuilders/TextBuilder.vue";
 import SliderBuilder from "./ItemBuilders/SliderBuilder.vue";
@@ -143,11 +135,9 @@ import AudioImageRecordBuilder from "./ItemBuilders/AudioImageRecordBuilder.vue"
 import GeolocationBuilder from "./ItemBuilders/GeolocationBuilder.vue";
 import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
 import Item from '../../models/Item';
-import ImageUpldr from '../../models/ImageUploader';
 
 export default {
   components: {
-    ImageUploader,
     RadioBuilder,
     TextBuilder,
     SliderBuilder,
@@ -179,8 +169,6 @@ export default {
     const model = new Item();
     model.updateReferenceObject(this);
 
-    const imgUploader = new ImageUpldr();
-
     const questionBuilder = { text: '', imgURL: '', imgFile: null };
 
     let isUploadingState = false;
@@ -189,7 +177,6 @@ export default {
     return {
       model,
       ...model.getItemBuilderData(this.initialItemData),
-      imgUploader,
       questionBuilder,
       isUploadingState,
       isError
@@ -262,8 +249,7 @@ export default {
         } else {
           this.isError = '';
           this.isUploadingState = true;
-          const response = await this.imgUploader.uploadImage(this.questionBuilder.imgFile);
-          this.question.image = response.location;
+          // this.question.image = response.location;
           this.questionBuilder.imgFile = null;
           this.isUploadingState = false;
         }

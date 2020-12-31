@@ -138,12 +138,7 @@
             <v-row>
               <v-col 
                 cols="auto">
-                <ImageUploader
-                  :uploadFor="'item-radio-option-pc'"
-                  :itemImg="nextOptionImage"
-                  @onAddImg="onAddImg"
-                  @onRemoveImg="onRemoveImg"
-                />
+                <!-- Image Uplaoder Here -->
               </v-col>
               <v-col 
                 cols="12"
@@ -212,11 +207,7 @@
                 cols="12"
                 sm="12"
               >
-                <ImageUploader
-                  :uploadFor="'item-radio-option-url'"
-                  :itemImg="nextOptionImage"
-                  @onAddImg="onAddImg"
-                />
+                <!-- Image Uplaoder Here -->
               </v-col>
             </v-row>
             <v-btn
@@ -234,13 +225,8 @@
 
 <script>
 import ClickOutside from 'vue-click-outside';
-import ImageUploader from '../ImageUploader.vue';
-import ImageUpldr from '../../../models/ImageUploader';
 
 export default {
-  components: {
-    ImageUploader
-  },
   props: {
     initialItemData: {
       type: Object,
@@ -263,7 +249,6 @@ export default {
     }
   },
   data: function () {
-    const imgUpldr = new ImageUpldr();
 
     let nextOptionImageFile = null;
     let nextOptionScore = 1;
@@ -298,8 +283,7 @@ export default {
       ],
       items: [],
       nextOptionScore,
-      hasScoreValue: this.initialItemData.hasScoreValue || false,
-      imgUpldr
+      hasScoreValue: this.initialItemData.hasScoreValue || false
     };
   },
   directives: {
@@ -318,8 +302,7 @@ export default {
         if(this.nextOptionImageFile) {
           this.$emit('error', '');
           this.$emit('uploading', true);
-          const response = await this.imgUpldr.uploadImage(this.nextOptionImageFile);
-          this.nextOptionImage = response.location;
+          // this.nextOptionImage = response.location;
           this.nextOptionImageFile = null;
           this.$emit('uploading', false);
         }

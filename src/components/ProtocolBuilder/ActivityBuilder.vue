@@ -566,7 +566,7 @@ export default {
       let itemsWithScoring = 0;
 
       for (let item of this.items) {
-        if (item.ui.inputType == 'radio' || item.ui.inputType == 'slider') {
+        if (item.ui.inputType == 'radio' || item.ui.inputType == 'prize' || item.ui.inputType == 'slider') {
           if (item.responseOptions.scoring) {
             itemsWithScoring++;
           }

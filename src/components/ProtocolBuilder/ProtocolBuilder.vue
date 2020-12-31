@@ -298,6 +298,7 @@ export default {
           ['reprolib:terms/allow']: isSkippable,
           ['reprolib:terms/addProperties']: addProperties,
           ['reprolib:terms/subScales']: subScales,
+          ['reprolib:terms/isPrize']: isPrize,
           ['_id']: id,
         } = activitiesObj;
 
@@ -330,6 +331,8 @@ export default {
             name && name[0] && name[0]['@value'],
           description:
             description && description[0] && description[0]['@value'],
+          isPrize:
+            isPrize && isPrize[0] && isPrize[0]['@value'],
           preamble:
             activityPreamble &&
             activityPreamble[0] &&
@@ -485,6 +488,36 @@ export default {
                   ),
               };
             }
+
+            if (itemType === 'prize') {
+              itemContent.options = {
+                isMultipleChoice: itemContent.multipleChoice || false,
+                hasScoreValue: itemContent.scoring || true,
+                nextOptionImage: '',
+                nextOptionName: '',
+                options:
+                  responseOptions[0] &&
+                  responseOptions[0]['schema:itemListElement'] &&
+                  responseOptions[0]['schema:itemListElement'].map(
+                    (itemListElement) => {
+                      const name = itemListElement["schema:name"];
+                      const value = itemListElement["schema:value"];
+                      const price = itemListElement["schema:price"];
+
+                      return {
+                        name:
+                          typeof name == "string" && name ||
+                          Array.isArray(name) && name[0] && name[0]['@value'].toString(),
+                        value:
+                          Array.isArray(value) && value[0] && value[0]['@value'],
+                        price:
+                          Array.isArray(price) && price[0] && price[0]['@value'],
+                      };
+                    }
+                  ),
+              };
+            }
+
             if (itemType === 'text') {
               itemContent.options = {
                 requiredValue:

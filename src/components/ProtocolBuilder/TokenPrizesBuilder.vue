@@ -12,7 +12,7 @@
         </thead>
         <tbody>
           <tr
-            v-for="(item, index) in prizesItems"
+            v-for="(item, index) in prizesOptions"
             :key="item.id"
             v-bind:class="{ editing: editState[index], 'prize-item': true }"
           >
@@ -83,6 +83,12 @@ export default {
     }
   },
   data() {
+    const activityModel = new Activity();
+    activityModel.updateReferenceObject(this);
+
+    const itemModel = new Item();
+    itemModel.updateReferenceObject(this);
+
     let initialActivityData = {
       items: [ 
         {
@@ -106,69 +112,128 @@ export default {
     const activityState = getPrizeActivity ? 'editing' : 'creating';
     initialActivityData = getPrizeActivity == undefined ? initialActivityData : getPrizeActivity;
 
-    const initialItemData = initialActivityData['items'][0];
-
-    const activityBuilder = new Activity();
-    activityBuilder.updateReferenceObject(this);
-
-    const itemBuilder = new Item();
-    itemBuilder.updateReferenceObject(this);
+    const initialItemsData = initialActivityData['items'];
+    const initialItemData = initialItemsData[0];
 
     return {
       activityState,
 
-      activityBuilder,
-      ...activityBuilder.getActivityBuilderData(initialActivityData),
+      initialActivityData,
+      initialItemsData,
+      initialItemData,
 
-      itemBuilder,
-      ...itemBuilder.getItemBuilderData(initialItemData),
+      activityModel,
+      ...activityModel.getActivityBuilderData(initialActivityData),
 
-      prizesItems: initialItemData['options']['options'],
-      discardPrizesItems: [...initialItemData['options']['options']],
+      itemModel,
+      ...itemModel.getItemBuilderData(initialItemData),
+
+      prizesOptions: [...initialItemData['options']['options']],
+      discardPrizesOptions: [...initialItemData['options']['options']],
+
       editState: [],
       isError: ''
     }
   },
   methods: {
     nextPrizeItemValue() {
-      const length = this.prizesItems.length;
+      const length = this.prizesOptions.length;
       if(length < 1) return 0
-      else return (this.prizesItems[length - 1]['value'] + 1)
+      else return (this.prizesOptions[length - 1]['value'] + 1)
     },
     addPrizeItem() {
       /** option { name: string, price: number } */
-      this.prizesItems.push({ value: this.nextPrizeItemValue(), name: '', price: null });
-      this.editState[this.prizesItems.length - 1] = true;
+      this.prizesOptions.push({ value: this.nextPrizeItemValue(), name: '', price: null });
+      this.editState[this.prizesOptions.length - 1] = true;
     },
     editPrizesState(index) {
       this.editState[index] = this.editState[index] ? false : true;
       this.editState = [...this.editState];
     },
     deletePrizeItem(index) {
-      this.prizesItems.splice(index, 1);
+      this.prizesOptions.splice(index, 1);
       this.editState.splice(index, 1);
     },
     validatePrizesItems() {
       let err = '';
-      this.prizesItems.forEach(item => {
+      this.prizesOptions.forEach(item => {
         if(item.price < 1 || !item.name) err = 'Please fill options with correct info';
       });
       return err;
     },
+    generateConfirmationItems(activityData) {
+
+      this.initialItemsData.splice(1, this.initialItemsData.length - 1);
+      activityData.conditionalItems = [];
+
+      activityData.items[0].options.options.forEach(item => {
+
+        const confirmationItem = {
+          name: `Confirmation ${item.value}`,
+          question: `Do you want ${item.name} for ${item.price} tokens?`,
+          options: {
+            hasScoreValue: false,
+            isTokenValue: false,
+            isMultipleChoice: false,
+            isSkippableItem: false,
+            nextOptionName: "",
+            nextOptionValue: "",
+            nextOptionImage: "",
+            options: [
+                { name: "Yes", value: 0, score: 0 }
+            ]
+          }
+        };
+
+        const confirmItemModel = new Item();
+        confirmItemModel.updateReferenceObject(confirmationItem);
+        confirmItemModel.getItemBuilderData(confirmationItem);
+        const confrimItemData = confirmItemModel.getItemData();
+        confrimItemData.ui.inputType = 'radio';
+        
+        activityData.items.push(confrimItemData);
+        this.initialItemsData.push(confrimItemData);
+
+        const condition = {
+          answerValue: item,
+          ifValue: activityData.items[0],
+          showValue: confrimItemData.name,
+          stateValue: {
+            name: 'IS EQUAL TO',
+            val: '=='
+          }
+        };
+
+        activityData.conditionalItems.push(condition);
+
+      });
+      
+    },
     onClickSavePrizes() {
       this.isError = this.validatePrizesItems();
       if(!this.isError) {
-        this.discardPrizesItems = [...this.prizesItems];
-        if(this.prizesItems.length < 1) this.activityState = 'deleting';
-        const activityData = this.activityBuilder.getActivityData();
+        this.discardPrizesOptions = [...this.prizesOptions];
+        if(this.prizesOptions.length < 1) this.activityState = 'deleting';
+
+        const activityData = this.activityModel.getActivityData();
         activityData['isPrize'] = true;
+
+        const itemData = this.itemModel.getItemData();
+        itemData['options']['options'] = [...this.prizesOptions];
+        itemData['ui']['inputType'] = 'radio';
+        activityData['items'] = [];
+        activityData['items'][0] = itemData;
+
+        this.generateConfirmationItems(activityData);
+
         this.prizeActivity(this.activityState, activityData);
+
         this.$emit('closeTokenPrizes');
         this.editState = [];
       }
     },
     onClickDiscardPrizes() {
-      this.prizesItems = [...this.discardPrizesItems];
+      this.prizesOptions = [...this.discardPrizesOptions];
       this.$emit('closeTokenPrizes');
       this.editState = [];
     }

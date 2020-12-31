@@ -612,6 +612,7 @@ export default {
         this.activities[this.editIndex] = activity;
       } else {
         this.activities.push(activity);
+        console.log(this.activities);
       }
     },
     onSubmitEditor(markdownData) {
@@ -643,9 +644,10 @@ export default {
 
       this.activities.push(activityModel.getActivityData());
     },
-    editActivity(index) {
+    editActivity(index) { 
       this.editIndex = index;
-      this.initialActivityData = this.activities[index];
+      if(this.prizeActivity('searching')) this.editIndex++;
+      this.initialActivityData = this.activities[this.editIndex];
       this.forceUpdate();
       this.dialog = true;
     },
@@ -798,13 +800,13 @@ export default {
         case 'searching':
           return this.activities.find(activity => activity['isPrize'] === true);
         case 'creating':
-          if(activityInput) this.activities.push(activityInput);
+          if(activityInput) this.activities.unshift(activityInput);
           break;
         case 'editing':
-          this.activities.splice(this.activities.findIndex(activity => activity['isPrize'] === true), 1, activityInput);
+          this.activities.splice(0, 1, activityInput);
           break;
         case 'deleting':
-          this.activities.splice(this.activities.findIndex(activity => activity['isPrize'] === true), 1);
+          this.activities.splice(0, 1);
           break;
         default:
           break;

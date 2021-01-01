@@ -1,12 +1,12 @@
 import S3 from 'aws-s3';
 
 const S3Config = {
-  bucketName: 'mindlogger-applet-contents',
-  dirName: 'images',
-  region: 'us-east-1',
-  accessKeyId: 'AKIA324KKOMBKK7WKR4K',
-  secretAccessKey: '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',
-  s3Url: 'https://mindlogger-applet-contents.s3.amazonaws.com'
+  bucketName: process.env.VUE_APP_BUCKET_NAME,
+  dirName: process.env.VUE_APP_DIR_NAME,
+  region: process.env.VUE_APP_REGION,
+  accessKeyId: process.env.VUE_APP_ACCESS_KEY_ID,
+  secretAccessKey: process.env.VUE_APP_SECRET_ACCES_KEY,
+  s3Url: process.env.VUE_APP_S3_URL
 };
 
 export default class ImageUploader {

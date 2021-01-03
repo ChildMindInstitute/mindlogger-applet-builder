@@ -19,11 +19,9 @@
           />
           <v-text-field
             v-model="description"
-            :rules="textRules"
             counter="230"
             maxlength="230"
             label="Activity Description"
-            required
           />
           <v-text-field
             v-model="preamble"
@@ -560,9 +558,6 @@ export default {
     isActivityValid() {
       if (!this.name) {
         this.error = 'Activity Name is required';
-        return false;
-      } else if (!this.description) {
-        this.error = 'Activity Description is required';
         return false;
       } else if (this.items.length == 0) {
         this.error = 'Activities must contain at least one item';

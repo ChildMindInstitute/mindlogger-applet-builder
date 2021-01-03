@@ -243,7 +243,7 @@ export default {
       model,
       ...model.getItemBuilderData(this.initialItemData),
       hasScoringItem: this.items.some((item) => item.options.hasScoreValue),
-      valid: (builderData.name.length > 0),
+      valid: (this.name && this.name.length > 0),
       imgUploader,
       questionBuilder,
       isUploadingState,

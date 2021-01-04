@@ -138,9 +138,9 @@
 
     <v-dialog v-model="tokenPrizes" persistent width="800">
       <PrizeActivityBuilder
-        :initial-activity-data="withPrize() ? activities[0] : {}"
+        :initial-activity-data="prizeActivity || {}"
         @closeModal="onClosePrizeActivityModal"
-        @deleteOptions="onDeletePrizeActivity"
+        @deleteOptions="onClosePrizeActivityModal"
       />
     </v-dialog>
 
@@ -230,6 +230,7 @@ export default {
     model.updateReferenceObject(this);
 
     return {
+      prizeActivity: null,
       tokenPrizes: false,
       ...getInitialData(model)
     }
@@ -259,7 +260,8 @@ export default {
         return;
       }
     }
-    this.itemTemplates = this.templates
+    this.itemTemplates = this.templates;
+    this.getPrizeActivity();
     this.$emit("setLoading", false);
   },
   methods: {
@@ -667,24 +669,8 @@ export default {
     },
 
     onClosePrizeActivityModal(response) {
-      if(!response) {
-        this.tokenPrizes = false;
-        return;
-      } 
-
-      if(this.withPrize()) {
-        this.activities.splice(0, 1, response);
-      } else {
-        this.activities.unshift(response);
-      }
-
+      this.prizeActivity = response;
       this.tokenPrizes = false;
-    },
-
-    onDeletePrizeActivity() {
-      this.tokenPrizes = false;
-      if(this.withPrize) this.activities.splice(0, 1);
-      console.log(this.activities);
     },
 
     onNewActivity(activity) {
@@ -725,7 +711,6 @@ export default {
     },
     editActivity(index) { 
       this.editIndex = index;
-      if(this.withPrize()) this.editIndex++;
       this.initialActivityData = this.activities[this.editIndex];
       this.forceUpdate();
       this.dialog = true;
@@ -792,6 +777,9 @@ export default {
       });
     },
     onClickExport() {
+      if(this.prizeActivity)
+        this.activities.push(this.prizeActivity);
+
       this.model.getProtocolData().then( data => {
         if (!this.isEditing) {
           this.$emit("uploadProtocol", data);
@@ -813,6 +801,8 @@ export default {
           }
         }
       }).catch(e => {
+        if(this.prizeActivity)
+          this.activities.pop();
         console.log(e);
       });
     },
@@ -872,9 +862,15 @@ export default {
       this.$refs.form.resetValidation();
     },
 
-
-    withPrize() {
-      return this.activities.find(activity => activity['isPrize'] === true);
+    getPrizeActivity() {
+      if(this.activities && this.activities.length) {
+        for(let i = 0; i < this.activities.length; i++) {
+          if(this.activities[i].isPrize === true) {
+            this.prizeActivity = this.activities.splice(i, 1)[0];
+            i--;
+          }
+        }
+      }
     },
 
     withoutPrize(arr) {

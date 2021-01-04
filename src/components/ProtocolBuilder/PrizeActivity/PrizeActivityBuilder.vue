@@ -4,7 +4,7 @@
     :updateItem="onUpdateItem"
     @updateItem="onUpdateItem"
     @discardUpdateItem="onDiscardUpdateItem"
-    @deleteOptions="$emit('deleteOptions')"
+    @deleteOptions="$emit('deleteOptions', null)"
   />
 </template>
 

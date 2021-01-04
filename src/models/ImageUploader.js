@@ -41,11 +41,11 @@ export default class ImageUploader {
         if(imgHeight < 566 || imgHeight > 3024)
           resolve('Height of image should be between 566px and 3024px');
         // portrait ratio which should be 4:5 // (width * 1.25)
-        if(imgHeight > imgWidth && (Math.ceil(imgWidth * 1.25) !== imgHeight))
-          resolve('For portrait image ratio should be 4:5');
+        // if(imgHeight > imgWidth && (Math.ceil(imgWidth * 1.25) !== imgHeight))
+          // resolve('For portrait image ratio should be 4:5');
         // landscape ratio which should be 1.91:1
-        if(imgWidth > imgHeight && (Math.ceil(imgHeight * 1.91) !== imgWidth))
-          resolve('For landscape image ratio should be 1.91:1');
+        // if(imgWidth > imgHeight && (Math.ceil(imgHeight * 1.91) !== imgWidth))
+          // resolve('For landscape image ratio should be 1.91:1');
 
         resolve('');
       };

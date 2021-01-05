@@ -126,6 +126,8 @@ export default {
       if(file && !this.errorMsg) {
         this.$emit('onAddImg', file);
         this.notify('success', 'Image is ' + (this.itemImg ? 'changed' : 'added'));
+      } else {
+        event.target.value = '';
       }
     },
     async onChangeURL(url) {

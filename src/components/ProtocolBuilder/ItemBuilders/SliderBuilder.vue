@@ -209,7 +209,7 @@ export default {
       ],
       hasScoreValue: this.initialItemData.hasScoreValue || false,
       scoreDialog: false,
-      scores: this.initialItemData.scores || null,
+      scores: this.initialItemData.scores || false,
       imgUpldr,
       imgFirstName: this.initialItemData.minValueImg || '',
       imgLastName: this.initialItemData.maxValueImg || ''
@@ -263,7 +263,7 @@ export default {
         'maxValue': this.maxValue || "Max",
         'maxValueImg': this.imgLastName,
         'hasScoreValue': this.hasScoreValue,
-        'scores': this.hasScoreValue ? this.scores : null
+        'scores': this.hasScoreValue ? this.scores : false
       };
       this.$emit('updateOptions', responseOptions);
     },

@@ -57,7 +57,7 @@
         </v-col>
       </v-row>
 
-      <v-form v-model="valid">
+      <v-form v-model="valid" @submit.prevent="onSaveSubScale" id="sub-scale-form">
         <v-text-field
           v-model="currentSubScale.variableName"
           label="Sub-Scale Name"
@@ -99,7 +99,14 @@
         @click="onDiscardSubScale"
       >{{ "Discard Changes" }}</v-btn>
       <v-spacer />
-      <v-btn color="primary" @click="onSaveSubScale" :disabled="!valid || selectedItemCount < 2">Save SubScale</v-btn>
+      <v-btn
+        color="primary"
+        @click="onSaveSubScale"
+        :disabled="!valid || selectedItemCount < 2"
+        form="sub-scale-form"
+      >
+        Save SubScale
+      </v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -189,6 +196,10 @@ export default {
   },
   methods: {
     onSaveSubScale() {
+      if (!this.valid || this.selectedItemCount < 2) {
+        return ;
+      }
+
       let subScale = {
         variableName: this.currentSubScale.variableName,
         jsExpression: this.itemsFormatted.filter(

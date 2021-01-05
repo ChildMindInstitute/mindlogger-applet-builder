@@ -347,6 +347,31 @@ export default class Item {
       return updates;
     }
 
+    const allowListUpdate = (field) => {
+      const oldAllowList = _.get(oldValue, field, []);
+      const newAllowList = _.get(newValue, field, []);
+
+      const updates = [];
+
+      oldAllowList.forEach(oldAllow => {
+        if (newAllowList.indexOf(oldAllow) < 0) {
+          updates.push(
+            `${oldAllow == 'dontKnow' ? 'Skippable Option' : oldAllow} was disabled`
+          )
+        }
+      })
+
+      newAllowList.forEach(newAllow => {
+        if (oldAllowList.indexOf(newAllow) < 0) {
+          updates.push(
+            `${oldAllow == 'dontKnow' ? 'Skippable Option' : oldAllow} was enabled`
+          )
+        }
+      })
+
+      return updates;
+    }
+
     const optionUpdate = name => field => 
           `${name} was ${_.get(newValue, field) ? 'enabled' : 'disabled'}`;
     const valueUpdate = name => field =>
@@ -378,7 +403,7 @@ export default class Item {
         inserted: valueInsert('Input type'),
       },
       'ui.allow': {
-        updated: optionUpdate('Skippable option'),
+        updated: allowListUpdate,
       },    
       'options.isMultipleChoice': {
         updated: optionUpdate('Multiple choice option'),

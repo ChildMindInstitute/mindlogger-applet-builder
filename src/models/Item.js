@@ -363,15 +363,15 @@ export default class Item {
             `${oldAllow == 'dontKnow' ? 'Skippable Option' : oldAllow} was disabled`
           )
         }
-      })
+      });
 
       newAllowList.forEach(newAllow => {
         if (oldAllowList.indexOf(newAllow) < 0) {
           updates.push(
-            `${oldAllow == 'dontKnow' ? 'Skippable Option' : oldAllow} was enabled`
+            `${newAllow == 'dontKnow' ? 'Skippable Option' : newAllow} was enabled`
           )
         }
-      })
+      });
 
       return updates;
     }

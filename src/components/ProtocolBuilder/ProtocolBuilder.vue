@@ -35,7 +35,7 @@
           <v-col>
             <v-subheader>Activities</v-subheader>
             <v-list-item
-              v-for="(activity, index) in activities"
+              v-for="(activity, index) in withoutPrize(activities)"
               :key="activity.id"
             >
               <v-list-item-content>
@@ -107,6 +107,7 @@
         :key="componentKey"
         :templates="itemTemplates"
         :initial-activity-data="initialActivityData"
+        @openPrize="tokenPrizes = true"
         @removeTemplate="onRemoveTemplate"
         @updateTemplates="onUpdateTemplates"
         @closeModal="onCloseActivityModal"
@@ -134,6 +135,15 @@
       @submit="onSubmitEditor"
     />
 
+
+    <v-dialog v-model="tokenPrizes" persistent width="800">
+      <PrizeActivityBuilder
+        :initial-activity-data="prizeActivity || {}"
+        @closeModal="onClosePrizeActivityModal"
+        @deleteOptions="onClosePrizeActivityModal"
+      />
+    </v-dialog>
+
   </v-container>
 </template>
 
@@ -149,6 +159,8 @@ import ActivityBuilder from './ActivityBuilder.vue';
 import { saveAs } from 'file-saver';
 import axios from 'axios';
 import _ from 'lodash';
+
+import PrizeActivityBuilder from './PrizeActivity/PrizeActivityBuilder.vue';
 
 const getInitialData = (model) => {
   return {
@@ -184,6 +196,7 @@ export default {
     ActivityBuilder,
     ChangeHistoryComponent,
     MarkdownEditor,
+    PrizeActivityBuilder
   },
   props: {
     exportButton: {
@@ -216,7 +229,11 @@ export default {
     const model = new Protocol();
     model.updateReferenceObject(this);
 
-    return getInitialData(model);
+    return {
+      prizeActivity: null,
+      tokenPrizes: false,
+      ...getInitialData(model)
+    }
   },
   async beforeMount() {
     if (this.initialData) {
@@ -243,7 +260,8 @@ export default {
         return;
       }
     }
-    this.itemTemplates = this.templates
+    this.itemTemplates = this.templates;
+    this.getPrizeActivity();
     this.$emit("setLoading", false);
   },
   methods: {
@@ -284,6 +302,7 @@ export default {
           ['reprolib:terms/subScales']: subScales,
           ['reprolib:terms/compute']: compute,
           ['reprolib:terms/messages']: messages,
+          ['reprolib:terms/isPrize']: isPrize,
           ['_id']: id,
         } = activitiesObj;
 
@@ -316,6 +335,8 @@ export default {
             name && name[0] && name[0]['@value'],
           description:
             description && description[0] && description[0]['@value'],
+          isPrize:
+            isPrize && isPrize[0] && isPrize[0]['@value'],
           preamble:
             activityPreamble &&
             activityPreamble[0] &&
@@ -491,6 +512,36 @@ export default {
                   ),
               };
             }
+
+            if (itemType === 'prize') {
+              itemContent.options = {
+                isMultipleChoice: itemContent.multipleChoice || false,
+                hasScoreValue: itemContent.scoring || true,
+                nextOptionImage: '',
+                nextOptionName: '',
+                options:
+                  responseOptions[0] &&
+                  responseOptions[0]['schema:itemListElement'] &&
+                  responseOptions[0]['schema:itemListElement'].map(
+                    (itemListElement) => {
+                      const name = itemListElement["schema:name"];
+                      const value = itemListElement["schema:value"];
+                      const price = itemListElement["schema:price"];
+
+                      return {
+                        name:
+                          typeof name == "string" && name ||
+                          Array.isArray(name) && name[0] && name[0]['@value'].toString(),
+                        value:
+                          Array.isArray(value) && value[0] && value[0]['@value'],
+                        price:
+                          Array.isArray(price) && price[0] && price[0]['@value'],
+                      };
+                    }
+                  ),
+              };
+            }
+
             if (itemType === 'text') {
               itemContent.options = {
                 requiredValue:
@@ -638,6 +689,12 @@ export default {
         this.onNewActivity(response);
       }
     },
+
+    onClosePrizeActivityModal(response) {
+      this.prizeActivity = response;
+      this.tokenPrizes = false;
+    },
+
     onNewActivity(activity) {
       if (this.editIndex >= 0 && this.editIndex < this.activities.length) {
         this.activities[this.editIndex] = activity;
@@ -742,9 +799,12 @@ export default {
       });
     },
     onClickExport() {
+      if(this.prizeActivity)
+        this.activities.push(this.prizeActivity);
+
       this.model.getProtocolData().then( data => {
         if (!this.isEditing) {
-          this.$emit("uploadProtocol", data)
+          this.$emit("uploadProtocol", data);
         } else {
           let { upgrade, updates, removed } = Protocol.getChangeInfo(this.original, data, true);
 
@@ -763,6 +823,8 @@ export default {
           }
         }
       }).catch(e => {
+        if(this.prizeActivity)
+          this.activities.pop();
         console.log(e);
       });
     },
@@ -820,7 +882,23 @@ export default {
     },
     resetValidation() {
       this.$refs.form.resetValidation();
+    },
+
+    getPrizeActivity() {
+      if(this.activities && this.activities.length) {
+        for(let i = 0; i < this.activities.length; i++) {
+          if(this.activities[i].isPrize === true) {
+            this.prizeActivity = this.activities.splice(i, 1)[0];
+            i--;
+          }
+        }
+      }
+    },
+
+    withoutPrize(arr) {
+      return arr.filter(activity => Boolean(activity['isPrize']) === false);
     }
+
   },
 };
 </script>

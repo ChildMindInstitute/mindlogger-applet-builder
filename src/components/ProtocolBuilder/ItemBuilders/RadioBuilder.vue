@@ -38,6 +38,19 @@
             v-model="isMultipleChoice"
             label="Multiple Choice"
             :disabled="!isItemEditable"
+            @change="updateAllow"
+          />
+        </v-col>
+        <v-col 
+          class="d-flex align-center"
+          cols="12"
+          md="3"
+          sm="6"
+        >
+          <v-checkbox
+            v-model="isMultipleChoice"
+            label="Multiple Choice"
+            :disabled="!isItemEditable"
             @change="update"
           />      
         </v-col>
@@ -49,6 +62,7 @@
           <v-btn
             outlined
             color="primary"
+            @click="$emit('openPrize')"
           >
             Create Token Prizes
           </v-btn>

@@ -238,7 +238,7 @@ export default {
         let item = this.items[i];
 
         if (
-          (item.ui.inputType == 'radio' || item.ui.inputType == 'slider') && 
+          (item.ui.inputType == 'radio' || item.ui.inputType == 'prize' || item.ui.inputType == 'slider') && 
           item.responseOptions.scoring
         ) {
           const relatedSubScales = subScales.filter(subScale => subScale.items.includes(item.name));

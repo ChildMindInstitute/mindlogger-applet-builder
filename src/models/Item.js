@@ -98,6 +98,9 @@ export default class Item {
                 "schema:value": option.value,
             };
 
+            if(this.ref.inputType === "prize")
+              choiceSchema["schema:price"] = option.price;
+
             if (this.ref.options.hasScoreValue) {
               choiceSchema["schema:score"] = (option.score || 0);
             }
@@ -112,7 +115,7 @@ export default class Item {
   }
 
   getResponseOptions() {
-    if (this.ref.inputType === "radio") {
+    if (this.ref.inputType === "radio" || this.ref.inputType === "prize") {
       const choices = this.getRadioChoices();
       return {
         "valueType": (this.ref.valueType.includes("token") || this.ref.options.isTokenValue) ? "xsd:token" : "xsd:anyURI",
@@ -213,8 +216,8 @@ export default class Item {
     if (this.ref.inputType === 'cumulativeScore') {
       schema['cumulativeScores'] = cumulativeScores;
     }
-    if (this.ref.inputType === 'radio') {
-      if (this.ref.options.isMultipleChoice) {
+    if (this.ref.inputType === 'radio' || this.ref.inputType === 'prize') {
+        if (this.ref.options.isMultipleChoice) {
         schema["ui"] = {
           "inputType": this.ref.inputType
         };
@@ -264,6 +267,7 @@ export default class Item {
 
     if (
       (this.ref.inputType === "radio" ||
+        this.ref.inputType === "prize" ||
         this.ref.inputType === "audioRecord" ||
         this.ref.inputType === "audioImageRecord" ||
         this.ref.inputType === "geolocation") &&

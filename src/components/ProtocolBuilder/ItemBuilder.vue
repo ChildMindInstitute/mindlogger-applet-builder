@@ -73,6 +73,7 @@
           :initial-item-data="options"
           :is-item-editable="isItemEditable"
           :item-templates="itemTemplates"
+          @openPrize="$emit('openPrize')"
           @removeTemplate="onRemoveTemplate"
           @updateTemplates="onUpdateTemplates"
           @updateOptions="updateOptions"

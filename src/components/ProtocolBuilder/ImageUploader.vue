@@ -23,6 +23,7 @@
               class="file-input" 
               type="file" 
               accept="image/jpeg, image/png, image/bmp" 
+              ref="imageInput"
               @change="onChangeFile"
             >
             <v-btn>Your computer</v-btn>
@@ -126,9 +127,8 @@ export default {
       if(file && !this.errorMsg) {
         this.$emit('onAddImg', file);
         this.notify('success', 'Image is ' + (this.itemImg ? 'changed' : 'added'));
-      } else {
-        event.target.value = '';
       }
+      event.target.value = '';
     },
     async onChangeURL(url) {
       this.notify('error', await this.imgUploader.isImageValid(url));
@@ -140,6 +140,8 @@ export default {
       } 
     },
     onClickToRemoveImage() {
+      const inputRef = this.$refs['imageInput'];
+      if(inputRef) inputRef.value = '';
       this.$emit('onRemoveImg');
       this.notify('success', 'Image is removed');
     },
@@ -147,7 +149,7 @@ export default {
       let delay = 4000;
       if(state === 'success') {
         this.successMsg = text;
-        delay = 1000;
+        delay = 2000;
       } else if(state === 'error') {
         this.errorMsg = text;
       }

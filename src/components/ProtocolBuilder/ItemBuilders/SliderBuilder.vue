@@ -290,6 +290,7 @@ export default {
     onRemoveImg(option) {
       if(option === 'first') this.imgFirstName = '';
       else if(option === 'last') this.imgLastName = '';
+      this.update();
     }
 
   }

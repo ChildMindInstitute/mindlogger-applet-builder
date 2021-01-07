@@ -46,13 +46,6 @@
         @click="onClickToRemoveImage">mdi-delete-outline</v-icon>
     </div>
 
-    <v-text-field
-      v-if="typeOfStructure === 2"
-      v-model="newUrlValue"
-      label="Option Image"
-      @change="onChangeURL"
-    />
-
     <v-dialog v-model="isUrlOptionActive" persistent width="800">
       <v-card>
         <v-card-title class="headline grey lighten-2" primary-title>
@@ -69,7 +62,7 @@
           </v-btn>
           <v-spacer />
           <v-btn color="primary" @click="onChangeURL(newUrlValue)">
-            Upload
+            Add
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -96,8 +89,8 @@ export default {
       default: 'error'
     },
     itemImg: {
-      type: String,
-      default: ''
+      type: [String, File],
+      default: null
     }
   },
   data() {

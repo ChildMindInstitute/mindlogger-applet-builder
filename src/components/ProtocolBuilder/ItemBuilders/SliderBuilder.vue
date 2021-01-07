@@ -284,7 +284,7 @@ export default {
         this.update();
       } catch(e) {
         this.$emit('uploading', false);
-        this.$emit('error', 'Something went wrong with uploading image for score option');
+        this.$emit('error', 'Something went wrong with uploading image for "Score Option". Please try to upload image again...');
       }
     },
     onRemoveImg(option) {

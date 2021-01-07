@@ -292,6 +292,7 @@ export default {
       this.responseOptions = this.model.getResponseOptions();
     },
     onAddImg(data) {
+      this.isError = '';
       if(typeof data !== 'string') {
         this.questionBuilder.imgFile = data;
         this.questionBuilder.imgURL = data.name;
@@ -300,6 +301,7 @@ export default {
       }
     },
     onRemoveImg() {
+      this.isError = '';
       this.questionBuilder.imgFile = null;
       this.questionBuilder.imgURL = '';
     },
@@ -327,7 +329,9 @@ export default {
 
       } catch(e) {
         this.isUploadingState = false;
-        this.isError = 'Something went wrong with uploading Header Image for Item. Please try another image or remove current!!!';
+        this.questionBuilder.imgURL = this.question.image;
+        this.questionBuilder.imgFile = null;
+        this.isError = 'Something went wrong with uploading "Header" image. Please try to upload image again...or save "Item" without image changes.';
       }
     },
     onDiscardItem() {

@@ -50,7 +50,7 @@ export default class ImageUploader {
         resolve('');
       };
 
-      img.onerror = () => resolve('Please check if you use correct url');
+      img.onerror = () => resolve('Please check if you use correct image url');
     });
   }
 

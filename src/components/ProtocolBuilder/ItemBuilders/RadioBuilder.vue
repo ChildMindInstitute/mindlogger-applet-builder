@@ -220,7 +220,7 @@
               </v-col>
             </v-row>
 
-            <v-row>
+            <v-row v-if="!nextOptionImage">
               <v-col 
                 cols="12"
                 sm="12"
@@ -419,7 +419,7 @@ export default {
         this.nextOptionImageFile = data;
         this.nextOptionImage = data.name;
       } else {
-        this.nextOptionImage = data;
+        setTimeout(() => { this.nextOptionImage = data; }, 2000);
       }
     },
     onRemoveImg() {

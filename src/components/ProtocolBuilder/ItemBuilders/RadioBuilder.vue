@@ -211,10 +211,24 @@
                 cols="12"
                 sm="12"
               >
-                <v-text-field
-                  v-model="nextOptionImage"
-                  label="Option Image URL"
-                />
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <div v-on="on">
+                      <v-text-field
+                        v-model="nextOptionImage"
+                        label="Option Image URL"
+                      />
+                    </div>
+                  </template>
+                  <span>
+                    <p>Image Requirements</p>
+                    <ul>
+                      <li>Size: less than 8MB</li>
+                      <li>Width: between 320px and 4032px</li>
+                      <li>Height: between 566px and 3024px</li>
+                    </ul>
+                  </span>
+                </v-tooltip>
               </v-col>
             </v-row>
             <v-btn

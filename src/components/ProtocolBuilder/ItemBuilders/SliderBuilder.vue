@@ -276,15 +276,17 @@ export default {
     async onUploadImg(option, data) {
       try {
         this.$emit('error', '');
-        this.$emit('uploading', true);
+        setTimeout(() => { this.$emit('uploading', true); }, 2000);
         const response = await this.imgUpldr.uploadImage(data);
         if(option === 'first') this.imgFirstName = response.location;
         else if(option === 'last') this.imgLastName = response.location;
-        this.$emit('uploading', false);
+        setTimeout(() => { this.$emit('uploading', false); }, 2100);
         this.update();
       } catch(e) {
-        this.$emit('uploading', false);
-        this.$emit('error', 'Something went wrong with uploading image for "Score Option". Please try to upload image again...');
+        setTimeout(() => {
+          this.$emit('uploading', false);
+          this.$emit('error', 'Something went wrong with uploading image for "Score Option". Please try to upload image again...');
+        }, 2000);
       }
     },
     onRemoveImg(option) {

@@ -9,43 +9,59 @@
       <p>use :uploadFor="'type'" value</p>
     </v-alert>
 
-    <v-expansion-panels v-if="typeOfStructure === 0">
-      <v-expansion-panel>
-        <v-expansion-panel-header disable-icon-rotate>
-          {{ itemImg ? 'Change' : 'Add' }} Header Image
-          <template v-slot:actions>
-            <v-icon>mdi-cloud-upload</v-icon>
-          </template>
-        </v-expansion-panel-header>
-        <v-expansion-panel-content>
-          <div class="upload-from-pc-wrapper">
+    <v-tooltip top>
+      <template v-slot:activator="{ on }">
+        <div v-on="on">
+
+          <v-expansion-panels v-if="typeOfStructure === 0">
+            <v-expansion-panel>
+              <v-expansion-panel-header disable-icon-rotate>
+                {{ itemImg ? 'Change' : 'Add' }} Header Image
+                <template v-slot:actions>
+                  <v-icon>mdi-cloud-upload</v-icon>
+                </template>
+              </v-expansion-panel-header>
+              <v-expansion-panel-content>
+                <div class="upload-from-pc-wrapper">
+                  <input 
+                    class="file-input" 
+                    type="file" 
+                    accept="image/jpeg, image/png, image/bmp" 
+                    @change="onChangeFile"
+                  >
+                  <v-btn>Your computer</v-btn>
+                </div>
+                <v-btn class="mt-4" @click="isUrlOptionActive = true">From URL</v-btn>
+                <v-btn v-if="itemImg" class="mt-4" color="error" @click="onClickToRemoveImage">Remove image</v-btn>
+              </v-expansion-panel-content>
+            </v-expansion-panel>
+          </v-expansion-panels>
+
+          <div class="upload-from-pc-wrapper" v-if="typeOfStructure === 1">
             <input 
+              v-if="!itemImg"
               class="file-input" 
               type="file" 
               accept="image/jpeg, image/png, image/bmp" 
               ref="imageInput"
               @change="onChangeFile"
             >
-            <v-btn>Your computer</v-btn>
+            <v-icon v-if="!itemImg" style="font-size: 55px;">mdi-image-search</v-icon>
+            <v-icon v-if="itemImg" style="font-size: 55px;"
+              @click="onClickToRemoveImage">mdi-delete-outline</v-icon>
           </div>
-          <v-btn class="mt-4" @click="isUrlOptionActive = true">From URL</v-btn>
-          <v-btn v-if="itemImg" class="mt-4" color="error" @click="onClickToRemoveImage">Remove image</v-btn>
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-    </v-expansion-panels>
-
-    <div class="upload-from-pc-wrapper" v-if="typeOfStructure === 1">
-      <input 
-        v-if="!itemImg"
-        class="file-input" 
-        type="file" 
-        accept="image/jpeg, image/png, image/bmp" 
-        @change="onChangeFile"
-      >
-      <v-icon v-if="!itemImg" style="font-size: 55px;">mdi-image-search</v-icon>
-      <v-icon v-if="itemImg" style="font-size: 55px;"
-        @click="onClickToRemoveImage">mdi-delete-outline</v-icon>
-    </div>
+      
+        </div>
+      </template>
+      <span>
+        <p>Image Requirements</p>
+        <ul>
+          <li>Size: less than 8MB</li>
+          <li>Width: between 320px and 4032px</li>
+          <li>Height: between 566px and 3024px</li>
+        </ul>
+      </span>
+    </v-tooltip>
 
     <v-dialog v-model="isUrlOptionActive" persistent width="800">
       <v-card>

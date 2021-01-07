@@ -224,8 +224,8 @@
                     <p>Image Requirements</p>
                     <ul>
                       <li>Size: less than 8MB</li>
-                      <li>Width: between 320px and 4032px</li>
-                      <li>Height: between 566px and 3024px</li>
+                      <li>Width: between 100px and 1920px</li>
+                      <li>Height: between 100px and 1920px</li>
                     </ul>
                   </span>
                 </v-tooltip>

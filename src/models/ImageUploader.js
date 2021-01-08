@@ -35,11 +35,11 @@ export default class ImageUploader {
         if(imgSize > 8192) 
           resolve('Size of image should be less than 8MB');
         // Minimum resolution: 320x566 (lower resolutions will be not be posted)
-        if(imgWidth < 320 || imgWidth > 4032) 
-          resolve('Width of image should be between 320px and 4032px');
+        if(imgWidth <= 100 || imgWidth > 1920)
+          resolve('Width of image should be between 100px and 1920px');
         // Maximum resolution: 4032x3024 (higher resolutions will not be posted)
-        if(imgHeight < 566 || imgHeight > 3024)
-          resolve('Height of image should be between 566px and 3024px');
+        if(imgHeight <= 100 || imgHeight > 1920)
+          resolve('Height of image should be between 100px and 1920px');
         // portrait ratio which should be 4:5 // (width * 1.25)
         // if(imgHeight > imgWidth && (Math.ceil(imgWidth * 1.25) !== imgHeight))
           // resolve('For portrait image ratio should be 4:5');
@@ -50,7 +50,7 @@ export default class ImageUploader {
         resolve('');
       };
 
-      img.onerror = () => resolve('Please check if you use correct url');
+      img.onerror = () => resolve('Please check if you use correct image url');
     });
   }
 

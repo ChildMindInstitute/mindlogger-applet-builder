@@ -153,7 +153,7 @@
                 cols="auto">
                 <ImageUploader
                   :uploadFor="'item-radio-option-pc'"
-                  :itemImg="nextOptionImage"
+                  :itemImg="nextOptionImageFile"
                   @onAddImg="onAddImg"
                   @onRemoveImg="onRemoveImg"
                 />
@@ -220,16 +220,29 @@
               </v-col>
             </v-row>
 
-            <v-row v-if="!nextOptionImage">
+            <v-row v-if="!nextOptionImageFile">
               <v-col 
                 cols="12"
                 sm="12"
               >
-                <ImageUploader
-                  :uploadFor="'item-radio-option-url'"
-                  :itemImg="nextOptionImage"
-                  @onAddImg="onAddImg"
-                />
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <div v-on="on">
+                      <v-text-field
+                        v-model="nextOptionImage"
+                        label="Option Image URL"
+                      />
+                    </div>
+                  </template>
+                  <span>
+                    <p>Image Requirements</p>
+                    <ul>
+                      <li>Size: less than 8MB</li>
+                      <li>Width: between 100px and 1920px</li>
+                      <li>Height: between 100px and 1920px</li>
+                    </ul>
+                  </span>
+                </v-tooltip>
               </v-col>
             </v-row>
             <v-btn
@@ -312,6 +325,7 @@ export default {
       items: [],
       nextOptionScore,
       hasScoreValue: this.initialItemData.hasScoreValue || false,
+      nextOptionImageFile,
       imgUpldr
     };
   },
@@ -335,6 +349,12 @@ export default {
           this.nextOptionImage = response.location;
           this.nextOptionImageFile = null;
           this.$emit('uploading', false);
+        } else if(this.nextOptionImage) {
+          const isImgInvalid = await this.imgUpldr.isImageValid(this.nextOptionImage);
+          if(isImgInvalid) {
+            this.$emit('error', isImgInvalid);
+            return;
+          }
         }
 
         const { isTokenValue, nextOptionName, nextOptionValue, hasScoreValue, nextOptionScore } = this;
@@ -359,6 +379,7 @@ export default {
         }
 
         this.options.push(nextOption);
+        this.$emit('error', '');
         this.nextOptionName = '';
         this.nextOptionValue = '';
         this.nextOptionImage = '';
@@ -367,7 +388,9 @@ export default {
         this.update();
       } catch(e) {
         this.$emit('uploading', false);
-        this.$emit('error', 'Something went wrong with uploading option image. Please try another image or remove current!!!');
+        this.nextOptionImageFile = null;
+        this.nextOptionImage = '';
+        this.$emit('error', 'Something went wrong with uploading "Option" image. Please try to upload image again...or add "Option" without image.');
       }
     },
     removeTemplate(item) {
@@ -414,17 +437,15 @@ export default {
       this.$emit('updateAllow', allow);
     },
 
-    onAddImg(data) {
-      if(typeof data !== 'string') {
-        this.nextOptionImageFile = data;
-        this.nextOptionImage = data.name;
-      } else {
-        setTimeout(() => { this.nextOptionImage = data; }, 2000);
-      }
+    onAddImg(file) {
+      this.$emit('error', '');
+      this.nextOptionImageFile = file;
+      this.nextOptionImage = file.name;
     },
     onRemoveImg() {
-      this.nextOptionImage = '';
+      this.$emit('error', '');
       this.nextOptionImageFile = null;
+      this.nextOptionImage = '';
     },
 
     // Utils

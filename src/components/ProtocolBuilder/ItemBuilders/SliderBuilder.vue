@@ -285,7 +285,7 @@ export default {
       } catch(e) {
         setTimeout(() => {
           this.$emit('uploading', false);
-          this.$emit('error', 'Something went wrong with uploading image for score option');
+          this.$emit('error', 'Something went wrong with uploading image for "Score Option". Please try to upload image again...');
         }, 2000);
       }
     },

@@ -50,22 +50,15 @@
             <v-icon v-if="itemImg" style="font-size: 55px;"
               @click="onClickToRemoveImage">mdi-delete-outline</v-icon>
           </div>
-
-          <v-text-field
-            v-if="typeOfStructure === 2"
-            v-model="newUrlValue"
-            label="Option Image"
-            @change="onChangeURL"
-          />
-        
+      
         </div>
       </template>
       <span>
         <p>Image Requirements</p>
         <ul>
           <li>Size: less than 8MB</li>
-          <li>Width: between 320px and 4032px</li>
-          <li>Height: between 566px and 3024px</li>
+          <li>Width: between 100px and 1920px</li>
+          <li>Height: between 100px and 1920px</li>
         </ul>
       </span>
     </v-tooltip>
@@ -86,7 +79,7 @@
           </v-btn>
           <v-spacer />
           <v-btn color="primary" @click="onChangeURL(newUrlValue)">
-            Upload
+            Add
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -113,8 +106,8 @@ export default {
       default: 'error'
     },
     itemImg: {
-      type: String,
-      default: ''
+      type: [String, File],
+      default: null
     }
   },
   data() {

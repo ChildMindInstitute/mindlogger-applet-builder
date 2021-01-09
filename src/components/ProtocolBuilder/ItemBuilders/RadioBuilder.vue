@@ -38,19 +38,6 @@
             v-model="isMultipleChoice"
             label="Multiple Choice"
             :disabled="!isItemEditable"
-            @change="updateAllow"
-          />
-        </v-col>
-        <v-col 
-          class="d-flex align-center"
-          cols="12"
-          md="3"
-          sm="6"
-        >
-          <v-checkbox
-            v-model="isMultipleChoice"
-            label="Multiple Choice"
-            :disabled="!isItemEditable"
             @change="update"
           />      
         </v-col>
@@ -106,11 +93,9 @@
             </v-list>
           </v-card>
         </v-col>
-      </v-row>
-      <v-row>
         <v-col
           class="d-flex align-center"
-          cols="12"
+          cols="auto"
         >
           <v-checkbox
             v-model="hasScoreValue"

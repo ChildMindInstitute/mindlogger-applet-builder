@@ -107,6 +107,7 @@
         :key="componentKey"
         :templates="itemTemplates"
         :initial-activity-data="initialActivityData"
+        :isPrizeActivity="prizeActivity"
         @openPrize="tokenPrizes = true"
         @removeTemplate="onRemoveTemplate"
         @updateTemplates="onUpdateTemplates"

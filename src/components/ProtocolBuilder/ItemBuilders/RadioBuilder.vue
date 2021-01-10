@@ -51,7 +51,7 @@
             color="primary"
             @click="$emit('openPrize')"
           >
-            Create Token Prizes
+            {{ isPrizeActivity ? 'Edit' : 'Create' }} Token Prizes
           </v-btn>
         </v-col>
         <v-col 
@@ -245,6 +245,10 @@ export default {
     },
     itemTemplates: {
       type: Array,
+      default: null
+    },
+    isPrizeActivity: {
+      type: Object,
       default: null
     }
   },

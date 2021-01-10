@@ -237,6 +237,7 @@
         :initial-item-data="initialItemData"
         :is-item-editable="allowEdit"
         :templates="itemTemplates"
+        :isPrizeActivity="isPrizeActivity"
         @openPrize="$emit('openPrize')"
         @removeTemplate="onRemoveTemplate"
         @updateTemplates="onUpdateTemplates"
@@ -319,6 +320,10 @@ export default {
       type: Array,
       required: false,
       default: null,
+    },
+    isPrizeActivity: {
+      type: Object,
+      default: null
     }
   },
   data: function() {

@@ -39,6 +39,7 @@
           :initial-item-data="options"
           :is-item-editable="isItemEditable"
           :item-templates="itemTemplates"
+          :isPrizeActivity="isPrizeActivity"
           @openPrize="$emit('openPrize')"
           @removeTemplate="onRemoveTemplate"
           @updateTemplates="onUpdateTemplates"
@@ -162,6 +163,10 @@ export default {
     },
     templates: {
       type: Array,
+      default: null
+    },
+    isPrizeActivity: {
+      type: Object,
       default: null
     }
   },

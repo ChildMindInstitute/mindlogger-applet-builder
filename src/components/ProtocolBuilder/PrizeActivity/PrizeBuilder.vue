@@ -106,8 +106,8 @@ export default {
   },
   data() {
 
-    const localOptions = this.options && this.options.options && this.options.options.length ? [...this.options.options] : [];
-    const discardLocalOptions = this.options && this.options.options && this.options.options.length ? [...this.options.options] : [];
+    const localOptions = this.options && this.options.options && this.options.options.length ? this.avoidObjectsReference(this.options.options) : [];
+    const discardLocalOptions = this.options && this.options.options && this.options.options.length ? this.avoidObjectsReference(this.options.options) : [];
     
     const responseOptions = {
       hasScoreValue: false,
@@ -132,9 +132,18 @@ export default {
     }
   },
   created() {
-    this.discardConfirmItems = [...this.confirmItems];
+    this.discardConfirmItems = this.avoidObjectsReference(this.confirmItems);
   },
   methods: {
+
+    avoidObjectsReference(arr) {
+      const arrWithNewObjects = [];
+      arr.forEach(item => {
+        const newObj = Object.assign({}, item);
+        arrWithNewObjects.push(newObj);
+      });
+      return arrWithNewObjects;
+    },
 
     nextOptionValue() {
       const length = this.localOptions.length;
@@ -187,16 +196,16 @@ export default {
       this.isError = this.validateOptions();
       if(this.isError) return;
 
-      this.responseOptions.options = [...this.localOptions];
-      this.discardLocalOptions = [...this.localOptions];
-      this.discardConfirmItems = [...this.confirmItems];
+      this.responseOptions.options = this.avoidObjectsReference(this.localOptions);
+      this.discardLocalOptions = this.avoidObjectsReference(this.localOptions);
+      this.discardConfirmItems = this.avoidObjectsReference(this.confirmItems);
       this.editState = [];
       this.$emit('updateOptions', this.responseOptions, this.confirmItems);
     },
 
     discardUpdateOptions() {
-      this.localOptions = [...this.discardLocalOptions];
-      this.confirmItems = [...this.discardConfirmItems];
+      this.localOptions = this.avoidObjectsReference(this.discardLocalOptions);
+      this.confirmItems = this.avoidObjectsReference(this.discardConfirmItems);
       this.$emit('closeOptions');
       this.editState = [];
       this.isError = '';

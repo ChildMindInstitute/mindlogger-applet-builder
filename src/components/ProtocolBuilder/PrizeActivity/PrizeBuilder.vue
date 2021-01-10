@@ -174,6 +174,7 @@ export default {
         this.discardLocalOptions = [];
         setTimeout(() => {
           this.$emit('deleteOptions');
+          this.isError = '';
         }, 1000);
       } else if(!this.localOptions.length) {
         err = 'Please add at least one option';

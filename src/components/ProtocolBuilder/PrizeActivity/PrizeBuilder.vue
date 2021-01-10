@@ -42,15 +42,15 @@
             </td>
             <td>
               <v-btn
-                v-bind:class="{ 'v-btn--outlined': editState[index] }"
                 @click="editOption(index)"
                 icon
               >
-                <v-icon dark >mdi-pencil</v-icon>
+                <v-icon v-if="!editState[index]" dark >mdi-file-edit</v-icon>
+                <v-icon v-if="editState[index]" dark >mdi-file-check</v-icon>
               </v-btn>
               <v-btn icon class="ml-1"
                 @click="deleteOption(index)">
-                <v-icon dark>mdi-delete</v-icon>
+                <v-icon dark>mdi-file-remove</v-icon>
               </v-btn>
             </td>
             <td>
@@ -189,6 +189,7 @@ export default {
       this.responseOptions.options = [...this.localOptions];
       this.discardLocalOptions = [...this.localOptions];
       this.discardConfirmItems = [...this.confirmItems];
+      this.editState = [];
       this.$emit('updateOptions', this.responseOptions, this.confirmItems);
     },
 

@@ -87,6 +87,26 @@
                         </v-btn>
                       </v-list-item-action>
                     </v-list-item>
+
+                    <v-list-item v-if="compute.length" :key="'cumulatives'">
+                      <v-list-item-content>
+                        <v-list-item-title v-text="'cumulatives'" />
+                      </v-list-item-content>
+                      <v-list-item-action>
+                        <v-btn icon @click="editCumulatives()">
+                          <v-icon color="grey lighten-1">
+                            edit
+                          </v-icon>
+                        </v-btn>
+                      </v-list-item-action>
+                      <v-list-item-action>
+                        <v-btn icon @click="deleteCumulatives()">
+                          <v-icon color="grey lighten-1">
+                            mdi-delete
+                          </v-icon>
+                        </v-btn>
+                      </v-list-item-action>
+                    </v-list-item>
                   </v-list>
                 </v-card-text>
               </v-card>
@@ -237,6 +257,7 @@
         :initial-item-data="initialItemData"
         :is-item-editable="allowEdit"
         :templates="itemTemplates"
+        :items="items"
         :isPrizeActivity="isPrizeActivity"
         @openPrize="$emit('openPrize')"
         @removeTemplate="onRemoveTemplate"
@@ -460,6 +481,20 @@ export default {
       }
     },
     onNewItem(item) {
+      if (item.ui && item.ui.inputType == 'cumulativeScore') {
+        let compute = [], messages = [];
+
+        item.cumulativeScores.forEach(cumulative => {
+          compute.push(cumulative.compute);
+          messages.push(...cumulative.messages);
+        })
+
+        this.compute = compute;
+        this.messages = messages;
+
+        return ;
+      }
+
       if (this.editIndex >= 0 && this.editIndex < this.items.length) {
         if (this.items[this.editIndex].name != item.name) {
           /** update associated sub-scale names when item name is updated */
@@ -483,8 +518,13 @@ export default {
         }
         this.items[this.editIndex] = item;
       } else {
-        let ageItemIndex = this.items.findIndex(item => item.allowEdit);
-        this.items.push(item);
+        let ageItemIndex = this.items.findIndex(item => !item.allowEdit);
+
+        if (ageItemIndex >= 0) {
+          this.items.splice(ageItemIndex, 0, item);
+        } else {
+          this.items.push(item);
+        }
       }
     },
     duplicateItem(index) {
@@ -629,6 +669,31 @@ export default {
         // delete items asking gender and age
         this.items = this.items.filter(item => item.allowEdit);
       }
+    },
+
+    editCumulatives() {
+      this.editIndex = this.items.length;
+      this.initialItemData = {
+        name: 'cumulatives',
+        ui: {
+          inputType: 'cumulativeScore'
+        },
+        cumulativeScores: this.compute.map(compute => {
+          return {
+            compute,
+            messages: this.messages.filter(message => message.jsExpression.split(/[<>]=*\s/g)[0].trim() == compute.variableName.trim()),
+          }
+        }).filter(cumulative => cumulative.messages.length === 2)
+      };
+      this.allowEdit = true;
+
+      this.forceUpdate();
+      this.editItemDialog = true;
+    },
+
+    deleteCumulatives() {
+      this.compute = [];
+      this.messages = [];
     }
   },
 };

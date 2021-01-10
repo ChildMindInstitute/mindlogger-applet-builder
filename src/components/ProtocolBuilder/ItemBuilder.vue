@@ -11,27 +11,61 @@
           v-model="name"
           label="Item Name"
           :rules="nameRules"
-          :disabled="!isItemEditable"
+          :disabled="!isItemEditable || inputType == 'cumulativeScore'"
           required
           @keydown="nameKeydown($event)"
         />
         <v-textarea
           v-model="questionBuilder.text"
           label="Question"
+          v-if="inputType !== 'cumulativeScore'"
           :disabled="!isItemEditable"
           counter="320"
           maxlength="320"
           auto-grow
           rows="1"
         />
-        <!-- Image Uplaoder Here -->
+        <ImageUploader
+          class="mt-3 mb-4"
+          style="max-width: 300px"
+          :uploadFor="'activity-item'"
+          :itemImg="questionBuilder.imgURL"
+          @onAddImg="onAddImg"
+          @onRemoveImg="onRemoveImg"
+        />
         <v-select
           class="mt-6"
           v-model="inputType"
           :items="inputTypes"
           label="Input Type"
           :disabled="!isItemEditable"
-        />
+          @change="onUpdateInputType"
+        >
+          <template v-slot:item="{ item, attrs, on }">
+            <v-list-item v-on="on" v-bind="attrs">
+              <v-tooltip
+                v-if="!hasScoringItem && item == 'cumulativeScore'"
+                top
+              >
+                <template v-slot:activator="{ on }">
+                  <div
+                    class="disabled-option"
+                    v-on="on"
+                    @click.stop=""
+                  >
+                    <span>{{ item }}</span>
+                  </div>
+                </template>
+                <span>Please create an item with scores before creating this page</span>
+              </v-tooltip>
+              <div
+                v-else
+              >
+                {{item}}
+              </div>
+            </v-list-item>
+          </template>
+        </v-select>
         <RadioBuilder
           v-if="inputType === 'radio'"
           :is-skippable-item="allow"
@@ -99,6 +133,13 @@
           @updateInputOptions="updateInputOptions"
           @updateMedia="updateMedia"
         />
+        <CumulativeScoreBuilder
+          v-if="inputType === 'cumulativeScore'"
+          :items="items"
+          :is-item-editable="isItemEditable"
+          :initial-item-data="initialItemData"
+          @updateCumulativeScore="updateCumulativeScore"
+        />
       </v-form>
     </v-card-text>
     <v-alert v-if="isError" type="error" class="mx-2">{{ isError }}</v-alert>
@@ -110,7 +151,13 @@
         @click="onDiscardItem"
       >{{ isItemEditable ? "Discard Changes" : "Close" }}</v-btn>
       <v-spacer />
-      <v-btn color="primary" @click="onSaveItem">Save Item</v-btn>
+      <v-btn
+        :disabled="!valid && inputType === 'cumulativeScore' || !name"
+        color="primary"
+        @click="onSaveItem"
+      >
+        Save Item
+      </v-btn>
     </v-card-actions>
   </v-card>
   <v-dialog v-model="isUploadingState" persistent width="400">
@@ -122,7 +169,16 @@
   </div>
 </template>
 
+<style scoped>
+
+.disabled-option {
+  color: grey;
+}
+
+</style>
+
 <script>
+import ImageUploader from './ImageUploader.vue';
 import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
 import TextBuilder from "./ItemBuilders/TextBuilder.vue";
 import SliderBuilder from "./ItemBuilders/SliderBuilder.vue";
@@ -135,10 +191,13 @@ import AudioRecordBuilder from "./ItemBuilders/AudioRecordBuilder.vue";
 import AudioImageRecordBuilder from "./ItemBuilders/AudioImageRecordBuilder.vue";
 import GeolocationBuilder from "./ItemBuilders/GeolocationBuilder.vue";
 import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
+import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
 import Item from '../../models/Item';
+import ImageUpldr from '../../models/ImageUploader';
 
 export default {
   components: {
+    ImageUploader,
     RadioBuilder,
     TextBuilder,
     SliderBuilder,
@@ -150,7 +209,8 @@ export default {
     AudioRecordBuilder,
     AudioImageRecordBuilder,
     GeolocationBuilder,
-    AudioStimulusBuilder
+    AudioStimulusBuilder,
+    CumulativeScoreBuilder,
   },
   props: {
     initialItemData: {
@@ -165,6 +225,10 @@ export default {
       type: Array,
       default: null
     },
+    items: {
+      type: Array,
+      required: true,
+    },
     isPrizeActivity: {
       type: Object,
       default: null
@@ -174,6 +238,8 @@ export default {
     const model = new Item();
     model.updateReferenceObject(this);
 
+    const imgUploader = new ImageUpldr();
+
     const questionBuilder = { text: '', imgURL: '', imgFile: null };
 
     let isUploadingState = false;
@@ -182,6 +248,9 @@ export default {
     return {
       model,
       ...model.getItemBuilderData(this.initialItemData),
+      hasScoringItem: this.items.some((item) => item.options.hasScoreValue),
+      valid: (this.name && this.name.length > 0),
+      imgUploader,
       questionBuilder,
       isUploadingState,
       isError
@@ -229,6 +298,7 @@ export default {
       this.responseOptions = this.model.getResponseOptions();
     },
     onAddImg(data) {
+      this.isError = '';
       if(typeof data !== 'string') {
         this.questionBuilder.imgFile = data;
         this.questionBuilder.imgURL = data.name;
@@ -237,6 +307,7 @@ export default {
       }
     },
     onRemoveImg() {
+      this.isError = '';
       this.questionBuilder.imgFile = null;
       this.questionBuilder.imgURL = '';
     },
@@ -254,7 +325,8 @@ export default {
         } else {
           this.isError = '';
           this.isUploadingState = true;
-          // this.question.image = response.location;
+          const response = await this.imgUploader.uploadImage(this.questionBuilder.imgFile);
+          this.question.image = response.location;
           this.questionBuilder.imgFile = null;
           this.isUploadingState = false;
         }
@@ -263,11 +335,24 @@ export default {
 
       } catch(e) {
         this.isUploadingState = false;
-        this.isError = 'Something went wrong with uploading Header Image for Item. Please try another image or remove current!!!';
+        this.questionBuilder.imgURL = this.question.image;
+        this.questionBuilder.imgFile = null;
+        this.isError = 'Something went wrong with uploading "Header" image. Please try to upload image again...or save "Item" without image changes.';
       }
     },
     onDiscardItem() {
       this.$emit("closeItemModal", null);
+    },
+
+    updateCumulativeScore (scoreRules) {
+      this.valid = !scoreRules.some(rule => !rule.valid) && scoreRules.length > 0;
+      this.cumulativeScores = scoreRules;
+    },
+
+    onUpdateInputType() {
+      if (this.inputType === 'cumulativeScore') {
+        this.name = 'cumulatives';
+      }
     }
   }
 };

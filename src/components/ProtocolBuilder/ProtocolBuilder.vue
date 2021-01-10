@@ -302,6 +302,8 @@ export default {
           ['reprolib:terms/addProperties']: addProperties,
           ['reprolib:terms/subScales']: subScales,
           ['reprolib:terms/isPrize']: isPrize,
+          ['reprolib:terms/compute']: compute,
+          ['reprolib:terms/messages']: messages,
           ['_id']: id,
         } = activitiesObj;
 
@@ -370,6 +372,26 @@ export default {
             }
 
             return subScaleData;
+          }),
+          compute: Array.isArray(compute) && compute.map((exp) => {
+            const jsExpression = exp['reprolib:terms/jsExpression'];
+            const variableName = exp['reprolib:terms/variableName'];
+
+            return {
+              jsExpression: jsExpression && jsExpression[0] && jsExpression[0]['@value'],
+              variableName: variableName && variableName[0] && variableName[0]['@value'],
+            }
+          }),
+          messages: Array.isArray(messages) && messages.map((msg) => {
+            const jsExpression = msg['reprolib:terms/jsExpression'];
+            const message = msg['reprolib:terms/message'];
+            const outputType = msg['reprolib:terms/outputType']
+
+            return {
+              jsExpression: jsExpression && jsExpression[0] && jsExpression[0]['@value'],
+              message: message && message[0] && message[0]['@value'],
+              outputType: outputType && outputType[0] && outputType[0]['@value'] || 'cumulative',
+            }
           })
         };
 

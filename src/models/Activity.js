@@ -37,6 +37,9 @@ export default class Activity {
       conditionalBuilderType: '',
       conditionalItemsForBuilder: [],
       subScales: initialActivityData.subScales && initialActivityData.subScales.map(subScale => subScale) || [],
+      compute: initialActivityData.compute && initialActivityData.compute.map(compute => compute) || [],
+      messages: initialActivityData.messages && initialActivityData.messages.map(message => message) || [],
+      allowEdit: true,
       isPrize: initialActivityData.isPrize || false
     };
   }
@@ -261,7 +264,7 @@ export default class Activity {
         })
       }
     }
-    console.log('order', itemNamesArray)
+
     return itemNamesArray;
   }
 
@@ -296,7 +299,9 @@ export default class Activity {
         addProperties: addProperties,
         allow: allowed,
       },
-      subScales: this.ref.subScales
+      subScales: this.ref.subScales,
+      compute: this.ref.compute,
+      messages: this.ref.messages,
     };
   }
 
@@ -348,7 +353,9 @@ export default class Activity {
       items: items,
       conditionalItems: conditionalItems,
       subScales: this.ref.subScales,
-      isPrize: this.ref.isPrize,
+      compute: this.ref.compute,
+      messages: this.ref.messages,
+      isPrize: this.ref.isPrize
     };
   }
 
@@ -449,7 +456,43 @@ export default class Activity {
 
           return updates;
         }
-      }
+      },
+      'compute': {
+        updated: (field) => {
+          const newCumulatives = _.get(newValue, field, []);
+          const oldCumulatives = _.get(oldValue, field, []);
+          const updates = [];
+
+          oldCumulatives.forEach(oldCumulative => {
+            const newCumulative = newCumulatives.find(newCumulative => oldCumulative.variableName === newCumulative.variableName);
+            if (newCumulative) {
+              const newMessages = _.get(newValue, 'messages', []).filter(
+                message => message.jsExpression.split(/[<>]=*\s/g)[0].trim() == newCumulative.variableName.trim()
+              );
+
+              const oldMessages = _.get(oldValue, 'messages', []).filter(
+                message => message.jsExpression.split(/[<>]=*\s/g)[0].trim() == oldCumulative.variableName.trim()
+              );
+
+              if (newCumulative.jsExpression !== oldCumulative.jsExpression || JSON.stringify(oldMessages) !== JSON.stringify(newMessages)) {
+                updates.push(`cumulative ${oldCumulative.variableName} was updated`);
+              }
+            } else {
+              updates.push(`cumulative ${oldCumulative.variableName} was removed`);
+            }
+          });
+
+          newCumulatives.forEach(newCumulative => {
+            const oldCumulative = oldCumulatives.find(oldCumulative => oldCumulative.variableName === newCumulative.variableName);
+
+            if (!oldCumulative) {
+              updates.push(`cumulative ${newCumulative.variableName} was added`);
+            }
+          });
+
+          return updates;
+        }
+      },
     };
   }
 

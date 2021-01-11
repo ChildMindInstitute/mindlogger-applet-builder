@@ -26,6 +26,19 @@
           @change="update"
         />
       </v-col>
+
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        sm="3"
+      >
+        <v-checkbox
+          v-model="hasResponseAlert"
+          label="Set Alert"
+          :disabled="!isItemEditable"
+          @change="update"
+        />
+      </v-col>
     </v-row>
 
     <v-row>
@@ -59,6 +72,25 @@
         >
           Edit Score
         </v-btn>
+      </v-col>
+    </v-row>
+
+    <v-row
+      v-if="hasResponseAlert"
+    >
+      <v-col 
+        class="d-flex align-center"
+        cols="12"
+        sm="12"
+      >
+        <v-text-field
+          v-model="responseAlertMessage"
+          label="Alert Message"
+          :rules="alertTextRules"
+          :disabled="!isItemEditable"
+          required
+          @change="update"
+        />
       </v-col>
     </v-row>
 
@@ -207,7 +239,12 @@ export default {
       numberRules: [
         v => !isNaN(parseInt(v)) || 'Please enter a numerical value',
       ],
+      alertTextRules: [
+        v => !!v || 'Alert Message cannot be empty',
+      ],
       hasScoreValue: this.initialItemData.hasScoreValue || false,
+      hasResponseAlert: this.initialItemData.hasResponseAlert || false,
+      responseAlertMessage: this.initialItemData.responseAlertMessage || '',
       scoreDialog: false,
       scores: this.initialItemData.scores || false,
       imgUpldr,
@@ -263,6 +300,8 @@ export default {
         'maxValue': this.maxValue || "Max",
         'maxValueImg': this.imgLastName,
         'hasScoreValue': this.hasScoreValue,
+        'hasResponseAlert': this.hasResponseAlert,
+        'responseAlertMessage': this.responseAlertMessage,
         'scores': this.hasScoreValue ? this.scores : false
       };
       this.$emit('updateOptions', responseOptions);

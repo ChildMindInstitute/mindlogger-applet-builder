@@ -39,8 +39,28 @@
             label="Multiple Choice"
             :disabled="!isItemEditable"
             @change="update"
-          />      
+          />
         </v-col>
+      </v-row>
+      <v-row
+        v-if="hasResponseAlert"
+      >
+        <v-col
+          class="d-flex align-center"
+          cols="12"
+          sm="12"
+        >
+          <v-text-field
+            v-model="responseAlertMessage"
+            label="Alert Message"
+            :rules="alertTextRules"
+            :disabled="!isItemEditable"
+            required
+            @change="update"
+          />
+        </v-col>
+      </v-row>
+      <v-row>
         <v-col
           v-if="isTokenValue !== isTokenValue"
           comment="***Hide Token Prize button for now***"
@@ -312,10 +332,15 @@ export default {
       numberRules: [
         v => !isNaN(parseInt(v)) || 'Please enter a numerical value',
       ],
+      alertTextRules: [
+        v => !!v || 'Alert Text cannot be empty',
+      ],
       items: [],
       nextOptionScore,
       hasScoreValue: this.initialItemData.hasScoreValue || false,
       nextOptionImageFile,
+      hasResponseAlert: this.initialItemData.hasResponseAlert || false,
+      responseAlertMessage: this.initialItemData.responseAlertMessage || '',
       imgUpldr
     };
   },
@@ -412,6 +437,8 @@ export default {
     update() {
       const responseOptions = {
         'hasScoreValue': this.hasScoreValue,
+        'hasResponseAlert': this.hasResponseAlert,
+        'responseAlertMessage': this.responseAlertMessage,
         'isTokenValue': this.isTokenValue,
         'isMultipleChoice': this.isMultipleChoice,
         'isSkippableItem': this.isSkippableItem,

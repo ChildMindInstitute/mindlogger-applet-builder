@@ -86,6 +86,7 @@
           v-if="inputType === 'text'"
           :is-skippable-item="allow"
           :initial-item-data="options"
+          :response-option="responseOptions"
           :initial-answer="correctAnswer"
           :is-item-editable="isItemEditable"
           @updateAnswer="updateAnswer"

@@ -128,9 +128,9 @@ export default class Item {
     }
     if (this.ref.inputType === "text") {
       return {
-        'valueType': this.ref.options.type,
+        'valueType': this.ref.options.valueType || this.ref.valueType,
+        'requiredValue': this.ref.options.requiredValue,
       }
-      return this.ref.options;
     }
     if (this.ref.inputType === "slider") {
       const choices = this.getSliderChoices();

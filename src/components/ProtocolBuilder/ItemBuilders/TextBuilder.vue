@@ -74,9 +74,13 @@
 <script>
 export default {
   props: {
-    initialItemData: {
+    initialItemData: { 
       type: Object,
       required: true
+    },
+    responseOption: {
+      type: Object,
+      required: true,
     },
     isSkippableItem: {
       type: Boolean,
@@ -98,7 +102,9 @@ export default {
       requiredValue: this.initialItemData.requiredValue || false,
       requiredAnswer: this.initialAnswer ? true : false,
       isSkippable: this.isSkippableItem || false,
-      isNumerical: (this.initialItemData.type && this.initialItemData.type === 'xsd:integer') || false,
+      isNumerical: ((this.responseOption.valueType && this.responseOption.valueType.includes('integer')) 
+        || (this.initialItemData.valueType && this.initialItemData.valueType.includes('integer'))) 
+      || false,
       valid: true,
       textRules: [
         v => !!v || 'Radio options cannot be empty',
@@ -113,7 +119,7 @@ export default {
       const responseOptions = {
         'maxLength': this.maxLength,
         'requiredValue': this.requiredValue,
-        'type': this.isNumerical ? 'xsd:integer' : 'xsd:string',
+        'valueType': this.isNumerical ? 'xsd:integer' : 'xsd:string',
       };
       this.$emit('updateOptions', responseOptions);
     },

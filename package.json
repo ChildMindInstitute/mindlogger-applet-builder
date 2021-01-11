@@ -1,6 +1,6 @@
 {
   "name": "applet-schema-builder",
-  "version": "0.3.37",
+  "version": "0.3.38",
   "private": false,
   "main": "./dist/applet-schema-builder.common.js",
   "scripts": {

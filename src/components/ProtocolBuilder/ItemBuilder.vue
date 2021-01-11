@@ -73,6 +73,7 @@
           :initial-item-data="options"
           :is-item-editable="isItemEditable"
           :item-templates="itemTemplates"
+          :isPrizeActivity="isPrizeActivity"
           @openPrize="$emit('openPrize')"
           @removeTemplate="onRemoveTemplate"
           @updateTemplates="onUpdateTemplates"
@@ -228,6 +229,10 @@ export default {
       type: Array,
       required: true,
     },
+    isPrizeActivity: {
+      type: Object,
+      default: null
+    }
   },
   data: function() {
     const model = new Item();

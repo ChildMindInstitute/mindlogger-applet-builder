@@ -1,9 +1,8 @@
 <template>
   <PrizeItemBuilder 
     :initial-item-data="initialItemData"
-    :updateItem="onUpdateItem"
     @updateItem="onUpdateItem"
-    @discardUpdateItem="onDiscardUpdateItem"
+    @closeOptions="$emit('closeModal', initialActivityData)"
     @deleteOptions="$emit('deleteOptions', null)"
   />
 </template>
@@ -61,12 +60,8 @@ export default {
       schema.ui.order = orderArr;
       schema.ui.addProperties = propertiesArr;
       this.conditionalItems = this.model.getConditionalItems(schema, this.items);
-      
-      this.$emit('closeModal', this.model.getActivityData());
-    },
 
-    onDiscardUpdateItem() {
-      this.$emit('closeModal', null);
+      this.$emit('closeModal', this.model.getActivityData());
     }
 
   }

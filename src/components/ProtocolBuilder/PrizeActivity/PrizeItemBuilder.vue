@@ -3,7 +3,7 @@
     :options="options"
     :updateItem="updateItem"
     @updateOptions="onUpdateOptions"
-    @closeOptions="onDiscardUpdateOptions"
+    @closeOptions="$emit('closeOptions')"
     @deleteOptions="$emit('deleteOptions')"
   />
 </template>
@@ -44,10 +44,6 @@ export default {
       this.options = newOptions;
       this.responseOptions = this.model.getResponseOptions();
       this.$emit('updateItem', [this.model.getItemData(), ...confirmItems]);
-    },
-
-    onDiscardUpdateOptions() {
-      this.$emit('discardUpdateItem');
     }
 
   }

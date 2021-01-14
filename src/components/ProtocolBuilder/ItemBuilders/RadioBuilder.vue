@@ -41,6 +41,19 @@
             @change="update"
           />
         </v-col>
+        <v-col 
+          class="d-flex align-center"
+          cols="12"
+          md="3"
+          sm="6"
+        >
+          <v-checkbox
+            v-model="hasResponseAlert"
+            label="Response Alert"
+            :disabled="!isItemEditable"
+            @change="update"
+          />
+        </v-col>
       </v-row>
       <v-row
         v-if="hasResponseAlert"

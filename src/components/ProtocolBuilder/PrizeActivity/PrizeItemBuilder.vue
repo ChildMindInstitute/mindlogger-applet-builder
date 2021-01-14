@@ -1,6 +1,7 @@
 <template>
   <PrizeBuilder
     :options="options"
+    :items="items"
     :updateItem="updateItem"
     @updateOptions="onUpdateOptions"
     @closeOptions="$emit('closeOptions')"
@@ -19,6 +20,10 @@ export default {
   props: {
     initialItemData: {
       type: Object,
+      required: true
+    },
+    items: {
+      type: Array,
       required: true
     },
     updateItem: {

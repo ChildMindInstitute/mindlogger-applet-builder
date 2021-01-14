@@ -23,7 +23,7 @@ export default {
 
     return {
       model,
-      ...model.getItemBuilderData({}),
+      ...model.getItemBuilderData({ question: this.option.question }),
       name: 'Confirmation' + (this.option.value + 1),
       inputType: 'radio',
       options: {

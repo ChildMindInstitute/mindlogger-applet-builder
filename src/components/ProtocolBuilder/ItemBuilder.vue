@@ -104,7 +104,16 @@
         <PhotoBuilder v-if="inputType === 'photo'" />
         <TimeRangeBuilder v-if="inputType === 'timeRange'" />
         <DateBuilder v-if="inputType === 'date'" />
-        <DrawingBuilder v-if="inputType === 'drawing'" />
+
+        <DrawingBuilder
+          v-if="inputType === 'drawing'"
+          :initial-item-input-options="inputOptions"
+          @uploading="isUploadingState = $event"
+          @error="isError = $event"
+          @updateInputOptions="updateInputOptions"
+          @updateMedia="updateMedia"
+        />
+
         <AudioRecordBuilder
           v-if="inputType === 'audioRecord'"
           :is-skippable-item="allow"

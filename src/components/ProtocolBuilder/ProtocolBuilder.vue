@@ -743,6 +743,7 @@ export default {
     },
     onClickExport() {
       this.model.getProtocolData().then( data => {
+        console.log(data);
         if (!this.isEditing) {
           this.$emit("uploadProtocol", data)
         } else {

@@ -32,7 +32,7 @@ export default class Item {
           && (initialItemData.ui.allow.includes("dontKnow")
             || initialItemData.ui.allow.includes("dont_know_answer")),
         responseOptions: initialItemData.responseOptions || {},
-        inputOptions: initialItemData.inputOptions || {},
+        inputOptions: initialItemData.inputOptions || [],
         media: initialItemData.media || {},
         cumulativeScores: initialItemData.cumulativeScores  || [],
         textRules: [v => !!v || "This field is required"],
@@ -159,18 +159,25 @@ export default class Item {
   }
 
   getInputOptions() {
-    if (this.ref.inputType === "audioStimulus") {
-      return this.ref.inputOptions;
-    }
-    return {};
+    if(!this.ref.inputOptions || this.ref.inputOptions.length <= 0) return [];
+
+    const inputOptions = this.ref.inputOptions.map(inputOption => {
+
+      const inputOptionSchema = {
+        "@type": "schema:" + inputOption.type,
+        "schema:name": inputOption.name,
+        "schema:value": inputOption.value
+      };
+
+      return inputOptionSchema;
+    });
+
+    return inputOptions;
   }
 
-  getMedia() {
-    if (this.ref.inputType === "audioStimulus") {
-      return this.ref.media;
-    }
-    return {};
-  }
+  // getMedia() {
+  //   if(!this.ref.media) return {};
+  // }
 
   getCumulativeScores() {
     if (this.ref.inputType === 'cumulativeScore') {
@@ -182,7 +189,7 @@ export default class Item {
   getCompressedSchema() {
     const responseOptions = this.getResponseOptions();
     const inputOptions = this.getInputOptions();
-    const media = this.getMedia();
+    // const media = this.getMedia();
     const cumulativeScores = this.getCumulativeScores();
 
     const schema = {
@@ -203,12 +210,14 @@ export default class Item {
     if (Object.keys(responseOptions).length !== 0) {
       schema["responseOptions"] = responseOptions;
     }
-    if (this.ref.inputType === "audioStimulus") {
+
+    if (this.ref.inputType === "audioStimulus" || this.ref.inputType === "drawing") {
       schema["inputOptions"] = inputOptions;
     }
-    if (this.ref.inputType === "audioStimulus") {
-      schema["media"] = media;
-    }
+
+    // if (this.ref.inputType === "audioStimulus" || this.ref.inputType === "drawing") {
+    //   schema["media"] = media;
+    // }
 
     if (this.ref.inputType === 'cumulativeScore') {
       schema['cumulativeScores'] = cumulativeScores;
@@ -270,10 +279,12 @@ export default class Item {
       Object.keys(this.ref.responseOptions).length
     ) {
       itemObj.responseOptions = itemObj.responseOptions || this.ref.responseOptions;
-    } else if (this.ref.inputType === "audioStimulus") {
-      itemObj.inputOptions = this.inputOptions;
+    } 
+    else if (this.ref.inputType === "audioStimulus" || this.ref.inputType === "drawing") {
+      // itemObj.inputOptions = this.ref.inputOptions;
       itemObj.media = this.ref.media;
-    } else if (this.ref.inputType === "text") {
+    }
+    else if (this.ref.inputType === "text") {
       itemObj.responseOptions = itemObj.responseOptions || this.ref.responseOptions;
       itemObj.correctAnswer = this.ref.correctAnswer;
     } else if (this.ref.inputType === "slider") {

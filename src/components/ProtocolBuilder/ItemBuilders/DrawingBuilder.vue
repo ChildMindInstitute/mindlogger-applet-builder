@@ -5,7 +5,7 @@
       class="mt-7 mb-4"
       style="max-width: 300px"
       :uploadFor="'drawing-item-bg'"
-      :itemImg="inputBackgroundOption.value"
+      :itemImg="inputBackgroundOption['schema:value']"
       @onAddImg="onUploadImg"
       @onRemoveImg="onRemoveImg"
     />
@@ -28,15 +28,13 @@ export default {
   },
   data: function () {
 
-    console.log(this.initialItemInputOptions);
-
     const inputBackgroundOption = this.getInputBackgroundOption(this.initialItemInputOptions) || {
-      type: 'URL',
-      name: 'backgroundImage',
-      value: ''
+      '@type': 'schema:URL',
+      'schema:name': 'backgroundImage',
+      'schema:value': ''
     };
 
-    inputBackgroundOption.type = 'URL';
+    inputBackgroundOption['@type'] = 'schema:URL';
 
     const inputOptions = this.initialItemInputOptions.length ? this.initialItemInputOptions : [ inputBackgroundOption ];
 
@@ -50,7 +48,7 @@ export default {
 
     getInputBackgroundOption(options) {
       if(!options || !options.length) return null;
-      return options.find(option => option.name === 'backgroundImage');
+      return options.find(option => option['schema:name'] === 'backgroundImage');
     },
 
     createMediaObj(file, url) {
@@ -72,10 +70,10 @@ export default {
         const media = {};
 
         if(typeof data === 'string') {
-          this.inputBackgroundOption.value = data;
+          this.inputBackgroundOption['schema:value'] = data;
         } else {
           const response = await this.imgUpldr.uploadImage(data);
-          this.inputBackgroundOption.value = response.location;
+          this.inputBackgroundOption['schema:value'] = response.location;
           media[`${response.location}`] = this.createMediaObj(data, response.location);
         }
 
@@ -95,7 +93,7 @@ export default {
 
     onRemoveImg() {
       this.$emit('error', '');
-      this.inputBackgroundOption.value = '';
+      this.inputBackgroundOption['schema:value'] = '';
     }
 
   }

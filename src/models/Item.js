@@ -158,27 +158,6 @@ export default class Item {
     }
   }
 
-  getInputOptions() {
-    if(!this.ref.inputOptions || this.ref.inputOptions.length <= 0) return [];
-
-    const inputOptions = this.ref.inputOptions.map(inputOption => {
-
-      const inputOptionSchema = {
-        "@type": "schema:" + inputOption.type,
-        "schema:name": inputOption.name,
-        "schema:value": inputOption.value
-      };
-
-      return inputOptionSchema;
-    });
-
-    return inputOptions;
-  }
-
-  // getMedia() {
-  //   if(!this.ref.media) return {};
-  // }
-
   getCumulativeScores() {
     if (this.ref.inputType === 'cumulativeScore') {
       return this.ref.cumulativeScores.map(({ compute, messages }) => ({ compute, messages }));
@@ -188,8 +167,6 @@ export default class Item {
 
   getCompressedSchema() {
     const responseOptions = this.getResponseOptions();
-    const inputOptions = this.getInputOptions();
-    // const media = this.getMedia();
     const cumulativeScores = this.getCumulativeScores();
 
     const schema = {
@@ -210,14 +187,6 @@ export default class Item {
     if (Object.keys(responseOptions).length !== 0) {
       schema["responseOptions"] = responseOptions;
     }
-
-    if (this.ref.inputType === "audioStimulus" || this.ref.inputType === "drawing") {
-      schema["inputOptions"] = inputOptions;
-    }
-
-    // if (this.ref.inputType === "audioStimulus" || this.ref.inputType === "drawing") {
-    //   schema["media"] = media;
-    // }
 
     if (this.ref.inputType === 'cumulativeScore') {
       schema['cumulativeScores'] = cumulativeScores;
@@ -279,9 +248,15 @@ export default class Item {
       Object.keys(this.ref.responseOptions).length
     ) {
       itemObj.responseOptions = itemObj.responseOptions || this.ref.responseOptions;
-    } 
-    else if (this.ref.inputType === "audioStimulus" || this.ref.inputType === "drawing") {
-      // itemObj.inputOptions = this.ref.inputOptions;
+    }
+
+    else if(this.ref.inputType === "drawing") {
+      itemObj.inputOptions = this.ref.inputOptions;
+      itemObj.media = this.ref.media;
+    }
+
+    else if (this.ref.inputType === "audioStimulus") {
+      itemObj.inputOptions = this.ref.inputOptions;
       itemObj.media = this.ref.media;
     }
     else if (this.ref.inputType === "text") {
@@ -366,6 +341,34 @@ export default class Item {
     const valueInsert = name => field =>
           `${name} was set to ${_.get(newValue, field)}`;
 
+    const inputOptionsListUpdate = (field) => {
+
+      const oldOptions = _.get(oldValue, field, []).map(option => {
+        return { value: option['schema:value'] }
+      });
+
+      const newOptions = _.get(newValue, field, []).map(option => {
+        return { value: option['schema:value'] }
+      });
+
+      const removedOptions = oldOptions.filter(option => {
+        return newOptions.find(newOption => {
+          return option.value === newOption.value
+        }) ? false : true
+      });
+
+      const insertedOptions = newOptions.filter(newOption => {
+        return oldOptions.find(option => {
+          return option.value === newOption.value
+        }) ? false : true
+      });
+
+      return [
+        ...removedOptions.map(option => `${option.value} option was removed`),
+        ...insertedOptions.map(option => `${option.value} option was inserted`)
+      ];
+    };
+
     return {
       'skos:prefLabel': {
         updated: valueUpdate('Item name'),
@@ -438,6 +441,9 @@ export default class Item {
         updated: valueUpdate('maxLength'),
         inserted: valueInsert('maxLength'),
       },
+      'inputOptions': {
+        updated: inputOptionsListUpdate
+      }
     }
   }
 

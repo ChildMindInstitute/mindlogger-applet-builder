@@ -568,6 +568,10 @@ export default {
             }
           }
 
+          const inputOptions = item['reprolib:terms/inputs'];
+          if(inputOptions && inputOptions.length > 0)
+            itemContent.inputOptions = this.inputOptionsModifier(itemType, inputOptions);
+
           if (itemType === 'audioStimulus') {
             let mediaObj = Object.entries(
               item['reprolib:terms/media'] && item['reprolib:terms/media'][0]
@@ -609,6 +613,29 @@ export default {
         this.activities.push(activityModel.getActivityData());
       });
     },
+    /** Modifiers for data from schema for using data inside app - Start */
+    inputOptionsModifier(itemType, options) {
+      const modifiedInputOptions = [];
+
+      options.forEach(option => {
+        const modifiedOption = {};
+
+        modifiedOption['@type'] = 'schema:' + getJustTypeOfOption(option['@type'][0]);
+        modifiedOption['schema:name'] = option['schema:name'][0]['@value'];
+        modifiedOption['schema:value'] = option['schema:value'][0]['@value'];
+
+        modifiedInputOptions.push(modifiedOption);
+      });
+
+      function getJustTypeOfOption(url) {
+        const index = url.lastIndexOf('/');
+        if(index >= 0 && url.length - 1 > index) return url.slice(index + 1);
+        else return '';
+      }
+
+      return modifiedInputOptions;
+    },
+    /** Modifiers for data from schema for using data inside app - End */
     onUpdateTemplates(option) {
       this.$emit("updateTemplates", option)
     },
@@ -743,7 +770,6 @@ export default {
     },
     onClickExport() {
       this.model.getProtocolData().then( data => {
-        console.log(data);
         if (!this.isEditing) {
           this.$emit("uploadProtocol", data)
         } else {

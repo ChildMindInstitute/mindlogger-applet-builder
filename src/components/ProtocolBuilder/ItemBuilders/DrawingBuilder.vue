@@ -24,6 +24,10 @@ export default {
     initialItemInputOptions: {
       type: Array,
       required: true
+    },
+    initialItemMedia: {
+      type: Object,
+      required: true
     }
   },
   data: function () {
@@ -33,15 +37,26 @@ export default {
       'schema:name': 'backgroundImage',
       'schema:value': ''
     };
-
     inputBackgroundOption['@type'] = 'schema:URL';
 
-    const inputOptions = this.initialItemInputOptions.length ? this.initialItemInputOptions : [ inputBackgroundOption ];
+    const inputOptions = this.initialItemInputOptions;
+
+    const mediaBackgroundObjData = this.getMediaBackgroundObjData(this.initialItemMedia, inputBackgroundOption) || {
+      "@type": "schema:ImageObject",
+      "schema:encodingFormat": '',
+      "schema:name": '',
+      "schema:contentUrl": ''
+    };
+    mediaBackgroundObjData['@type'] = 'schema:ImageObject';
+
+    const media = this.initialItemMedia;
 
     return {
       imgUpldr: new ImageUpldr(),
       inputBackgroundOption,
-      inputOptions
+      inputOptions,
+      mediaBackgroundObjData,
+      media
     }
   },
   methods: {
@@ -51,15 +66,21 @@ export default {
       return options.find(option => option['schema:name'] === 'backgroundImage');
     },
 
-    createMediaObj(file, url) {
-      const mediaObject = {
-        "@type": "schema:ImageObject",
-        "schema:encodingFormat": file.type,
-        "schema:name": file.name,
-        "schema:contentUrl": url
-      };
+    getMediaBackgroundObjData(media, inputBgOption) {
+      if(!media || !media[inputBgOption['schema:value']]) return null;
+      return media[inputBgOption['schema:value']];
+    },
 
-      return mediaObject;
+    getMediaDataFromURL(url) {
+      const splitValuesFromURL = url.split('/');
+      const name = splitValuesFromURL[splitValuesFromURL.length - 1];
+      const splitNameValues = name.split('.');
+      const encodingFormat = 'image/' + splitNameValues[splitNameValues.length - 1];
+      return {
+        "schema:encodingFormat": encodingFormat,
+        "schema:name": name,
+        "schema:contentUrl": url
+      }
     },
 
     async onUploadImg(data) {
@@ -70,17 +91,23 @@ export default {
         const media = {};
 
         if(typeof data === 'string') {
+          this.onRemoveImg();
           this.inputBackgroundOption['schema:value'] = data;
         } else {
           const response = await this.imgUpldr.uploadImage(data);
+          this.onRemoveImg();
           this.inputBackgroundOption['schema:value'] = response.location;
-          media[`${response.location}`] = this.createMediaObj(data, response.location);
         }
+
+        this.inputOptions.push(this.inputBackgroundOption);
+
+        this.mediaBackgroundObjData = Object.assign(this.mediaBackgroundObjData, this.getMediaDataFromURL(this.inputBackgroundOption['schema:value']));
+        this.media[this.inputBackgroundOption['schema:value']] = this.mediaBackgroundObjData;
 
         setTimeout(() => { 
           this.$emit('uploading', false);
           this.$emit('updateInputOptions', this.inputOptions);
-          this.$emit('updateMedia', media);
+          this.$emit('updateMedia', this.media);
         }, 2100);
 
       } catch(e) {
@@ -93,7 +120,17 @@ export default {
 
     onRemoveImg() {
       this.$emit('error', '');
+
+      const removingOptionImgUrl = this.inputBackgroundOption['schema:value'];
+      const removingOptionIndex = this.inputOptions.indexOf(option => option['schema:value'] === removingOptionImgUrl);
+
+      this.inputOptions.splice(removingOptionIndex, 1);
+      delete this.media[removingOptionImgUrl];
+
       this.inputBackgroundOption['schema:value'] = '';
+
+      this.$emit('updateInputOptions', this.inputOptions);
+      this.$emit('updateMedia', this.media);
     }
 
   }

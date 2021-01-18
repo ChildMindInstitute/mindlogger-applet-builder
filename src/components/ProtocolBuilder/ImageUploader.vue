@@ -13,7 +13,7 @@
       <template v-slot:activator="{ on }">
         <div v-on="on">
 
-          <v-expansion-panels v-if="typeOfStructure === 0 || typeOfStructure === 3">
+          <v-expansion-panels v-if="typeOfStructure === 0 || typeOfStructure === 3 || typeOfStructure === 4">
             <v-expansion-panel>
               <v-expansion-panel-header disable-icon-rotate>
                 {{ itemImg ? 'Change' : 'Add' }} {{ getCorrectTitle(typeOfStructure) }}
@@ -113,7 +113,7 @@ export default {
   data() {
     const imgUploader = new ImageUploader();
 
-    const typesOfStructure = ['activity-item', 'item-radio-option-pc', 'item-radio-option-url', 'drawing-item-bg'];
+    const typesOfStructure = ['activity-item', 'item-radio-option-pc', 'item-radio-option-url', 'drawing-item-bg', 'default-item'];
     const typeOfStructure = typesOfStructure.findIndex(structure => structure === this.uploadFor);
     
     let isUrlOptionActive = false;
@@ -138,6 +138,9 @@ export default {
           break;
         case 3:
           title = 'Canvas Background';
+          break;
+        case 4:
+          title = 'Image';
           break;
       }
       return title;

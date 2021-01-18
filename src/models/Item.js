@@ -148,10 +148,10 @@ export default class Item {
         "schema:maxValue": "new Date()"
       };
     }
-    if (
-        this.ref.inputType === "audioRecord" ||
-        this.ref.inputType === "audioImageRecord"
-    ) {
+    if (this.ref.inputType === "audioImageRecord") {
+      return this.ref.responseOptions;
+    }
+    if (this.ref.inputType === "audioRecord") {
         return this.ref.options;
     } else {
         return {};
@@ -243,7 +243,6 @@ export default class Item {
     if (
       (this.ref.inputType === "radio" ||
         this.ref.inputType === "audioRecord" ||
-        this.ref.inputType === "audioImageRecord" ||
         this.ref.inputType === "geolocation") &&
       Object.keys(this.ref.responseOptions).length
     ) {
@@ -252,6 +251,13 @@ export default class Item {
 
     else if(this.ref.inputType === "drawing") {
       itemObj.inputOptions = this.ref.inputOptions;
+    }
+
+    else if(this.ref.inputType === "audioImageRecord") {
+      if(!itemObj.responseOptions['schema:image']) {
+        // default image
+        itemObj.responseOptions['schema:image'] = 'https://www.dropbox.com/s/wgtjq3bgqlfhbzd/map3g.png?raw=1';
+      }
     }
 
     else if (this.ref.inputType === "audioStimulus") {
@@ -439,6 +445,21 @@ export default class Item {
       'options.maxLength': {
         updated: valueUpdate('maxLength'),
         inserted: valueInsert('maxLength'),
+      },
+      'responseOptions.requiredValue': {
+        updated: optionUpdate('Required option'),
+      },
+      'responseOptions.schema:minValue': {
+        updated: valueUpdate('minValue'),
+        inserted: valueInsert('minValue'),
+      },
+      'responseOptions.schema:maxValue': {
+        updated: valueUpdate('maxValue'),
+        inserted: valueInsert('maxValue'),
+      },
+      'responseOptions.schema:image': {
+        updated: valueUpdate('Image'),
+        inserted: valueInsert('Image'),
       },
       'inputOptions': {
         updated: inputOptionsListUpdate

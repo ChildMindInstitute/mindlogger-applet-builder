@@ -28,12 +28,10 @@ export default {
   },
   data: function () {
 
-    const inputBackgroundOption = this.getInputBackgroundOption(this.initialItemInputOptions) || {
-      '@type': 'schema:URL',
-      'schema:name': 'backgroundImage',
-      'schema:value': ''
-    };
+    let inputBackgroundOption = { 'schema:value': '' };
+    inputBackgroundOption = Object.assign(inputBackgroundOption, this.getInputBackgroundOption(this.initialItemInputOptions));
     inputBackgroundOption['@type'] = 'schema:URL';
+    inputBackgroundOption['schema:name'] = 'backgroundImage';
 
     const inputOptions = this.initialItemInputOptions;
 

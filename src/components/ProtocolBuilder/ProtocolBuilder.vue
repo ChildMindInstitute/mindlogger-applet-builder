@@ -623,9 +623,17 @@ export default {
       options.forEach(option => {
         const modifiedOption = {};
 
-        modifiedOption['@type'] = 'schema:' + this.getTypeOfActionFromSchemaURL(option['@type'][0]);
-        modifiedOption['schema:name'] = option['schema:name'][0]['@value'];
-        modifiedOption['schema:value'] = option['schema:value'][0]['@value'];
+        const type = option['@type'];
+        if(type)
+          modifiedOption['@type'] = 'schema:' + this.getTypeOfActionFromSchemaURL(type[0]);
+        
+        const name = option['schema:name'];
+        if(name)
+          modifiedOption['schema:name'] = name[0]['@value'];
+        
+        const value = option['schema:value'];
+        if(value)
+          modifiedOption['schema:value'] = value[0]['@value'];
 
         modifiedInputOptions.push(modifiedOption);
       });

@@ -108,11 +108,9 @@
         <DrawingBuilder
           v-if="inputType === 'drawing'"
           :initial-item-input-options="inputOptions"
-          :initial-item-media="media"
           @uploading="isUploadingState = $event"
           @error="isError = $event"
           @updateInputOptions="updateInputOptions"
-          @updateMedia="updateMedia"
         />
 
         <AudioRecordBuilder

@@ -569,14 +569,9 @@ export default {
           }
 
           const inputOptions = item['reprolib:terms/inputs'];
-          if(inputOptions && inputOptions.length > 0)
-            itemContent.inputOptions = this.inputOptionsModifier(itemType, inputOptions);
-
-          const media = item['reprolib:terms/media'];
-          if(media && media.length > 0) {
-            // delete later !!!!!!! this should works for all items wich contains media, modification for specific values should be inside mediaModifier fucntion
+          if(inputOptions && inputOptions.length > 0) {
             if(itemType === 'drawing')
-              itemContent.media = this.mediaModifier(itemType, media);
+              itemContent.inputOptions = this.inputOptionsModifier(itemType, inputOptions);
           }
 
           if (itemType === 'audioStimulus') {
@@ -636,27 +631,6 @@ export default {
       });
 
       return modifiedInputOptions;
-    },
-    // media modifier
-    mediaModifier(itemType, media) {
-      const modifiedMedia = {};
-
-      media.forEach(mediaObjContainer => {
-        Object.entries(mediaObjContainer).forEach(mediaObj => {
-          const mediaObjData = mediaObj[1][0];
-          const modifiedMediaObj = {};
-          
-          modifiedMediaObj['@type'] = 'schema:' 
-            + this.getTypeOfActionFromSchemaURL(mediaObjData['@type'][0]);
-          modifiedMediaObj['schema:name'] = mediaObjData['schema:name'][0]['@value'];
-          modifiedMediaObj['schema:contentUrl'] = mediaObjData['schema:contentUrl'];
-          modifiedMediaObj['schema:encodingFormat'] = mediaObjData['schema:encodingFormat'];
-
-          modifiedMedia[mediaObj[0]] = modifiedMediaObj;
-        });
-      });
-
-      return modifiedMedia;
     },
     // helper functions for modifiers
     getTypeOfActionFromSchemaURL(url) {

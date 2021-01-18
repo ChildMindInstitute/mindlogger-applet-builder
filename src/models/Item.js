@@ -252,7 +252,6 @@ export default class Item {
 
     else if(this.ref.inputType === "drawing") {
       itemObj.inputOptions = this.ref.inputOptions;
-      itemObj.media = this.ref.media;
     }
 
     else if (this.ref.inputType === "audioStimulus") {

@@ -568,9 +568,20 @@ export default {
             }
           }
 
+          // new block start
+          const responseOptions2 = item['reprolib:terms/responseOptions'];
+          if(responseOptions2 && responseOptions2.length > 0) {
+            // delete "itemType === 'audioImageRecord'" later !!!!!!! this should works for all items wich contains responseOptions, modification for specific values should be inside "responseOptionsModifier" function
+            if(itemType === 'audioImageRecord')
+              itemContent.responseOptions = this.responseOptionsModifier(itemType, responseOptions2);
+          }
+
           const inputOptions = item['reprolib:terms/inputs'];
-          if(inputOptions && inputOptions.length > 0)
-            itemContent.inputOptions = this.inputOptionsModifier(itemType, inputOptions);
+          if(inputOptions && inputOptions.length > 0) {
+            // delete "itemType === 'drawing'" later !!!!!!! this should works for all items wich contains inputOptions, modification for specific values should be inside "inputOptionsModifier" function
+            if(itemType === 'drawing')
+              itemContent.inputOptions = this.inputOptionsModifier(itemType, inputOptions);
+          }
 
           const media = item['reprolib:terms/media'];
           if(media && media.length > 0) {
@@ -578,6 +589,7 @@ export default {
             if(itemType === 'drawing')
               itemContent.media = this.mediaModifier(itemType, media);
           }
+          // new block end
 
           if (itemType === 'audioStimulus') {
             let mediaObj = Object.entries(
@@ -621,6 +633,37 @@ export default {
       });
     },
     // Modifiers for data from schema for using data inside app - Start
+    // response options modifier
+    responseOptionsModifier(itemType, options) {
+      const responseOptions = options[0];
+      const modifiedResponseOptions = {};
+
+      const valueType = responseOptions['reprolib:terms/valueType'];
+      if(valueType)
+        modifiedResponseOptions['valueType'] = valueType[0]['@id'];
+
+      const minValue = responseOptions['schema:minValue'];
+      if(minValue)
+        modifiedResponseOptions['schema:minValue'] = minValue[0]['@value'];
+
+      const maxValue = responseOptions['schema:maxValue'];
+      if(maxValue)
+        modifiedResponseOptions['schema:maxValue'] = maxValue[0]['@value'];
+
+      const image = responseOptions['schema:image'];
+      if(image)
+        modifiedResponseOptions['schema:image'] = image;
+
+      const multipleChoice = responseOptions['reprolib:terms/multipleChoice'];
+      if(multipleChoice)
+        modifiedResponseOptions['multipleChoice'] = multipleChoice[0]['@value'];
+
+      const requiredValue = responseOptions['reprolib:terms/requiredValue'];
+      if(requiredValue)
+        modifiedResponseOptions['requiredValue'] = requiredValue[0]['@value'];
+
+      return modifiedResponseOptions;
+    },
     // input options modifier
     inputOptionsModifier(itemType, options) {
       const modifiedInputOptions = [];

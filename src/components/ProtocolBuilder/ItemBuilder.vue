@@ -122,13 +122,18 @@
           @updateOptions="updateOptions"
           @updateAllow="updateAllow"
         />
+
         <AudioImageRecordBuilder
           v-if="inputType === 'audioImageRecord'"
+          :initial-item-response-options="responseOptions"
           :is-skippable-item="allow"
-          :initial-item-data="options"
-          @updateOptions="updateOptions"
+          @uploading="isUploadingState = $event"
+          @error="isError = $event"
+          @checkValidation="valid = $event"
+          @updateResponseOptions="updateResponseOptions"
           @updateAllow="updateAllow"
         />
+
         <GeolocationBuilder v-if="inputType === 'geolocation'" @update="updateResponseOptions" />
         <AudioStimulusBuilder
           v-if="inputType === 'audioStimulus'"
@@ -160,7 +165,7 @@
       >{{ isItemEditable ? "Discard Changes" : "Close" }}</v-btn>
       <v-spacer />
       <v-btn
-        :disabled="!valid && inputType === 'cumulativeScore' || !name"
+        :disabled="!valid && inputType === 'cumulativeScore' || !name || !valid && inputType === 'audioImageRecord'"
         color="primary"
         @click="onSaveItem"
       >

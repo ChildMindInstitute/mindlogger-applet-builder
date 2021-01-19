@@ -466,6 +466,14 @@ export default {
               responseOptions[0] &&
               responseOptions[0]['reprolib:terms/scoring'];
 
+            let responseAlert =
+              responseOptions[0] &&
+              responseOptions[0]['reprolib:terms/responseAlert'];
+
+            let responseAlertMessage = 
+              responseOptions[0] && 
+              responseOptions[0]['reprolib:terms/responseAlertMessage'];
+
             if (multipleChoice) {
               itemContent.multipleChoice =
                 multipleChoice[0] && multipleChoice[0]['@value'];
@@ -474,6 +482,16 @@ export default {
             if (scoring) {
               itemContent.scoring = 
                 scoring[0] && scoring[0]['@value'];
+            }
+
+            if (responseAlert) {
+              itemContent.responseAlert = 
+                responseAlert[0] && responseAlert[0]['@value'];
+            }
+
+            if (responseAlertMessage) {
+              itemContent.responseAlertMessage = 
+                responseAlertMessage[0] && responseAlertMessage[0]['@value'];
             }
 
             if (valueType) {
@@ -485,6 +503,8 @@ export default {
               itemContent.options = {
                 isMultipleChoice: itemContent.multipleChoice || false,
                 hasScoreValue: itemContent.scoring || false,
+                hasResponseAlert: itemContent.responseAlert || false,
+                responseAlertMessage: itemContent.responseAlertMessage || '',
                 nextOptionImage: '',
                 nextOptionName: '',
                 options:
@@ -563,6 +583,8 @@ export default {
             if (itemType === 'slider') {
               itemContent.options = {
                 hasScoreValue: itemContent.scoring || false,
+                hasResponseAlert: itemContent.responseAlert || false,
+                responseAlertMessage: itemContent.responseAlertMessage || '',
                 maxValue:
                   responseOptions[0] &&
                   responseOptions[0]['schema:maxValue'] &&

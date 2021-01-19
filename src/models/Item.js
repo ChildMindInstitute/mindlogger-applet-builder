@@ -120,7 +120,9 @@ export default class Item {
       return {
         "valueType": (this.ref.valueType.includes("token") || this.ref.options.isTokenValue) ? "xsd:token" : "xsd:anyURI",
         "scoring": this.ref.options.hasScoreValue,
+        "responseAlert": this.ref.options.hasResponseAlert,
         "multipleChoice": this.ref.options.isMultipleChoice,
+        "responseAlertMessage": this.ref.options.responseAlertMessage,
         "schema:minValue": 1,
         "schema:maxValue": choices.length,
         choices: choices
@@ -137,6 +139,8 @@ export default class Item {
       return {
         "valueType": "xsd:integer",
         "scoring": this.ref.options.hasScoreValue,
+        "responseAlert": this.ref.options.hasResponseAlert,
+        "responseAlertMessage": this.ref.options.responseAlertMessage,
         "schema:minValue": this.ref.options.minValue,
         "schema:maxValue": this.ref.options.maxValue,
         "schema:minValueImg": this.ref.options.minValueImg,
@@ -287,6 +291,7 @@ export default class Item {
       itemObj.options.maxValueImg = itemObj.options.maxValueImg || "";
       itemObj.options.numOptions = itemObj.options.numOptions || 5;
       itemObj.options.hasScoreValue = itemObj.options.hasScoreValue || false;
+      itemObj.options.hasResponseAlert = itemObj.options.hasResponseAlert || false;
     }
 
     return itemObj;
@@ -448,6 +453,12 @@ export default class Item {
       },
       'options.hasScoreValue': {
         updated: optionUpdate('Scoring option'),
+      },
+      'options.hasResponseAlert': {
+        updated: optionUpdate('Response Alert'),
+      },
+      'options.responseAlertMessage': {
+        updated: valueUpdate('Alert Message'),
       },
       'options.scores': {
         updated: scoreUpdate,

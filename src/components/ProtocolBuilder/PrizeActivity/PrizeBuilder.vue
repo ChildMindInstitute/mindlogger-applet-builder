@@ -99,6 +99,10 @@ export default {
       type: Object,
       required: true
     },
+    items: {
+      type: Array,
+      required: true
+    },
     updateItem: {
       type: Function,
       default: null
@@ -107,8 +111,9 @@ export default {
   data() {
 
     const localOptions = this.options && this.options.options && this.options.options.length ? this.avoidObjectsReference(this.options.options) : [];
-    const discardLocalOptions = this.options && this.options.options && this.options.options.length ? this.avoidObjectsReference(this.options.options) : [];
-    
+    localOptions.map((option, index) => option.question = this.items[index + 1].question);
+    const discardLocalOptions = this.avoidObjectsReference(localOptions);
+
     const responseOptions = {
       hasScoreValue: false,
       isTokenValue: false,
@@ -196,7 +201,13 @@ export default {
       this.isError = this.validateOptions();
       if(this.isError) return;
 
-      this.responseOptions.options = this.avoidObjectsReference(this.localOptions);
+      this.localOptions.forEach((option, index) => option.value = index);
+      const options = this.localOptions.map((option) => {
+        const {question, ...opt} = option;
+        return opt;
+      })
+
+      this.responseOptions.options = this.avoidObjectsReference(options);
       this.discardLocalOptions = this.avoidObjectsReference(this.localOptions);
       this.discardConfirmItems = this.avoidObjectsReference(this.confirmItems);
       this.editState = [];

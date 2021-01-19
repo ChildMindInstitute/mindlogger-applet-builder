@@ -1,6 +1,7 @@
 <template>
   <PrizeItemBuilder 
     :initial-item-data="initialItemData"
+    :items="items"
     @updateItem="onUpdateItem"
     @closeOptions="$emit('closeModal', initialActivityData)"
     @deleteOptions="$emit('deleteOptions', null)"

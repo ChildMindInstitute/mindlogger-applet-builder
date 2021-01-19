@@ -264,6 +264,18 @@
                 </v-tooltip>
               </v-col>
             </v-row>
+            <v-row>
+              <v-col 
+                cols="12"
+                sm="12"
+              >
+                <v-text-field
+                  v-model="nextOptionDescription"
+                  label="Option Description"
+                  @change="update"
+                />
+              </v-col>
+            </v-row>
             <v-btn
               :disabled="!valid || !isItemEditable"
               @click="addOption"
@@ -336,6 +348,7 @@ export default {
       nextOptionName: this.initialItemData.nextOptionName || '',
       nextOptionValue: this.initialItemData.nextOptionValue || '',
       nextOptionImage: this.initialItemData.nextOptionImage || '',
+      nextOptionDescription: this.initialItemData.nextOptionDescription || '',
       options: this.initialItemData.options || [],
       templateList: false,
       valid: true,
@@ -385,13 +398,14 @@ export default {
           }
         }
 
-        const { isTokenValue, nextOptionName, nextOptionValue, hasScoreValue, nextOptionScore } = this;
+        const { isTokenValue, nextOptionName, nextOptionValue, hasScoreValue, nextOptionScore, nextOptionDescription } = this;
 
         const currentVal = this.options.length ? this.getMaxValue(this.options) + 1 : 0
         const nextOption = {
           'name': nextOptionName,
           'value': isTokenValue ? Number(nextOptionValue) : currentVal,
           'score': hasScoreValue ? Number(nextOptionScore) : 0,
+          'description': nextOptionDescription,
         };
         if (this.nextOptionImage) {
           nextOption.image = this.nextOptionImage.toString();
@@ -399,7 +413,8 @@ export default {
         if (this.isTemplate) {
           const newOption = {
             text: nextOptionName,
-            value: nextOptionValue
+            value: nextOptionValue,
+            description: nextOptionDescription,
           }
           this.items = [...this.items, newOption]
           this.$emit('updateTemplates', newOption);
@@ -412,6 +427,7 @@ export default {
         this.nextOptionValue = '';
         this.nextOptionImage = '';
         this.nextOptionScore = nextOption.score + 1;
+        this.nextOptionDescription = '';
         this.resetValidation();
         this.update();
       } catch(e) {
@@ -423,7 +439,7 @@ export default {
     },
     removeTemplate(item) {
       const { items } = this;
-      const updatedItems = items.filter(({ text, value }) => text !== item.text || value !== item.value)
+      const updatedItems = items.filter(({ text, value, description }) => text !== item.text || value !== item.value || description !== item.description)
       this.items = [...updatedItems]
       this.$emit('removeTemplate', item);
     },
@@ -431,7 +447,8 @@ export default {
       const nextOption = {
         'name': item.text,
         'value': Number(item.value),
-        'image': ''
+        'image': '',
+        'description': item.description,
       };
       this.templateList = false;
       this.options.push(nextOption);
@@ -458,6 +475,7 @@ export default {
         'nextOptionName': this.nextOptionName,
         'nextOptionValue': this.nextOptionValue,
         'nextOptionImage': this.nextOptionImage,
+        'nextOptionDescription': this.nextOptionDescription,
         'options': this.options,
       };
       this.$emit('updateOptions', responseOptions);

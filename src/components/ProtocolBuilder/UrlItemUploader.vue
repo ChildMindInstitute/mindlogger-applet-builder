@@ -156,6 +156,9 @@ export default {
               if (choice['schema:image']) {
                 optionSchema.image = choice['schema:image'];
               }
+              if (choice['schema:description']) {
+                optionSchema.description = choice['schema:description'];
+              }
               return optionSchema;
             });
             simplifiedSchema.options.numOptions = simplifiedSchema.options.options.length;

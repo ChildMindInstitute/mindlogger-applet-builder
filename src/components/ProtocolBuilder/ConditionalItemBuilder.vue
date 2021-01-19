@@ -193,7 +193,8 @@ export default {
           choice => {
             return {
               name: choice["schema:name"],
-              value: choice["schema:value"]
+              value: choice["schema:value"],
+              description: choice["schema:description"],
             };
           }
         );

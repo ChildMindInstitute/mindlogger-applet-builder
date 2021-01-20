@@ -75,7 +75,7 @@
       </v-row>
       <v-row>
         <v-col
-          v-if="isTokenValue !== isTokenValue"
+          v-if="isTokenValue"
           comment="***Hide Token Prize button for now***"
           class="d-flex align-center"
           cols="auto"

@@ -264,7 +264,10 @@ export default class Item {
     const schema = this.getCompressedSchema();
     const itemObj = {
       name: this.ref.name,
-      question: this.ref.question.image ? `\r\n\r\n![''](${this.ref.question.image} =250x250)\r\n\r\n${this.ref.question.text}` : this.ref.question.text,
+      question: 
+        this.ref.inputType !== 'markdownMessage'
+        ? this.ref.question.image ? `\r\n\r\n![''](${this.ref.question.image} =250x250)\r\n\r\n${this.ref.question.text}` : this.ref.question.text
+        : this.ref.markdownText,
       description: this.ref.description,
       options: this.ref.options,
       allowEdit: this.ref.allowEdit,
@@ -402,9 +405,15 @@ export default class Item {
         inserted: (field) => `Item description was set (${_.get(newValue, field)})`
       }, 
       'question': {
-        updated: (field) => `Item Question was changed to ${this.getQuesionInfo(_.get(newValue, field)).text}`,
+        updated: (field) => 
+          _.get(newValue, 'ui.inputType') !== 'markdownMessage'
+            ? `Item Question was changed to ${this.getQuesionInfo(_.get(newValue, field)).text}`
+            : `Markdown message was updated`,
         removed: (field) => `Item Question was removed`,
-        inserted: (field) => `Item Question was set to ${this.getQuesionInfo(_.get(newValue, field)).text}`,
+        inserted: (field) => 
+          _.get(newValue, 'ui.inputType') !== 'markdownMessage'
+            ? `Item Question was set to ${this.getQuesionInfo(_.get(newValue, field)).text}`
+            : `Markdown message was inserted`,
       },
       'correctAnswer': {
         updated: (field) => `Correct answer was changed`

@@ -271,7 +271,6 @@ export default {
       questionBuilder,
       isUploadingState,
       isError,
-      markdownText: (this.initialItemData.question || ''),
     };
   },
   beforeMount() {

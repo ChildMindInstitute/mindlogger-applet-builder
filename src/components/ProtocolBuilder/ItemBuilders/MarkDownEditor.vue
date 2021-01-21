@@ -29,7 +29,7 @@ export default {
     }
   },
   methods: {
-    async uploadFn() {
+    async uploadFn(payload) {
       const ret = await this.imageUploader.uploadImage(payload); // the payload has the file(File) param from pmd
       return {
           upload: true,

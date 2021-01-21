@@ -58,6 +58,7 @@ export default class Item {
           "cumulativeScore"
         ],
         allowEdit: initialItemData.allowEdit === undefined ? true : initialItemData.allowEdit,
+        markdownText: (initialItemData.question || ''),
     };
   }
 

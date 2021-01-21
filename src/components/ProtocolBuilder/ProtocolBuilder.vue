@@ -129,7 +129,7 @@
         @updateHistoryView="updateHistoryView"
       />
     </v-dialog>
-    <MarkdownEditor 
+    <LandingPageEditor 
       :visibility="markdownDialog" 
       :markdownText="markdownData"
       @close="onCloseEditor"
@@ -153,7 +153,7 @@ import Protocol from '../../models/Protocol';
 import Activity from '../../models/Activity';
 import Item from '../../models/Item';
 import ChangeHistoryComponent from './ChangeHistoryComponent.vue';
-import MarkdownEditor from "./MarkdownEditor"
+import LandingPageEditor from "./LandingPageEditor"
 import util from '../../utilities/util';
 import api from '../../utilities/api';
 import ActivityBuilder from './ActivityBuilder.vue';
@@ -196,7 +196,7 @@ export default {
   components: {
     ActivityBuilder,
     ChangeHistoryComponent,
-    MarkdownEditor,
+    LandingPageEditor,
     PrizeActivityBuilder
   },
   props: {

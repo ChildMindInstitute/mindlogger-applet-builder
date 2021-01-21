@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import * as Sentry from '@sentry/browser';
 import { Vue as VueIntegration } from '@sentry/integrations';
+import store from './store'
+import pmd from 'perfect-markdown'
 
 import App from './App.vue'
 import vuetify from './plugins/vuetify';
@@ -17,7 +19,11 @@ if (env !== 'development') {
 
 Vue.config.productionTip = false;
 
+Vue.use(pmd, { store });
+pmd.setI18nLocale('en');
+
 new Vue({
   vuetify,
+  store,
   render: (h) => h(App),
 }).$mount("#app");

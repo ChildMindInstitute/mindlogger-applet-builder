@@ -54,6 +54,7 @@ export default class Item {
           "audioImageRecord",
           "geolocation",
           "audioStimulus",
+          "markdownMessage",
           "cumulativeScore"
         ],
         allowEdit: initialItemData.allowEdit === undefined ? true : initialItemData.allowEdit,

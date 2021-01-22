@@ -148,7 +148,7 @@ export default class Item {
         "schema:maxValue": "new Date()"
       };
     }
-    if (this.ref.inputType === "audioImageRecord") {
+    if (this.ref.inputType === "audioImageRecord" || this.ref.inputType === "geolocation") {
       return this.ref.responseOptions;
     }
     if (this.ref.inputType === "audioRecord") {
@@ -242,8 +242,7 @@ export default class Item {
 
     if (
       (this.ref.inputType === "radio" ||
-        this.ref.inputType === "audioRecord" ||
-        this.ref.inputType === "geolocation") &&
+        this.ref.inputType === "audioRecord") &&
       Object.keys(this.ref.responseOptions).length
     ) {
       itemObj.responseOptions = itemObj.responseOptions || this.ref.responseOptions;

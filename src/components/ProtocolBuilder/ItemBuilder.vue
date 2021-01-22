@@ -132,7 +132,14 @@
           @updateAllow="updateAllow"
         />
 
-        <GeolocationBuilder v-if="inputType === 'geolocation'" @update="updateResponseOptions" />
+        <GeolocationBuilder
+          v-if="inputType === 'geolocation'"
+          :initial-item-response-options="responseOptions"
+          @uploading="isUploadingState = $event"
+          @error="isError = $event"
+          @updateResponseOptions="updateResponseOptions"
+        />
+
         <AudioStimulusBuilder
           v-if="inputType === 'audioStimulus'"
           :is-skippable-item="allow"

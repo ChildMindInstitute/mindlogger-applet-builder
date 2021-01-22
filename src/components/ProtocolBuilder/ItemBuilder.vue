@@ -107,9 +107,11 @@
 
         <DrawingBuilder
           v-if="inputType === 'drawing'"
+          :initial-item-response-options="responseOptions"
           :initial-item-input-options="inputOptions"
           @uploading="isUploadingState = $event"
           @error="isError = $event"
+          @updateResponseOptions="updateResponseOptions"
           @updateInputOptions="updateInputOptions"
         />
 

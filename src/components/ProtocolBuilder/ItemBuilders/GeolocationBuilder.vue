@@ -15,6 +15,7 @@
 </template>
 
 <script>
+import ImageUpldr from '../../../models/ImageUploader';
 import ImageUploader from './../ImageUploader.vue';
 
 export default {
@@ -36,6 +37,7 @@ export default {
     responseOptions['valueType'] = 'geolocation';
 
     return {
+      imgUpldr: new ImageUpldr(),
       responseOptions
     }
   },

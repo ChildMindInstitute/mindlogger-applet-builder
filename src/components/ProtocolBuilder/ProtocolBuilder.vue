@@ -516,6 +516,7 @@ export default {
                       const name = itemListElement["schema:name"];
                       const value = itemListElement["schema:value"];
                       const score = itemListElement["schema:score"];
+                      const description = itemListElement["schema:description"];
 
                       return {
                         image: 
@@ -528,6 +529,9 @@ export default {
                           Array.isArray(value) && value[0] && value[0]['@value'],
                         score:
                           Array.isArray(score) && score[0] && score[0]['@value'],
+                        description:
+                          typeof description == 'string' && description ||
+                          Array.isArray(description) && description[0] && description[0]['@value'].toString(),
                       };
                     }
                   ),
@@ -548,6 +552,7 @@ export default {
                       const name = itemListElement["schema:name"];
                       const value = itemListElement["schema:value"];
                       const price = itemListElement["schema:price"];
+                      const description = itemListElement["schema:description"];
 
                       return {
                         name:
@@ -557,6 +562,9 @@ export default {
                           Array.isArray(value) && value[0] && value[0]['@value'],
                         price:
                           Array.isArray(price) && price[0] && price[0]['@value'],
+                        description:
+                          typeof description == "string" && description ||
+                          Array.isArray(description) && description[0] && description[0]['@value'].toString(),
                       };
                     }
                   ),

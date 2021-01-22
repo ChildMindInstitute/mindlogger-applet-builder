@@ -96,6 +96,7 @@ export default class Item {
                 "@type": "schema:option",
                 "schema:name": option.name,
                 "schema:value": option.value,
+                "schema:description": option.description,
             };
 
             if(this.ref.inputType === "prize")

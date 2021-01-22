@@ -148,7 +148,7 @@ export default class Item {
         "schema:maxValue": "new Date()"
       };
     }
-    if (this.ref.inputType === "audioImageRecord") {
+    if (this.ref.inputType === "audioImageRecord" || this.ref.inputType === "drawing") {
       return this.ref.responseOptions;
     }
     if (this.ref.inputType === "audioRecord") {

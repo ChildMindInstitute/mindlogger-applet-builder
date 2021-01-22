@@ -571,8 +571,8 @@ export default {
           // new block start
           const responseOptions2 = item['reprolib:terms/responseOptions'];
           if(responseOptions2 && responseOptions2.length > 0) {
-            // delete "itemType === 'audioImageRecord'" later !!!!!!! this should works for all items wich contains responseOptions, modification for specific values should be inside "responseOptionsModifier" function
-            if(itemType === 'audioImageRecord')
+            // delete "itemType === 'audioImageRecord' || itemType === 'drawing'" later !!!!!!! this should works for all items wich contains responseOptions, modification for specific values should be inside "responseOptionsModifier" function
+            if(itemType === 'audioImageRecord' || itemType === 'drawing')
               itemContent.responseOptions = this.responseOptionsModifier(itemType, responseOptions2);
           }
 

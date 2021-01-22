@@ -74,6 +74,7 @@ export default {
     this.$emit('checkValidation', true);
 
     return {
+      imgUpldr: new ImageUpldr(),
       responseOptions,
       isSkippable: this.isSkippableItem || false,
       valid: true,

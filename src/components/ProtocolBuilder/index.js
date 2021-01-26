@@ -1,7 +1,6 @@
 import AppletSchemaBuilder from './ProtocolBuilder.vue';
-import pmd from 'perfect-markdown'
-import messages from 'perfect-markdown/src/lang';
-import help from 'perfect-markdown/src/lang/help';
+
+import { html5Media } from 'markdown-it-html5-media';
 
 const Components = {
   AppletSchemaBuilder
@@ -9,12 +8,11 @@ const Components = {
 
 
 export default {
-  pmd,
   install: function (Vue, options = {}) {
-    const { store } = options;
-    Vue.use(pmd, store ? { store } : {});
+    if (options.mavonEditor) {
+      options.mavonEditor.markdownIt.use(html5Media);
+    }
 
-    pmd.setHelp('en_US', help.en);
     Object.keys(Components).forEach(name => {
       Vue.component(name, Components[name]);
     });

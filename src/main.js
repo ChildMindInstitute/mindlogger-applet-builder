@@ -1,6 +1,10 @@
 import Vue from 'vue'
 import * as Sentry from '@sentry/browser';
 import { Vue as VueIntegration } from '@sentry/integrations';
+import store from './store'
+import mavonEditor from 'mavon-editor';
+import 'mavon-editor/dist/css/index.css'
+import { html5Media } from 'markdown-it-html5-media';
 
 import App from './App.vue'
 import vuetify from './plugins/vuetify';
@@ -17,7 +21,11 @@ if (env !== 'development') {
 
 Vue.config.productionTip = false;
 
+Vue.use(mavonEditor);
+mavonEditor.markdownIt.use(html5Media);
+
 new Vue({
   vuetify,
+  store,
   render: (h) => h(App),
 }).$mount("#app");

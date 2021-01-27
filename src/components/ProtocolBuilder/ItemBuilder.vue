@@ -15,24 +15,28 @@
           required
           @keydown="nameKeydown($event)"
         />
-        <v-textarea
-          v-model="questionBuilder.text"
-          label="Question"
-          v-if="inputType !== 'cumulativeScore'"
-          :disabled="!isItemEditable"
-          counter="320"
-          maxlength="320"
-          auto-grow
-          rows="1"
-        />
-        <ImageUploader
-          class="mt-3 mb-4"
-          style="max-width: 300px"
-          :uploadFor="'activity-item'"
-          :itemImg="questionBuilder.imgURL"
-          @onAddImg="onAddImg"
-          @onRemoveImg="onRemoveImg"
-        />
+        <template
+          v-if="inputType !== 'markdownMessage'"
+        >
+          <v-textarea
+            v-model="questionBuilder.text"
+            label="Question"
+            v-if="inputType !== 'cumulativeScore'"
+            :disabled="!isItemEditable"
+            counter="320"
+            maxlength="320"
+            auto-grow
+            rows="1"
+          />
+          <ImageUploader
+            class="mt-3 mb-4"
+            style="max-width: 300px"
+            :uploadFor="'activity-item'"
+            :itemImg="questionBuilder.imgURL"
+            @onAddImg="onAddImg"
+            @onRemoveImg="onRemoveImg"
+          />
+        </template>
         <v-select
           class="mt-6"
           v-model="inputType"
@@ -66,6 +70,16 @@
             </v-list-item>
           </template>
         </v-select>
+
+        <div
+          v-if="inputType === 'markdownMessage'"
+        >
+          Message:
+
+          <MarkDownEditor
+            v-model="markdownText"
+          />
+        </div>
         <RadioBuilder
           v-if="inputType === 'radio'"
           :is-skippable-item="allow"
@@ -193,12 +207,12 @@ import AudioImageRecordBuilder from "./ItemBuilders/AudioImageRecordBuilder.vue"
 import GeolocationBuilder from "./ItemBuilders/GeolocationBuilder.vue";
 import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
 import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
+import MarkDownEditor from "./ItemBuilders/MarkDownEditor";
 import Item from '../../models/Item';
 import ImageUpldr from '../../models/ImageUploader';
 
 export default {
   components: {
-    ImageUploader,
     RadioBuilder,
     TextBuilder,
     SliderBuilder,
@@ -212,6 +226,8 @@ export default {
     GeolocationBuilder,
     AudioStimulusBuilder,
     CumulativeScoreBuilder,
+    ImageUploader,
+    MarkDownEditor,
   },
   props: {
     initialItemData: {
@@ -254,7 +270,7 @@ export default {
       imgUploader,
       questionBuilder,
       isUploadingState,
-      isError
+      isError,
     };
   },
   beforeMount() {

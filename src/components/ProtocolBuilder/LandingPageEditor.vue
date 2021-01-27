@@ -11,12 +11,8 @@
         </v-card-title>
         <v-card-text>
           <v-container>
-            <Editor 
-              class="p-markdown mt-5"
-              ref="markdownEditor"
-              :initialValue="markdownText"
-              :options="editorOptions"
-              previewStyle="vertical"
+            <MarkDownEditor 
+              v-model="markdownData"
             />
           </v-container>
         </v-card-text>
@@ -44,14 +40,12 @@
 
 
 <script>
-import 'codemirror/lib/codemirror.css';
-import '@toast-ui/editor/dist/toastui-editor.css';
-import { Editor } from '@toast-ui/vue-editor'
+import MarkDownEditor from './ItemBuilders/MarkDownEditor';
 
 export default {
-  name: 'MarkdownEditor',
+  name: 'LandingPageEditor',
   components: {
-    Editor,
+    MarkDownEditor,
   },
   props: {
     visibility: {
@@ -68,7 +62,8 @@ export default {
       dialog: false,
       editorOptions: {
         hideModeSwitch: false
-      }
+      },
+      markdownData: this.markdownText,
     }
   },
   methods: {
@@ -78,8 +73,7 @@ export default {
      * @returns {void} 
      */
     onSubmit() {
-      const markdownData = this.$refs.markdownEditor.invoke("getMarkdown")
-      this.$emit("submit", markdownData)
+      this.$emit("submit", this.markdownData);
     },
 
     /**

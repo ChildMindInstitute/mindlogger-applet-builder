@@ -15,6 +15,18 @@
       type="text"
       @change="update"
     />
+
+    <Uploader
+      class="mt-4 mb-10"
+      style="max-width: 300px"
+      :initialType="'audio'"
+      :initialData="''"
+      @onAdd="$event(); loading = true;"
+      @onUploaded="loading = false; onUploadedAudio($event);"
+      @onRemove="onRemoveAudio()"
+      @onError="loading = false; notify = $event;"
+    />
+
     <v-checkbox
       v-model="isSkippable"
       label="Skippable Item"
@@ -27,11 +39,23 @@
       :disabled="!isItemEditable"
       @change="update"
     />
+
+    <Alert
+      :loading="loading"
+      :notify="notify"
+    />
   </v-form>
 </template>
 
 <script>
+import Uploader from '../Uploader.vue';
+import Alert from '../Alert.vue';
+
 export default {
+  components: {
+    Uploader,
+    Alert,
+  },
   props: {
     initialItemData: {
       type: Object,
@@ -68,7 +92,9 @@ export default {
         : true,
       isSkippable: this.isSkippableItem || false,
       valid: true,
-      urlRules: [v => !!v || "Media URL cannot be empty"]
+      urlRules: [v => !!v || "Media URL cannot be empty"],
+      loading: false,
+      notify: {},
     };
   },
   methods: {
@@ -100,7 +126,23 @@ export default {
     updateAllow() {
       const allow = this.isSkippable
       this.$emit('updateAllow', allow);
+    },
+
+    onUploadedAudio(audioURL) {
+      console.log(audioURL);
+      this.notify = {
+        type: 'success',
+        message: 'Audio successfully uploaded and added to "AudioStimulus" Item',
+      };
+    },
+
+    onRemoveAudio() {
+      this.notify = {
+        type: 'warning',
+        message: 'Audio successfully removed from "AudioStimulus" Item',
+      };
     }
+
   }
 };
 </script>

@@ -17,7 +17,42 @@
     <!-- Images Uploader Structure -->
 
     <div v-if="initialType === 'audio'">
-      Audio Uploader
+      
+      <v-expansion-panels>
+        <v-expansion-panel>
+          <v-expansion-panel-header>
+            {{ data ? 'Change' : 'Add' }} Audio
+          </v-expansion-panel-header>
+          <v-expansion-panel-content>
+            <div class="input-file-container">
+              <input 
+                class="file-input"
+                type="file"
+                ref="fileInput"
+                accept="audio/mpeg, audio/ogg, audio/wav"
+                @change="onChangeAudioFile"
+              >
+              <v-btn>
+                Your computer
+                <v-icon right>mdi-monitor</v-icon>
+              </v-btn>
+            </div>
+            <v-btn class="mt-4">
+              Record
+              <v-icon right>mdi-record-circle-outline</v-icon>
+            </v-btn>
+            <v-btn
+              v-if="data"
+              class="mt-4"
+              color="error"
+              @click="removeConfirm = true"
+            >
+              Remove Audio
+            </v-btn>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
+
     </div>
     <!-- Audio Uploader Structure -->
 
@@ -85,6 +120,17 @@ export default {
   },
   methods: {
 
+    async onChangeAudioFile(event) {
+      const file = event.target.files[0];
+
+      if(file) {
+        this.data = file;
+        this.$emit('onAdd', this.uploadFile);
+      }
+
+      event.target.value = '';
+    },
+
     async uploadFile() {
       try {
         const response = await this.uploader.upload(this.data);
@@ -144,7 +190,7 @@ export default {
 }
 
 .v-dialog .v-alert {
-  margin-bottom: 0px
+  margin-bottom: 0px;
 }
 
 </style>

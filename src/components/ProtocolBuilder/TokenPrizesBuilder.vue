@@ -170,7 +170,7 @@ export default {
 
         const confirmationItem = {
           name: `Confirmation ${item.value}`,
-          question: `Do you want ${item.name} for ${item.price} tokens?`,
+          question: `Do you want \"${item.name}\" for ${item.price} token${item.price >= 2 ? 's' : ''}?`,
           options: {
             hasScoreValue: false,
             isTokenValue: false,

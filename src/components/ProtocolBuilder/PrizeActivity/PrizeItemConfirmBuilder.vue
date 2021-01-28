@@ -65,7 +65,7 @@ export default {
   },
   methods: {
     createQuestion() {
-      this.question.text = `Do you want \"${this.option.name}\" for ${this.option.price} token`;
+      this.question.text = `Do you want \"${this.option.name}\" for ${this.option.price} token${this.option.price >= 2 ? 's' : ''}?`;
     }
   }
 

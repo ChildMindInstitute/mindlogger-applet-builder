@@ -37,7 +37,10 @@
                 <v-icon right>mdi-monitor</v-icon>
               </v-btn>
             </div>
-            <v-btn class="mt-4">
+            <v-btn 
+              class="mt-4"
+              @click="$emit('onRecordAudio')"
+            >
               Record
               <v-icon right>mdi-record-circle-outline</v-icon>
             </v-btn>
@@ -103,7 +106,7 @@ export default {
       default: '',
     },
     initialData: {
-      type: String,
+      type: [String, File],
       default: '',
     },
   },
@@ -118,23 +121,34 @@ export default {
       removeConfirm: false,
     };
   },
+  watch: {
+    initialData() {
+      if(this.data !== this.initialData) {
+        this.data = this.initialData;
+
+        if(this.initialType === 'audio')
+          this.onChangeAudioFile(null, this.data);
+      }
+    }
+  },
   methods: {
 
-    async onChangeAudioFile(event) {
-      const file = event.target.files[0];
+    async onChangeAudioFile(event, audioFile) {
+      const file = event ? event.target.files[0] : audioFile;
 
       if(file) {
         this.data = file;
-        this.$emit('onAdd', this.uploadFile);
+        this.$emit('onAddAudio', this.uploadFile);
       }
 
-      event.target.value = '';
+      if(event) event.target.value = '';
     },
 
     async uploadFile() {
       try {
         const response = await this.uploader.upload(this.data);
-        this.$emit('onUploaded', response.location);
+        this.data = response.location;
+        this.$emit('onUploaded', this.data);
       } catch(err) {
         this.data = this.initialData;
         setTimeout(() => {

@@ -1,9 +1,7 @@
 <template>
   <v-dialog 
     v-model="show"
-    persistent
     width="400"
-    @click="show = false"
   >
 
     <v-card 

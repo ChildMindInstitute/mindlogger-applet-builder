@@ -39,6 +39,13 @@
             </div>
             <v-btn 
               class="mt-4"
+              @click="$emit('onAddFromURL')"
+            >
+              From URL
+              <v-icon right>mdi-link-variant-plus</v-icon>
+            </v-btn>
+            <v-btn 
+              class="mt-4"
               @click="$emit('onRecordAudio')"
             >
               Record
@@ -136,7 +143,7 @@ export default {
     async onChangeAudioFile(event, audioFile) {
       const file = event ? event.target.files[0] : audioFile;
 
-      if(file) {
+      if(file && typeof file !== 'string') {
         this.data = file;
         this.$emit('onAddAudio', this.uploadFile);
       }

@@ -2,15 +2,6 @@
   <v-form ref="form" v-model="valid">
 
     <v-text-field
-      v-model="url"
-      label="Media URL"
-      type="text"
-      :disabled="!isItemEditable"
-      :rules="urlRules"
-      @change="update"
-    />
-
-    <v-text-field
       v-if="isItemEditable"
       v-model="transcript"
       label="Media transcript"
@@ -30,6 +21,7 @@
       style="max-width: 300px"
       :initialType="'audio'"
       :initialData="audio"
+      @onAddFromURL="isAddingFromURLProcess = true"
       @onRecordAudio="onOpenRecorder"
       @onAddAudio="loading = true; $event();"
       @onUploaded="loading = false; onUploadedAudio($event);"
@@ -51,6 +43,37 @@
       :disabled="!isItemEditable"
       @change="update"
     />
+
+    <v-dialog v-model="isAddingFromURLProcess" persistent width="800">
+      <v-card>
+        <v-card-title class="headline grey lighten-2" primary-title>
+          <v-icon left large>mdi-link-variant-plus</v-icon>
+          Add from URL
+        </v-card-title>
+        <v-card-text>
+          <v-text-field label="URL" v-model="audioURL" />
+        </v-card-text>
+        <v-divider />
+        <v-card-actions>
+          <v-btn 
+            outlined
+            color="primary"
+            @click="isAddingFromURLProcess = false"
+          >
+            Cancel
+          </v-btn>
+          <v-spacer />
+          <v-btn 
+            color="primary"
+            :disabled="!audioURL"
+            @click="isAddingFromURLProcess = false; onAddFromURL();"
+          >
+            Add
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <!-- Audio URL Popup -->
 
     <v-dialog
       v-model="isRecordProcess"
@@ -161,6 +184,8 @@ export default {
 
       audioFromItem: '',
 
+      isAddingFromURLProcess: false,
+      audioURL: '',
       isRecordProcess: false,
       isRecordProcessVisible: false,
       recordedAudioData: null,
@@ -198,6 +223,27 @@ export default {
     updateAllow() {
       const allow = this.isSkippable
       this.$emit('updateAllow', allow);
+    },
+
+    onAddFromURL() {
+      const newAudio = new Audio(this.audioURL);
+
+      newAudio.addEventListener('canplay', () => {
+        this.audioFromItem = this.audioURL;
+        this.audio = this.audioFromItem;
+        this.audioURL = '';
+        this.notify = {
+          type: 'success',
+          message: 'Audio successfully added to "AudioStimulus" Item',
+        };
+      });
+
+      newAudio.addEventListener('error', () => {
+        this.notify = {
+          type: 'error',
+          message: 'Please check if you use correct "audio" url.',
+        };
+      });
     },
 
     onOpenRecorder() {

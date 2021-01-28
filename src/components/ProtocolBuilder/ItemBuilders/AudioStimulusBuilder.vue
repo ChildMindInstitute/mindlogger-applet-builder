@@ -10,10 +10,10 @@
     />
 
     <AudioPlayer
-      v-if="audioFromItem"
+      v-if="url"
       class="audio-player mt-4 mb-5"
       style="max-width: 370px"
-      :src="audioFromItem" 
+      :src="url"
     />
 
     <Uploader
@@ -182,14 +182,12 @@ export default {
       valid: true,
       urlRules: [v => !!v || "Media URL cannot be empty"],
 
-      audioFromItem: '',
-
       isAddingFromURLProcess: false,
       audioURL: '',
       isRecordProcess: false,
       isRecordProcessVisible: false,
       recordedAudioData: null,
-      audio: this.audioFromItem,
+      audio: this.url,
       loading: false,
       notify: {},
     };
@@ -229,13 +227,14 @@ export default {
       const newAudio = new Audio(this.audioURL);
 
       newAudio.addEventListener('canplay', () => {
-        this.audioFromItem = this.audioURL;
-        this.audio = this.audioFromItem;
+        this.url = this.audioURL;
+        this.audio = this.url;
         this.audioURL = '';
         this.notify = {
           type: 'success',
           message: 'Audio successfully added to "AudioStimulus" Item',
         };
+        this.update();
       });
 
       newAudio.addEventListener('error', () => {
@@ -274,22 +273,24 @@ export default {
     },
 
     onUploadedAudio(audioURL) {
-      this.audioFromItem = audioURL;
-      this.audio = this.audioFromItem;
+      this.url = audioURL;
+      this.audio = this.url;
       this.recordedAudioData = null;
       this.notify = {
         type: 'success',
         message: 'Audio successfully uploaded and added to "AudioStimulus" Item',
       };
+      this.update();
     },
 
     onRemoveAudio() {
-      this.audioFromItem = '';
-      this.audio = this.audioFromItem;
+      this.url = '';
+      this.audio = this.url;
       this.notify = {
         type: 'warning',
         message: 'Audio successfully removed from "AudioStimulus" Item',
       };
+      this.update();
     }
 
   }

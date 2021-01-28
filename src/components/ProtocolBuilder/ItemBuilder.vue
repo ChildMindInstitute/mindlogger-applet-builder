@@ -167,7 +167,7 @@
       >{{ isItemEditable ? "Discard Changes" : "Close" }}</v-btn>
       <v-spacer />
       <v-btn
-        :disabled="!valid && inputType === 'cumulativeScore' || !name"
+        :disabled="!name || !inputType || (!valid && inputType === 'cumulativeScore')"
         color="primary"
         @click="onSaveItem"
       >

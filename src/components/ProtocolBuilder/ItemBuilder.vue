@@ -23,8 +23,6 @@
             label="Question"
             v-if="inputType !== 'cumulativeScore'"
             :disabled="!isItemEditable"
-            counter="320"
-            maxlength="320"
             auto-grow
             rows="1"
           />

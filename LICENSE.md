@@ -4,12 +4,8 @@ License text copyright © 2021 Child Mind Institute, Inc. All Rights Reserved.
 <br>
 "Delayed Open Source Attribution License" and "DOSA License" are trademarks of Child Mind Institute, Inc.
 
-<hr>
-<center><img width="100" src="https://mindlogger.org/assets/logos/DOSA_logo.png" class="img-responsive img-centered" alt="DOSA logo"></center>
-<hr>
-
 --------
-![DOSA logo](https://mindlogger.org/assets/logos/DOSA_logo.png)
+![DOSA logo](https://mindlogger.org/assets/logos/DOSA_logo.png =100x)
 --------
 
 Though it is not itself an open source license, the purpose of this Delayed Open Source Attribution 

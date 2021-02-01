@@ -119,7 +119,17 @@
         <PhotoBuilder v-if="inputType === 'photo'" />
         <TimeRangeBuilder v-if="inputType === 'timeRange'" />
         <DateBuilder v-if="inputType === 'date'" />
-        <DrawingBuilder v-if="inputType === 'drawing'" />
+
+        <DrawingBuilder
+          v-if="inputType === 'drawing'"
+          :initial-item-response-options="responseOptions"
+          :initial-item-input-options="inputOptions"
+          @uploading="isUploadingState = $event"
+          @error="isError = $event"
+          @updateResponseOptions="updateResponseOptions"
+          @updateInputOptions="updateInputOptions"
+        />
+
         <AudioRecordBuilder
           v-if="inputType === 'audioRecord'"
           :is-skippable-item="allow"
@@ -127,14 +137,26 @@
           @updateOptions="updateOptions"
           @updateAllow="updateAllow"
         />
+
         <AudioImageRecordBuilder
           v-if="inputType === 'audioImageRecord'"
+          :initial-item-response-options="responseOptions"
           :is-skippable-item="allow"
-          :initial-item-data="options"
-          @updateOptions="updateOptions"
+          @uploading="isUploadingState = $event"
+          @error="isError = $event"
+          @checkValidation="valid = $event"
+          @updateResponseOptions="updateResponseOptions"
           @updateAllow="updateAllow"
         />
-        <GeolocationBuilder v-if="inputType === 'geolocation'" @update="updateResponseOptions" />
+
+        <GeolocationBuilder
+          v-if="inputType === 'geolocation'"
+          :initial-item-response-options="responseOptions"
+          @uploading="isUploadingState = $event"
+          @error="isError = $event"
+          @updateResponseOptions="updateResponseOptions"
+        />
+
         <AudioStimulusBuilder
           v-if="inputType === 'audioStimulus'"
           :is-skippable-item="allow"
@@ -165,7 +187,7 @@
       >{{ isItemEditable ? "Discard Changes" : "Close" }}</v-btn>
       <v-spacer />
       <v-btn
-        :disabled="!name || !inputType || (!valid && inputType === 'cumulativeScore')"
+        :disabled="!name || !inputType || (!valid && inputType === 'cumulativeScore') || (!valid && inputType === 'audioImageRecord')"
         color="primary"
         @click="onSaveItem"
       >

@@ -650,6 +650,22 @@ export default {
             }
           }
 
+          // new block start
+          const responseOptions2 = item['reprolib:terms/responseOptions'];
+          if(responseOptions2 && responseOptions2.length > 0) {
+            // delete "itemType === 'audioImageRecord' || itemType === 'drawing' || itemType === 'geolocation'" later !!!!!!! this should works for all items wich contains responseOptions, modification for specific values should be inside "responseOptionsModifier" function
+            if(itemType === 'audioImageRecord' || itemType === 'drawing' || itemType === 'geolocation')
+              itemContent.responseOptions = this.responseOptionsModifier(itemType, responseOptions2);
+          }
+
+          const inputOptions = item['reprolib:terms/inputs'];
+          if(inputOptions && inputOptions.length > 0) {
+            // delete "itemType === 'drawing'" later !!!!!!! this should works for all items wich contains inputOptions, modification for specific values should be inside "inputOptionsModifier" function
+            if(itemType === 'drawing')
+              itemContent.inputOptions = this.inputOptionsModifier(itemType, inputOptions);
+          }
+          // new block end
+
           if (itemType === 'audioStimulus') {
             let mediaObj = Object.entries(
               item['reprolib:terms/media'] && item['reprolib:terms/media'][0]
@@ -691,6 +707,69 @@ export default {
         this.activities.push(activityModel.getActivityData());
       });
     },
+    // Modifiers for data from schema for using data inside app - Start
+    // response options modifier
+    responseOptionsModifier(itemType, options) {
+      const responseOptions = options[0];
+      const modifiedResponseOptions = {};
+
+      const valueType = responseOptions['reprolib:terms/valueType'];
+      if(valueType)
+        modifiedResponseOptions['valueType'] = valueType[0]['@id'];
+
+      const minValue = responseOptions['schema:minValue'];
+      if(minValue)
+        modifiedResponseOptions['schema:minValue'] = minValue[0]['@value'];
+
+      const maxValue = responseOptions['schema:maxValue'];
+      if(maxValue)
+        modifiedResponseOptions['schema:maxValue'] = maxValue[0]['@value'];
+
+      const image = responseOptions['schema:image'];
+      if(image)
+        modifiedResponseOptions['schema:image'] = image;
+
+      const multipleChoice = responseOptions['reprolib:terms/multipleChoice'];
+      if(multipleChoice)
+        modifiedResponseOptions['multipleChoice'] = multipleChoice[0]['@value'];
+
+      const requiredValue = responseOptions['reprolib:terms/requiredValue'];
+      if(requiredValue)
+        modifiedResponseOptions['requiredValue'] = requiredValue[0]['@value'];
+
+      return modifiedResponseOptions;
+    },
+    // input options modifier
+    inputOptionsModifier(itemType, options) {
+      const modifiedInputOptions = [];
+
+      options.forEach(option => {
+        const modifiedOption = {};
+
+        const type = option['@type'];
+        if(type)
+          modifiedOption['@type'] = 'schema:' + this.getTypeOfActionFromSchemaURL(type[0]);
+        
+        const name = option['schema:name'];
+        if(name)
+          modifiedOption['schema:name'] = name[0]['@value'];
+        
+        const value = option['schema:value'];
+        if(value)
+          modifiedOption['schema:value'] = value[0]['@value'];
+
+        modifiedInputOptions.push(modifiedOption);
+      });
+
+      return modifiedInputOptions;
+    },
+    // helper functions for modifiers
+    getTypeOfActionFromSchemaURL(url) {
+      const index = url.lastIndexOf('/');
+      if(index >= 0 && url.length - 1 > index) return url.slice(index + 1);
+      else return '';
+    },
+    // Modifiers for data from schema for using data inside app - End
     onUpdateTemplates(option) {
       this.$emit("updateTemplates", option)
     },

@@ -6,7 +6,7 @@ License text copyright © 2021 Child Mind Institute, Inc. All Rights Reserved.
 
 --------
 
-![DOSA logo](https://mindlogger.org/assets/logos/DOSA_logo.png)
+![DOSA logo](https://mindlogger.org/assets/logos/DOSA_logo.png =100x100)
 
 --------
 

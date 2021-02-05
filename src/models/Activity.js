@@ -15,6 +15,7 @@ export default class Activity {
       preamble: initialActivityData.preamble || '',
       shuffleActivityOrder: initialActivityData.shuffle || false,
       isSkippable: initialActivityData.isSkippable || false,
+      disableBack: initialActivityData.disableBack || false,
       items: initialActivityData.items && initialActivityData.items.map(item => item) || [],
       id: initialActivityData._id || null,
       textRules: [(v) => !!v || 'This field is required'],
@@ -268,15 +269,14 @@ export default class Activity {
     return itemNamesArray;
   }
 
-  getAllowed() {
-    return this.ref.isSkippable ? ['skipped'] : [];
-  }
-
   getCompressedSchema() {
     const visibility = this.getItemVisibility();
     const itemOrder = this.getItemOrder();
     const addProperties = this.getAddProperties(itemOrder);
-    const allowed = this.getAllowed();
+    const allowed = [];
+    this.ref.isSkippable && allowed.push('skipped');
+    this.ref.disableBack && allowed.push('disableBack');
+
     return {
       '@context': [
         'https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json',
@@ -348,6 +348,7 @@ export default class Activity {
       preamble: this.ref.preamble,
       shuffle: this.ref.shuffleActivityOrder,
       isSkippable: this.ref.isSkippable,
+      disableBack: this.ref.disableBack,
       schema: schema,
       context: context,
       items: items,

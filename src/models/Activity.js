@@ -15,7 +15,7 @@ export default class Activity {
       preamble: initialActivityData.preamble || '',
       shuffleActivityOrder: initialActivityData.shuffle || false,
       isSkippable: initialActivityData.isSkippable || false,
-      items: initialActivityData.items && initialActivityData.items.map(item => item) || [],
+      items: initialActivityData.items || [],
       id: initialActivityData._id || null,
       textRules: [(v) => !!v || 'This field is required'],
       editItemDialog: false,
@@ -40,7 +40,7 @@ export default class Activity {
       compute: initialActivityData.compute && initialActivityData.compute.map(compute => compute) || [],
       messages: initialActivityData.messages && initialActivityData.messages.map(message => message) || [],
       allowEdit: true,
-      isPrize: initialActivityData.isPrize || false
+      isPrize: initialActivityData.isPrize || false,
     };
   }
 
@@ -339,7 +339,6 @@ export default class Activity {
   getActivityData() {
     const schema = this.getCompressedSchema();
     const context = this.getContext();
-    const items = this.ref.items;
     const conditionalItems = this.ref.conditionalItems;
     return {
       _id: this.ref.id,
@@ -350,7 +349,7 @@ export default class Activity {
       isSkippable: this.ref.isSkippable,
       schema: schema,
       context: context,
-      items: items,
+      items: this.ref.items,
       conditionalItems: conditionalItems,
       subScales: this.ref.subScales,
       compute: this.ref.compute,
@@ -628,5 +627,136 @@ export default class Activity {
       updates,
       removed,
     };
+  }
+
+  static parseJSONLD(act) {
+    const activitiesObj = act;
+    const {
+      ['http://www.w3.org/2004/02/skos/core#prefLabel']: name,
+      ['schema:description']: description,
+      ['reprolib:terms/preamble']: activityPreamble,
+      ['reprolib:terms/shuffle']: shuffle,
+      ['reprolib:terms/allow']: isSkippable,
+      ['reprolib:terms/addProperties']: addProperties,
+      ['reprolib:terms/subScales']: subScales,
+      ['reprolib:terms/compute']: compute,
+      ['reprolib:terms/messages']: messages,
+      ['reprolib:terms/isPrize']: isPrize,
+      ['reprolib:terms/order']: orders,
+      ['_id']: id,
+    } = activitiesObj;
+
+    const visibilities = addProperties.map((property) => {
+      const isAbout = _.get(
+        property,
+        'reprolib:terms/isAbout.0.@id',
+        ""
+      );
+      const isVis = _.get(
+        property,
+        'reprolib:terms/isVis.0.@value',
+        ""
+      );
+      const variableName = _.get(
+        property,
+        'reprolib:terms/variableName.0.@value',
+        ""
+      );
+      return {
+        isAbout,
+        isVis,
+        variableName,
+      }
+    });
+
+    const activityInfo = {
+      _id: id && id.split('/')[1],
+      name:
+        name && name[0] && name[0]['@value'],
+      description:
+        description && description[0] && description[0]['@value'],
+      isPrize:
+        isPrize && isPrize[0] && isPrize[0]['@value'],
+      preamble:
+        activityPreamble &&
+        activityPreamble[0] &&
+        activityPreamble[0]['@value'],
+      shuffle: shuffle && shuffle[0] && shuffle[0]['@value'],
+      visibilities,
+      subScales: Array.isArray(subScales) && subScales.map((subScale, index) => {
+        const jsExpression = subScale['reprolib:terms/jsExpression'];
+        const variableName = subScale['reprolib:terms/variableName'];
+        const lookupTable = subScale['reprolib:terms/lookupTable'];
+
+        let subScaleData = {
+          jsExpression: jsExpression[0] && jsExpression[0]['@value'],
+          variableName: variableName[0] && variableName[0]['@value'],
+          subScaleId: index + 1,
+        };
+
+        if (lookupTable && Array.isArray(lookupTable)) {
+          subScaleData['lookupTable'] = lookupTable.map(row => {
+            const age = row['reprolib:terms/age'];
+            const rawScore = row['reprolib:terms/rawScore'];
+            const sex = row['reprolib:terms/sex'];
+            const tScore = row['reprolib:terms/tScore'];
+
+            return {
+              age: age && age[0] && age[0]['@value'] || '',
+              rawScore: rawScore && rawScore[0] && rawScore[0]['@value'] || '',
+              sex: sex && sex[0] && sex[0]['@value'] || '',
+              tScore: tScore && tScore[0] && tScore[0]['@value'] || '',
+            }
+          })
+        }
+
+        return subScaleData;
+      }),
+      compute: Array.isArray(compute) && compute.map((exp) => {
+        const jsExpression = exp['reprolib:terms/jsExpression'];
+        const variableName = exp['reprolib:terms/variableName'];
+
+        return {
+          jsExpression: jsExpression && jsExpression[0] && jsExpression[0]['@value'],
+          variableName: variableName && variableName[0] && variableName[0]['@value'],
+        }
+      }),
+      messages: Array.isArray(messages) && messages.map((msg) => {
+        const jsExpression = msg['reprolib:terms/jsExpression'];
+        const message = msg['reprolib:terms/message'];
+        const outputType = msg['reprolib:terms/outputType']
+
+        return {
+          jsExpression: jsExpression && jsExpression[0] && jsExpression[0]['@value'],
+          message: message && message[0] && message[0]['@value'],
+          outputType: outputType && outputType[0] && outputType[0]['@value'] || 'cumulative',
+        }
+      }),
+      orderList: _.get(orders, '0.@list', []).map(order => order['@id'])
+    };
+
+    let isSkippableList =
+      (isSkippable && isSkippable[0] && isSkippable[0]['@list']) || [];
+
+    if (isSkippableList.length) {
+      if (
+        (isSkippableList[0] &&
+          isSkippableList[0]['@id'] &&
+          isSkippableList[0]['@id'].includes('refused_to_answer')) ||
+        (isSkippableList[0] &&
+          isSkippableList[0]['@id'] &&
+          isSkippableList[0]['@id'].includes('dontKnow'))
+      ) {
+        activityInfo.isSkippable = true;
+      }
+    }
+
+    activityInfo.isValid = true;
+
+    return activityInfo;
+  }
+
+  static checkValidation (act) {
+    return act.name && act.description;
   }
 }

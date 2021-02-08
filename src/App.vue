@@ -1,8 +1,6 @@
 <template>
   <v-app>
-    <applet-schema-builder
-      exportButton
-    />
+    <Builder />
   </v-app>
 </template>
 
@@ -13,17 +11,20 @@
   border-color: #005fa3 !important;
 }
 
+.v-application--wrap {
+  background: rgb(239,239,243);
+}
+
 </style>
 
 <script>
-
-import AppletSchemaBuilder from './components/ProtocolBuilder/ProtocolBuilder.vue';
+import Builder from './components/ProtocolBuilder/Builder';
 
 export default {
   name: 'App',
   components: {
-    AppletSchemaBuilder
-  },
+    Builder
+  }
 }
 </script>
 

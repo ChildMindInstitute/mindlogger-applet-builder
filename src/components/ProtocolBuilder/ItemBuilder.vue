@@ -1,218 +1,311 @@
 <template>
-  <div>
-  <v-card>
-    <v-card-title class="headline grey lighten-2" primary-title>
-      <v-icon left>{{ isItemEditable ? "mdi-pencil" : "mdi-eye" }}</v-icon>
-      {{ isItemEditable ? "Edit Item" : "View Item" }}
-    </v-card-title>
-    <v-card-text>
-      <v-form ref="form" lazy-validation>
-        <v-text-field
-          v-model="name"
-          label="Item Name"
-          :rules="nameRules"
-          :disabled="!isItemEditable || inputType == 'cumulativeScore'"
-          required
-          @keydown="nameKeydown($event)"
-        />
-        <template
-          v-if="inputType !== 'markdownMessage'"
-        >
-          <v-textarea
-            v-model="questionBuilder.text"
-            label="Question"
-            v-if="inputType !== 'cumulativeScore'"
-            :disabled="!isItemEditable"
-            auto-grow
-            rows="1"
-          />
-          <ImageUploader
-            class="mt-3 mb-4"
-            style="max-width: 300px"
-            :uploadFor="'activity-item'"
-            :itemImg="questionBuilder.imgURL"
-            @onAddImg="onAddImg"
-            @onRemoveImg="onRemoveImg"
-          />
-        </template>
-        <v-select
-          class="mt-6"
-          v-model="inputType"
-          :items="inputTypes"
-          label="Input Type"
-          :disabled="!isItemEditable"
-          @change="onUpdateInputType"
-        >
-          <template v-slot:item="{ item, attrs, on }">
-            <v-list-item v-on="on" v-bind="attrs">
-              <v-tooltip
-                v-if="!hasScoringItem && item == 'cumulativeScore'"
-                top
-              >
-                <template v-slot:activator="{ on }">
-                  <div
-                    class="disabled-option"
-                    v-on="on"
-                    @click.stop=""
-                  >
-                    <span>{{ item }}</span>
-                  </div>
-                </template>
-                <span>Please create an item with scores before creating this page</span>
-              </v-tooltip>
-              <div
-                v-else
-              >
-                {{item}}
-              </div>
-            </v-list-item>
-          </template>
-        </v-select>
-
-        <div
-          v-if="inputType === 'markdownMessage'"
-        >
-          Message:
-
-          <MarkDownEditor
-            v-model="markdownText"
-          />
-        </div>
-        <RadioBuilder
-          v-if="inputType === 'radio'"
-          :is-skippable-item="allow"
-          :response-options="responseOptions"
-          :initial-item-data="options"
-          :is-item-editable="isItemEditable"
-          :item-templates="itemTemplates"
-          :isPrizeActivity="isPrizeActivity"
-          @openPrize="$emit('openPrize')"
-          @removeTemplate="onRemoveTemplate"
-          @updateTemplates="onUpdateTemplates"
-          @updateOptions="updateOptions"
-          @updateAllow="updateAllow"
-          @uploading="isUploadingState = $event"
-          @error="isError = $event"
-        />
-        <TextBuilder
-          v-if="inputType === 'text'"
-          :is-skippable-item="allow"
-          :initial-item-data="options"
-          :response-option="responseOptions"
-          :initial-answer="correctAnswer"
-          :is-item-editable="isItemEditable"
-          @updateAnswer="updateAnswer"
-          @updateOptions="updateOptions"
-          @updateAllow="updateAllow"
-        />
-        <SliderBuilder
-          v-if="inputType === 'slider'"
-          :is-skippable-item="allow"
-          :initial-item-data="options"
-          :is-item-editable="isItemEditable"
-          @updateOptions="updateOptions"
-          @updateAllow="updateAllow"
-          @uploading="isUploadingState = $event"
-          @error="isError = $event"
-        />
-        <VideoBuilder v-if="inputType === 'video'" />
-        <PhotoBuilder v-if="inputType === 'photo'" />
-        <TimeRangeBuilder v-if="inputType === 'timeRange'" />
-        <DateBuilder v-if="inputType === 'date'" />
-
-        <DrawingBuilder
-          v-if="inputType === 'drawing'"
-          :initial-item-response-options="responseOptions"
-          :initial-item-input-options="inputOptions"
-          @uploading="isUploadingState = $event"
-          @error="isError = $event"
-          @updateResponseOptions="updateResponseOptions"
-          @updateInputOptions="updateInputOptions"
-        />
-
-        <AudioRecordBuilder
-          v-if="inputType === 'audioRecord'"
-          :is-skippable-item="allow"
-          :initial-item-data="options"
-          @updateOptions="updateOptions"
-          @updateAllow="updateAllow"
-        />
-
-        <AudioImageRecordBuilder
-          v-if="inputType === 'audioImageRecord'"
-          :initial-item-response-options="responseOptions"
-          :is-skippable-item="allow"
-          @uploading="isUploadingState = $event"
-          @error="isError = $event"
-          @checkValidation="valid = $event"
-          @updateResponseOptions="updateResponseOptions"
-          @updateAllow="updateAllow"
-        />
-
-        <GeolocationBuilder
-          v-if="inputType === 'geolocation'"
-          :initial-item-response-options="responseOptions"
-          @uploading="isUploadingState = $event"
-          @error="isError = $event"
-          @updateResponseOptions="updateResponseOptions"
-        />
-
-        <AudioStimulusBuilder
-          v-if="inputType === 'audioStimulus'"
-          :is-skippable-item="allow"
-          :initial-item-input-options="inputOptions"
-          :initial-item-media="media"
-          :initial-item-data="options"
-          :is-item-editable="isItemEditable"
-          @updateAllow="updateAllow"
-          @updateInputOptions="updateInputOptions"
-          @updateMedia="updateMedia"
-        />
-        <CumulativeScoreBuilder
-          v-if="inputType === 'cumulativeScore'"
-          :items="items"
-          :is-item-editable="isItemEditable"
-          :initial-item-data="initialItemData"
-          @updateCumulativeScore="updateCumulativeScore"
-        />
-      </v-form>
-    </v-card-text>
-    <v-alert v-if="isError" type="error" class="mx-2">{{ isError }}</v-alert>
-    <v-divider />
-    <v-card-actions>
-      <v-btn
-        outlined
-        color="primary"
-        @click="onDiscardItem"
-      >{{ isItemEditable ? "Discard Changes" : "Close" }}</v-btn>
+  <v-card
+    class="pa-2"
+  >
+    <v-card-title class="px-2 py-0">
+      <span>{{ item.name }}</span>
       <v-spacer />
-      <v-btn
-        :disabled="!name || !inputType || (!valid && inputType === 'cumulativeScore') || (!valid && inputType === 'audioImageRecord')"
-        color="primary"
-        @click="onSaveItem"
+      <v-card-actions>
+        <v-btn icon @click="duplicateItem(itemIndex)">
+          <v-icon color="grey lighten-1">
+            content_copy
+          </v-icon>
+        </v-btn>
+        <v-btn icon @click="editItem">
+          <v-icon
+            v-if="!isExpanded && item.allowEdit"
+            color="grey lighten-1"
+          >
+            edit
+          </v-icon>
+          <v-icon
+            v-else-if="!isExpanded"
+            color="grey lighten-1"
+          >
+            mdi-eye
+          </v-icon>
+
+          <v-icon
+            v-else
+            color="grey lighten-1"
+          >
+            mdi-chevron-double-up
+          </v-icon>
+        </v-btn>
+        <v-btn
+          v-if="item.allowEdit"
+          icon
+          @click="onDeleteItem"
+        >
+          <v-icon color="grey lighten-1">
+            mdi-delete
+          </v-icon>
+        </v-btn>
+      </v-card-actions>
+    </v-card-title>
+
+    <v-form
+      v-if="isExpanded"
+      class="px-2"
+      ref="form"
+      lazy-validation
+    >
+      <v-text-field
+        v-model="item.name"
+        @input="onUpdateName"
+        label="Item Name"
+        :rules="nameRules"
+        :disabled="!item.allowEdit || item.inputType == 'cumulativeScore'"
+        required
+        @keydown="nameKeydown($event)"
+      />
+      <template
+        v-if="item.inputType !== 'markdownMessage'"
       >
-        Save Item
-      </v-btn>
-    </v-card-actions>
+        <v-textarea
+          v-model="questionBuilder.text"
+          label="Question"
+          v-if="item.inputType !== 'cumulativeScore'"
+          :disabled="!item.allowEdit"
+          auto-grow
+          rows="1"
+        />
+        <ImageUploader
+          class="mt-3 mb-4"
+          style="max-width: 300px"
+          :uploadFor="'activity-item'"
+          :itemImg="questionBuilder.imgURL"
+          :notify-enabled="false"
+          @onAddImg="onAddImg"
+          @onRemoveImg="onRemoveImg"
+        />
+      </template>
+      <v-select
+        class="mt-6"
+        :value="item.inputType"
+        :items="itemInputTypes"
+        label="Input Type"
+        :disabled="!item.allowEdit"
+        @change="onUpdateInputType($event)"
+      >
+        <template
+          v-slot:item="{ item, attrs, on }"
+        >
+          <v-list-item
+            v-on="on"
+            v-bind="attrs"
+          >
+            <v-tooltip
+              v-if="!hasScoringItem && item == 'cumulativeScore'"
+              top
+            >
+              <template
+                v-slot:activator="{ on }"
+              >
+                <div
+                  class="disabled-option"
+                  v-on="on"
+                  @click.stop=""
+                >
+                  <img
+                    height="20"
+                    class="px-2 pt-2"
+                    :src="item.icon"
+                  />
+                  <span>{{ item.text }}</span>
+                </div>
+              </template>
+              <span>Please create an item with scores before creating this page</span>
+            </v-tooltip>
+            <div
+              v-else
+            >
+              <img
+                height="20"
+                class="px-2 pt-2"
+                :src="item.icon"
+              />
+              {{ item.text }}
+            </div>
+          </v-list-item>
+        </template>
+
+        <template
+          v-slot:selection="{ item }"
+        >
+          <v-list-item>
+            <img
+              height="20"
+              class="pr-2"
+              :src="item.icon"
+            />
+
+            {{ item.text }}
+          </v-list-item>
+        </template>
+      </v-select>
+
+      <div
+        v-if="item.inputType === 'markdownMessage'"
+      >
+        Message:
+
+        <MarkDownEditor
+          :value="item.markdownText"
+          @input="onUpdateMarkdownText"
+        />
+      </div>
+      <RadioBuilder
+        v-if="item.inputType === 'radio'"
+        :is-skippable-item="item.allow"
+        :response-options="item.responseOptions"
+        :initial-item-data="item.options"
+        :is-item-editable="item.allowEdit"
+        :item-templates="itemTemplates"
+        :isPrizeActivity="{}"
+        @openPrize="$emit('openPrize')"
+        @removeTemplate="onRemoveTemplate"
+        @updateTemplates="onUpdateTemplates"
+        @updateOptions="updateOptions"
+        @updateAllow="updateAllow"
+        @uploading="isUploadingState = $event"
+        @error="isError = $event"
+      />
+      <TextBuilder
+        v-if="item.inputType === 'text'"
+        :is-skippable-item="item.allow"
+        :initial-item-data="item.options"
+        :response-option="item.responseOptions"
+        :initial-answer="item.correctAnswer"
+        :is-item-editable="item.allowEdit"
+        @updateAnswer="updateAnswer"
+        @updateOptions="updateOptions"
+        @updateAllow="updateAllow"
+      />
+      <SliderBuilder
+        v-if="item.inputType === 'slider'"
+        :is-skippable-item="item.allow"
+        :initial-item-data="item.options"
+        :is-item-editable="item.allowEdit"
+        @updateOptions="updateOptions"
+        @updateAllow="updateAllow"
+        @uploading="isUploadingState = $event"
+        @error="isError = $event"
+      />
+      <VideoBuilder v-if="item.inputType === 'video'" />
+      <PhotoBuilder v-if="item.inputType === 'photo'" />
+      <TimeRangeBuilder v-if="item.inputType === 'timeRange'" />
+      <DateBuilder v-if="item.inputType === 'date'" />
+
+      <DrawingBuilder
+        v-if="item.inputType === 'drawing'"
+        :initial-item-response-options="item.responseOptions"
+        :initial-item-input-options="item.inputOptions"
+        @uploading="isUploadingState = $event"
+        @error="isError = $event"
+        @updateResponseOptions="updateResponseOptions"
+        @updateInputOptions="updateInputOptions"
+      />
+
+      <AudioRecordBuilder
+        v-if="item.inputType === 'audioRecord'"
+        :is-skippable-item="item.allow"
+        :initial-item-data="item.options"
+        @updateOptions="updateOptions"
+        @updateAllow="updateAllow"
+      />
+
+      <AudioImageRecordBuilder
+        v-if="item.inputType === 'audioImageRecord'"
+        :initial-item-response-options="item.responseOptions"
+        :is-skippable-item="item.allow"
+        @uploading="isUploadingState = $event"
+        @error="isError = $event"
+        @checkValidation="valid = $event"
+        @updateResponseOptions="updateResponseOptions"
+        @updateAllow="updateAllow"
+      />
+
+      <GeolocationBuilder
+        v-if="item.inputType === 'geolocation'"
+        :initial-item-response-options="item.responseOptions"
+        @uploading="isUploadingState = $event"
+        @error="isError = $event"
+        @updateResponseOptions="updateResponseOptions"
+      />
+
+      <AudioStimulusBuilder
+        v-if="item.inputType === 'audioStimulus'"
+        :is-skippable-item="item.allow"
+        :initial-item-input-options="item.inputOptions"
+        :initial-item-media="item.media"
+        :initial-item-data="item.options"
+        :is-item-editable="item.allowEdit"
+        @updateAllow="updateAllow"
+        @updateInputOptions="updateInputOptions"
+        @updateMedia="updateMedia"
+      />
+      <CumulativeScoreBuilder
+        v-if="item.inputType === 'cumulativeScore'"
+        :items="item.items"
+        :is-item-editable="item.allowEdit"
+        :initial-item-data="item"
+        @updateCumulativeScore="updateCumulativeScore"
+      />
+    </v-form>
+
+    <div
+      v-else-if="item.inputType !== 'cumulativeScore' && item.inputType !== 'markdownMessage'"
+      class="px-2"
+    >
+      <div>
+        <img
+          height="25"
+          class="px-2 pt-4"
+          :src="questionBuilder.imgURL"
+        />
+        <span>{{ questionBuilder.text }}</span>
+      </div>
+
+      <div
+        class="mt-4"
+      >
+        <div
+          v-for="(option, index) in item.options.options"
+          :key="index"
+        >
+          <input
+            class="mx-2"
+            type="checkbox"
+            value="false"
+            disabled
+          >
+          <span>{{ option.name }}</span>
+        </div>
+      </div>
+    </div>
+
+    <v-dialog
+      v-model="isUploadingState"
+      persistent
+      width="400"
+    >
+      <v-card class="pt-5 pb-6 text-center">
+        <v-progress-circular class="d-block mx-auto mt-2" color="primary" indeterminate :size="50">
+        </v-progress-circular>
+        <span> Uploading ... </span>
+      </v-card>
+    </v-dialog>
+
   </v-card>
-  <v-dialog v-model="isUploadingState" persistent width="400">
-    <v-card class="pt-5 pb-6">
-      <v-progress-circular class="d-block mx-auto mt-2" color="primary" indeterminate :size="50">
-      </v-progress-circular>
-    </v-card>
-  </v-dialog>
-  </div>
 </template>
 
 <style scoped>
 
-.disabled-option {
-  color: grey;
-}
-
 </style>
 
 <script>
+
 import ImageUploader from './ImageUploader.vue';
 import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
 import TextBuilder from "./ItemBuilders/TextBuilder.vue";
@@ -230,6 +323,8 @@ import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
 import MarkDownEditor from "./ItemBuilders/MarkDownEditor";
 import Item from '../../models/Item';
 import ImageUpldr from '../../models/ImageUploader';
+import { mapMutations, mapGetters } from 'vuex';
+import config from '../../config';
 
 export default {
   components: {
@@ -250,147 +345,219 @@ export default {
     MarkDownEditor,
   },
   props: {
-    initialItemData: {
-      type: Object,
-      required: true
-    },
-    isItemEditable: {
-      type: Boolean,
-      default: true
-    },
-    templates: {
-      type: Array,
-      default: null
-    },
-    items: {
-      type: Array,
+    itemIndex: {
+      type: Number,
       required: true,
     },
-    isPrizeActivity: {
-      type: Object,
-      default: null
+  },
+  data() {
+    return {
+      model: null,
+      textRules: [v => !!v || "This field is required"],
+      nameRules: [
+        v =>
+          /^[a-zA-Z0-9-_]+$/.test(v) ||
+          "Item name must be contain only alphanumeric symbols or underscore"
+      ],
+      hasScoringItem: false,
+      valid: false,
+      imgUploader: new ImageUpldr(),
+      questionBuilder: {
+        text: '',
+        imgURL: ''
+      },
+      isUploadingState: false,
+      isError: '',
+      isExpanded: false,
     }
   },
-  data: function() {
-    const model = new Item();
-    model.updateReferenceObject(this);
 
-    const imgUploader = new ImageUpldr();
-
-    const questionBuilder = { text: '', imgURL: '', imgFile: null };
-
-    let isUploadingState = false;
-    let isError = '';
-
-    return {
-      model,
-      ...model.getItemBuilderData(this.initialItemData),
-      hasScoringItem: this.items.some((item) => item.options.hasScoreValue),
-      valid: (this.name && this.name.length > 0),
-      imgUploader,
-      questionBuilder,
-      isUploadingState,
-      isError,
-    };
-  },
   beforeMount() {
-    this.itemTemplates = this.templates;
-    this.questionBuilder.text = this.question.text;
-    this.questionBuilder.imgURL = this.question.image;
+    const model = new Item();
+    model.updateReferenceObject(this.item);
+
+    Object.assign(this, {
+      valid: this.item.name && this.item.name.length > 0,
+      hasScoringItem: this.currentActivity.items.some((item) => item.options.hasScoreValue),
+      questionBuilder: {
+        text: this.item.question.text,
+        imgURL: this.item.question.image
+      },
+      isExpanded: !this.item.name.length,
+      model
+    })
+  },
+
+  watch: {
+    questionBuilder: {
+      deep: true,
+      handler() {
+        this.updateItemMetaInfo({
+          index: this.itemIndex,
+          obj: {
+            question: {
+              text: this.questionBuilder.text,
+              image: this.questionBuilder.imgURL
+            }
+          }
+        })
+      }
+    },
+  },
+
+  computed: {
+    ...mapGetters(config.MODULE_NAME,
+      [
+        'currentActivity',
+        'itemInputTypes',
+        'itemTemplates',
+      ]
+    ),
+
+    config () {
+      return config;
+    },
+
+    item () {
+      return this.currentActivity.items[this.itemIndex];
+    }
   },
   methods: {
-    nameKeydown(e) {
+    ...mapMutations(config.MODULE_NAME,
+      [
+        'updateItemMetaInfo',
+        'duplicateItem',
+        'deleteItem',
+        'updateItemInputType',
+      ],
+    ),
+
+    editItem () {
+      this.isExpanded = !this.isExpanded;
+    },
+
+    onDeleteItem () {
+      this.deleteItem(this.itemIndex);
+    },
+
+    nameKeydown (e) {
       if (!/^[a-zA-Z0-9-_]+$/.test(e.key)) {
         e.preventDefault();
       }
     },
-    validate() {
-      if (this.$refs.form.validate()) {
-        this.snackbar = true;
-      }
-    },
-    updateResponseOptions(newResponseOptions) {
-      this.responseOptions = newResponseOptions;
-    },
-    updateInputOptions(newInputOptions) {
-      this.inputOptions = newInputOptions;
-    },
-    updateAnswer(correctAnswer) {
-      this.correctAnswer = correctAnswer;
-    },
-    updateAllow(allowItem) {
-      this.allow = allowItem;
-    },
-    updateMedia(newMedia) {
-      this.media = newMedia;
-    },
-    onUpdateTemplates(option) {
-      this.$emit('updateTemplates', option);
-    },
-    onRemoveTemplate(option) {
-      this.$emit('removeTemplate', option);
-    },
-    updateOptions(newOptions) {
-      this.options = newOptions;
-      this.responseOptions = this.model.getResponseOptions();
-    },
-    onAddImg(data) {
+
+    async onAddImg (data) {
       this.isError = '';
-      if(typeof data !== 'string') {
-        this.questionBuilder.imgFile = data;
-        this.questionBuilder.imgURL = data.name;
+
+      if ( typeof data !== 'string' ) {
+        this.isUploadingState = true;
+        const response = await this.imgUploader.uploadImage(data);
+        this.questionBuilder.imgURL = response.location;
       } else {
         this.questionBuilder.imgURL = data;
       }
+
+      this.isUploadingState = false;
+
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: {
+          question: {
+            text: this.questionBuilder.text,
+            image: this.questionBuilder.imgURL
+          }
+        }
+      });
     },
-    onRemoveImg() {
+
+    onRemoveImg () {
       this.isError = '';
       this.questionBuilder.imgFile = null;
       this.questionBuilder.imgURL = '';
     },
-    async onSaveItem() {
-      try {
 
-        if (!this.isItemEditable) {
-          this.$emit("closeItemModal", null);
-          return;
-        }
-
-        this.question.text = this.questionBuilder.text;
-        if(!this.questionBuilder.imgFile) {
-          this.question.image = this.questionBuilder.imgURL;
-        } else {
-          this.isError = '';
-          this.isUploadingState = true;
-          const response = await this.imgUploader.uploadImage(this.questionBuilder.imgFile);
-          this.question.image = response.location;
-          this.questionBuilder.imgFile = null;
-          this.isUploadingState = false;
-        }
-
-        this.$emit("closeItemModal", this.model.getItemData());
-
-      } catch(e) {
-        this.isUploadingState = false;
-        this.questionBuilder.imgURL = this.question.image;
-        this.questionBuilder.imgFile = null;
-        this.isError = 'Something went wrong with uploading "Header" image. Please try to upload image again...or save "Item" without image changes.';
+    onUpdateInputType (inputType) {
+      const updates = {
+        inputType
+      };
+      if (this.item.inputType === 'cumulativeScore') {
+        updates.name = 'cumulatives';
       }
-    },
-    onDiscardItem() {
-      this.$emit("closeItemModal", null);
+
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: updates
+      })
     },
 
-    updateCumulativeScore (scoreRules) {
-      this.valid = !scoreRules.some(rule => !rule.valid) && scoreRules.length > 0;
-      this.cumulativeScores = scoreRules;
+    onUpdateName (name) {
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { name }
+      })
     },
 
-    onUpdateInputType() {
-      if (this.inputType === 'cumulativeScore') {
-        this.name = 'cumulatives';
-      }
-    }
+    onUpdateMarkdownText (markdownText) {
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { markdownText }
+      })
+    },
+
+    updateResponseOptions(responseOptions) {
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { responseOptions }
+      })
+    },
+
+    updateInputOptions(inputOptions) {
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { inputOptions }
+      })
+    },
+
+    updateAnswer(correctAnswer) {
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { correctAnswer }
+      })
+    },
+
+    updateAllow(allowItem) {
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { allow: allowItem }
+      })
+    },
+
+    updateMedia(newMedia) {
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { media: newMedia }
+      })
+    },
+
+    onUpdateTemplates (option) {
+      this.$emit('updateTemplates', option);
+    },
+
+    onRemoveTemplate (option) {
+      this.$emit('removeTemplate', option);
+    },
+
+    updateOptions (newOptions) {
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { options: newOptions }
+      })
+
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { responseOptions: this.model.getResponseOptions() }
+      })
+    },
   }
-};
+}
 </script>

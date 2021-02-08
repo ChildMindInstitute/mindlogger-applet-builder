@@ -108,6 +108,11 @@ export default {
     itemImg: {
       type: [String, File],
       default: null
+    },
+    notifyEnabled: {
+      type: Boolean,
+      required: false,
+      default: true
     }
   },
   data() {
@@ -170,6 +175,10 @@ export default {
       this.notify('success', 'Image is removed');
     },
     notify(state, text) {
+      if (!this.notifyEnabled) {
+        return ;
+      }
+
       let delay = 4000;
       if(state === 'success') {
         this.successMsg = text;

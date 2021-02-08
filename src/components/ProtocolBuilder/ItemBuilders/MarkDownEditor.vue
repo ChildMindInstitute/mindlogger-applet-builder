@@ -287,6 +287,10 @@
   
       }
   }
+
+  .v-note-wrapper {
+    z-index: 5;
+  }
 </style>
 
 <script>

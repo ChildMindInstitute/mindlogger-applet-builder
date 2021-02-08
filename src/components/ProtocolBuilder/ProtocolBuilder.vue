@@ -466,6 +466,10 @@ export default {
               responseOptions[0] &&
               responseOptions[0]['reprolib:terms/scoring'];
 
+            let showTickMarks =
+              responseOptions[0] &&
+              responseOptions[0]['reprolib:terms/showTickMarks'];
+
             let responseAlert =
               responseOptions[0] &&
               responseOptions[0]['reprolib:terms/responseAlert'];
@@ -482,6 +486,11 @@ export default {
             if (scoring) {
               itemContent.scoring = 
                 scoring[0] && scoring[0]['@value'];
+            }
+
+            if (showTickMarks) {
+              itemContent.showTickMarks = 
+                showTickMarks[0] && showTickMarks[0]['@value'];
             }
 
             if (responseAlert) {
@@ -592,6 +601,7 @@ export default {
               itemContent.options = {
                 hasScoreValue: itemContent.scoring || false,
                 hasResponseAlert: itemContent.responseAlert || false,
+                showTickMarks: itemContent.showTickMarks || false,
                 responseAlertMessage: itemContent.responseAlertMessage || '',
                 maxValue:
                   responseOptions[0] &&

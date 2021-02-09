@@ -55,15 +55,15 @@
           v-for="(option, index) in options"
           :key="index"
         >
-          <div class="ma-4">
+          <div
+            class="radio-option"
+            :class="{ 'selected-option': index == editingOptionIndex }"
+          >
             <img
-              height="30"
-              class="px-2 pt-4"
+              width="40"
               :src="option.image"
             />
-            <span
-              :class="{ 'selected-option': index == editingOptionIndex }"
-            >
+            <span>
               {{ option.name }}
             </span>
           </div>
@@ -307,9 +307,18 @@
 </template>
 
 <style scoped>
-  span.selected-option {
+  .selected-option {
     border-bottom: 1px solid black;
     padding-bottom: 5px;
+  }
+
+  .radio-option {
+    display: flex;
+    align-items: center;
+  }
+
+  .radio-option > * {
+    margin-left: 10px;
   }
 </style>
 

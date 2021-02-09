@@ -415,7 +415,7 @@ export default {
           activitiesObj,
           'reprolib:terms/order.0.@list',
           []
-        ).map((key) => {
+        ).filter(key => items[key['@id']]).map((key) => {
           let allow = []
           const item = items[key['@id']];
           if (item['reprolib:terms/allow'] &&
@@ -449,6 +449,10 @@ export default {
               item['reprolib:terms/allowEdit'][0] ?
               item['reprolib:terms/allowEdit'][0]['@value'] : true
           };
+
+          if (itemContent.ui.inputType == 'markdown-message') {
+            itemContent.ui.inputType = 'markdownMessage';
+          }
 
           let responseOptions = item['reprolib:terms/responseOptions'];
 

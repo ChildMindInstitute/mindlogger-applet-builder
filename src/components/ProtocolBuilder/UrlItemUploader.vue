@@ -64,15 +64,16 @@ export default {
         v => (v && v.includes('raw.githubusercontent.com')) || 'Invalid item URL. URL should contain \'raw.githubusercontent.com/...\'',
       ],
       sampleItems: [
-        'https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/MindLoggerDemo/items/radio',
-        'https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/MindLoggerDemo/items/radio-multi',
-        'https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/MindLoggerDemo/items/slider',
-        'https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/MindLoggerDemo/items/text',
-        'https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/MindLoggerDemo/items/audio-stimulus',
-        'https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/MindLoggerDemo/items/time-range',
+        'https://raw.githubusercontent.com/ChildMindInstitute/Demo_applet/master/activities/MindLoggerDemo/items/radio',
+        'https://raw.githubusercontent.com/ChildMindInstitute/Demo_applet/master/activities/MindLoggerDemo/items/radio-multi',
+        'https://raw.githubusercontent.com/ChildMindInstitute/Demo_applet/master/activities/MindLoggerDemo/items/slider',
+        'https://raw.githubusercontent.com/ChildMindInstitute/Demo_applet/master/activities/MindLoggerDemo/items/text',
+        'https://raw.githubusercontent.com/ChildMindInstitute/Demo_applet/master/activities/MindLoggerDemo/items/audio-stimulus',
+        'https://raw.githubusercontent.com/ChildMindInstitute/Demo_applet/master/activities/MindLoggerDemo/items/time-range',
       ],
       fetchedSchema: {},
       error: '',
+      valid: true
     };
   },
   methods: {

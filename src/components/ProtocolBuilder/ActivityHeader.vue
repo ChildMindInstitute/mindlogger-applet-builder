@@ -56,7 +56,7 @@ export default {
     ]),
     name: {
       get: function () {
-        return this.currentActivity.name;
+        return this.currentActivity && this.currentActivity.name;
       },
       set: function (name) {
         this.updateActivityMetaInfo({ name });
@@ -64,7 +64,7 @@ export default {
     },
     description: {
       get: function () {
-        return this.currentActivity.description;
+        return this.currentActivity && this.currentActivity.description;
       },
       set: function (description) {
         this.updateActivityMetaInfo({ description });
@@ -72,7 +72,7 @@ export default {
     },
     preamble: {
       get: function () {
-        return this.currentActivity.preamble;
+        return this.currentActivity && this.currentActivity.preamble;
       },
       set: function (preamble) {
         this.updateActivityMetaInfo({ preamble });
@@ -80,7 +80,7 @@ export default {
     },
     isSkippable: {
       get: function () {
-        return this.currentActivity.isSkippable;
+        return this.currentActivity && this.currentActivity.isSkippable;
       },
       set: function (isSkippable) {
         this.updateActivityMetaInfo({ isSkippable });

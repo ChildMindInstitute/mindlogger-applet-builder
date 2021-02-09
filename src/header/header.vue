@@ -3,7 +3,6 @@
     <v-row>
       <v-btn
         icon
-        x-large
         :disabled="currentScreen == config.PROTOCOL_SCREEN"
         @click="onBackToProtocolScreen"
       >
@@ -15,48 +14,54 @@
       <v-spacer/>
 
       <v-tooltip
+        v-if="currentActivity"
         bottom
       >
         <template v-slot:activator="{ on }">
           <v-btn
             @click="viewItems"
             v-on="on"
-            icon
-            x-large
+            :color="currentScreen == config.ITEM_SCREEN ? 'primary' : ''"
+            class="mx-1"
           >
-            <img height="25" alt='' v-bind:src="baseImageURL + 'items.png'"/>
+            <img v-show="currentScreen === config.ITEM_SCREEN" height="25" alt='' v-bind:src="baseImageURL + 'header-icons/white/items.png'"/>
+            <img v-show="currentScreen !== config.ITEM_SCREEN" height="25" alt='' v-bind:src="baseImageURL + 'header-icons/black/items.png'"/>
           </v-btn>
         </template>
         <span>Item List</span>
       </v-tooltip>
 
       <v-tooltip
+        v-if="currentActivity"
         bottom
       >
         <template v-slot:activator="{ on }">
           <v-btn
             @click="viewConditionalLogic"
             v-on="on"
-            icon
-            x-large
+            :color="currentScreen == config.CONDITIONAL_SCREEN ? 'primary' : ''"
+            class="mx-1"
           >
-            <img height="25" alt='' v-bind:src="baseImageURL + 'conditional-icon.png'"/>
+            <img v-show="currentScreen === config.CONDITIONAL_SCREEN" height="25" alt='' v-bind:src="baseImageURL + 'header-icons/white/conditional-icon.png'" />
+            <img v-show="currentScreen !== config.CONDITIONAL_SCREEN" height="25" alt='' v-bind:src="baseImageURL + 'header-icons/black/conditional-icon.png'" />
           </v-btn>
         </template>
         <span>Conditional Logic</span>
       </v-tooltip>
 
       <v-tooltip
+        v-if="currentActivity"
         bottom
       >
         <template v-slot:activator="{ on }">
           <v-btn
             @click="viewSubScales"
             v-on="on"
-            icon
-            x-large
+            :color="currentScreen == config.SUBSCALE_SCREEN ? 'primary' : ''"
+            class="mx-1"
           >
-            <img height="25" alt='' v-bind:src="baseImageURL + 'subscale-icon.png'"/>
+            <img v-show="currentScreen === config.SUBSCALE_SCREEN" height="25" alt='' v-bind:src="baseImageURL + 'header-icons/white/subscale-icon.png'"/>
+            <img v-show="currentScreen !== config.SUBSCALE_SCREEN" height="25" alt='' v-bind:src="baseImageURL + 'header-icons/black/subscale-icon.png'"/>
           </v-btn>
         </template>
         <span>SubScales</span>
@@ -69,10 +74,9 @@
           <v-btn
             @click="saveToDashboard"
             v-on="on"
-            icon
-            x-large
+            class="mx-1"
           >
-            <img height="25" alt='' v-bind:src="baseImageURL + 'save-icon.png'"/>
+            <img height="25" alt='' v-bind:src="baseImageURL + 'header-icons/black/save-icon.png'"/>
           </v-btn>
         </template>
         <span>Save To Dashboard</span>
@@ -85,10 +89,9 @@
           <v-btn
             @click="downloadSchema"
             v-on="on"
-            icon
-            x-large
+            class="mx-1"
           >
-            <img height="25" alt='' v-bind:src="baseImageURL + 'export-icon.png'"/>
+            <img height="25" alt='' v-bind:src="baseImageURL + 'header-icons/black/export-icon.png'"/>
           </v-btn>
         </template>
         <span>Download Schema</span>
@@ -102,10 +105,9 @@
           <v-btn
             @click="resetBuilder"
             v-on="on"
-            icon
-            x-large
+            class="mx-1"
           >
-            <img height="25" alt='' v-bind:src="baseImageURL + 'refresh-icon.png'"/>
+            <img height="25" alt='' v-bind:src="baseImageURL + 'header-icons/black/refresh-icon.png'"/>
           </v-btn>
         </template>
         <span>Reset Builder</span>
@@ -118,10 +120,9 @@
           <v-btn
             @click="viewHistory"
             v-on="on"
-            icon
-            x-large
+            class="mx-1"
           >
-            <img height="25" alt='' v-bind:src="baseImageURL + 'history-icon.png'"/>
+            <img height="25" alt='' v-bind:src="baseImageURL + 'header-icons/black/history-icon.png'"/>
           </v-btn>
         </template>
         <span>View History</span>
@@ -148,7 +149,8 @@ export default {
       'currentScreen',
       'baseImageURL',
       'protocol',
-      'activities'
+      'activities',
+      'currentActivity'
     ])
   },
   methods: {
@@ -224,19 +226,18 @@ export default {
     },
 
     viewItems () {
-
+      this.setCurrentScreen(config.ITEM_SCREEN);
     },
 
     viewConditionalLogic () {
-
+      this.setCurrentScreen(config.CONDITIONAL_SCREEN);
     },
 
     viewSubScales () {
-
+      this.setCurrentScreen(config.SUBSCALE_SCREEN);
     },
 
     viewHistory () {
-
     }
   }
 }

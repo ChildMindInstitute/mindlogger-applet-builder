@@ -31,7 +31,7 @@
           v-bind="attrs"
           v-on="on"
           color="primary"
-          class="ma-2"
+          class="mx-4 my-2"
           rounded
         >
           Add item
@@ -62,9 +62,6 @@ import ItemBuilder from './ItemBuilder';
 import UrlItemUploader from './UrlItemUploader';
 
 export default {
-  components: {
-    UrlItemUploader,
-  },
   data() {
     return {
       urlItemUploaderKey: 0,
@@ -73,6 +70,7 @@ export default {
   },
   components: {
     ItemBuilder,
+    UrlItemUploader,
   },
   computed: {
     config () {

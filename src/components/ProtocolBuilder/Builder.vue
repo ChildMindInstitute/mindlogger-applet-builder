@@ -10,7 +10,7 @@
       />
 
 
-      <v-dialog v-model="tokenPrizeModal" persistent width="800">
+      <v-dialog v-model="tokenPrizeDialog" persistent width="800">
         <PrizeActivityBuilder
           :initial-activity-data="prizeActivity || {}"
           @closeModal="onClosePrizeActivityModal"
@@ -117,6 +117,14 @@ export default {
     ]),
     config() {
       return config;
+    },
+    tokenPrizeDialog: {
+      get: function () {
+        return this.tokenPrizeModal;
+      },
+      set: function (value) {
+        this.setTokenPrizeModalStatus(value);
+      }
     }
   },
   methods: {
@@ -128,6 +136,7 @@ export default {
       'setPrizeActivity',
       'deleteActivity',
       'replaceActivityData',
+      'setTokenPrizeModalStatus',
     ]),
     ...mapGetters(config.MODULE_NAME, [
       'formattedProtocol'
@@ -180,6 +189,8 @@ export default {
           this.setPrizeActivity(response);
         }
       }
+
+      this.setTokenPrizeModalStatus(false);
     }
   }
 }

@@ -14,11 +14,19 @@ const activityGetters = {
   currentActivity (state) {
     return state.currentActivity;
   },
+
+  prizeActivity (state) {
+    return state.protocol.prizeActivity;
+  },
+
+  tokenPrizeModal (state) {
+    return state.protocol.tokenPrizeModal;
+  }
 };
 
 export default {
   ...activityGetters,
-
+  
   /** get formatted protocol data from current protocol state */
   formattedProtocol (state) {
     const protocol = state.protocol;

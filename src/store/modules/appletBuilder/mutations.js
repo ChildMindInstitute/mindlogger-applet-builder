@@ -11,16 +11,22 @@ const itemMutations = {
     Object.assign(state.currentActivity.items[index], obj);
   },
 
-  addItem (state) {
+  addItem (state, obj) {
     const model = new Item();
-    state.currentActivity.items.push(model.getItemBuilderData({
+    let item = {
       options: {
         options: []
       },
       ui: {
         inputType: 'radio',
       }
-    }));
+    };
+  
+    if (obj) {
+      item = obj;
+    }
+
+    state.currentActivity.items.push(model.getItemBuilderData(item));
   },
 
   duplicateItem(state, index) {
@@ -95,6 +101,31 @@ const activityMutations = {
 
     state.currentActivity.isValid = Activity.checkValidation(state.currentActivity);
   },
+
+  setPrizeActivity (state, prizeActivity) {
+    if (!state.protocol.prizeActivity) {
+      state.protocol.activities.push({
+        ...prizeActivity,
+        index: state.protocol.activities.length,
+      })
+    }
+
+    state.protocol.prizeActivity = prizeActivity;
+  },
+
+  replaceActivityData (state, { index, activity }) {
+    state.protocol.activities[index] = {
+      ...activity,
+      index
+    };
+
+    if (state.currentActivity.index == index) {
+      state.currentActivity = state.protocol.activities[index];
+    }
+    if (state.protocol.prizeActivity.index == index) {
+      state.protocol.prizeActivity = state.protocol.activities[index];
+    }
+  }
 };
 
 export default {
@@ -131,5 +162,9 @@ export default {
       isValid: false,
       activities: []
     }
-  }
+  },
+
+  setTokenPrizeModalStatus (state, status) {
+    state.protocol.tokenPrizeModal = status;
+  },
 }

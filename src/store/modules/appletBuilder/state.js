@@ -10,6 +10,7 @@ export default {
     name: '',
     protocolVersion: '',
     isValid: false,
+    prizeActivity: null,
     activities: []
   },
   baseImageURL,

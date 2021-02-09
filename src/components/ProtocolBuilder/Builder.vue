@@ -8,6 +8,15 @@
       <ActivityBuilder
         v-else
       />
+
+
+      <v-dialog v-model="tokenPrizeModal" persistent width="800">
+        <PrizeActivityBuilder
+          :initial-activity-data="prizeActivity || {}"
+          @closeModal="onClosePrizeActivityModal"
+          @deleteOptions="onClosePrizeActivityModal"
+        />
+      </v-dialog>
     </div>
   </div>
 </template>
@@ -28,6 +37,7 @@ import ActivityBuilder from './ActivityBuilder';
 import Protocol from '../../models/Protocol';
 import Activity from '../../models/Activity';
 import Item from '../../models/Item';
+import PrizeActivityBuilder from './PrizeActivity/PrizeActivityBuilder.vue';
 
 import { mapMutations, mapGetters } from 'vuex';
 
@@ -36,6 +46,7 @@ export default {
     Header,
     ProtocolBuilder,
     ActivityBuilder,
+    PrizeActivityBuilder,
   },
   props: {
     exportButton: {
@@ -100,6 +111,9 @@ export default {
   computed: {
     ...mapGetters(config.MODULE_NAME, [
       'currentScreen',
+      'tokenPrizeModal',
+      'activities',
+      'prizeActivity',
     ]),
     config() {
       return config;
@@ -111,11 +125,14 @@ export default {
       'setTemplates',
       'setCurrentScreen',
       'setFormattedOriginalProtocol',
+      'setPrizeActivity',
+      'deleteActivity',
+      'replaceActivityData',
     ]),
     ...mapGetters(config.MODULE_NAME, [
       'formattedProtocol'
     ]),
-    async fillStoreWithAppletData() {
+    async fillStoreWithAppletData () {
       const { applet, activities, items, protocol } = this.initialData;
 
       const initialStoreData = {
@@ -141,8 +158,29 @@ export default {
         initialStoreData.activities.push(builderData);
       });
 
+      initialStoreData.prizeActivity = initialStoreData.activities.find(activity => activity.isPrize);
       this.initProtocolData(initialStoreData);
     },
+
+    onClosePrizeActivityModal (response) {
+      const prizeIndex = this.activities.findIndex(activity => activity.isPrize);
+
+      if (!response) {
+        if (prizeIndex >= 0) {
+          this.setPrizeActivity(null);
+          this.deleteActivity(prizeIndex);
+        }
+      } else {
+        if (prizeIndex >= 0) {
+          this.replaceActivityData({
+            index: prizeIndex,
+            activity: response
+          });
+        } else {
+          this.setPrizeActivity(response);
+        }
+      }
+    }
   }
 }
 </script>

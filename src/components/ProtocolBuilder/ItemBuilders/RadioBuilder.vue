@@ -16,7 +16,7 @@
               color="primary"
               @click="$emit('openPrize')"
             >
-              {{ isPrizeActivity ? 'Edit' : 'Create' }} Token Prizes
+              {{ hasPrizeActivity ? 'Edit' : 'Create' }} Token Prizes
             </v-btn>
 
             <v-menu offset-y>
@@ -342,9 +342,10 @@ export default {
       type: Array,
       default: null
     },
-    isPrizeActivity: {
-      type: Object,
-      default: null
+    hasPrizeActivity: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   data: function () {
@@ -487,6 +488,13 @@ export default {
     },
     deleteOption(index) {
       this.options.splice(index, 1);
+
+      if (index == this.editingOptionIndex) {
+        this.editingOptionIndex = -1;
+      } else if (index < this.editingOptionIndex) {
+        this.editingOptionIndex--;
+      }
+
       this.update();
     },
     editOption(index) {

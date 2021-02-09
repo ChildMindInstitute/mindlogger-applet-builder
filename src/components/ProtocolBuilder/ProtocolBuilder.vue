@@ -166,7 +166,7 @@ export default {
         'deleteActivity', 
         'addActivity', 
         'setCurrentActivity', 
-        'setCurrentScreen'
+        'setCurrentScreen',
       ]
     ),
     onSubmitEditor (markdownData) {

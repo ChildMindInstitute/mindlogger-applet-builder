@@ -163,8 +163,8 @@
         :initial-item-data="item.options"
         :is-item-editable="item.allowEdit"
         :item-templates="itemTemplates"
-        :isPrizeActivity="{}"
-        @openPrize="$emit('openPrize')"
+        :has-prize-activity="hasPrizeActivity"
+        @openPrize="setTokenPrizeModalStatus(true)"
         @removeTemplate="onRemoveTemplate"
         @updateTemplates="onUpdateTemplates"
         @updateOptions="updateOptions"
@@ -420,16 +420,21 @@ export default {
   },
 
   computed: {
+    config () {
+      return config;
+    },
+
     ...mapGetters(config.MODULE_NAME,
       [
         'currentActivity',
         'itemInputTypes',
         'itemTemplates',
+        'prizeActivity'
       ]
     ),
 
-    config () {
-      return config;
+    hasPrizeActivity () {
+      return !!this.prizeActivity;
     },
 
     item () {
@@ -443,6 +448,7 @@ export default {
         'duplicateItem',
         'deleteItem',
         'updateItemInputType',
+        'setTokenPrizeModalStatus',
       ],
     ),
 

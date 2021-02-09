@@ -110,6 +110,7 @@ export default {
 
       if (compressedSchema.ui && compressedSchema.ui.inputType) {
         simplifiedSchema.inputType = compressedSchema.ui.inputType;
+        simplifiedSchema.ui = compressedSchema.ui;
       }
 
       if (compressedSchema['schema:description']) {

@@ -91,7 +91,7 @@ const activityMutations = {
   addActivity (state) {
     const model = new Activity;
     state.protocol.activities.push({
-      ...model.getActivityBuilderData({}),
+      ...model.getActivityBuilderData({ items: [] }),
       index: state.protocol.activities.length,
     })
   },

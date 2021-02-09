@@ -20,6 +20,11 @@ export default class Item {
 
   getItemBuilderData(initialItemData) {
     const question = Item.getQuesionInfo(initialItemData.question || '');
+    let inputType = initialItemData.ui ? initialItemData.ui.inputType : '';
+
+    if (inputType == 'radio' && initialItemData.options.isMultipleChoice) {
+      inputType = 'checkbox';
+    }
 
     return {
       id: initialItemData._id || null,
@@ -28,8 +33,8 @@ export default class Item {
       description: initialItemData.description || '',
       correctAnswer: initialItemData.correctAnswer || '',
       valueType: initialItemData.valueType || '',
-      inputType: initialItemData.ui ? initialItemData.ui.inputType : '',
-      options: initialItemData.options || [],
+      inputType,
+      options: initialItemData.options || {},
       allow: initialItemData.ui && initialItemData.ui.allow
         && (initialItemData.ui.allow.includes("dontKnow")
           || initialItemData.ui.allow.includes("dont_know_answer")),
@@ -181,17 +186,20 @@ export default class Item {
     if (this.ref.inputType === 'cumulativeScore') {
       schema['cumulativeScores'] = cumulativeScores;
     }
-    if (this.ref.inputType === 'radio' || this.ref.inputType === 'prize') {
-        if (this.ref.options.isMultipleChoice) {
+
+    if (this.ref.inputType === 'radio' || this.ref.inputType === 'checkbox' || this.ref.inputType === 'prize') {
+      const inputType = (this.ref.inputType === 'radio' || this.ref.inputType === 'checkbox') ? 'radio' : 'prize';
+
+      if (this.ref.options.isMultipleChoice) {
         schema["ui"] = {
-          "inputType": this.ref.inputType
+          inputType
         };
       } else {
         schema["ui"] = {
-            inputType: this.ref.inputType,
-            allow: [
-              "autoAdvance"
-            ]
+          inputType,
+          allow: [
+            "autoAdvance"
+          ]
         };
       }
     } else {

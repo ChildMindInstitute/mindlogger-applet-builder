@@ -120,4 +120,16 @@ export default {
   updateProtocolMetaInfo (state, obj) {
     Object.assign(state.protocol, obj);
   },
+
+  resetProtocol (state) {
+    state.protocol = {
+      id: '',
+      description: '',
+      markdownData: '',
+      name: '',
+      protocolVersion: '',
+      isValid: false,
+      activities: []
+    }
+  }
 }

@@ -3,7 +3,7 @@
     class="pa-2"
   >
     <v-card-title class="px-2 py-0">
-      <span>{{ item.name }}</span>
+      <span class="item-name">{{ item.name }}</span>
       <v-spacer />
       <v-card-actions>
         <v-btn icon @click="duplicateItem(itemIndex)">
@@ -76,6 +76,7 @@
           :uploadFor="'activity-item'"
           :itemImg="questionBuilder.imgURL"
           :notify-enabled="false"
+          :disabled="!item.allowEdit"
           @onAddImg="onAddImg"
           @onRemoveImg="onRemoveImg"
         />
@@ -156,7 +157,7 @@
         />
       </div>
       <RadioBuilder
-        v-if="item.inputType === 'radio'"
+        v-if="item.inputType === 'radio' || item.inputType === 'checkbox'"
         :is-skippable-item="item.allow"
         :response-options="item.responseOptions"
         :initial-item-data="item.options"
@@ -264,10 +265,11 @@
           class="px-2 pt-4"
           :src="questionBuilder.imgURL"
         />
-        <span>{{ questionBuilder.text }}</span>
+        <span class="item-quiz">{{ questionBuilder.text }}</span>
       </div>
 
       <div
+        v-if="item.inputType == 'radio' || item.inputType == 'checkbox'"
         class="mt-4"
       >
         <div
@@ -275,11 +277,21 @@
           :key="index"
         >
           <input
+            v-if="item.options.isMultipleChoice"
             class="mx-2"
             type="checkbox"
             value="false"
             disabled
           >
+
+          <input
+            v-else
+            class="mx-2"
+            type="radio"
+            value="false"
+            disabled
+          >
+
           <span>{{ option.name }}</span>
         </div>
       </div>
@@ -301,7 +313,9 @@
 </template>
 
 <style scoped>
-
+  .item-name, .item-quiz {
+    font-weight: 600;
+  }
 </style>
 
 <script>

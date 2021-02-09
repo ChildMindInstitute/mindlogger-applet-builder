@@ -13,7 +13,10 @@
       <template v-slot:activator="{ on }">
         <div v-on="on">
 
-          <v-expansion-panels v-if="typeOfStructure === 0 || typeOfStructure === 3 || typeOfStructure === 4">
+          <v-expansion-panels
+            v-if="typeOfStructure === 0 || typeOfStructure === 3 || typeOfStructure === 4"
+            :disabled="disabled"
+          >
             <v-expansion-panel>
               <v-expansion-panel-header disable-icon-rotate>
                 {{ itemImg ? 'Change' : 'Add' }} {{ getCorrectTitle(typeOfStructure) }}
@@ -113,6 +116,11 @@ export default {
       type: Boolean,
       required: false,
       default: true
+    },
+    disabled: {
+      type: Boolean,
+      required: false,
+      default: false
     }
   },
   data() {

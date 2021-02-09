@@ -16,59 +16,63 @@ export default {
   itemInputTypes: [
     {
       text: "radio",
-      icon: baseImageURL + 'save-icon.png',
+      icon: baseImageURL + 'item-types/radio-icon.png',
+    },
+    {
+      text: 'checkbox',
+      icon: baseImageURL + 'item-types/check-box-icon.png',
     },
     {
       text: "text",
-      icon: baseImageURL + 'save-icon.png',
+      icon: baseImageURL + 'item-types/text-input-icon.png',
     },
     {
       text: "slider",
-      icon: baseImageURL + 'save-icon.png',
+      icon: baseImageURL + 'item-types/slider-icon.png',
     },
     {
       text: "photo",
-      icon: baseImageURL + 'save-icon.png',
+      icon: baseImageURL + 'item-types/photo-icon.png',
     },
     {
       text: "video",
-      icon: baseImageURL + 'save-icon.png',
+      icon: baseImageURL + 'item-types/video-icon.png',
     },
     {
       text: "timeRange",
-      icon: baseImageURL + 'save-icon.png',
+      icon: baseImageURL + 'item-types/time-range.png',
     },
     {
       text: "date",
-      icon: baseImageURL + 'save-icon.png',
+      icon: baseImageURL + 'item-types/date-icon.png',
     },
     {
       text: "drawing",
-      icon: baseImageURL + 'save-icon.png',
+      icon: baseImageURL + 'item-types/drawing-icon.png',
     },
     {
       text: "audioRecord",
-      icon: baseImageURL + 'save-icon.png',
+      icon: baseImageURL + 'item-types/audio-icon.png',
     },
     {
       text: "audioImageRecord",
-      icon: baseImageURL + 'save-icon.png',
+      icon: baseImageURL + 'item-types/audio-icon.png',
     },
     {
       text: "geolocation",
-      icon: baseImageURL + 'save-icon.png',
+      icon: baseImageURL + 'item-types/geolocation-icon.png',
     },
     {
       text: "audioStimulus",
-      icon: baseImageURL + 'save-icon.png',
+      icon: baseImageURL + 'item-types/audio-icon.png',
     },
     {
       text: "markdownMessage",
-      icon: baseImageURL + 'save-icon.png',
+      icon: baseImageURL + 'item-types/message-icon.png',
     },
     {
       text: "cumulativeScore",
-      icon: baseImageURL + 'save-icon.png',
+      icon: baseImageURL + 'item-types/cumulative-icon.png',
     },
   ],
   templates: [],

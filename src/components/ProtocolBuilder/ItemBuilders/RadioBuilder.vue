@@ -1,166 +1,94 @@
 <template>
   <div>
     <v-form>
-      <v-row>
-        <v-col 
-          class="d-flex align-center"
-          cols="12"
-          md="3"
-          sm="6"
-        >
-          <v-checkbox
-            v-model="isTokenValue"
-            label="Token Value"
-            :disabled="!isItemEditable"
-            @change="update"
-          />
-        </v-col>
-        <v-col 
-          class="d-flex align-center"
-          cols="12"
-          md="3"
-          sm="6"
-        >
-          <v-checkbox
-            v-model="isSkippable"
-            label="Skippable Item"
-            :disabled="!isItemEditable"
-            @change="updateAllow"
-          />
-        </v-col>
-        <v-col 
-          class="d-flex align-center"
-          cols="12"
-          md="3"
-          sm="6"
-        >
-          <v-checkbox
-            v-model="isMultipleChoice"
-            label="Multiple Choice"
-            :disabled="!isItemEditable"
-            @change="update"
-          />
-        </v-col>
-        <v-col 
-          class="d-flex align-center"
-          cols="12"
-          md="3"
-          sm="6"
-        >
-          <v-checkbox
-            v-model="hasResponseAlert"
-            label="Response Alert"
-            :disabled="!isItemEditable"
-            @change="update"
-          />
-        </v-col>
-      </v-row>
-      <v-row
-        v-if="hasResponseAlert"
-      >
-        <v-col
-          class="d-flex align-center"
-          cols="12"
-          sm="12"
-        >
-          <v-text-field
-            v-model="responseAlertMessage"
-            label="Alert Message"
-            :rules="alertTextRules"
-            :disabled="!isItemEditable"
-            required
-            @change="update"
-          />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col
-          v-if="isTokenValue"
-          comment="***Hide Token Prize button for now***"
-          class="d-flex align-center"
-          cols="auto"
-        >
-          <v-btn
-            outlined
-            color="primary"
-            @click="$emit('openPrize')"
-          >
-            {{ isPrizeActivity ? 'Edit' : 'Create' }} Token Prizes
-          </v-btn>
-        </v-col>
-        <v-col 
-          v-if="isTokenValue"
-          class="d-flex align-center flex-column justify-center"
-          cols="auto"
-        >
-          <v-btn
-            @click="openTemplateList"
-            v-click-outside="closeTemplateList"
-            class="deep-orange"
-            color="primary"
-            dark
-          >
-            Saved Templates
-          </v-btn>
-          <v-card
-            v-show="templateList"
-            class="mx-auto mx-template-list"
-            min-width="172"
-            tile
-          >
-            <v-list>
-              <v-list-item
-                v-for="(item, i) in items"
-                :key="i"
-              >
-                <v-list-item-title @click="addTemplateOption(item)">
-                  {{ item.text }} | {{ item.value }}
-                </v-list-item-title>
-                <v-btn
-                  icon
-                  color="grey darken-1 ml-2"
-                  @click="removeTemplate(item)"
-                >
-                  <v-icon>mdi-delete</v-icon>
-                </v-btn>
-              </v-list-item>
-            </v-list>
-          </v-card>
-        </v-col>
-        <v-col
-          class="d-flex align-center"
-          cols="auto"
-        >
-          <v-checkbox
-            v-model="hasScoreValue"
-            label="Option Score"
-            :disabled="!isItemEditable"
-            @change="update"
-          />
-        </v-col>
-      </v-row>
       <v-list>
         <v-subheader>
           Options
+
+          <v-spacer />
+
+          <template
+            v-if="isTokenValue"
+          >
+            <v-btn
+              class="mx-2"
+              outlined
+              color="primary"
+              @click="$emit('openPrize')"
+            >
+              {{ isPrizeActivity ? 'Edit' : 'Create' }} Token Prizes
+            </v-btn>
+
+            <v-menu offset-y>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  class="deep-orange"
+                  color="primary"
+                  dark
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  Saved Templates
+                </v-btn>
+              </template>
+              <v-list>
+                <v-list-item
+                  v-for="(item, i) in items"
+                  :key="i"
+                >
+                  <v-list-item-title @click="addTemplateOption(item)">
+                    {{ item.text }} | {{ item.value }}
+                  </v-list-item-title>
+                  <v-btn
+                    icon
+                    color="grey darken-1 ml-2"
+                    @click="removeTemplate(item)"
+                  >
+                    <v-icon>mdi-delete</v-icon>
+                  </v-btn>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+          </template>
         </v-subheader>
         <v-list-item
           v-for="(option, index) in options"
           :key="index"
         >
-          <v-list-item-content>
-            <v-list-item-title v-text="option.name" />
-          </v-list-item-content>
-          <v-list-item-action>
-            <v-btn
-              icon
-              :disabled="!isItemEditable"
-              @click="deleteOption(index)"
+          <div class="ma-4">
+            <img
+              height="30"
+              class="px-2 pt-4"
+              :src="option.image"
+            />
+            <span
+              :class="{ 'selected-option': index == editingOptionIndex }"
             >
-              <v-icon color="grey lighten-1">
-                delete
-              </v-icon>
-            </v-btn>
-          </v-list-item-action>
+              {{ option.name }}
+            </span>
+          </div>
+          <v-spacer/>
+          <v-btn
+            icon
+            :disabled="!isItemEditable"
+            @click="editOption(index)"
+          >
+            <v-icon
+              color="grey lighten-1"
+            >
+              edit
+            </v-icon>
+          </v-btn>
+
+          <v-btn
+            icon
+            :disabled="!isItemEditable"
+            @click="deleteOption(index)"
+          >
+            <v-icon color="grey lighten-1">
+              delete
+            </v-icon>
+          </v-btn>
         </v-list-item>
         <v-list-item class="d-block">
           <v-form
@@ -168,15 +96,6 @@
             v-model="valid"
           >
             <v-row>
-              <v-col 
-                cols="auto">
-                <ImageUploader
-                  :uploadFor="'item-radio-option-pc'"
-                  :itemImg="nextOptionImageFile"
-                  @onAddImg="onAddImg"
-                  @onRemoveImg="onRemoveImg"
-                />
-              </v-col>
               <v-col 
                 cols="12"
                 sm="5"
@@ -241,8 +160,19 @@
 
             <v-row v-if="!nextOptionImageFile">
               <v-col 
-                cols="12"
-                sm="12"
+                cols="auto"
+              >
+                <ImageUploader
+                  :uploadFor="'item-radio-option-pc'"
+                  :itemImg="nextOptionImageFile"
+                  @onAddImg="onAddImg"
+                  @onRemoveImg="onRemoveImg"
+                  :disabled="!isItemEditable"
+                />
+              </v-col>
+
+              <v-col 
+                cols="9"
               >
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
@@ -250,6 +180,7 @@
                       <v-text-field
                         v-model="nextOptionImage"
                         label="Option Image URL"
+                        :disabled="!isItemEditable"
                       />
                     </div>
                   </template>
@@ -276,18 +207,111 @@
                 />
               </v-col>
             </v-row>
+
+            <v-btn
+              class="mx-2"
+              :disabled="!valid || !isItemEditable"
+              v-if="editingOptionIndex >= 0"
+              @click="addOption(true)"
+            >
+              Update Option
+            </v-btn>
+
             <v-btn
               :disabled="!valid || !isItemEditable"
-              @click="addOption"
+              @click="addOption(false)"
             >
               Add Option
             </v-btn>
           </v-form>
         </v-list-item>
       </v-list>
+
+      <v-divider
+        class="mt-4"
+      />
+      <v-row>
+        <v-col 
+          class="d-flex align-center"
+          cols="12"
+          md="3"
+          sm="6"
+        >
+          <v-checkbox
+            v-model="isTokenValue"
+            label="Token Value"
+            :disabled="!isItemEditable"
+            @change="update"
+          />
+        </v-col>
+        <v-col 
+          class="d-flex align-center"
+          cols="12"
+          md="3"
+          sm="6"
+        >
+          <v-checkbox
+            v-model="isSkippable"
+            label="Skippable Item"
+            :disabled="!isItemEditable"
+            @change="updateAllow"
+          />
+        </v-col>
+        <v-col 
+          class="d-flex align-center"
+          cols="12"
+          md="3"
+          sm="6"
+        >
+          <v-checkbox
+            v-model="hasResponseAlert"
+            label="Response Alert"
+            :disabled="!isItemEditable"
+            @change="update"
+          />
+        </v-col>
+        <v-col
+          class="d-flex align-center"
+          cols="12"
+          md="3"
+          sm="6"
+        >
+          <v-checkbox
+            v-model="hasScoreValue"
+            label="Option Score"
+            :disabled="!isItemEditable"
+            @change="update"
+          />
+        </v-col>
+      </v-row>
+      <v-row
+        v-if="hasResponseAlert"
+      >
+        <v-col
+          class="d-flex align-center"
+          cols="12"
+          sm="12"
+        >
+          <v-text-field
+            v-model="responseAlertMessage"
+            label="Alert Message"
+            :rules="alertTextRules"
+            :disabled="!isItemEditable"
+            required
+            @change="update"
+          />
+        </v-col>
+      </v-row>
     </v-form>
   </div>
 </template>
+
+<style scoped>
+  span.selected-option {
+    border-bottom: 1px solid black;
+    padding-bottom: 5px;
+  }
+</style>
 
 <script>
 import ClickOutside from 'vue-click-outside';
@@ -321,7 +345,7 @@ export default {
     isPrizeActivity: {
       type: Object,
       default: null
-    }
+    },
   },
   data: function () {
     const imgUpldr = new ImageUpldr();
@@ -350,7 +374,6 @@ export default {
       nextOptionImage: this.initialItemData.nextOptionImage || '',
       nextOptionDescription: this.initialItemData.nextOptionDescription || '',
       options: this.initialItemData.options || [],
-      templateList: false,
       valid: true,
       textRules: [
         v => !!v || 'Radio options cannot be empty',
@@ -367,7 +390,8 @@ export default {
       nextOptionImageFile,
       hasResponseAlert: this.initialItemData.hasResponseAlert || false,
       responseAlertMessage: this.initialItemData.responseAlertMessage || '',
-      imgUpldr
+      imgUpldr,
+      editingOptionIndex: -1,
     };
   },
   directives: {
@@ -380,9 +404,8 @@ export default {
     resetValidation () {
       this.$refs.form.resetValidation()
     },
-    async addOption() {
+    async addOption(isEditing) {
       try {
-
         if(this.nextOptionImageFile) {
           this.$emit('error', '');
           this.$emit('uploading', true);
@@ -393,6 +416,7 @@ export default {
         } else if(this.nextOptionImage) {
           const isImgInvalid = await this.imgUpldr.isImageValid(this.nextOptionImage);
           if(isImgInvalid) {
+            console.log('image invalid', isImgInvalid);
             this.$emit('error', isImgInvalid);
             return;
           }
@@ -410,7 +434,8 @@ export default {
         if (this.nextOptionImage) {
           nextOption.image = this.nextOptionImage.toString();
         }
-        if (this.isTemplate) {
+
+        if (this.isTemplate && !isEditing) {
           const newOption = {
             text: nextOptionName,
             value: nextOptionValue,
@@ -421,7 +446,12 @@ export default {
           this.isTemplate = false;
         }
 
-        this.options.push(nextOption);
+        if (isEditing) {
+          this.options[this.editingOptionIndex] = nextOption;
+        } else {
+          this.options.push(nextOption);
+        }
+
         this.$emit('error', '');
         this.nextOptionName = '';
         this.nextOptionValue = '';
@@ -436,6 +466,8 @@ export default {
         this.nextOptionImage = '';
         this.$emit('error', 'Something went wrong with uploading "Option" image. Please try to upload image again...or add "Option" without image.');
       }
+
+      this.editingOptionIndex = -1;
     },
     removeTemplate(item) {
       const { items } = this;
@@ -450,19 +482,23 @@ export default {
         'image': '',
         'description': item.description,
       };
-      this.templateList = false;
       this.options.push(nextOption);
       this.update();
-    },
-    openTemplateList(event) {
-      this.templateList = !this.templateList
-    },
-    closeTemplateList() {
-      this.templateList = false;
     },
     deleteOption(index) {
       this.options.splice(index, 1);
       this.update();
+    },
+    editOption(index) {
+      const option = this.options[index];
+
+      this.editingOptionIndex = index;
+
+      this.nextOptionName = option.name;
+      this.nextOptionValue= option.value;
+      this.nextOptionScore= option.score;
+      this.nextOptionDescription = option.description || '';
+      this.nextOptionImage = option.image || '';
     },
     update() {
       const responseOptions = {

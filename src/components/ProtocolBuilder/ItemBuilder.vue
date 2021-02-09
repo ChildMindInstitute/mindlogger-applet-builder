@@ -259,13 +259,12 @@
       v-else-if="item.inputType !== 'cumulativeScore' && item.inputType !== 'markdownMessage'"
       class="px-2"
     >
-      <div>
+      <div class="item-quiz">
         <img
-          height="25"
-          class="px-2 pt-4"
+          width="50"
           :src="questionBuilder.imgURL"
         />
-        <span class="item-quiz">{{ questionBuilder.text }}</span>
+        <span>{{ questionBuilder.text }}</span>
       </div>
 
       <div
@@ -315,6 +314,10 @@
 <style scoped>
   .item-name, .item-quiz {
     font-weight: 600;
+  }
+  .item-quiz {
+    display: flex;
+    align-items: center;
   }
 </style>
 

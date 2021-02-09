@@ -834,8 +834,6 @@ export default {
         this.activities.push(this.prizeActivity);
 
       this.model.getProtocolData().then( data => {
-        console.log('onClickExport', JSON.stringify(data));
-
         if (!this.isEditing) {
           this.$emit("uploadProtocol", data);
         } else {

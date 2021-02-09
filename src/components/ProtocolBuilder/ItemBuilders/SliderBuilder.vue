@@ -39,6 +39,19 @@
           @change="update"
         />
       </v-col>
+
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        sm="3"
+      >
+        <v-checkbox
+          v-model="continousSlider"
+          label="Use Continous Slider"
+          :disabled="!isItemEditable"
+          @change="update"
+        />
+      </v-col>
     </v-row>
 
     <v-row>
@@ -242,6 +255,7 @@ export default {
       alertTextRules: [
         v => !!v || 'Alert Message cannot be empty',
       ],
+      continousSlider: this.initialItemData.continousSlider || false,
       hasScoreValue: this.initialItemData.hasScoreValue || false,
       hasResponseAlert: this.initialItemData.hasResponseAlert || false,
       responseAlertMessage: this.initialItemData.responseAlertMessage || '',
@@ -301,6 +315,7 @@ export default {
         'maxValueImg': this.imgLastName,
         'hasScoreValue': this.hasScoreValue,
         'hasResponseAlert': this.hasResponseAlert,
+        'continousSlider': this.continousSlider,
         'responseAlertMessage': this.responseAlertMessage,
         'scores': this.hasScoreValue ? this.scores : false
       };

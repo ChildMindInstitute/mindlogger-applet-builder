@@ -128,9 +128,26 @@ const activityMutations = {
   }
 };
 
+const subScaleMutations = {
+  addSubScale (state) {
+    if (state.currentActivity) {
+      state.currentActivity.subScales.push({});
+    }
+  },
+
+  updateSubScaleData (state, { index, obj }) {
+    Object.assign(state.currentActivity.subScales[index], obj);
+  },
+
+  deleteSubScale (state, index) {
+    state.currentActivity.subScales.splice(index, 1);
+  }
+}
+
 export default {
   ...activityMutations,
   ...itemMutations,
+  ...subScaleMutations,
   initProtocolData (state, data) {
     state.protocol = data;
   },

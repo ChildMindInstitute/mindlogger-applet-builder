@@ -57,7 +57,7 @@ export default {
     },
     {
       text: "audioImageRecord",
-      icon: baseImageURL + 'item-types/audio-icon.png',
+      icon: baseImageURL + 'item-types/audio-image-record-icon.png',
     },
     {
       text: "geolocation",
@@ -65,7 +65,7 @@ export default {
     },
     {
       text: "audioStimulus",
-      icon: baseImageURL + 'item-types/audio-icon.png',
+      icon: baseImageURL + 'item-types/audio-stimulus-icon.png',
     },
     {
       text: "markdownMessage",

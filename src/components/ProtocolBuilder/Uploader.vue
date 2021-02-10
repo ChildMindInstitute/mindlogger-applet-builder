@@ -30,7 +30,7 @@
                 type="file"
                 ref="fileInput"
                 accept="audio/mpeg, audio/ogg, audio/wav"
-                @change="onChangeAudioFile"
+                @change="onAddFromDevice($event, null)"
               >
               <v-btn>
                 Your computer
@@ -82,7 +82,7 @@
       >
         <v-row class="flex-column">
           <v-col class="grow">
-            <h3>Are you sure you want to remove "{{this.initialType}}" from Item?</h3>
+            <h3>Are you sure you want to remove {{this.initialType}}?</h3>
           </v-col>
           <v-col class="shrink d-flex justify-end">
             <v-btn
@@ -142,11 +142,12 @@ export default {
   },
   watch: {
     initialData() {
-      if(this.data !== this.initialData) {
-        this.data = this.initialData;
-
-        if(this.initialType === 'audio')
-          this.onChangeAudioFile(null, this.data);
+      const type = typeof this.initialData;
+     
+      if(type === 'string' && this.initialData !== this.data) {
+        this.onAddFromUrl(this.initialData);
+      } else if(type === 'object' && this.initialData.name !== this.data.name) {
+        this.onAddFromDevice(null, this.initialData);
       }
     }
   },
@@ -156,38 +157,35 @@ export default {
       try {
         if(this.initialType === 'audio') await isAudioUrlValid(url);
 
+        this.data = url;
         this.isAddingFromUrl = false;
-        this.$emit('onAddFromUrl', url);
+        this.$emit('onAddFromUrl', this.data);
       } catch (error) {
         this.$emit('onNotify', error);
       }
     },
 
-    async onChangeAudioFile(event, audioFile) {
-      const file = event ? event.target.files[0] : audioFile;
-
-      if(file && typeof file !== 'string') {
-        this.data = file;
-        this.$emit('onAddAudio', this.uploadFile);
-      }
-
+    async onAddFromDevice(event, externalFile) {
+      const file = event ? event.target.files[0] : externalFile;
+      if(!file) return;
       if(event) event.target.value = '';
+
+      this.data = file;
+      this.$emit('onAddFromDevice', this.upload);
     },
 
-    async uploadFile() {
-      try {
-        const response = await this.uploader.upload(this.data);
-        this.data = response.location;
-        this.$emit('onUploaded', this.data);
-      } catch(err) {
-        this.data = this.initialData;
-        setTimeout(() => {
-          this.$emit('onError', { 
-            type: 'error', 
-            message: `Something went wrong with uploading "${this.initialType}${this.initialAdditionalType ? ': ' + this.initialAdditionalType : ''}". Please try to upload again or just save Item without adding ${this.initialType}.`,
+    async upload() {
+      return new Promise((resolve, reject) => {
+        this.uploader.upload(this.data)
+          .then(response => { 
+            this.data = response.location;
+            resolve(this.data);
+          })
+          .catch(err => {
+            this.data = this.initialData;
+            setTimeout(() => reject('Something went wrong with uploading.'), 1000);
           });
-        }, 1000);
-      }
+      });
     },
 
     onClickRemove() {

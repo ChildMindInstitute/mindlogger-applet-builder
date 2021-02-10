@@ -21,13 +21,11 @@
       style="max-width: 300px"
       :initialType="'audio'"
       :initialData="audio"
-      @onAddFromUrl="onAddFromUrl"
+      @onAddFromUrl="onAddFromUrl($event)"
+      @onAddFromDevice="loading = true; onAddFromDevice($event);"
       @onRecordAudio="onOpenRecorder"
-      @onAddAudio="loading = true; $event();"
-      @onUploaded="loading = false; onUploadedAudio($event);"
       @onRemove="onRemoveAudio()"
       @onNotify="loading = false; notify = $event;"
-      @onError="loading = false; notify = $event;"
     />
     <!-- Audio Uploader -->
 
@@ -198,10 +196,31 @@ export default {
       this.audio = this.url;
       this.notify = {
         type: 'success',
-        message: 'Audio successfully added to AudioStimulus Item.',
+        message: 'Audio from URL successfully added to AudioStimulus Item.',
         duration: 3000,
       };
       this.update();
+    },
+
+    async onAddFromDevice(uploadFunction) {
+      try {
+        this.url = await uploadFunction();
+        this.audio = this.url;
+        this.recordedAudioData = null;
+        this.loading = false;
+        this.notify = {
+          type: 'success',
+          message: 'Audio successfully added to AudioStimulus Item.',
+          duration: 3000,
+        };
+        this.update();
+      } catch (error) {
+        this.loading = false;
+        this.notify = {
+          type: 'error',
+          message: 'Something went wrong with uploading audio for AudioStimulus Item. Please try to upload again or just save AudioStimulus Item without adding audio.',
+        };
+      }
     },
 
     onOpenRecorder() {
@@ -231,23 +250,13 @@ export default {
       this.audio = audioFile;
     },
 
-    onUploadedAudio(audioURL) {
-      this.url = audioURL;
-      this.audio = this.url;
-      this.recordedAudioData = null;
-      this.notify = {
-        type: 'success',
-        message: 'Audio successfully uploaded and added to "AudioStimulus" Item',
-      };
-      this.update();
-    },
-
     onRemoveAudio() {
       this.url = '';
       this.audio = this.url;
       this.notify = {
         type: 'warning',
-        message: 'Audio successfully removed from "AudioStimulus" Item',
+        message: 'Audio successfully removed from AudioStimulus Item',
+        duration: 3000,
       };
       this.update();
     }

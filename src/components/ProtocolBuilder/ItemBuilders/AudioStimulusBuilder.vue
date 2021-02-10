@@ -66,7 +66,7 @@
           <v-btn 
             color="primary"
             :disabled="!audioURL"
-            @click="isAddingFromURLProcess = false; onAddFromURL();"
+            @click="onAddFromURL();"
           >
             Add
           </v-btn>
@@ -135,6 +135,7 @@ import Uploader from '../Uploader.vue';
 import AudioRecorder from 'vue-audio-recorder';
 import Notify from '../Additional/Notify.vue';
 import Loading from '../Additional/Loading.vue';
+import { isAudioUrlValid } from '../../../models/Uploader';
 
 Vue.use(AudioRecorder);
 
@@ -225,26 +226,21 @@ export default {
       this.$emit('updateAllow', allow);
     },
 
-    onAddFromURL() {
-      const newAudio = new Audio(this.audioURL);
-
-      newAudio.addEventListener('canplay', () => {
-        this.url = this.audioURL;
+    async onAddFromURL() {
+      try {
+        this.url = await isAudioUrlValid(this.audioURL);
         this.audio = this.url;
         this.audioURL = '';
+        this.isAddingFromURLProcess = false;
         this.notify = {
           type: 'success',
-          message: 'Audio successfully added to "AudioStimulus" Item',
+          message: 'Audio successfully added to AudioStimulus Item.',
+          duration: 3000,
         };
         this.update();
-      });
-
-      newAudio.addEventListener('error', () => {
-        this.notify = {
-          type: 'error',
-          message: 'Please check if you use correct "audio" url.',
-        };
-      });
+      } catch (error) {
+        this.notify = error;
+      }
     },
 
     onOpenRecorder() {

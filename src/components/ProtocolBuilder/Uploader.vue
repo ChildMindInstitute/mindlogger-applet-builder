@@ -100,7 +100,7 @@
 </template>
 
 <script>
-import Uploader from '../../models/Uploader';
+import { Uploader } from '../../models/Uploader';
 
 export default {
   props: {

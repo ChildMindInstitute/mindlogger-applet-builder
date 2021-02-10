@@ -8,7 +8,17 @@ const S3Config = {
   s3Url: process.env.VUE_APP_S3_URL
 };
 
-export default class Uploader {
+export function isAudioUrlValid(url) {
+  return new Promise((resolve, reject) => {
+    const audio = new Audio(url);
+    audio.addEventListener('canplay', () => resolve(url));
+    audio.addEventListener('error', () => {
+      reject({ type: 'error', message: 'Please check if you use correct audio url.', duration: 3000 });
+    });
+  });
+}
+
+export class Uploader {
   constructor(dirName = '') {
     this.client = this.init(dirName);
   }

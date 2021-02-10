@@ -294,7 +294,7 @@
 </style>
 
 <script>
-import ImageUploader from '../../../models/ImageUploader';
+import ImageUploader from '../../models/ImageUploader';
 import {toolbar_left_addlink} from 'mavon-editor/src/lib/toolbar_left_click.js'
 
 export default {

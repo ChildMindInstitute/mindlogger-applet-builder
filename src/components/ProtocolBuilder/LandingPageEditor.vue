@@ -40,7 +40,7 @@
 
 
 <script>
-import MarkDownEditor from './ItemBuilders/MarkDownEditor';
+import MarkDownEditor from './MarkDownEditor';
 
 export default {
   name: 'LandingPageEditor',

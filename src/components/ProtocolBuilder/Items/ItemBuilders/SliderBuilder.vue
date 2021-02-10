@@ -203,8 +203,8 @@
 </style>
 
 <script>
-import ImageUploader from '../ImageUploader.vue';
-import ImageUpldr from '../../../models/ImageUploader';
+import ImageUploader from '../../ImageUploader.vue';
+import ImageUpldr from '../../../../models/ImageUploader';
 
 export default {
   components: {

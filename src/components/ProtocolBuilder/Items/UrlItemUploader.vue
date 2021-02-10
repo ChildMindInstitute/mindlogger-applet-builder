@@ -53,7 +53,7 @@
 
 <script>
 
-import api from '../../utilities/api.vue';
+import api from '../../../utilities/api.vue';
 
 export default {
   data: function () {

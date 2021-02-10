@@ -59,7 +59,7 @@
 
 <script>
 import { mapGetters, mapMutations } from 'vuex';
-import config from '../../config';
+import config from '../../../config';
 import ItemBuilder from './ItemBuilder';
 import UrlItemUploader from './UrlItemUploader';
 

@@ -25,9 +25,9 @@
 import { mapGetters, mapMutations } from 'vuex';
 import config from '../../config';
 import ActivityHeader from './ActivityHeader';
-import ItemList from './ItemList';
-import SubScaleList from './SubScaleList';
-import ConditionalList from './ConditionalList';
+import ItemList from './Items/ItemList';
+import SubScaleList from './SubScales/SubScaleList';
+import ConditionalList from './Conditionals/ConditionalList';
 
 export default {
   components: {

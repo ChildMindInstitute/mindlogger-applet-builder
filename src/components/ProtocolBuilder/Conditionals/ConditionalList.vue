@@ -36,7 +36,7 @@
 
 <script>
 import { mapGetters, mapMutations } from 'vuex';
-import config from '../../config';
+import config from '../../../config';
 import ConditionalBuilder from './ConditionalBuilder';
 
 export default {

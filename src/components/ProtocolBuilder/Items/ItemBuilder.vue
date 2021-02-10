@@ -323,7 +323,7 @@
 
 <script>
 
-import ImageUploader from './ImageUploader.vue';
+import ImageUploader from '../ImageUploader.vue';
 import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
 import TextBuilder from "./ItemBuilders/TextBuilder.vue";
 import SliderBuilder from "./ItemBuilders/SliderBuilder.vue";
@@ -337,11 +337,11 @@ import AudioImageRecordBuilder from "./ItemBuilders/AudioImageRecordBuilder.vue"
 import GeolocationBuilder from "./ItemBuilders/GeolocationBuilder.vue";
 import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
 import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
-import MarkDownEditor from "./ItemBuilders/MarkDownEditor";
-import Item from '../../models/Item';
-import ImageUpldr from '../../models/ImageUploader';
+import MarkDownEditor from "../MarkDownEditor";
+import Item from '../../../models/Item';
+import ImageUpldr from '../../../models/ImageUploader';
 import { mapMutations, mapGetters } from 'vuex';
-import config from '../../config';
+import config from '../../../config';
 
 export default {
   components: {

@@ -47,7 +47,7 @@
 
 <script>
 import { mapGetters, mapMutations } from 'vuex';
-import config from '../../config';
+import config from '../../../config';
 import SubScaleBuilder from './SubScaleBuilder';
 import { ageScreen, genderScreen } from './lookupTable';
 import LookUpTableUploader from './LookUpTableUploader';

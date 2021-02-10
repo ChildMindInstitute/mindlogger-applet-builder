@@ -39,7 +39,7 @@
             </div>
             <v-btn 
               class="mt-4"
-              @click="$emit('onAddFromURL')"
+              @click="isAddingFromUrl = true"
             >
               From URL
               <v-icon right>mdi-link-variant-plus</v-icon>
@@ -65,6 +65,13 @@
 
     </div>
     <!-- Audio Uploader Structure -->
+
+    <AddFromUrl
+      :show="isAddingFromUrl"
+      @add="onAddFromUrl"
+      @cancel="isAddingFromUrl = false"
+    />
+    <!-- Add From Url Popup -->
 
     <v-dialog v-model="removeConfirm" persistent width="400">
       <v-alert
@@ -100,9 +107,13 @@
 </template>
 
 <script>
-import { Uploader } from '../../models/Uploader';
+import { Uploader, isAudioUrlValid } from '../../models/Uploader';
+import AddFromUrl from './Additional/AddFromUrl.vue';
 
 export default {
+  components: {
+    AddFromUrl,
+  },
   props: {
     initialType: {
       type: String,
@@ -125,6 +136,7 @@ export default {
       structureTypes,
       uploader,
       data: this.initialData,
+      isAddingFromUrl: false,
       removeConfirm: false,
     };
   },
@@ -139,6 +151,17 @@ export default {
     }
   },
   methods: {
+
+    async onAddFromUrl(url) {
+      try {
+        if(this.initialType === 'audio') await isAudioUrlValid(url);
+
+        this.isAddingFromUrl = false;
+        this.$emit('onAddFromUrl', url);
+      } catch (error) {
+        this.$emit('onNotify', error);
+      }
+    },
 
     async onChangeAudioFile(event, audioFile) {
       const file = event ? event.target.files[0] : audioFile;

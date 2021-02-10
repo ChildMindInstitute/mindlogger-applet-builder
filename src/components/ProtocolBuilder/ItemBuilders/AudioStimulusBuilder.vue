@@ -21,11 +21,12 @@
       style="max-width: 300px"
       :initialType="'audio'"
       :initialData="audio"
-      @onAddFromURL="isAddingFromURLProcess = true"
+      @onAddFromUrl="onAddFromUrl"
       @onRecordAudio="onOpenRecorder"
       @onAddAudio="loading = true; $event();"
       @onUploaded="loading = false; onUploadedAudio($event);"
       @onRemove="onRemoveAudio()"
+      @onNotify="loading = false; notify = $event;"
       @onError="loading = false; notify = $event;"
     />
     <!-- Audio Uploader -->
@@ -43,37 +44,6 @@
       :disabled="!isItemEditable"
       @change="update"
     />
-
-    <v-dialog v-model="isAddingFromURLProcess" persistent width="800">
-      <v-card>
-        <v-card-title class="headline grey lighten-2" primary-title>
-          <v-icon left large>mdi-link-variant-plus</v-icon>
-          Add from URL
-        </v-card-title>
-        <v-card-text>
-          <v-text-field label="URL" v-model="audioURL" />
-        </v-card-text>
-        <v-divider />
-        <v-card-actions>
-          <v-btn 
-            outlined
-            color="primary"
-            @click="isAddingFromURLProcess = false"
-          >
-            Cancel
-          </v-btn>
-          <v-spacer />
-          <v-btn 
-            color="primary"
-            :disabled="!audioURL"
-            @click="onAddFromURL();"
-          >
-            Add
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-    <!-- Audio URL Popup -->
 
     <v-dialog
       v-model="isRecordProcess"
@@ -135,7 +105,6 @@ import Uploader from '../Uploader.vue';
 import AudioRecorder from 'vue-audio-recorder';
 import Notify from '../Additional/Notify.vue';
 import Loading from '../Additional/Loading.vue';
-import { isAudioUrlValid } from '../../../models/Uploader';
 
 Vue.use(AudioRecorder);
 
@@ -185,8 +154,6 @@ export default {
       valid: true,
       urlRules: [v => !!v || "Media URL cannot be empty"],
 
-      isAddingFromURLProcess: false,
-      audioURL: '',
       isRecordProcess: false,
       isRecordProcessVisible: false,
       recordedAudioData: null,
@@ -226,21 +193,15 @@ export default {
       this.$emit('updateAllow', allow);
     },
 
-    async onAddFromURL() {
-      try {
-        this.url = await isAudioUrlValid(this.audioURL);
-        this.audio = this.url;
-        this.audioURL = '';
-        this.isAddingFromURLProcess = false;
-        this.notify = {
-          type: 'success',
-          message: 'Audio successfully added to AudioStimulus Item.',
-          duration: 3000,
-        };
-        this.update();
-      } catch (error) {
-        this.notify = error;
-      }
+    onAddFromUrl(url) {
+      this.url = url;
+      this.audio = this.url;
+      this.notify = {
+        type: 'success',
+        message: 'Audio successfully added to AudioStimulus Item.',
+        duration: 3000,
+      };
+      this.update();
     },
 
     onOpenRecorder() {

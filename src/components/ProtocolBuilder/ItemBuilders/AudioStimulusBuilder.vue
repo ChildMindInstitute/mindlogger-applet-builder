@@ -42,7 +42,7 @@ export default {
       default: true
     },
     initialItemInputOptions: {
-      type: Object,
+      type: Array,
       required: true
     },
     isSkippableItem: {
@@ -63,7 +63,7 @@ export default {
             "schema:transcript"
           ]
         : "",
-      allowReplay: Array.isArray(this.initialItemInputOptions)
+      allowReplay: this.initialItemInputOptions.length > 1
         ? this.initialItemInputOptions[1]["schema:value"]
         : true,
       isSkippable: this.isSkippableItem || false,

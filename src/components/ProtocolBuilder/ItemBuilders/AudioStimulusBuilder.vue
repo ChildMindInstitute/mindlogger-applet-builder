@@ -120,11 +120,11 @@
     </v-dialog>
     <!-- Audio Record Popup -->
 
-    <Alert
-      :loading="loading"
-      :notify="notify"
-    />
-    <!-- Alert -->
+    <Notify :notify="notify" />
+    <!-- Notify -->
+
+    <Loading :loading="loading" />
+    <!-- Loading -->
     
   </v-form>
 </template>
@@ -133,7 +133,8 @@
 import Vue from 'vue';
 import Uploader from '../Uploader.vue';
 import AudioRecorder from 'vue-audio-recorder';
-import Alert from '../Alert.vue';
+import Notify from '../Additional/Notify.vue';
+import Loading from '../Additional/Loading.vue';
 
 Vue.use(AudioRecorder);
 
@@ -142,7 +143,8 @@ export default {
     Uploader,
     AudioRecorder: AudioRecorder.AudioRecorder,
     AudioPlayer: AudioRecorder.AudioPlayer,
-    Alert,
+    Notify,
+    Loading,
   },
   props: {
     initialItemData: {

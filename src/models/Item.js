@@ -103,7 +103,7 @@ export default class Item {
   }
 
   getResponseOptions() {
-    if (this.ref.inputType === "radio" || this.ref.inputType === "prize") {
+    if (this.ref.inputType === "radio" || this.ref.inputType === "prize" || this.ref.inputType === "checkbox") {
       const choices = this.getRadioChoices();
       return {
         "valueType": (this.ref.valueType.includes("token") || this.ref.options.isTokenValue) ? "xsd:token" : "xsd:anyURI",
@@ -243,6 +243,7 @@ export default class Item {
 
     if (
       (this.ref.inputType === "radio" ||
+        this.ref.inputType === "checkbox" ||
         this.ref.inputType === "prize" ||
         this.ref.inputType === "audioRecord") &&
       Object.keys(this.ref.responseOptions).length

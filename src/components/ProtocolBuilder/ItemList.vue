@@ -4,13 +4,15 @@
       Items
     </v-card-title>
 
-    <ItemBuilder
-      v-for="(item, index) in currentActivity.items"
-      :key="index"
-      :item-index="index"
-      class="ma-4"
-    >
-    </ItemBuilder>
+    <div>
+      <ItemBuilder
+        v-for="(item, index) in currentActivity.items"
+        :key="index"
+        :item-index="index"
+        class="ma-4"
+      >
+      </ItemBuilder>
+    </div>
 
     <v-dialog
       v-model="urlDialog"

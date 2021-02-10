@@ -6,8 +6,8 @@ export default class Activity {
   }
 
   getActivityBuilderData(initialActivityData) {
-    if (initialActivityData.schema) {
-      initialActivityData.conditionalItems = this.getConditionalItems(initialActivityData.schema, initialActivityData.items);
+    if (initialActivityData.visibilities && initialActivityData.visibilities.length) {
+      initialActivityData.conditionalItems = this.getConditionalItems(initialActivityData, initialActivityData.items);
     }
     return {
       name: initialActivityData.name || '',
@@ -18,24 +18,13 @@ export default class Activity {
       items: initialActivityData.items || [],
       id: initialActivityData._id || null,
       textRules: [(v) => !!v || 'This field is required'],
-      editItemDialog: false,
-      urlDialog: false,
       error: '',
       componentKey: 0,
       initialItemData: initialActivityData.isPrize && initialActivityData.items ? initialActivityData.items[0] : { options: {}, },
       isItemEditable: true,
       editIndex: -1,
-      initialConditionalItemData: {},
       visibilities: initialActivityData.visibilities || [],
-      editConditionalItemIndex: -1,
-      conditionalRadioItems: [],
-      conditionalSliderItems: [],
-      ifConditionalAvailable: false,
-      isConditionalEditMode: false,
-      editConditionalItemDialog: false,
       conditionalItems: initialActivityData.conditionalItems || [],
-      conditionalBuilderType: '',
-      conditionalItemsForBuilder: [],
       subScales: initialActivityData.subScales && initialActivityData.subScales.map(subScale => subScale) || [],
       compute: initialActivityData.compute && initialActivityData.compute.map(compute => compute) || [],
       messages: initialActivityData.messages && initialActivityData.messages.map(message => message) || [],
@@ -48,11 +37,21 @@ export default class Activity {
     this.ref = ref;
   }
 
-  getConditionalItems(schema, items) {
-    const addProperties = schema.ui.addProperties;
+  getConditionalItems(activity, items) {
+    const visibilities = activity.visibilities;
     const conditionalItems = [];
 
-    addProperties.forEach((property) => {
+    const itemChoices = [];
+
+    for (let i = 0; i < items.length; i++) {
+      const itemModel = new Item();
+      itemModel.updateReferenceObject(items[i]);
+
+      const options = itemModel.getResponseOptions();
+      itemChoices.push(options.choices);
+    }
+
+    visibilities.forEach((property) => {
       let ifValue, stateValue, answerValue;
       const showValue = property.variableName;
       if (typeof property.isVis === 'boolean') return;
@@ -91,11 +90,11 @@ export default class Activity {
           }
         });
       } else if (excludeValues) {
-        const itemValue = items.find(({ name }) => name === excludeValues[1]);
-        const option = itemValue.responseOptions.choices.find(choice => choice['schema:value'] == excludeValues[2]);
+        const itemIndex = items.findIndex(({ name }) => name === excludeValues[1]);
+        const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == excludeValues[2]);
 
         conditionalItems.push({
-          ifValue: itemValue,
+          ifValue: items[itemIndex],
           showValue,
           answerValue: {
             name: option['schema:name'],
@@ -107,11 +106,11 @@ export default class Activity {
           }
         })
       } else if (includeValues) { 
-        const itemValue = items.find(({ name }) => name === includeValues[1]);
-        const option = itemValue.responseOptions.choices.find(choice => choice['schema:value'] == includeValues[2]);
+        const itemIndex = items.findIndex(({ name }) => name === includeValues[1]);
+        const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == includeValues[2]);
 
         conditionalItems.push({
-          ifValue: itemValue,
+          ifValue: items[itemIndex],
           showValue,
           answerValue: {
             name: option['schema:name'],
@@ -130,9 +129,11 @@ export default class Activity {
             name: 'IS EQUAL TO',
             val: '==',
           };
-          ifValue = items.find(({ name }) => name === values[0]);
+          const itemIndex = items.findIndex(({ name }) => name === values[0]);
 
-          const option = ifValue.responseOptions.choices.find(choice => choice['schema:value'] == values[1]);
+          const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == values[1]);
+
+          ifValue = items[itemIndex];
           answerValue = {
             name: option['schema:name'],
             value: option['schema:value']
@@ -143,9 +144,10 @@ export default class Activity {
             name: 'IS NOT EQUAL TO',
             val: '!=',
           };
-          ifValue = items.find(({ name }) => name === values[0]);
+          const itemIndex = items.findIndex(({ name }) => name === values[0]);
           
-          const option = ifValue.responseOptions.choices.find(choice => choice['schema:value'] == values[1]);
+          const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == values[1]);
+          ifValue = items[itemIndex];
           answerValue = {
             name: option['schema:name'],
             value: option['schema:value']

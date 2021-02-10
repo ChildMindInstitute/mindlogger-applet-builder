@@ -4,19 +4,20 @@
       SubScales
     </v-card-title>
 
-    <SubScaleBuilder
-      v-for="(subScale, index) in currentActivity.subScales"
-      :key="index"
-      :sub-scale-index="index"
-      :sub-scale="subScale"
-      :sub-scales="currentActivity.subScales"
-      :items="currentActivity.items"
-      @onCreateLookupTable="onCreateLookupTable"
-      @onDeleteLookupTable="onDeleteLookupTable"
-      class="ma-4"
-    >
-    </SubScaleBuilder>
-
+    <div>
+      <SubScaleBuilder
+        v-for="(subScale, index) in currentActivity.subScales"
+        :key="index"
+        :sub-scale-index="index"
+        :sub-scale="subScale"
+        :sub-scales="currentActivity.subScales"
+        :items="currentActivity.items"
+        @onCreateLookupTable="onCreateLookupTable"
+        @onDeleteLookupTable="onDeleteLookupTable"
+        class="ma-4"
+      >
+      </SubScaleBuilder>
+    <div>
     <v-btn
       @click="onAddSubScale"
       color="primary"

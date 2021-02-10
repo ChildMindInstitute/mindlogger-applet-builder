@@ -142,12 +142,30 @@ const subScaleMutations = {
   deleteSubScale (state, index) {
     state.currentActivity.subScales.splice(index, 1);
   }
+};
+
+const conditionalMutations = {
+  addConditional (state) {
+    if (state.currentActivity) {
+      state.currentActivity.conditionalItems.push({});
+    }
+  },
+
+  updateConditionalData (state, { index, obj }) {
+    state.currentActivity.conditionalItems[index] = obj;
+  },
+
+  deleteConditional (state, index) {
+    state.currentActivity.conditionalItems.splice(index, 1);
+  }
 }
 
 export default {
   ...activityMutations,
   ...itemMutations,
   ...subScaleMutations,
+  ...conditionalMutations,
+
   initProtocolData (state, data) {
     state.protocol = data;
   },

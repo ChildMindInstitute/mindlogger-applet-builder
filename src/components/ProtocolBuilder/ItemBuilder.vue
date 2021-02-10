@@ -581,6 +581,10 @@ export default {
         obj: { responseOptions: this.model.getResponseOptions() }
       })
     },
+
+    updateCumulativeScore () {
+      
+    }
   }
 }
 </script>

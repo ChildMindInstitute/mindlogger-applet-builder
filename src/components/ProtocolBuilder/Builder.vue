@@ -9,7 +9,6 @@
         v-else
       />
 
-
       <v-dialog v-model="tokenPrizeDialog" persistent width="800">
         <PrizeActivityBuilder
           :initial-activity-data="prizeActivity || {}"

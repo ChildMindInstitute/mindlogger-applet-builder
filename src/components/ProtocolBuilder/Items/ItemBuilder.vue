@@ -583,7 +583,10 @@ export default {
     },
 
     updateCumulativeScore () {
-      
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { cumulativeScores: scoreRules }
+      });
     }
   }
 }

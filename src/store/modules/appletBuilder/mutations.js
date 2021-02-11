@@ -27,10 +27,10 @@ const itemMutations = {
       item = obj;
     }
 
-    let ageItemIndex = state.currentActivity.items.findIndex(item => !item.allowEdit);
+    let lastIndex = state.currentActivity.items.findIndex(item => !item.allowEdit || item.inputType == 'cumulativeScore');
 
-    if (ageItemIndex >= 0) {
-      state.currentActivity.items.splice(ageItemIndex, 0, model.getItemBuilderData(item));
+    if (lastIndex >= 0) {
+      state.currentActivity.items.splice(lastIndex, 0, model.getItemBuilderData(item));
     } else {
       state.currentActivity.items.push(model.getItemBuilderData(item));
     }
@@ -52,10 +52,10 @@ const itemMutations = {
       id: null,
     };
 
-    let ageItemIndex = state.currentActivity.items.findIndex(item => !item.allowEdit);
+    let lastIndex = state.currentActivity.items.findIndex(item => !item.allowEdit || item.inputType == 'cumulativeScore');
 
-    if (ageItemIndex >= 0) {
-      state.currentActivity.items.splice(ageItemIndex, 0, newItem);
+    if (lastIndex >= 0) {
+      state.currentActivity.items.splice(lastIndex, 0, newItem);
     } else {
       state.currentActivity.items.push(newItem);
     }

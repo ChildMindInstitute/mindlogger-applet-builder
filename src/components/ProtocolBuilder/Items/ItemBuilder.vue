@@ -100,7 +100,7 @@
             v-bind="attrs"
           >
             <v-tooltip
-              v-if="!hasScoringItem && item == 'cumulativeScore'"
+              v-if="!hasScoringItem && item.text == 'cumulativeScore'"
               top
             >
               <template
@@ -326,6 +326,10 @@
   .invalid {
     background-color: #d44c4c;
   }
+
+  .disabled-option {
+    color: grey;
+  }
 </style>
 
 <script>
@@ -511,7 +515,7 @@ export default {
       const updates = {
         inputType
       };
-      if (this.item.inputType === 'cumulativeScore') {
+      if (inputType === 'cumulativeScore') {
         updates.name = 'cumulatives';
       }
 

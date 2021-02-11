@@ -102,6 +102,7 @@
           @updateOptions="updateOptions"
           @updateAllow="updateAllow"
         />
+
         <SliderBuilder
           v-if="inputType === 'slider'"
           :is-skippable-item="allow"
@@ -109,9 +110,10 @@
           :is-item-editable="isItemEditable"
           @updateOptions="updateOptions"
           @updateAllow="updateAllow"
-          @uploading="isUploadingState = $event"
-          @error="isError = $event"
+          @loading="loading = $event"
+          @notify="notify = $event"
         />
+        
         <VideoBuilder v-if="inputType === 'video'" />
         <PhotoBuilder v-if="inputType === 'photo'" />
         <TimeRangeBuilder v-if="inputType === 'timeRange'" />

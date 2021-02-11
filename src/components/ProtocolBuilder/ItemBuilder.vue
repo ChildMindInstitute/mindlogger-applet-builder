@@ -156,9 +156,9 @@
         <GeolocationBuilder
           v-if="inputType === 'geolocation'"
           :initial-item-response-options="responseOptions"
-          @uploading="isUploadingState = $event"
-          @error="isError = $event"
           @updateResponseOptions="updateResponseOptions"
+          @loading="loading = $event"
+          @notify="notify = $event"
         />
 
         <AudioStimulusBuilder

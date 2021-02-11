@@ -3,24 +3,26 @@
   <p>
     Users will be prompted to grant access to their location. Latitude and longitude will be recorded.
   </p>
-  <ImageUploader
+  <Uploader
     class="my-5"
     style="max-width: 300px"
-    :uploadFor="'default-item'"
-    :itemImg="responseOptions['schema:image']"
-    @onAddImg="onUploadImg"
-    @onRemoveImg="onRemoveImg"
+    :initialType="'image'"
+    :initialData="responseOptions['schema:image']"
+    :initialTitle="'Geolocation Image'"
+    @onAddFromUrl="onAddGeoImageFromUrl($event)"
+    @onAddFromDevice="$emit('loading', true); onAddGeoImageFromDevice($event);"
+    @onRemove="onRemoveGeoImage()"
+    @onNotify="$emit('loading', false); $emit('notify', $event);"
   />
   </div>
 </template>
 
 <script>
-import ImageUpldr from '../../../models/ImageUploader';
-import ImageUploader from './../ImageUploader.vue';
+import Uploader from '../Uploader.vue';
 
 export default {
   components: {
-    ImageUploader,
+    Uploader,
   },
   props: {
     initialItemResponseOptions: {
@@ -37,8 +39,7 @@ export default {
     responseOptions['valueType'] = 'geolocation';
 
     return {
-      imgUpldr: new ImageUpldr(),
-      responseOptions
+      responseOptions,
     }
   },
   methods: {
@@ -47,35 +48,43 @@ export default {
       this.$emit('updateResponseOptions', this.responseOptions);
     },
 
-    async onUploadImg(data) {
+    onAddGeoImageFromUrl(url) {
+      this.responseOptions['schema:image'] = url;
+      this.onUpdateResponseOptions();
+      this.$emit('notify', {
+        type: 'success',
+        message: 'Image from URL successfully added to Geolocation Item.',
+        duration: 3000,
+      });
+    },
+
+    async onAddGeoImageFromDevice(uploadFunction) {
       try {
-        this.$emit('error', '');
-        setTimeout(() => { this.$emit('uploading', true); }, 2000);
-
-        if(typeof data === 'string') {
-          this.responseOptions['schema:image'] = data;
-        } else {
-          const response = await this.imgUpldr.uploadImage(data);
-          this.responseOptions['schema:image'] = response.location;
-        }
-
-        setTimeout(() => {
-          this.onUpdateResponseOptions();
-          this.$emit('uploading', false);
-        }, 2100);
-
-      } catch(e) {
-        setTimeout(() => {
-          this.$emit('uploading', false);
-          this.$emit('error', 'Something went wrong with uploading image for "Geolocation" item. Please try to upload image again...');
-        }, 2000);
+        this.responseOptions['schema:image'] = await uploadFunction();
+        this.onUpdateResponseOptions();
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'success',
+          message: 'Image successfully added to Geolocation Item.',
+          duration: 3000,
+        });
+      } catch (error) {
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'error',
+          message: 'Something went wrong with uploading image for Item > Geolocation. Please try to upload again or just save Geolocation without image changes.',
+        });
       }
     },
 
-    onRemoveImg() {
-      this.$emit('error', '');
+    onRemoveGeoImage() {
       this.responseOptions['schema:image'] = '';
       this.onUpdateResponseOptions();
+      this.$emit('notify', {
+        type: 'warning',
+        message: 'Image successfully removed from Geolocation Item.',
+        duration: 3000,
+      });
     },
 
   },

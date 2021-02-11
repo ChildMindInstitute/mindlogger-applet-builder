@@ -171,7 +171,10 @@
           @updateAllow="updateAllow"
           @updateInputOptions="updateInputOptions"
           @updateMedia="updateMedia"
+          @loading="loading = $event"
+          @notify="notify = $event"
         />
+        
         <CumulativeScoreBuilder
           v-if="inputType === 'cumulativeScore'"
           :items="items"

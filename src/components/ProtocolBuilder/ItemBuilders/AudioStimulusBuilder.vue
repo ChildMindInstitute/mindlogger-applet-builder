@@ -21,11 +21,12 @@
       style="max-width: 300px"
       :initialType="'audio'"
       :initialData="audio"
+      :initialTitle="'Stimulus Audio'"
       @onAddFromUrl="onAddAudioFromUrl($event)"
-      @onAddFromDevice="loading = true; onAddAudioFromDevice($event);"
+      @onAddFromDevice="$emit('loading', true); onAddAudioFromDevice($event);"
       @onRecordAudio="onOpenRecorder"
       @onRemove="onRemoveAudio()"
-      @onNotify="loading = false; notify = $event;"
+      @onNotify="$emit('loading', false); $emit('notify', $event);"
     />
     <!-- Audio Uploader -->
 
@@ -87,9 +88,6 @@
       </v-card>
     </v-dialog>
     <!-- Audio Record Popup -->
-
-    <Notify :notify="notify" />
-    <Loading :loading="loading" />
     
   </v-form>
 </template>
@@ -98,8 +96,6 @@
 import Vue from 'vue';
 import Uploader from '../Uploader.vue';
 import AudioRecorder from 'vue-audio-recorder';
-import Notify from '../Additional/Notify.vue';
-import Loading from '../Additional/Loading.vue';
 
 Vue.use(AudioRecorder);
 
@@ -108,8 +104,6 @@ export default {
     Uploader,
     AudioRecorder: AudioRecorder.AudioRecorder,
     AudioPlayer: AudioRecorder.AudioPlayer,
-    Notify,
-    Loading,
   },
   props: {
     initialItemData: {
@@ -121,8 +115,8 @@ export default {
       default: true
     },
     initialItemInputOptions: {
-      type: Object,
-      required: true
+      type: Array,
+      required: true,
     },
     isSkippableItem: {
       type: Boolean,
@@ -142,7 +136,7 @@ export default {
             "schema:transcript"
           ]
         : "",
-      allowReplay: Array.isArray(this.initialItemInputOptions)
+      allowReplay: this.initialItemInputOptions[1]
         ? this.initialItemInputOptions[1]["schema:value"]
         : true,
       isSkippable: this.isSkippableItem || false,
@@ -191,11 +185,11 @@ export default {
     onAddAudioFromUrl(url) {
       this.url = url;
       this.audio = this.url;
-      this.notify = {
+      this.$emit('notify', {
         type: 'success',
         message: 'Audio from URL successfully added to AudioStimulus Item.',
         duration: 3000,
-      };
+      });
       this.update();
     },
 
@@ -204,19 +198,19 @@ export default {
         this.url = await uploadFunction();
         this.audio = this.url;
         this.recordedAudioData = null;
-        this.loading = false;
-        this.notify = {
+        this.$emit('loading', false);
+        this.$emit('notify', {
           type: 'success',
           message: 'Audio successfully added to AudioStimulus Item.',
           duration: 3000,
-        };
+        });
         this.update();
       } catch (error) {
-        this.loading = false;
-        this.notify = {
+        this.$emit('loading', false);
+        this.$emit('notify', {
           type: 'error',
           message: 'Something went wrong with uploading audio for AudioStimulus Item. Please try to upload again or just save AudioStimulus Item without changes for audio.',
-        };
+        });
       }
     },
 
@@ -250,11 +244,11 @@ export default {
     onRemoveAudio() {
       this.url = '';
       this.audio = this.url;
-      this.notify = {
+      this.$emit('notify', {
         type: 'warning',
         message: 'Audio successfully removed from AudioStimulus Item.',
         duration: 3000,
-      };
+      });
       this.update();
     }
 

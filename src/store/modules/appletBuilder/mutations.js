@@ -213,5 +213,9 @@ export default {
 
   updateTemplateRequestStatus (state, status) {
     state.templateUpdateRequest.pending = status;
+  },
+
+  setVersions (state, versions) {
+    state.versions = versions;
   }
 }

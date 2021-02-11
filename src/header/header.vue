@@ -115,6 +115,7 @@
 
       <v-tooltip
         bottom
+        v-if="formattedOriginalProtocol"
       >
         <template v-slot:activator="{ on }">
           <v-btn
@@ -128,6 +129,21 @@
         <span>View History</span>
       </v-tooltip>
     </v-row>
+
+    <v-dialog
+      v-model="changeHistoryDialog.visibility"
+      width="800"
+      class="historyDialog"
+    >
+      <ChangeHistoryComponent
+        :key="historyComponentKey"
+        :history="changeHistoryDialog.data"
+        :currentVersion="changeHistoryDialog.currentVersion"
+        :defaultVersion="changeHistoryDialog.defaultVersion"
+        :versions="versions"
+        @updateHistoryView="updateHistoryView"
+      />
+    </v-dialog>
   </v-card>
 </template>
 
@@ -136,11 +152,32 @@ import config from '../config';
 import Protocol from '../models/Protocol';
 import Activity from '../models/Activity';
 import Item from '../models/Item';
+import util from '../utilities/util';
+import ChangeHistoryComponent from '../components/ProtocolBuilder/ChangeHistoryComponent';
 
 import { mapMutations, mapGetters } from 'vuex';
 import { saveAs } from 'file-saver';
 
 export default {
+  components: {
+    ChangeHistoryComponent,
+  },
+  props: {
+    getProtocols: {
+      type: Function,
+      required: false,
+      default: null,
+    }
+  },
+  data () {
+    return {
+      changeHistoryDialog: {
+        visibility: false,
+        defaultVersion: null,
+        data: [],
+      }
+    };
+  },
   computed: {
     config () {
       return config;
@@ -150,7 +187,9 @@ export default {
       'baseImageURL',
       'protocol',
       'activities',
-      'currentActivity'
+      'currentActivity',
+      'formattedOriginalProtocol',
+      'versions'
     ])
   },
   methods: {
@@ -158,6 +197,10 @@ export default {
       'setCurrentScreen',
       'setCurrentActivity',
       'resetProtocol',
+    ]),
+
+    ...mapGetters(config.MODULE_NAME, [
+      'formattedProtocol',
     ]),
 
     onBackToProtocolScreen () {
@@ -238,7 +281,53 @@ export default {
     },
 
     viewHistory () {
-    }
+      this.formattedProtocol().then((current) => {
+        const { log, upgrade } = Protocol.getChangeInfo(
+          this.formattedOriginalProtocol,
+          current
+        );
+
+        this.changeHistoryDialog.visibility = true;
+        this.changeHistoryDialog.data = log;
+        this.changeHistoryDialog.currentVersion = util.upgradeVersion(
+          this.protocol.protocolVersion,
+          upgrade
+        );
+        this.changeHistoryDialog.defaultVersion = null;
+
+        this.historyComponentKey++;
+      });
+    },
+
+    updateHistoryView (version) {
+      const index = this.versions.indexOf(version);
+
+      /** viewing current changes */
+      if (index < 0) {
+        this.changeHistoryDialog.defaultVersion = version;
+
+        this.viewHistory();
+        return;
+      }
+
+      /** viewing old changes */
+      this.getProtocols([this.versions[index], this.versions[index + 1]]).then(
+        (resp) => {
+          const data = resp.data;
+
+          const { log, upgrade } = Protocol.getChangeInfo(
+            data[1].content,
+            data[0].content
+          );
+
+          this.changeHistoryDialog.visibility = true;
+          this.changeHistoryDialog.data = log;
+          this.changeHistoryDialog.defaultVersion = version;
+
+          this.historyComponentKey++;
+        }
+      );
+    },
   }
 }
 </script>

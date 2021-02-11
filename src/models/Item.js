@@ -486,6 +486,9 @@ export default class Item {
         updated: valueUpdate('maxLength'),
         inserted: valueInsert('maxLength'),
       },
+      'options.isTokenValue': {
+        updated: optionUpdate('Token Value option'),
+      },
       'responseOptions.requiredValue': {
         updated: optionUpdate('Required option'),
       },

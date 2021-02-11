@@ -80,6 +80,7 @@ export default {
     },
   ],
   templates: [],
+  versions: null,
   original: null,
   currentScreen: config.PROTOCOL_SCREEN,
   currentActivity: null,

@@ -82,5 +82,9 @@ export default {
 
   templateUpdateRequest (state) {
     return state.templateUpdateRequest;
+  },
+
+  versions (state) {
+    return state.versions;
   }
 }

@@ -1,7 +1,9 @@
 <template>
   <div class="builder">
     <div class="container">
-      <Header/>
+      <Header
+        :getProtocols="getProtocols"
+      />
       <ProtocolBuilder
         v-if="currentScreen == config.PROTOCOL_SCREEN"
       />
@@ -37,6 +39,7 @@ import Protocol from '../../models/Protocol';
 import Activity from '../../models/Activity';
 import Item from '../../models/Item';
 import PrizeActivityBuilder from './PrizeActivity/PrizeActivityBuilder.vue';
+import util from '../../utilities/util';
 
 import { mapMutations, mapGetters } from 'vuex';
 
@@ -76,10 +79,10 @@ export default {
   },
   async beforeMount() {
     this.setTemplates(this.templates);
+    this.setVersions(this.versions);
     this.setCurrentScreen(config.PROTOCOL_SCREEN);
 
     if (this.initialData) {
-      this.isEditing = true;
       if (!this.versions.length) {
         this.$emit('setLoading', true);
       }
@@ -102,7 +105,7 @@ export default {
         return;
       }
 
-      this.setFormattedOriginalProtocol(original);
+      this.setFormattedOriginalProtocol(JSON.parse(JSON.stringify(original)));
     }
 
     this.$emit("setLoading", false);
@@ -150,6 +153,7 @@ export default {
       'replaceActivityData',
       'setTokenPrizeModalStatus',
       'updateTemplateRequestStatus',
+      'setVersions',
     ]),
     ...mapGetters(config.MODULE_NAME, [
       'formattedProtocol'

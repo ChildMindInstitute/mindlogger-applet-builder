@@ -3,6 +3,9 @@
     <div class="container">
       <Header
         :getProtocols="getProtocols"
+        @uploadProtocol="uploadProtocol"
+        @updateProtocol="updateProtocol"
+        @onUploadError="onUploadError"
       />
       <ProtocolBuilder
         v-if="currentScreen == config.PROTOCOL_SCREEN"
@@ -208,6 +211,18 @@ export default {
       }
 
       this.setTokenPrizeModalStatus(false);
+    },
+
+    uploadProtocol (data) {
+      this.$emit("uploadProtocol", data);
+    },
+
+    updateProtocol (data) {
+      this.$emit("updateProtocol", data);
+    },
+
+    onUploadError (msg) {
+      this.$emit("onUploadError", msg);
     }
   }
 }

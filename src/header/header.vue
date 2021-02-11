@@ -209,7 +209,30 @@ export default {
     },
 
     saveToDashboard () {
-      
+      this.formattedProtocol().then((data) => {
+        if (!this.formattedOriginalProtocol) {
+          this.$emit("uploadProtocol", data);
+        } else {
+          let { upgrade, updates, removed } = Protocol.getChangeInfo(this.formattedOriginalProtocol, data, true);
+
+          let newVersion = util.upgradeVersion(this.protocol.protocolVersion, upgrade);
+          if (newVersion != this.protocol.protocolVersion) {
+            updates.data['schema:schemaVersion'] = updates.data['schema:version'] = newVersion;
+
+            data.protocol = updates;
+            data.removed = removed;
+            data.baseVersion = this.protocol.protocolVersion;
+
+            this.$emit("updateProtocol", data);
+          } else {
+            this.$emit("onUploadError", 'Please make changes to update applet');
+          }
+        }
+      }).catch(e => {
+        if(this.prizeActivity)
+          this.activities.pop();
+        console.log(e);
+      });
     },
 
     downloadSchema () {

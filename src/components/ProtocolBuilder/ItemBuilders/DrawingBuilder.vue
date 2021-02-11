@@ -1,32 +1,37 @@
 <template>
   <div>
-    <ImageUploader
-      class="mt-5 mb-7"
+    <Uploader
+      class="my-5"
       style="max-width: 300px"
-      :uploadFor="'default-item'"
-      :itemImg="responseOptions['schema:image']"
-      @onAddImg="onUploadImg"
-      @onRemoveImg="onRemoveImg"
+      :initialType="'image'"
+      :initialData="responseOptions['schema:image']"
+      :initialTitle="'Draw Image'"
+      @onAddFromUrl="onAddDrawImageFromUrl($event, '')"
+      @onAddFromDevice="$emit('loading', true); onAddDrawImageFromDevice($event, '');"
+      @onRemove="onRemoveDrawImage('')"
+      @onNotify="$emit('loading', false); $emit('notify', $event);"
     />
     <p>Users will be prompted to draw an image.</p>
-    <ImageUploader
-      class="my-4"
+    <Uploader
+      class="my-5"
       style="max-width: 300px"
-      :uploadFor="'drawing-item-bg'"
-      :itemImg="inputBackgroundOption['schema:value']"
-      @onAddImg="onUploadBgImg"
-      @onRemoveImg="onRemoveBgImg"
+      :initialType="'image'"
+      :initialData="inputBackgroundOption['schema:value']"
+      :initialTitle="'Draw Background Image'"
+      @onAddFromUrl="onAddDrawImageFromUrl($event, 'Background')"
+      @onAddFromDevice="$emit('loading', true); onAddDrawImageFromDevice($event, 'Background');"
+      @onRemove="onRemoveDrawImage('Background')"
+      @onNotify="$emit('loading', false); $emit('notify', $event);"
     />
   </div>
 </template>
 
 <script>
-import ImageUpldr from '../../../models/ImageUploader';
-import ImageUploader from './../ImageUploader.vue';
+import Uploader from '../Uploader.vue';
 
 export default {
   components: {
-    ImageUploader
+    Uploader,
   },
   props: {
     initialItemResponseOptions: {
@@ -54,7 +59,6 @@ export default {
     const inputOptions = this.initialItemInputOptions;
 
     return {
-      imgUpldr: new ImageUpldr(),
       responseOptions,
       inputBackgroundOption,
       inputOptions,
@@ -66,80 +70,72 @@ export default {
       this.$emit('updateResponseOptions', this.responseOptions);
     },
 
+    onUpdateInputOptions() {
+      this.$emit('updateInputOptions', this.inputOptions);
+    },
+
     getInputBackgroundOption(options) {
       if(!options || !options.length) return null;
       return options.find(option => option['schema:name'] === 'backgroundImage');
     },
 
-    async onUploadImg(data) {
-      try {
-        this.$emit('error', '');
-        setTimeout(() => { this.$emit('uploading', true); }, 2000);
-        if(typeof data === 'string') {
-          this.responseOptions['schema:image'] = data;
-        } else {
-          const response = await this.imgUpldr.uploadImage(data);
-          this.responseOptions['schema:image'] = response.location;
-        }
-        setTimeout(() => {
-          this.onUpdateResponseOptions();
-          this.$emit('uploading', false);
-        }, 2100);
-      } catch(e) {
-        setTimeout(() => {
-          this.$emit('uploading', false);
-          this.$emit('error', 'Something went wrong with uploading image for "Drawing" item. Please try to upload image again...');
-        }, 2000);
-      }
-    },
-
-    async onUploadBgImg(data) {
-      try {
-        this.$emit('error', '');
-        setTimeout(() => { this.$emit('uploading', true); }, 2000);
-
-        if(typeof data === 'string') {
-          this.onRemoveBgImg();
-          this.inputBackgroundOption['schema:value'] = data;
-        } else {
-          const response = await this.imgUpldr.uploadImage(data);
-          this.onRemoveBgImg();
-          this.inputBackgroundOption['schema:value'] = response.location;
-        }
-
-        this.inputOptions.push(this.inputBackgroundOption);
-
-        setTimeout(() => { 
-          this.$emit('uploading', false);
-          this.$emit('updateInputOptions', this.inputOptions);
-        }, 2100);
-
-      } catch(e) {
-        setTimeout(() => {
-          this.$emit('uploading', false);
-          this.$emit('error', 'Something went wrong with uploading image for "Canvas Background". Please try to upload image again...');
-        }, 2000);
-      }
-    },
-
-    onRemoveImg() {
-      this.$emit('error', '');
-      this.responseOptions['schema:image'] = '';
+    updateImage(url) {
+      this.responseOptions['schema:image'] = url;
       this.onUpdateResponseOptions();
     },
 
-    onRemoveBgImg() {
-      this.$emit('error', '');
-
+    updateBackgroundImage(url) {
       const removingOptionImgUrl = this.inputBackgroundOption['schema:value'];
       const removingOptionIndex = this.inputOptions.indexOf(option => option['schema:value'] === removingOptionImgUrl);
-
       this.inputOptions.splice(removingOptionIndex, 1);
+      this.inputBackgroundOption['schema:value'] = url;
+      if(url) this.inputOptions.push(this.inputBackgroundOption);
+      this.onUpdateInputOptions();
+    },
 
-      this.inputBackgroundOption['schema:value'] = '';
+    onAddDrawImageFromUrl(url, type) {
+      if(type === 'Background') this.updateBackgroundImage(url);
+      else this.updateImage(url);
 
-      this.$emit('updateInputOptions', this.inputOptions);
-    }
+      this.$emit('notify', {
+        type: 'success',
+        message: `${type} Image from URL successfully added to Geolocation Item.`,
+        duration: 3000,
+      });
+    },
+
+    async onAddDrawImageFromDevice(uploadFunction, type) {
+      try {
+        const uploadedImageUrl = await uploadFunction();
+
+        if(type === 'Background') this.updateBackgroundImage(uploadedImageUrl);
+        else this.updateImage(uploadedImageUrl);
+
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'success',
+          message: `${type} Image successfully added to Draw Item.`,
+          duration: 3000,
+        });
+      } catch (error) {
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'error',
+          message: `Something went wrong with uploading image for Item > ${type} Draw image. Please try to upload again or just save Draw without image changes.`,
+        });
+      }
+    },
+
+    onRemoveDrawImage(type) {
+      if(type === 'Background') this.updateBackgroundImage('');
+      else this.updateImage('');
+
+      this.$emit('notify', {
+        type: 'warning',
+        message: `${type} Image successfully removed from Geolocation Item.`,
+        duration: 3000,
+      });
+    },
 
   }
 }

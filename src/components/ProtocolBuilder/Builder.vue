@@ -166,6 +166,7 @@ export default {
 
       const initialStoreData = {
         ... await Protocol.parseJSONLD(applet, protocol),
+        valid: true,
         activities: [],
       };
 

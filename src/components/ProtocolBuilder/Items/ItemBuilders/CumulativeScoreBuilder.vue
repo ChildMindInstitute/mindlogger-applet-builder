@@ -215,6 +215,7 @@ export default {
 
     if (!rules.length) {
       this.rules.push(this.parseRuleData());
+      this.$emit('updateCumulativeScore', this.rules);
     }
   },
   methods: {

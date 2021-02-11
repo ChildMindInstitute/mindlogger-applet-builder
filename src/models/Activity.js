@@ -24,12 +24,19 @@ export default class Activity {
       isItemEditable: true,
       editIndex: -1,
       visibilities: initialActivityData.visibilities || [],
-      conditionalItems: initialActivityData.conditionalItems || [],
-      subScales: initialActivityData.subScales && initialActivityData.subScales.map(subScale => subScale) || [],
+      conditionalItems: initialActivityData.conditionalItems && initialActivityData.conditionalItems.map(conditional => ({
+        ...conditional,
+        valid: true,
+      })) || [],
+      subScales: initialActivityData.subScales && initialActivityData.subScales.map(subScale => ({
+        ...subScale,
+        valid: true
+      })) || [],
       compute: initialActivityData.compute && initialActivityData.compute.map(compute => compute) || [],
       messages: initialActivityData.messages && initialActivityData.messages.map(message => message) || [],
       allowEdit: true,
       isPrize: initialActivityData.isPrize || false,
+      valid: initialActivityData.valid || false,
     };
   }
 
@@ -753,12 +760,16 @@ export default class Activity {
       }
     }
 
-    activityInfo.isValid = true;
+    activityInfo.valid = true;
 
     return activityInfo;
   }
 
   static checkValidation (act) {
-    return act.name && act.description;
+    if (!act.name || !act.description) {
+      return false;
+    }
+
+    return true;
   }
 }

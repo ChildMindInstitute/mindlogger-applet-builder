@@ -51,12 +51,15 @@
         </v-card-title>
 
         <v-card
-          v-for="(activity, index) in withoutPrize(activities)"
+          v-for="(activity, index) in withoutPrize"
           :key="`${activity._id}-${index}`"
           class="ma-4"
         >
-          <v-card-title class="py-0">
-            {{ activity.name }}
+          <v-card-title
+            class="py-0"
+            :class="activityStatus[index] ? '' : 'invalid'"
+          >
+            {{activity.name}}
             <v-spacer />
             <v-card-actions>
               <v-btn icon @click="duplicateActivity(index)">
@@ -106,6 +109,10 @@
     font-size: 18px;
     padding: 4px;
     text-transform: none;
+  }
+
+  .invalid {
+    background-color: #d44c4c;
   }
 </style>
 
@@ -157,6 +164,19 @@ export default {
         this.updateProtocolMetaInfo({ markdownData })
       }
     },
+
+    withoutPrize () {
+      return this.activities.filter(activity => Boolean(activity['isPrize']) === false);
+    },
+
+    activityStatus () {
+      return this.withoutPrize.map(activity => !(
+        !activity.valid 
+          || activity.items.some(item => !item.valid) 
+          || activity.subScales.some(subScale => !subScale.valid)
+          || activity.conditionalItems.some(conditional => !conditional.valid)
+      ))
+    },
   },
   methods: {
     ...mapMutations(config.MODULE_NAME, 
@@ -178,9 +198,6 @@ export default {
     },
     onEditAboutPage () {
       this.markdownDialog = true;
-    },
-    withoutPrize (arr) {
-      return arr.filter(activity => Boolean(activity['isPrize']) === false);
     },
 
     editActivity (index) {

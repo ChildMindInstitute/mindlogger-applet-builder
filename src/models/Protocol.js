@@ -305,4 +305,12 @@ export default class Protocol {
 
     return protocolInfo;
   }
+
+  static checkValidation(protocol) {
+    if (!protocol.name) {
+      return false;
+    }
+
+    return true;
+  }
 }

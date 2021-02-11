@@ -44,6 +44,7 @@ export default class Item {
       cumulativeScores: initialItemData.cumulativeScores  || [],
       allowEdit: initialItemData.allowEdit === undefined ? true : initialItemData.allowEdit,
       markdownText: (initialItemData.question || ''),
+      valid: initialItemData.valid || false,
     };
   }
 
@@ -821,7 +822,7 @@ export default class Item {
       }
     }
 
-    itemContent.isValid = true;
+    itemContent.valid = true;
 
     return itemContent;
   }
@@ -892,6 +893,18 @@ export default class Item {
   }
 
   static checkValidation (item) {
-    return item.name;
+    if (!item.name || !item.inputType) {
+      return false;
+    }
+
+    if (item.cumulativeScores) {
+      for (let i = 0; i < item.cumulativeScores.length; i++) {
+        if (!item.cumulativeScores[i].valid) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 }

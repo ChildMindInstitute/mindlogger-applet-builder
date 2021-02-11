@@ -17,7 +17,7 @@
         class="ma-4"
       >
       </SubScaleBuilder>
-    <div>
+    </div>
     <v-btn
       @click="onAddSubScale"
       color="primary"

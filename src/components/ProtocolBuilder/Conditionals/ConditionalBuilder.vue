@@ -4,20 +4,32 @@
   >
     <v-card-title
       class="px-2 py-0 conditional-title"
+      :class="current.valid ? '' : 'invalid'"
     >
       <span v-if="stateValue">
-        <span class="blue--text">IF </span>
+        <span
+          :class="current.valid ? 'blue--text' : 'yellow-text'"
+        >IF </span>
         <span>
           {{ ifValue.name || 'XXX' }}
         </span>
 
-        <span class="blue--text">{{ stateValue.name }} </span>
+        <span
+          :class="current.valid ? 'blue--text' : 'yellow-text'"
+        >
+          {{ stateValue.name }}
+        </span>
+
         <span v-if="answerValue">{{ answerValue.name }} </span>
         <template v-else>
           <span>{{ minValue !== null ? minValue : 'XXX' }} </span>
           <span v-if="maxValue">AND {{ maxValue }} </span>
         </template>
-        <span class="blue--text">SHOW </span>
+        <span
+          :class="current.valid ? 'blue--text' : 'yellow-text'"
+        >
+          SHOW 
+        </span>
         <span>{{ showValue || 'XXX' }} </span>
       </span>
 
@@ -129,6 +141,10 @@
   .conditional-title {
     font-size: 17px;
   }
+
+  .invalid {
+    background-color: #d44c4c;
+  }
 </style>
 
 <script>
@@ -220,6 +236,20 @@ export default {
         'updateConditionalData'
       ]
     ),
+    isValid () {
+      if (!this.ifValue || !this.stateValue || !this.showValue) {
+        return false;
+      }
+
+      if (this.ifValue.inputType == 'slider') {
+        if ( (stateValue.name === 'WITHIN' || stateValue.name === 'OUTSIDE OF') && (!this.maxValue && this.maxValue !== 0) ) {
+          return false;
+        }
+
+        return (this.minValue || this.minValue === 0);
+      }
+      return (this.answerValue || this.answerValue === 0);
+    },
     onUpdate () {
       this.updateConditionalData({
         index: this.conditionalIndex,
@@ -229,7 +259,8 @@ export default {
           showValue: this.showValue,
           answerValue: this.answerValue,
           minValue: this.minValue,
-          maxValue: this.maxValue
+          maxValue: this.maxValue,
+          valid: this.isValid()
         }
       })
     }

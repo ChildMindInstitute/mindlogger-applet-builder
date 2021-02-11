@@ -2,7 +2,10 @@
   <v-card
     class="pa-2"
   >
-    <v-card-title class="px-2 py-0">
+    <v-card-title
+      class="px-2 py-0"
+      :class="item.valid ? '' : 'invalid'"
+    >
       <span class="item-name">{{ item.name }}</span>
       <v-spacer />
       <v-card-actions>
@@ -248,7 +251,7 @@
       />
       <CumulativeScoreBuilder
         v-if="item.inputType === 'cumulativeScore'"
-        :items="item.items"
+        :items="currentActivity.items"
         :is-item-editable="item.allowEdit"
         :initial-item-data="item"
         @updateCumulativeScore="updateCumulativeScore"
@@ -318,6 +321,10 @@
   .item-quiz {
     display: flex;
     align-items: center;
+  }
+
+  .invalid {
+    background-color: #d44c4c;
   }
 </style>
 
@@ -589,7 +596,7 @@ export default {
       })
     },
 
-    updateCumulativeScore () {
+    updateCumulativeScore (scoreRules) {
       this.updateItemMetaInfo({
         index: this.itemIndex,
         obj: { cumulativeScores: scoreRules }

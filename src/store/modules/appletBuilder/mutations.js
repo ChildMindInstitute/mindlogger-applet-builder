@@ -9,6 +9,7 @@ const itemMutations = {
     }
 
     Object.assign(state.currentActivity.items[index], obj);
+    state.currentActivity.items[index].valid = Item.checkValidation(state.currentActivity.items[index]);
   },
 
   addItem (state, obj) {
@@ -99,7 +100,7 @@ const activityMutations = {
   updateActivityMetaInfo (state, obj) {
     Object.assign(state.currentActivity, obj);
 
-    state.currentActivity.isValid = Activity.checkValidation(state.currentActivity);
+    state.currentActivity.valid = Activity.checkValidation(state.currentActivity);
   },
 
   setPrizeActivity (state, prizeActivity) {
@@ -185,6 +186,7 @@ export default {
   /** protocol meta data */
   updateProtocolMetaInfo (state, obj) {
     Object.assign(state.protocol, obj);
+    state.protocol.valid = Protocol.checkValidation(state.protocol);
   },
 
   resetProtocol (state) {

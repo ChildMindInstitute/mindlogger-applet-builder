@@ -23,6 +23,7 @@
             v-on="on"
             :color="currentScreen == config.ITEM_SCREEN ? 'primary' : ''"
             class="mx-1"
+            :class="itemStatus ? '' : 'invalid'"
           >
             <img v-show="currentScreen === config.ITEM_SCREEN" height="25" alt='' v-bind:src="baseImageURL + 'header-icons/white/items.png'"/>
             <img v-show="currentScreen !== config.ITEM_SCREEN" height="25" alt='' v-bind:src="baseImageURL + 'header-icons/black/items.png'"/>
@@ -41,6 +42,7 @@
             v-on="on"
             :color="currentScreen == config.CONDITIONAL_SCREEN ? 'primary' : ''"
             class="mx-1"
+            :class="conditionalStatus ? '' : 'invalid'"
           >
             <img v-show="currentScreen === config.CONDITIONAL_SCREEN" height="25" alt='' v-bind:src="baseImageURL + 'header-icons/white/conditional-icon.png'" />
             <img v-show="currentScreen !== config.CONDITIONAL_SCREEN" height="25" alt='' v-bind:src="baseImageURL + 'header-icons/black/conditional-icon.png'" />
@@ -59,6 +61,7 @@
             v-on="on"
             :color="currentScreen == config.SUBSCALE_SCREEN ? 'primary' : ''"
             class="mx-1"
+            :class="subScaleStatus ? '' : 'invalid'"
           >
             <img v-show="currentScreen === config.SUBSCALE_SCREEN" height="25" alt='' v-bind:src="baseImageURL + 'header-icons/white/subscale-icon.png'"/>
             <img v-show="currentScreen !== config.SUBSCALE_SCREEN" height="25" alt='' v-bind:src="baseImageURL + 'header-icons/black/subscale-icon.png'"/>
@@ -144,8 +147,21 @@
         @updateHistoryView="updateHistoryView"
       />
     </v-dialog>
+
+    <v-dialog v-model="dataAlertDialog.visibility" width="350">
+      <v-card>
+        <v-card-title class="grey lighten-2">Protocol Data Alert</v-card-title>
+        <v-card-text class="pa-4">{{ dataAlertDialog.message }}</v-card-text>
+      </v-card>
+    </v-dialog>
   </v-card>
 </template>
+
+<style scoped>
+  .invalid {
+    border-bottom: 4px solid red;
+  }
+</style>
 
 <script>
 import config from '../config';
@@ -175,6 +191,11 @@ export default {
         visibility: false,
         defaultVersion: null,
         data: [],
+      },
+      historyComponentKey: 0,
+      dataAlertDialog: {
+        visibility: false,
+        message: ''
       }
     };
   },
@@ -190,7 +211,16 @@ export default {
       'currentActivity',
       'formattedOriginalProtocol',
       'versions'
-    ])
+    ]),
+    itemStatus () {
+      return this.currentActivity && this.currentActivity.items.every(item => item.valid);
+    },
+    subScaleStatus () {
+      return this.currentActivity && this.currentActivity.subScales.every(subScale => subScale.valid);
+    },
+    conditionalStatus () {
+      return this.currentActivity && this.currentActivity.conditionalItems.every(conditional => conditional.valid);
+    }
   },
   methods: {
     ...mapMutations(config.MODULE_NAME, [
@@ -209,6 +239,12 @@ export default {
     },
 
     saveToDashboard () {
+      if (!this.appletStatus()) {
+        this.dataAlertDialog.visibility = true;
+        this.dataAlertDialog.message = 'Please fix errors in your activity/items to save applet.';
+        return ;
+      }
+
       this.formattedProtocol().then((data) => {
         if (!this.formattedOriginalProtocol) {
           this.$emit("uploadProtocol", data);
@@ -295,6 +331,27 @@ export default {
       this.setCurrentScreen(config.ITEM_SCREEN);
     },
 
+    appletStatus () {
+      if (!this.protocol.valid) {
+        return false;
+      }
+
+      for (let activity of this.protocol.activities) {
+        const valid = !(
+          !activity.valid 
+            || activity.items.some(item => !item.valid) 
+            || activity.subScales.some(subScale => !subScale.valid)
+            || activity.conditionalItems.some(conditional => !conditional.valid)
+        );
+
+        if (!valid) {
+          return false;
+        }
+      }
+
+      return true;
+    },
+
     viewConditionalLogic () {
       this.setCurrentScreen(config.CONDITIONAL_SCREEN);
     },
@@ -304,6 +361,12 @@ export default {
     },
 
     viewHistory () {
+      if (!this.appletStatus()) {
+        this.dataAlertDialog.visibility = true;
+        this.dataAlertDialog.message = 'Please fix errors in your activity/items to view history.';
+        return ;
+      }
+
       this.formattedProtocol().then((current) => {
         const { log, upgrade } = Protocol.getChangeInfo(
           this.formattedOriginalProtocol,

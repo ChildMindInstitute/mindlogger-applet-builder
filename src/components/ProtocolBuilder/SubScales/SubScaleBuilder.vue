@@ -1,6 +1,9 @@
 <template>
   <v-card>
-    <v-card-title class="px-2 py-0">
+    <v-card-title
+      class="px-2 py-0"
+      :class="subScale.valid ? '' : 'invalid'"
+    >
       <span class="item-name">
         (<v-icon
           :color="!hasLookupTable ? 'grey' : 'primary'"
@@ -172,6 +175,10 @@
     margin-right: 5px;
     color: grey;
   }
+
+  .invalid {
+    background-color: #d44c4c;
+  }
 </style>
 
 <script>
@@ -274,7 +281,8 @@ export default {
             item => item.selected
           ).map(
             item => item.name
-          ).join(' + ')
+          ).join(' + '),
+        valid: this.valid && this.selectedItemCount >= 2
       };
 
       if (this.subScales[this.subScaleIndex].subScaleId) {

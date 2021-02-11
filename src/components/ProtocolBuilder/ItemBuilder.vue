@@ -16,30 +16,30 @@
           required
           @keydown="nameKeydown($event)"
         />
-        <v-textarea
-          v-model="questionText"
-          label="Question"
-          v-if="inputType !== 'cumulativeScore'"
-          :disabled="!isItemEditable"
-          counter="320"
-          maxlength="320"
-          auto-grow
-          rows="1"
-        />
-
-        <Uploader
-          class="mt-3 mb-4"
-          style="max-width: 300px"
-          :initialType="'image'"
-          :initialData="headerImage"
-          :initialTitle="'Header Item Image'"
-          @onAddFromUrl="onAddHeaderImageFromUrl($event)"
-          @onAddFromDevice="loading = true; onAddHeaderImageFromDevice($event);"
-          @onRemove="onRemoveHeaderImage()"
-          @onNotify="loading = false; notify = $event;"
-        />
-        <!-- /Item Header Image Uploader -->
-
+        <template
+          v-if="inputType !== 'markdownMessage'"
+        >
+          <v-textarea
+            v-model="questionText"
+            label="Question"
+            v-if="inputType !== 'cumulativeScore'"
+            :disabled="!isItemEditable"
+            auto-grow
+            rows="1"
+          />
+          <Uploader
+            class="mt-3 mb-4"
+            style="max-width: 300px"
+            :initialType="'image'"
+            :initialData="headerImage"
+            :initialTitle="'Header Item Image'"
+            @onAddFromUrl="onAddHeaderImageFromUrl($event)"
+            @onAddFromDevice="loading = true; onAddHeaderImageFromDevice($event);"
+            @onRemove="onRemoveHeaderImage()"
+            @onNotify="loading = false; notify = $event;"
+          />
+          <!-- /Item Header Image Uploader -->
+        </template>
         <v-select
           class="mt-6"
           v-model="inputType"
@@ -73,6 +73,11 @@
             </v-list-item>
           </template>
         </v-select>
+
+        <div v-if="inputType === 'markdownMessage'">
+          Message:
+          <MarkDownEditor v-model="markdownText" />
+        </div>
 
         <RadioBuilder
           v-if="inputType === 'radio'"
@@ -118,7 +123,17 @@
         <PhotoBuilder v-if="inputType === 'photo'" />
         <TimeRangeBuilder v-if="inputType === 'timeRange'" />
         <DateBuilder v-if="inputType === 'date'" />
-        <DrawingBuilder v-if="inputType === 'drawing'" />
+
+        <DrawingBuilder
+          v-if="inputType === 'drawing'"
+          :initial-item-response-options="responseOptions"
+          :initial-item-input-options="inputOptions"
+          @uploading="isUploadingState = $event"
+          @error="isError = $event"
+          @updateResponseOptions="updateResponseOptions"
+          @updateInputOptions="updateInputOptions"
+        />
+
         <AudioRecordBuilder
           v-if="inputType === 'audioRecord'"
           :is-skippable-item="allow"
@@ -126,14 +141,26 @@
           @updateOptions="updateOptions"
           @updateAllow="updateAllow"
         />
+
         <AudioImageRecordBuilder
           v-if="inputType === 'audioImageRecord'"
+          :initial-item-response-options="responseOptions"
           :is-skippable-item="allow"
-          :initial-item-data="options"
-          @updateOptions="updateOptions"
+          @uploading="isUploadingState = $event"
+          @error="isError = $event"
+          @checkValidation="valid = $event"
+          @updateResponseOptions="updateResponseOptions"
           @updateAllow="updateAllow"
         />
-        <GeolocationBuilder v-if="inputType === 'geolocation'" @update="updateResponseOptions" />
+
+        <GeolocationBuilder
+          v-if="inputType === 'geolocation'"
+          :initial-item-response-options="responseOptions"
+          @uploading="isUploadingState = $event"
+          @error="isError = $event"
+          @updateResponseOptions="updateResponseOptions"
+        />
+
         <AudioStimulusBuilder
           v-if="inputType === 'audioStimulus'"
           :is-skippable-item="allow"
@@ -164,7 +191,7 @@
       >{{ isItemEditable ? "Discard Changes" : "Close" }}</v-btn>
       <v-spacer />
       <v-btn
-        :disabled="!valid && inputType === 'cumulativeScore' || !name"
+        :disabled="!name || !inputType || (!valid && inputType === 'cumulativeScore') || (!valid && inputType === 'audioImageRecord')"
         color="primary"
         @click="onSaveItem"
       >
@@ -194,6 +221,7 @@ import Uploader from './Uploader.vue';
 import Notify from './Additional/Notify.vue';
 import Loading from './Additional/Loading.vue';
 
+import MarkDownEditor from "./ItemBuilders/MarkDownEditor";
 import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
 import TextBuilder from "./ItemBuilders/TextBuilder.vue";
 import SliderBuilder from "./ItemBuilders/SliderBuilder.vue";
@@ -226,6 +254,7 @@ export default {
     GeolocationBuilder,
     AudioStimulusBuilder,
     CumulativeScoreBuilder,
+    MarkDownEditor,
   },
   props: {
     initialItemData: {

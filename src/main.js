@@ -1,6 +1,11 @@
 import Vue from 'vue'
 import * as Sentry from '@sentry/browser';
 import { Vue as VueIntegration } from '@sentry/integrations';
+import store from './store'
+import mavonEditor from 'mavon-editor';
+import 'mavon-editor/dist/css/index.css'
+import html5Embed from 'markdown-it-html5-embed';
+import markdownItImSize from 'markdown-it-imsize';
 
 import App from './App.vue'
 import vuetify from './plugins/vuetify';
@@ -17,7 +22,14 @@ if (env !== 'development') {
 
 Vue.config.productionTip = false;
 
+Vue.use(mavonEditor);
+mavonEditor.markdownIt.use(html5Embed, {
+  html5embed: {
+    useImageSyntax: true
+}}).use(markdownItImSize);
+
 new Vue({
   vuetify,
+  store,
   render: (h) => h(App),
 }).$mount("#app");

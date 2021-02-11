@@ -13,10 +13,10 @@
       <template v-slot:activator="{ on }">
         <div v-on="on">
 
-          <v-expansion-panels v-if="typeOfStructure === 0">
+          <v-expansion-panels v-if="typeOfStructure === 0 || typeOfStructure === 3 || typeOfStructure === 4">
             <v-expansion-panel>
               <v-expansion-panel-header disable-icon-rotate>
-                {{ itemImg ? 'Change' : 'Add' }} Header Image
+                {{ itemImg ? 'Change' : 'Add' }} {{ getCorrectTitle(typeOfStructure) }}
                 <template v-slot:actions>
                   <v-icon>mdi-cloud-upload</v-icon>
                 </template>
@@ -113,7 +113,7 @@ export default {
   data() {
     const imgUploader = new ImageUploader();
 
-    const typesOfStructure = ['activity-item', 'item-radio-option-pc', 'item-radio-option-url'];
+    const typesOfStructure = ['activity-item', 'item-radio-option-pc', 'item-radio-option-url', 'drawing-item-bg', 'default-item'];
     const typeOfStructure = typesOfStructure.findIndex(structure => structure === this.uploadFor);
     
     let isUrlOptionActive = false;
@@ -130,6 +130,21 @@ export default {
     }
   },
   methods: {
+    getCorrectTitle(index) {
+      let title = 'Title';
+      switch(index) {
+        case 0:
+          title = 'Header Image';
+          break;
+        case 3:
+          title = 'Canvas Background';
+          break;
+        case 4:
+          title = 'Image';
+          break;
+      }
+      return title;
+    },
     async onChangeFile(event) {
       const file = event.target.files[0];
       this.notify('error', await this.imgUploader.isImageValid(file));

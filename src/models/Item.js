@@ -32,7 +32,7 @@ export default class Item {
           && (initialItemData.ui.allow.includes("dontKnow")
             || initialItemData.ui.allow.includes("dont_know_answer")),
         responseOptions: initialItemData.responseOptions || {},
-        inputOptions: initialItemData.inputOptions || {},
+        inputOptions: initialItemData.inputOptions || [],
         media: initialItemData.media || {},
         cumulativeScores: initialItemData.cumulativeScores  || [],
         textRules: [v => !!v || "This field is required"],
@@ -54,9 +54,11 @@ export default class Item {
           "audioImageRecord",
           "geolocation",
           "audioStimulus",
+          "markdownMessage",
           "cumulativeScore"
         ],
         allowEdit: initialItemData.allowEdit === undefined ? true : initialItemData.allowEdit,
+        markdownText: (initialItemData.question || ''),
     };
   }
 
@@ -156,28 +158,14 @@ export default class Item {
         "schema:maxValue": "new Date()"
       };
     }
-    if (
-        this.ref.inputType === "audioRecord" ||
-        this.ref.inputType === "audioImageRecord"
-    ) {
+    if (this.ref.inputType === "audioImageRecord" || this.ref.inputType === "drawing" || this.ref.inputType === "geolocation") {
+      return this.ref.responseOptions;
+    }
+    if (this.ref.inputType === "audioRecord") {
         return this.ref.options;
     } else {
         return {};
     }
-  }
-
-  getInputOptions() {
-    if (this.ref.inputType === "audioStimulus") {
-      return this.ref.inputOptions;
-    }
-    return {};
-  }
-
-  getMedia() {
-    if (this.ref.inputType === "audioStimulus") {
-      return this.ref.media;
-    }
-    return {};
   }
 
   getCumulativeScores() {
@@ -189,8 +177,6 @@ export default class Item {
 
   getCompressedSchema() {
     const responseOptions = this.getResponseOptions();
-    const inputOptions = this.getInputOptions();
-    const media = this.getMedia();
     const cumulativeScores = this.getCumulativeScores();
 
     const schema = {
@@ -210,12 +196,6 @@ export default class Item {
     };
     if (Object.keys(responseOptions).length !== 0) {
       schema["responseOptions"] = responseOptions;
-    }
-    if (this.ref.inputType === "audioStimulus") {
-      schema["inputOptions"] = inputOptions;
-    }
-    if (this.ref.inputType === "audioStimulus") {
-      schema["media"] = media;
     }
 
     if (this.ref.inputType === 'cumulativeScore') {
@@ -263,7 +243,10 @@ export default class Item {
     const schema = this.getCompressedSchema();
     const itemObj = {
       name: this.ref.name,
-      question: this.ref.question.image ? `\r\n\r\n![''](${this.ref.question.image} =250x250)\r\n\r\n${this.ref.question.text}` : this.ref.question.text,
+      question: 
+        this.ref.inputType !== 'markdownMessage'
+        ? this.ref.question.image ? `\r\n\r\n![''](${this.ref.question.image} =250x250)\r\n\r\n${this.ref.question.text}` : this.ref.question.text
+        : this.ref.markdownText,
       description: this.ref.description,
       options: this.ref.options,
       allowEdit: this.ref.allowEdit,
@@ -273,16 +256,28 @@ export default class Item {
     if (
       (this.ref.inputType === "radio" ||
         this.ref.inputType === "prize" ||
-        this.ref.inputType === "audioRecord" ||
-        this.ref.inputType === "audioImageRecord" ||
-        this.ref.inputType === "geolocation") &&
+        this.ref.inputType === "audioRecord") &&
       Object.keys(this.ref.responseOptions).length
     ) {
       itemObj.responseOptions = itemObj.responseOptions || this.ref.responseOptions;
-    } else if (this.ref.inputType === "audioStimulus") {
-      itemObj.inputOptions = this.inputOptions;
+    }
+
+    else if(this.ref.inputType === "drawing") {
+      itemObj.inputOptions = this.ref.inputOptions;
+    }
+
+    else if(this.ref.inputType === "audioImageRecord") {
+      if(!itemObj.responseOptions['schema:image']) {
+        // default image
+        itemObj.responseOptions['schema:image'] = 'https://www.dropbox.com/s/wgtjq3bgqlfhbzd/map3g.png?raw=1';
+      }
+    }
+
+    else if (this.ref.inputType === "audioStimulus") {
+      itemObj.inputOptions = this.ref.inputOptions;
       itemObj.media = this.ref.media;
-    } else if (this.ref.inputType === "text") {
+    }
+    else if (this.ref.inputType === "text") {
       itemObj.responseOptions = itemObj.responseOptions || this.ref.responseOptions;
       itemObj.correctAnswer = this.ref.correctAnswer;
     } else if (this.ref.inputType === "slider") {
@@ -390,6 +385,34 @@ export default class Item {
     const valueInsert = name => field =>
           `${name} was set to ${_.get(newValue, field)}`;
 
+    const inputOptionsListUpdate = (field) => {
+
+      const oldOptions = _.get(oldValue, field, []).map(option => {
+        return { value: option['schema:value'] }
+      });
+
+      const newOptions = _.get(newValue, field, []).map(option => {
+        return { value: option['schema:value'] }
+      });
+
+      const removedOptions = oldOptions.filter(option => {
+        return newOptions.find(newOption => {
+          return option.value === newOption.value
+        }) ? false : true
+      });
+
+      const insertedOptions = newOptions.filter(newOption => {
+        return oldOptions.find(option => {
+          return option.value === newOption.value
+        }) ? false : true
+      });
+
+      return [
+        ...removedOptions.map(option => `${option.value} option was removed`),
+        ...insertedOptions.map(option => `${option.value} option was inserted`)
+      ];
+    };
+
     return {
       'skos:prefLabel': {
         updated: valueUpdate('Item name'),
@@ -401,9 +424,15 @@ export default class Item {
         inserted: (field) => `Item description was set (${_.get(newValue, field)})`
       }, 
       'question': {
-        updated: (field) => `Item Question was changed to ${this.getQuesionInfo(_.get(newValue, field)).text}`,
+        updated: (field) => 
+          _.get(newValue, 'ui.inputType') !== 'markdownMessage'
+            ? `Item Question was changed to ${this.getQuesionInfo(_.get(newValue, field)).text}`
+            : `Markdown message was updated`,
         removed: (field) => `Item Question was removed`,
-        inserted: (field) => `Item Question was set to ${this.getQuesionInfo(_.get(newValue, field)).text}`,
+        inserted: (field) => 
+          _.get(newValue, 'ui.inputType') !== 'markdownMessage'
+            ? `Item Question was set to ${this.getQuesionInfo(_.get(newValue, field)).text}`
+            : `Markdown message was inserted`,
       },
       'correctAnswer': {
         updated: (field) => `Correct answer was changed`
@@ -468,6 +497,24 @@ export default class Item {
         updated: valueUpdate('maxLength'),
         inserted: valueInsert('maxLength'),
       },
+      'responseOptions.requiredValue': {
+        updated: optionUpdate('Required option'),
+      },
+      'responseOptions.schema:minValue': {
+        updated: valueUpdate('minValue'),
+        inserted: valueInsert('minValue'),
+      },
+      'responseOptions.schema:maxValue': {
+        updated: valueUpdate('maxValue'),
+        inserted: valueInsert('maxValue'),
+      },
+      'responseOptions.schema:image': {
+        updated: valueUpdate('Image'),
+        inserted: valueInsert('Image'),
+      },
+      'inputOptions': {
+        updated: inputOptionsListUpdate
+      }
     }
   }
 

@@ -21,7 +21,7 @@
       <v-expansion-panels>
         <v-expansion-panel>
           <v-expansion-panel-header>
-            {{ data ? 'Change' : 'Add' }} Audio
+            {{ uploadData ? 'Change' : 'Add' }} Audio
           </v-expansion-panel-header>
           <v-expansion-panel-content>
             <div class="input-file-container">
@@ -52,7 +52,7 @@
               <v-icon right>mdi-record-circle-outline</v-icon>
             </v-btn>
             <v-btn
-              v-if="data"
+              v-if="uploadData"
               class="mt-4"
               color="error"
               @click="removeConfirm = true"
@@ -135,7 +135,7 @@ export default {
     return {
       structureTypes,
       uploader,
-      data: this.initialData,
+      uploadData: this.initialData,
       isAddingFromUrl: false,
       removeConfirm: false,
     };
@@ -144,9 +144,9 @@ export default {
     initialData() {
       const type = typeof this.initialData;
      
-      if(type === 'string' && this.initialData !== this.data) {
+      if(type === 'string' && this.initialData !== this.uploadData) {
         this.onAddFromUrl(this.initialData);
-      } else if(type === 'object' && this.initialData.name !== this.data.name) {
+      } else if(type === 'object' && this.initialData.name !== this.uploadData.name) {
         this.onAddFromDevice(null, this.initialData);
       }
     }
@@ -157,9 +157,9 @@ export default {
       try {
         if(this.initialType === 'audio') await isAudioUrlValid(url);
 
-        this.data = url;
+        this.uploadData = url;
         this.isAddingFromUrl = false;
-        this.$emit('onAddFromUrl', this.data);
+        this.$emit('onAddFromUrl', this.uploadData);
       } catch (error) {
         this.$emit('onNotify', error);
       }
@@ -170,19 +170,19 @@ export default {
       if(!file) return;
       if(event) event.target.value = '';
 
-      this.data = file;
+      this.uploadData = file;
       this.$emit('onAddFromDevice', this.upload);
     },
 
     async upload() {
       return new Promise((resolve, reject) => {
-        this.uploader.upload(this.data)
+        this.uploader.upload(this.uploadData)
           .then(response => { 
-            this.data = response.location;
-            resolve(this.data);
+            this.uploadData = response.location;
+            resolve(this.uploadData);
           })
           .catch(err => {
-            this.data = this.initialData;
+            this.uploadData = this.initialData;
             setTimeout(() => reject('Something went wrong with uploading.'), 1000);
           });
       });
@@ -192,7 +192,7 @@ export default {
       const inputRef = this.$refs['fileInput'];
       if(inputRef) inputRef.value = '';
       this.$emit('onRemove');
-      this.data = '';
+      this.uploadData = '';
       this.removeConfirm = false;
     },
 

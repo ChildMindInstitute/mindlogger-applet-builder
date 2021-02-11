@@ -21,8 +21,8 @@
       style="max-width: 300px"
       :initialType="'audio'"
       :initialData="audio"
-      @onAddFromUrl="onAddFromUrl($event)"
-      @onAddFromDevice="loading = true; onAddFromDevice($event);"
+      @onAddFromUrl="onAddAudioFromUrl($event)"
+      @onAddFromDevice="loading = true; onAddAudioFromDevice($event);"
       @onRecordAudio="onOpenRecorder"
       @onRemove="onRemoveAudio()"
       @onNotify="loading = false; notify = $event;"
@@ -191,7 +191,7 @@ export default {
       this.$emit('updateAllow', allow);
     },
 
-    onAddFromUrl(url) {
+    onAddAudioFromUrl(url) {
       this.url = url;
       this.audio = this.url;
       this.notify = {
@@ -202,7 +202,7 @@ export default {
       this.update();
     },
 
-    async onAddFromDevice(uploadFunction) {
+    async onAddAudioFromDevice(uploadFunction) {
       try {
         this.url = await uploadFunction();
         this.audio = this.url;

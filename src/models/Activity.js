@@ -9,13 +9,37 @@ export default class Activity {
     if (initialActivityData.visibilities && initialActivityData.visibilities.length) {
       initialActivityData.conditionalItems = this.getConditionalItems(initialActivityData, initialActivityData.items);
     }
+
+    const items = (initialActivityData.items || []).map(item => item);
+
+    if (initialActivityData.compute && initialActivityData.compute.length) {
+      const itemModel = new Item();
+
+      const cumulative = itemModel.getItemBuilderData({
+        name: 'cumulatives',
+        ui: {
+          inputType: 'cumulativeScore'
+        },
+        cumulativeScores: initialActivityData.compute.map(compute => {
+          return {
+            compute,
+            messages: initialActivityData.messages.filter(message => message.jsExpression.split(/[<>]=*\s/g)[0].trim() == compute.variableName.trim()),
+            valid: true,
+          }
+        }).filter(cumulative => cumulative.messages.length === 2),
+        valid: true,
+      });
+
+      items.push(cumulative);
+    }
+
     return {
       name: initialActivityData.name || '',
       description: initialActivityData.description || '',
       preamble: initialActivityData.preamble || '',
       shuffleActivityOrder: initialActivityData.shuffle || false,
       isSkippable: initialActivityData.isSkippable || false,
-      items: initialActivityData.items || [],
+      items,
       id: initialActivityData._id || null,
       textRules: [(v) => !!v || 'This field is required'],
       error: '',
@@ -32,8 +56,6 @@ export default class Activity {
         ...subScale,
         valid: true
       })) || [],
-      compute: initialActivityData.compute && initialActivityData.compute.map(compute => compute) || [],
-      messages: initialActivityData.messages && initialActivityData.messages.map(message => message) || [],
       allowEdit: true,
       isPrize: initialActivityData.isPrize || false,
       valid: initialActivityData.valid || false,
@@ -309,8 +331,7 @@ export default class Activity {
         allow: allowed,
       },
       subScales: this.ref.subScales,
-      compute: this.ref.compute,
-      messages: this.ref.messages,
+      ...this.parseCumulative(),
     };
   }
 
@@ -345,6 +366,24 @@ export default class Activity {
     };
   }
 
+  parseCumulative () {
+    const item = this.ref.items.find(item => item.ui.inputType === 'cumulativeScore');
+
+    let compute = [], messages = [];
+
+    if (item) {
+      item.cumulativeScores.forEach(cumulative => {
+        compute.push(cumulative.compute);
+        messages.push(...cumulative.messages);
+      })
+    }
+
+    return {
+      compute,
+      messages,
+    }
+  }
+
   getActivityData() {
     const schema = this.getCompressedSchema();
     const context = this.getContext();
@@ -358,11 +397,10 @@ export default class Activity {
       isSkippable: this.ref.isSkippable,
       schema: schema,
       context: context,
-      items: this.ref.items,
+      items: this.ref.items.filter(item => item.ui.inputType !== 'cumulativeScore'),
       conditionalItems: conditionalItems,
       subScales: this.ref.subScales,
-      compute: this.ref.compute,
-      messages: this.ref.messages,
+      ...this.parseCumulative(),
       isPrize: this.ref.isPrize,
     };
   }

@@ -78,5 +78,9 @@ export default {
 
   itemInputTypes (state) {
     return state.itemInputTypes;
+  },
+
+  templateUpdateRequest (state) {
+    return state.templateUpdateRequest;
   }
 }

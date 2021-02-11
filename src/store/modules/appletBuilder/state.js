@@ -14,6 +14,9 @@ export default {
     activities: []
   },
   baseImageURL,
+  templateUpdateRequest: {
+    pending: false
+  },
   itemInputTypes: [
     {
       text: "radio",

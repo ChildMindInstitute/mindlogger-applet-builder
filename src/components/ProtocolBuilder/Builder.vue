@@ -107,12 +107,25 @@ export default {
 
     this.$emit("setLoading", false);
   },
+  watch: {
+    templateUpdateRequest: {
+      deep: true,
+      handler () {
+        const req = this.templateUpdateRequest;
+        if (req.pending) {
+          this.$emit(req.type, req.option);
+          this.updateTemplateRequestStatus(false);
+        }
+      }
+    }
+  },
   computed: {
     ...mapGetters(config.MODULE_NAME, [
       'currentScreen',
       'tokenPrizeModal',
       'activities',
       'prizeActivity',
+      'templateUpdateRequest',
     ]),
     config() {
       return config;
@@ -136,6 +149,7 @@ export default {
       'deleteActivity',
       'replaceActivityData',
       'setTokenPrizeModalStatus',
+      'updateTemplateRequestStatus',
     ]),
     ...mapGetters(config.MODULE_NAME, [
       'formattedProtocol'

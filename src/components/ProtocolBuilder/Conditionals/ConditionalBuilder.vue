@@ -148,7 +148,7 @@ export default {
   },
   data () {
     return {
-      isExpanded: false,
+      isExpanded: !this.current.stateValue,
 
       ifValue: this.current.ifValue || null,
       stateValue: this.current.stateValue || null,

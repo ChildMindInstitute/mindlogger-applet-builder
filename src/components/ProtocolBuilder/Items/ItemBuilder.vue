@@ -261,7 +261,7 @@
     >
       <div class="item-quiz">
         <img
-          width="50"
+          width="25"
           :src="questionBuilder.imgURL"
         />
         <span>{{ questionBuilder.text }}</span>
@@ -452,6 +452,7 @@ export default {
         'deleteItem',
         'updateItemInputType',
         'setTokenPrizeModalStatus',
+        'insertTemplateUpdateRequest',
       ],
     ),
 
@@ -563,11 +564,17 @@ export default {
     },
 
     onUpdateTemplates (option) {
-      this.$emit('updateTemplates', option);
+      this.insertTemplateUpdateRequest({
+        type: 'updateTemplates',
+        option
+      })
     },
 
     onRemoveTemplate (option) {
-      this.$emit('removeTemplate', option);
+      this.insertTemplateUpdateRequest({
+        type: 'removeTemplate',
+        option
+      })
     },
 
     updateOptions (newOptions) {

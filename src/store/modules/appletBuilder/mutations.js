@@ -202,4 +202,16 @@ export default {
   setTokenPrizeModalStatus (state, status) {
     state.protocol.tokenPrizeModal = status;
   },
+
+  insertTemplateUpdateRequest (state, { type, option }) {
+    Object.assign(state.templateUpdateRequest, {
+      type,
+      option,
+      pending: true
+    });
+  },
+
+  updateTemplateRequestStatus (state, status) {
+    state.templateUpdateRequest.pending = status;
+  }
 }

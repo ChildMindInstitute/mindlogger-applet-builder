@@ -46,11 +46,19 @@ const itemMutations = {
       suffix++;
     }
 
-    state.currentActivity.items.push({
+    const newItem = {
       ...item,
       name: `${item.name} (${suffix})`,
-      _id: null,
-    })
+      id: null,
+    };
+
+    let ageItemIndex = state.currentActivity.items.findIndex(item => !item.allowEdit);
+
+    if (ageItemIndex >= 0) {
+      state.currentActivity.items.splice(ageItemIndex, 0, newItem);
+    } else {
+      state.currentActivity.items.push(newItem);
+    }
   },
 
   deleteItem(state, index) {
@@ -81,12 +89,11 @@ const activityMutations = {
 
     activities.push({
       ...activity,
-      _id: null,
+      id: null,
       name: `${activity.name} (${suffix})`,
-      isValid: true,
       items: activity.items.map(item => ({
         ...item,
-        _id: null,
+        id: null,
       })),
     });
   },

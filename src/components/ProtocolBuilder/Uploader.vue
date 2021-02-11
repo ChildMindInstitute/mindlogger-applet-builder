@@ -11,27 +11,44 @@
     </v-alert>
     <!-- Showing when user did not specify what type of uploader to show -->
 
-    <div v-if="initialType === 'image'">
-      Img Uploader
-    </div>
-    <!-- Images Uploader Structure -->
-
-    <div v-if="initialType === 'audio'">
+    <div v-if="initialType === 'audio' || initialType === 'image'">
       
       <v-expansion-panels>
         <v-expansion-panel>
           <v-expansion-panel-header>
-            {{ uploadData ? 'Change' : 'Add' }} Audio
+            {{ uploadData ? 'Change' : 'Add' }} {{initialTitle}}
           </v-expansion-panel-header>
           <v-expansion-panel-content>
             <div class="input-file-container">
-              <input 
+
+              <input
                 class="file-input"
                 type="file"
                 ref="fileInput"
                 accept="audio/mpeg, audio/ogg, audio/wav"
                 @change="onAddFromDevice($event, null)"
               >
+
+              <input
+                v-if="initialType === 'audio'"
+                class="file-input"
+                type="file"
+                ref="fileInput"
+                accept="audio/mpeg, audio/ogg, audio/wav"
+                @change="onAddFromDevice($event, null)"
+              >
+              <!-- /if initialType === 'audio' -->
+
+              <input
+                v-if="initialType === 'image'"
+                class="file-input"
+                type="file"
+                ref="fileInput"
+                accept="image/jpeg, image/png, image/bmp"
+                @change="onAddFromDevice($event, null)"
+              >
+              <!-- /if initialType === 'image' -->
+
               <v-btn>
                 Your computer
                 <v-icon right>mdi-monitor</v-icon>
@@ -44,27 +61,31 @@
               From URL
               <v-icon right>mdi-link-variant-plus</v-icon>
             </v-btn>
+
             <v-btn 
+              v-if="initialType === 'audio'"
               class="mt-4"
               @click="$emit('onRecordAudio')"
             >
               Record
               <v-icon right>mdi-record-circle-outline</v-icon>
             </v-btn>
+            <!-- /if initialType === 'audio' -->
+
             <v-btn
               v-if="uploadData"
               class="mt-4"
               color="error"
               @click="removeConfirm = true"
             >
-              Remove Audio
+              Remove
             </v-btn>
           </v-expansion-panel-content>
         </v-expansion-panel>
       </v-expansion-panels>
 
     </div>
-    <!-- Audio Uploader Structure -->
+    <!-- Image/Audio Uploader Structure -->
 
     <AddFromUrl
       :show="isAddingFromUrl"
@@ -82,7 +103,7 @@
       >
         <v-row class="flex-column">
           <v-col class="grow">
-            <h3>Are you sure you want to remove {{this.initialType}}?</h3>
+            <h3>Are you sure you want to remove {{initialTitle}}?</h3>
           </v-col>
           <v-col class="shrink d-flex justify-end">
             <v-btn
@@ -107,7 +128,7 @@
 </template>
 
 <script>
-import { Uploader, isAudioUrlValid } from '../../models/Uploader';
+import { Uploader, isAudioUrlValid, isImageValid } from '../../models/Uploader';
 import AddFromUrl from './Additional/AddFromUrl.vue';
 
 export default {
@@ -127,6 +148,10 @@ export default {
       type: [String, File],
       default: '',
     },
+    initialTitle: {
+      type: String,
+      default: '',
+    }
   },
   data() {
     const structureTypes = ['image', 'audio'];
@@ -156,12 +181,16 @@ export default {
     async onAddFromUrl(url) {
       try {
         if(this.initialType === 'audio') await isAudioUrlValid(url);
+        else if(this.initialType === 'image') await isImageValid(url);
 
         this.uploadData = url;
         this.isAddingFromUrl = false;
         this.$emit('onAddFromUrl', this.uploadData);
       } catch (error) {
-        this.$emit('onNotify', error);
+        this.$emit('onNotify', {
+          type: 'error',
+          message: error,
+        });
       }
     },
 
@@ -170,8 +199,17 @@ export default {
       if(!file) return;
       if(event) event.target.value = '';
 
-      this.uploadData = file;
-      this.$emit('onAddFromDevice', this.upload);
+      try {
+        if(this.initialType === 'image') await isImageValid(file);
+
+        this.uploadData = file;
+        this.$emit('onAddFromDevice', this.upload);
+      } catch (error) {
+        this.$emit('onNotify', {
+          type: 'error',
+          message: error,
+        });
+      }
     },
 
     async upload() {

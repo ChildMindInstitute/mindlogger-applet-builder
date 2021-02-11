@@ -1,5 +1,6 @@
 <template>
-  <div>
+<div>
+
   <v-card>
     <v-card-title class="headline grey lighten-2" primary-title>
       <v-icon left>{{ isItemEditable ? "mdi-pencil" : "mdi-eye" }}</v-icon>
@@ -16,7 +17,7 @@
           @keydown="nameKeydown($event)"
         />
         <v-textarea
-          v-model="questionBuilder.text"
+          v-model="questionText"
           label="Question"
           v-if="inputType !== 'cumulativeScore'"
           :disabled="!isItemEditable"
@@ -25,14 +26,20 @@
           auto-grow
           rows="1"
         />
-        <ImageUploader
+
+        <Uploader
           class="mt-3 mb-4"
           style="max-width: 300px"
-          :uploadFor="'activity-item'"
-          :itemImg="questionBuilder.imgURL"
-          @onAddImg="onAddImg"
-          @onRemoveImg="onRemoveImg"
+          :initialType="'image'"
+          :initialData="headerImage"
+          :initialTitle="'Header Item Image'"
+          @onAddFromUrl="onAddHeaderImageFromUrl($event)"
+          @onAddFromDevice="loading = true; onAddHeaderImageFromDevice($event);"
+          @onRemove="onRemoveHeaderImage()"
+          @onNotify="loading = false; notify = $event;"
         />
+        <!-- /Item Header Image Uploader -->
+
         <v-select
           class="mt-6"
           v-model="inputType"
@@ -161,13 +168,11 @@
       </v-btn>
     </v-card-actions>
   </v-card>
-  <v-dialog v-model="isUploadingState" persistent width="400">
-    <v-card class="pt-5 pb-6">
-      <v-progress-circular class="d-block mx-auto mt-2" color="primary" indeterminate :size="50">
-      </v-progress-circular>
-    </v-card>
-  </v-dialog>
-  </div>
+
+  <Notify :notify="notify" />
+  <Loading :loading="loading" />
+
+</div>
 </template>
 
 <style scoped>
@@ -179,7 +184,12 @@
 </style>
 
 <script>
-import ImageUploader from './ImageUploader.vue';
+import Item from '../../models/Item';
+
+import Uploader from './Uploader.vue';
+import Notify from './Additional/Notify.vue';
+import Loading from './Additional/Loading.vue';
+
 import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
 import TextBuilder from "./ItemBuilders/TextBuilder.vue";
 import SliderBuilder from "./ItemBuilders/SliderBuilder.vue";
@@ -193,12 +203,12 @@ import AudioImageRecordBuilder from "./ItemBuilders/AudioImageRecordBuilder.vue"
 import GeolocationBuilder from "./ItemBuilders/GeolocationBuilder.vue";
 import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
 import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
-import Item from '../../models/Item';
-import ImageUpldr from '../../models/ImageUploader';
 
 export default {
   components: {
-    ImageUploader,
+    Uploader,
+    Notify,
+    Loading,
     RadioBuilder,
     TextBuilder,
     SliderBuilder,
@@ -233,114 +243,125 @@ export default {
     isPrizeActivity: {
       type: Object,
       default: null
-    }
+    },
   },
   data: function() {
+
     const model = new Item();
     model.updateReferenceObject(this);
-
-    const imgUploader = new ImageUpldr();
-
-    const questionBuilder = { text: '', imgURL: '', imgFile: null };
-
-    let isUploadingState = false;
-    let isError = '';
 
     return {
       model,
       ...model.getItemBuilderData(this.initialItemData),
       hasScoringItem: this.items.some((item) => item.options.hasScoreValue),
       valid: (this.name && this.name.length > 0),
-      imgUploader,
-      questionBuilder,
-      isUploadingState,
-      isError
+      isError: '',
+      questionText: '',
+      headerImage: '',
+      loading: false,
+      notify: {},
     };
   },
   beforeMount() {
     this.itemTemplates = this.templates;
-    this.questionBuilder.text = this.question.text;
-    this.questionBuilder.imgURL = this.question.image;
+    this.questionText = this.question.text;
+    this.headerImage = this.question.image;
   },
   methods: {
+
     nameKeydown(e) {
       if (!/^[a-zA-Z0-9-_]+$/.test(e.key)) {
         e.preventDefault();
       }
     },
+
     validate() {
       if (this.$refs.form.validate()) {
         this.snackbar = true;
       }
     },
+
     updateResponseOptions(newResponseOptions) {
       this.responseOptions = newResponseOptions;
     },
+
     updateInputOptions(newInputOptions) {
       this.inputOptions = newInputOptions;
     },
+
     updateAnswer(correctAnswer) {
       this.correctAnswer = correctAnswer;
     },
+
     updateAllow(allowItem) {
       this.allow = allowItem;
     },
+
     updateMedia(newMedia) {
       this.media = newMedia;
     },
+
     onUpdateTemplates(option) {
       this.$emit('updateTemplates', option);
     },
+
     onRemoveTemplate(option) {
       this.$emit('removeTemplate', option);
     },
+
     updateOptions(newOptions) {
       this.options = newOptions;
       this.responseOptions = this.model.getResponseOptions();
     },
-    onAddImg(data) {
-      this.isError = '';
-      if(typeof data !== 'string') {
-        this.questionBuilder.imgFile = data;
-        this.questionBuilder.imgURL = data.name;
-      } else {
-        this.questionBuilder.imgURL = data;
-      }
+
+    onAddHeaderImageFromUrl(url) {
+      this.headerImage = url;
+      this.notify = {
+        type: 'success',
+        message: 'Header image from URL successfully added to Item.',
+        duration: 3000,
+      };
     },
-    onRemoveImg() {
-      this.isError = '';
-      this.questionBuilder.imgFile = null;
-      this.questionBuilder.imgURL = '';
-    },
-    async onSaveItem() {
+
+    async onAddHeaderImageFromDevice(uploadFunction) {
       try {
-
-        if (!this.isItemEditable) {
-          this.$emit("closeItemModal", null);
-          return;
-        }
-
-        this.question.text = this.questionBuilder.text;
-        if(!this.questionBuilder.imgFile) {
-          this.question.image = this.questionBuilder.imgURL;
-        } else {
-          this.isError = '';
-          this.isUploadingState = true;
-          const response = await this.imgUploader.uploadImage(this.questionBuilder.imgFile);
-          this.question.image = response.location;
-          this.questionBuilder.imgFile = null;
-          this.isUploadingState = false;
-        }
-
-        this.$emit("closeItemModal", this.model.getItemData());
-
-      } catch(e) {
-        this.isUploadingState = false;
-        this.questionBuilder.imgURL = this.question.image;
-        this.questionBuilder.imgFile = null;
-        this.isError = 'Something went wrong with uploading "Header" image. Please try to upload image again...or save "Item" without image changes.';
+        this.headerImage = await uploadFunction();
+        this.loading = false;
+        this.notify = {
+          type: 'success',
+          message: 'Header image successfully added to Item.',
+          duration: 3000,
+        };
+      } catch (error) {
+        this.loading = false;
+        this.notify = {
+          type: 'error',
+          message: 'Something went wrong with uploading header image for Item. Please try to upload again or just save Item without changes for header image.',
+        };
       }
     },
+
+    onRemoveHeaderImage() {
+      this.headerImage = '';
+      this.notify = {
+        type: 'warning',
+        message: 'Header image successfully removed from Item.',
+        duration: 3000,
+      };
+    },
+
+    async onSaveItem() {
+      if (!this.isItemEditable) {
+        this.$emit("closeItemModal", null);
+        return;
+      }
+
+      this.question.text = this.questionText;
+      this.question.image = this.headerImage;
+
+      this.$emit("closeItemModal", this.model.getItemData());
+    },
+
     onDiscardItem() {
       this.$emit("closeItemModal", null);
     },
@@ -354,7 +375,8 @@ export default {
       if (this.inputType === 'cumulativeScore') {
         this.name = 'cumulatives';
       }
-    }
+    },
+
   }
 };
 </script>

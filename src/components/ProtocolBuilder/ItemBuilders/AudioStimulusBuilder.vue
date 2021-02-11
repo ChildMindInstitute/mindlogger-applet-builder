@@ -89,10 +89,7 @@
     <!-- Audio Record Popup -->
 
     <Notify :notify="notify" />
-    <!-- Notify -->
-
     <Loading :loading="loading" />
-    <!-- Loading -->
     
   </v-form>
 </template>
@@ -218,7 +215,7 @@ export default {
         this.loading = false;
         this.notify = {
           type: 'error',
-          message: 'Something went wrong with uploading audio for AudioStimulus Item. Please try to upload again or just save AudioStimulus Item without adding audio.',
+          message: 'Something went wrong with uploading audio for AudioStimulus Item. Please try to upload again or just save AudioStimulus Item without changes for audio.',
         };
       }
     },
@@ -255,7 +252,7 @@ export default {
       this.audio = this.url;
       this.notify = {
         type: 'warning',
-        message: 'Audio successfully removed from AudioStimulus Item',
+        message: 'Audio successfully removed from AudioStimulus Item.',
         duration: 3000,
       };
       this.update();

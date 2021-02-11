@@ -146,11 +146,11 @@
           v-if="inputType === 'audioImageRecord'"
           :initial-item-response-options="responseOptions"
           :is-skippable-item="allow"
-          @uploading="isUploadingState = $event"
-          @error="isError = $event"
           @checkValidation="valid = $event"
           @updateResponseOptions="updateResponseOptions"
           @updateAllow="updateAllow"
+          @loading="loading = $event"
+          @notify="notify = $event"
         />
 
         <GeolocationBuilder

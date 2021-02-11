@@ -169,15 +169,6 @@
           >
             <v-row>
               <v-col 
-                cols="auto">
-                <ImageUploader
-                  :uploadFor="'item-radio-option-pc'"
-                  :itemImg="nextOptionImageFile"
-                  @onAddImg="onAddImg"
-                  @onRemoveImg="onRemoveImg"
-                />
-              </v-col>
-              <v-col 
                 cols="12"
                 sm="5"
                 md="4"
@@ -190,6 +181,18 @@
                   maxlength="75"
                   :disabled="!isItemEditable"
                   @change="update"
+                />
+              </v-col>
+              <v-col 
+                cols="auto">
+                <Uploader
+                  :initialType="'image'"
+                  :initialData="nextOptionImage"
+                  :initialTitle="'Option Image'"
+                  @onAddFromUrl="onAddOptionImageFromUrl($event)"
+                  @onAddFromDevice="$emit('loading', true); onAddOptionImageFromDevice($event);"
+                  @onRemove="onRemoveOptionImage()"
+                  @onNotify="$emit('loading', false); $emit('notify', $event);"
                 />
               </v-col>
               <v-col 
@@ -238,32 +241,6 @@
                 />
               </v-col>
             </v-row>
-
-            <v-row v-if="!nextOptionImageFile">
-              <v-col 
-                cols="12"
-                sm="12"
-              >
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <div v-on="on">
-                      <v-text-field
-                        v-model="nextOptionImage"
-                        label="Option Image URL"
-                      />
-                    </div>
-                  </template>
-                  <span>
-                    <p>Image Requirements</p>
-                    <ul>
-                      <li>Size: less than 8MB</li>
-                      <li>Width: between 100px and 1920px</li>
-                      <li>Height: between 100px and 1920px</li>
-                    </ul>
-                  </span>
-                </v-tooltip>
-              </v-col>
-            </v-row>
             <v-row>
               <v-col 
                 cols="12"
@@ -291,12 +268,11 @@
 
 <script>
 import ClickOutside from 'vue-click-outside';
-import ImageUploader from '../ImageUploader.vue';
-import ImageUpldr from '../../../models/ImageUploader';
+import Uploader from '../Uploader.vue';
 
 export default {
   components: {
-    ImageUploader
+    Uploader,
   },
   props: {
     initialItemData: {
@@ -324,9 +300,6 @@ export default {
     }
   },
   data: function () {
-    const imgUpldr = new ImageUpldr();
-
-    let nextOptionImageFile = null;
     let nextOptionScore = 1;
 
     if (
@@ -364,10 +337,8 @@ export default {
       items: [],
       nextOptionScore,
       hasScoreValue: this.initialItemData.hasScoreValue || false,
-      nextOptionImageFile,
       hasResponseAlert: this.initialItemData.hasResponseAlert || false,
       responseAlertMessage: this.initialItemData.responseAlertMessage || '',
-      imgUpldr
     };
   },
   directives: {
@@ -380,63 +351,41 @@ export default {
     resetValidation () {
       this.$refs.form.resetValidation()
     },
+
     async addOption() {
-      try {
+      const { isTokenValue, nextOptionName, nextOptionValue, hasScoreValue, nextOptionScore, nextOptionDescription } = this;
 
-        if(this.nextOptionImageFile) {
-          this.$emit('error', '');
-          this.$emit('uploading', true);
-          const response = await this.imgUpldr.uploadImage(this.nextOptionImageFile);
-          this.nextOptionImage = response.location;
-          this.nextOptionImageFile = null;
-          this.$emit('uploading', false);
-        } else if(this.nextOptionImage) {
-          const isImgInvalid = await this.imgUpldr.isImageValid(this.nextOptionImage);
-          if(isImgInvalid) {
-            this.$emit('error', isImgInvalid);
-            return;
-          }
-        }
-
-        const { isTokenValue, nextOptionName, nextOptionValue, hasScoreValue, nextOptionScore, nextOptionDescription } = this;
-
-        const currentVal = this.options.length ? this.getMaxValue(this.options) + 1 : 0
-        const nextOption = {
-          'name': nextOptionName,
-          'value': isTokenValue ? Number(nextOptionValue) : currentVal,
-          'score': hasScoreValue ? Number(nextOptionScore) : 0,
-          'description': nextOptionDescription,
-        };
-        if (this.nextOptionImage) {
-          nextOption.image = this.nextOptionImage.toString();
-        }
-        if (this.isTemplate) {
-          const newOption = {
-            text: nextOptionName,
-            value: nextOptionValue,
-            description: nextOptionDescription,
-          }
-          this.items = [...this.items, newOption]
-          this.$emit('updateTemplates', newOption);
-          this.isTemplate = false;
-        }
-
-        this.options.push(nextOption);
-        this.$emit('error', '');
-        this.nextOptionName = '';
-        this.nextOptionValue = '';
-        this.nextOptionImage = '';
-        this.nextOptionScore = nextOption.score + 1;
-        this.nextOptionDescription = '';
-        this.resetValidation();
-        this.update();
-      } catch(e) {
-        this.$emit('uploading', false);
-        this.nextOptionImageFile = null;
-        this.nextOptionImage = '';
-        this.$emit('error', 'Something went wrong with uploading "Option" image. Please try to upload image again...or add "Option" without image.');
+      const currentVal = this.options.length ? this.getMaxValue(this.options) + 1 : 0;
+      const nextOption = {
+        'name': nextOptionName,
+        'value': isTokenValue ? Number(nextOptionValue) : currentVal,
+        'score': hasScoreValue ? Number(nextOptionScore) : 0,
+        'description': nextOptionDescription,
+      };
+      if (this.nextOptionImage) {
+        nextOption.image = this.nextOptionImage.toString();
       }
+      if (this.isTemplate) {
+        const newOption = {
+          text: nextOptionName,
+          value: nextOptionValue,
+          description: nextOptionDescription,
+        }
+        this.items = [...this.items, newOption]
+        this.$emit('updateTemplates', newOption);
+        this.isTemplate = false;
+      }
+
+      this.options.push(nextOption);
+      this.nextOptionName = '';
+      this.nextOptionValue = '';
+      this.nextOptionImage = '';
+      this.nextOptionScore = nextOption.score + 1;
+      this.nextOptionDescription = '';
+      this.resetValidation();
+      this.update();
     },
+
     removeTemplate(item) {
       const { items } = this;
       const updatedItems = items.filter(({ text, value, description }) => text !== item.text || value !== item.value || description !== item.description)
@@ -485,21 +434,47 @@ export default {
       this.$emit('updateAllow', allow);
     },
 
-    onAddImg(file) {
-      this.$emit('error', '');
-      this.nextOptionImageFile = file;
-      this.nextOptionImage = file.name;
+    onAddOptionImageFromUrl(url) {
+      this.nextOptionImage = url;
+      this.$emit('notify', {
+        type: 'success',
+        message: 'Image from URL successfully added to Option.',
+        duration: 3000,
+      });
     },
-    onRemoveImg() {
-      this.$emit('error', '');
-      this.nextOptionImageFile = null;
+
+    async onAddOptionImageFromDevice(uploadFunction) {
+      try {
+        this.nextOptionImage = await uploadFunction();
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'success',
+          message: 'Image successfully added to Option.',
+          duration: 3000,
+        });
+      } catch (error) {
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'error',
+          message: 'Something went wrong with uploading image for Item > Option. Please try to upload again or just save Option without image changes.',
+        });
+      }
+    },
+
+    onRemoveOptionImage() {
       this.nextOptionImage = '';
+      this.$emit('notify', {
+        type: 'warning',
+        message: 'Image successfully removed from Option.',
+        duration: 3000,
+      });
     },
 
     // Utils
     getMaxValue(array) {
       return Math.max.apply(Math, array.map(option => option.value))
-    }
+    },
+
   }
 }
 </script>

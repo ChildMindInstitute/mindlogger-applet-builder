@@ -73,6 +73,7 @@
             </v-list-item>
           </template>
         </v-select>
+
         <RadioBuilder
           v-if="inputType === 'radio'"
           :is-skippable-item="allow"
@@ -86,9 +87,10 @@
           @updateTemplates="onUpdateTemplates"
           @updateOptions="updateOptions"
           @updateAllow="updateAllow"
-          @uploading="isUploadingState = $event"
-          @error="isError = $event"
+          @loading="loading = $event"
+          @notify="notify = $event"
         />
+
         <TextBuilder
           v-if="inputType === 'text'"
           :is-skippable-item="allow"

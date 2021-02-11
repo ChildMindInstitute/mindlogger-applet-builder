@@ -167,6 +167,11 @@ export default {
   },
   watch: {
     initialData() {
+      if(!this.initialData) {
+        this.uploadData = this.initialData;
+        return;
+      };
+
       const type = typeof this.initialData;
      
       if(type === 'string' && this.initialData !== this.uploadData) {

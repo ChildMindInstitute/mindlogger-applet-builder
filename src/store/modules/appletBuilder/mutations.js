@@ -27,7 +27,13 @@ const itemMutations = {
       item = obj;
     }
 
-    state.currentActivity.items.push(model.getItemBuilderData(item));
+    let ageItemIndex = state.currentActivity.items.findIndex(item => !item.allowEdit);
+
+    if (ageItemIndex >= 0) {
+      state.currentActivity.items.splice(ageItemIndex, 0, model.getItemBuilderData(item));
+    } else {
+      state.currentActivity.items.push(model.getItemBuilderData(item));
+    }
   },
 
   duplicateItem(state, index) {

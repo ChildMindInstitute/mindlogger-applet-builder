@@ -7,7 +7,7 @@
     <div>
       <ItemBuilder
         v-for="(item, index) in currentActivity.items"
-        :key="index"
+        :key="`${index}-${item.id || 0}`"
         :item-index="index"
         class="ma-4"
       >
@@ -68,6 +68,7 @@ export default {
     return {
       urlItemUploaderKey: 0,
       urlDialog: false,
+      baseKey: 0,
     }
   },
   components: {

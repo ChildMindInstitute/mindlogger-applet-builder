@@ -80,6 +80,34 @@
             >
               Remove
             </v-btn>
+
+            <div 
+              v-if="initialType === 'image'"
+              class="mt-4 text-right"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-icon
+                    color="primary"
+                    dark
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    mdi-information-outline
+                  </v-icon>
+                </template>
+                <span>
+                  <p>Image Requirements</p>
+                  <ul>
+                    <li>Size: less than 8MB</li>
+                    <li>Width: between 100px and 1920px</li>
+                    <li>Height: between 100px and 1920px</li>
+                  </ul>
+                </span>
+              </v-tooltip>
+            </div>
+            <!-- /Image Upload Rules -->
+
           </v-expansion-panel-content>
         </v-expansion-panel>
       </v-expansion-panels>

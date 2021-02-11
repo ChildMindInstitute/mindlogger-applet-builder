@@ -16,10 +16,13 @@ const itemMutations = {
     const model = new Item();
     let item = {
       options: {
-        options: []
+        options: [],
       },
       ui: {
         inputType: 'radio',
+        allow: [
+          'dontKnow'
+        ]
       }
     };
   

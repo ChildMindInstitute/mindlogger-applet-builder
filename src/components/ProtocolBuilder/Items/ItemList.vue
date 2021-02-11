@@ -42,7 +42,7 @@
 
       <v-list>
         <v-list-item
-          @click="addItem"
+          @click="addBlankItem"
         >
           <v-list-item-title>Blank item</v-list-item-title>
         </v-list-item>
@@ -99,6 +99,10 @@ export default {
         this.addItem(response);
       }
     },
+
+    addBlankItem () {
+      this.addItem();
+    }
   }
 }
 </script>

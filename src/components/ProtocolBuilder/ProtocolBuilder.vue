@@ -514,12 +514,16 @@ export default {
                   responseOptions[0]['schema:itemListElement'] &&
                   responseOptions[0]['schema:itemListElement'].map(
                     (itemListElement) => {
+                      const image = itemListElement['schema:image'];
                       const name = itemListElement["schema:name"];
                       const value = itemListElement["schema:value"];
                       const price = itemListElement["schema:price"];
                       const description = itemListElement["schema:description"];
 
                       return {
+                        image: 
+                          typeof image === 'string' && image ||
+                          Array.isArray(image) && image[0] && image[0]['@value'].toString(),
                         name:
                           typeof name == "string" && name ||
                           Array.isArray(name) && name[0] && name[0]['@value'].toString(),

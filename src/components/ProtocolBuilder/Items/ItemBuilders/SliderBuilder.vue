@@ -23,7 +23,7 @@
           v-model="hasScoreValue"
           label="Option Score"
           :disabled="!isItemEditable"
-          @change="update"
+          @change="sliderRangeUpdate($event, 'max')"
         />
       </v-col>
 
@@ -48,12 +48,28 @@
         sm="3"
       >
         <v-text-field
-          v-model="numOptions"
-          label="On a scale of 1 to "
+          v-model="minSliderTick"
+          label="Minimum Slider Value"
           :disabled="!isItemEditable"
           type="number"
-          @change="update"
+          @change="sliderRangeUpdate($event, 'min')"
           min="1"
+          :max="maxSliderTick"
+        />
+      </v-col>
+
+      <v-col 
+        class="d-flex align-center"
+        cols="12"
+        sm="3"
+      >
+        <v-text-field
+          v-model="maxSliderTick"
+          label="Maximum Slider Value"
+          :disabled="!isItemEditable"
+          type="number"
+          @change="sliderRangeUpdate($event, 'max')"
+          :min="minSliderTick"
           max="12"
         />
       </v-col>
@@ -112,7 +128,7 @@
               :key="i"
               class="d-flex"
             >
-              <div class="option-value pt-2">{{i+1}}</div>
+              <div class="option-value pt-2">{{i + Number(minSliderTick)}}</div>
               <v-text-field
                 v-model="scores[i]"
                 class="option-score mt-0 pt-0"
@@ -228,7 +244,8 @@ export default {
     const imgUpldr = new ImageUpldr();
     
     return {
-      numOptions: this.initialItemData.numOptions || 5,
+      minSliderTick: this.initialItemData.minSliderTick || 0,
+      maxSliderTick: this.initialItemData.maxSliderTick || 5,
       minValue: this.initialItemData.minValue || '',
       maxValue: this.initialItemData.maxValue || '',
       isSkippable: this.isSkippableItem || false,
@@ -257,8 +274,8 @@ export default {
   },
   methods: {
     resetScores () {
-      for (let i = 0; i < this.scores.length; i++) {
-        this.$set(this.scores, i, i+1);
+      for (let i = this.minSliderTick; i < this.maxSliderTick; i++) {
+        this.$set(this.scores, i - this.minSliderTick, i);
       }
     },
 
@@ -273,28 +290,15 @@ export default {
     },
 
     update () {
-      if (this.numOptions > 12) {
-        this.numOptions = 12;
-      } else if (this.numOptions < 1) {
-        this.numOptions = 1;
-      }
-
-      if (this.hasScoreValue) {
-        this.scores = this.scores || [];
-      }
-
-      if (this.scores) {
-        while(this.scores.length < this.numOptions) {
-          this.scores.push(this.scores.length + 1);
-        }
-
-        while(this.scores.length > this.numOptions) {
-          this.scores.pop();
-        }
+      if (this.maxSliderTick > 12) {
+        this.maxSliderTick = 12;
+      } else if (this.minSliderTick < 1) {
+        this.minSliderTick = 1;
       }
 
       const responseOptions = {
-        'numOptions': this.numOptions,
+        'minSliderTick': this.minSliderTick,
+        'maxSliderTick': this.maxSliderTick,
         'minValue': this.minValue || "Min",
         'minValueImg': this.imgFirstName,
         'maxValue': this.maxValue || "Max",
@@ -305,6 +309,48 @@ export default {
         'scores': this.hasScoreValue ? this.scores : false
       };
       this.$emit('updateOptions', responseOptions);
+    },
+
+    sliderRangeUpdate(ev, type) {
+      if (this.hasScoreValue) {
+        this.scores = this.scores || [];
+
+        const tickCount = this.maxSliderTick - this.minSliderTick + 1;
+
+        if (type == 'max') {
+          while (this.scores.length < tickCount) {
+            this.scores.push(Number(this.minSliderTick) + this.scores.length);
+          }
+
+          while (this.scores.length > tickCount) {
+            this.scores.pop();
+          }
+        } else {
+          while (this.scores.length < tickCount) {
+            this.scores.unshift(Number(this.minSliderTick) + (tickCount - this.scores.length - 1));
+          }
+
+          while (this.scores.length > tickCount) {
+            this.scores.shift();
+          }
+        }
+
+        while (this.scores.length < (this.maxSliderTick - this.minSliderTick + 1)) {
+          this.scores.push(this.scores.length + 1);
+        }
+
+        while (this.scores.length > (this.maxSliderTick - this.minSliderTick + 1)) {
+          this.scores.pop();
+        }
+
+        if (type == 'min') {
+            
+        } else {
+
+        }
+      }
+
+      this.update();
     },
 
     updateAllow() {

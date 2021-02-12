@@ -96,8 +96,8 @@
           <v-text-field
             v-model="minValue"
             label="Min value"
-            min="1"
-            :max="sliderNumOptions"
+            :min="minSliderTick"
+            :max="maxSliderTick"
             type="number"
             @input="onUpdate"
           />
@@ -109,8 +109,8 @@
             "
             v-model="maxValue"
             label="Max value"
-            min="1"
-            :max="sliderNumOptions"
+            :min="minSliderTick"
+            :max="maxSliderTick"
             type="number"
             @input="onUpdate"
           />
@@ -221,8 +221,11 @@ export default {
       ];
     },
 
-    sliderNumOptions () {
-      return this.ifValue.inputType == 'slider' && this.ifValue.options.numOptions || 0;
+    minSliderTick () {
+      return this.ifValue.inputType == 'slider' && this.ifValue.options.minSliderTick || 0;
+    },
+    maxSliderTick () {
+      return this.ifValue.inputType == 'slider' && this.ifValue.options.maxSliderTick || 0;
     },
 
     answerItems () {

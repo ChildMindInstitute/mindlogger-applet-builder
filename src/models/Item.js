@@ -54,20 +54,20 @@ export default class Item {
 
   getSliderChoices() {
     const choices = [];
-    for (let i = 1; i <= this.ref.options.numOptions; i++) {
+    for (let i = this.ref.options.minSliderTick; i <= this.ref.options.maxSliderTick; i++) {
       let obj = {
         "schema:name": i.toString(),
         "schema:value": i
       };
 
       if (this.ref.options.hasScoreValue) {
-        obj["schema:score"] = this.ref.options.scores[i-1];
+        obj["schema:score"] = this.ref.options.scores[i - this.ref.options.minSliderTick];
       }
 
       if (this.ref.options.minValueImg && i === 1)
         obj["schema:image"] = this.ref.options.minValueImg;
       
-      if(this.ref.options.maxValueImg && i === this.ref.options.numOptions)
+      if(this.ref.options.maxValueImg && i == this.ref.options.maxSliderTick)
         obj["schema:image"] = this.ref.options.maxValueImg;
 
       choices.push(obj);
@@ -275,7 +275,8 @@ export default class Item {
       itemObj.options.minValueImg = itemObj.options.minValueImg || "";
       itemObj.options.maxValue = itemObj.options.maxValue || "Max";
       itemObj.options.maxValueImg = itemObj.options.maxValueImg || "";
-      itemObj.options.numOptions = itemObj.options.numOptions || 5;
+      itemObj.options.minSliderTick = itemObj.options.minSliderTick || 0;
+      itemObj.options.maxSliderTick = itemObj.options.maxSliderTick || 0;
       itemObj.options.hasScoreValue = itemObj.options.hasScoreValue || false;
       itemObj.options.hasResponseAlert = itemObj.options.hasResponseAlert || false;
     }
@@ -467,9 +468,13 @@ export default class Item {
       'options.requiredValue': {
         updated: optionUpdate('Required option'),
       },
-      'options.numOptions': {
-        updated: valueUpdate('Scale value'),
-        inserted: valueInsert('Scale value'),
+      'options.minSliderTick': {
+        updated: valueUpdate('Slider Min Value'),
+        inserted: valueInsert('Slider Min Value'),
+      },
+      'options.maxSliderTick': {
+        updated: valueUpdate('Slider Max Value'),
+        inserted: valueInsert('Slider Max Value'),
       },
       'options.hasScoreValue': {
         updated: optionUpdate('Scoring option'),
@@ -742,10 +747,11 @@ export default class Item {
             responseOptions[0]['schema:minValueImg'] &&
             responseOptions[0]['schema:minValueImg'][0] &&
             responseOptions[0]['schema:minValueImg'][0]['@value'],
-          numOptions:
-            responseOptions[0] &&
-            responseOptions[0]['schema:itemListElement'] &&
-            responseOptions[0]['schema:itemListElement'].length,
+          maxSliderTick:
+            Math.min(..._.get(responseOptions, '0.schema:itemListElement', []).map(item => _.get(item, 'schema:value.0.@value'))),
+          minSliderTick:
+            Math.max(..._.get(responseOptions, '0.schema:itemListElement', []).map(item => _.get(item, 'schema:value.0.@value'))),
+
           scores: itemContent.scoring && responseOptions[0] &&
             responseOptions[0]['schema:itemListElement'] &&
             responseOptions[0]['schema:itemListElement'].map(

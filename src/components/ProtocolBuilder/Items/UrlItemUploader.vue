@@ -163,7 +163,9 @@ export default {
               }
               return optionSchema;
             });
-            simplifiedSchema.options.numOptions = simplifiedSchema.options.options.length;
+
+            simplifiedSchema.options.minSliderTick = Math.min(...simplifiedSchema.options.options.map(option => option.value));
+            simplifiedSchema.options.maxSliderTick = Math.max(...simplifiedSchema.options.options.map(option => option.value));
           }
         }
 

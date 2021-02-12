@@ -401,9 +401,6 @@ export default {
   },
 
   beforeMount() {
-    const model = new Item();
-    model.updateReferenceObject(this.item);
-
     Object.assign(this, {
       valid: this.item.name && this.item.name.length > 0,
       hasScoringItem: this.currentActivity.items.some((item) => item.options.hasScoreValue),
@@ -411,8 +408,7 @@ export default {
         text: this.item.question.text,
         imgURL: this.item.question.image
       },
-      isExpanded: !this.item.name.length,
-      model
+      isExpanded: !this.item.name.length
     })
   },
 
@@ -594,9 +590,12 @@ export default {
         obj: { options: newOptions }
       })
 
+      const model = new Item();
+      model.updateReferenceObject(this.item);
+
       this.updateItemMetaInfo({
         index: this.itemIndex,
-        obj: { responseOptions: this.model.getResponseOptions() }
+        obj: { responseOptions: model.getResponseOptions() }
       })
     },
 

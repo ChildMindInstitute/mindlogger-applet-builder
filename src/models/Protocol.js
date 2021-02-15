@@ -289,7 +289,7 @@ export default class Protocol {
       protocolVersion: _.get(applet, 'schema:schemaVersion[0].@value', this.protocolVersion)
     };
 
-    const markdownData = applet["reprolib:terms/landingPage"][0]["@value"];
+    const markdownData = _.get(applet, ["reprolib:terms/landingPage", 0, "@value"], "");
     if (markdownData) {
       try {
         protocolInfo.markdownData = (await axios.get(markdownData)).data;

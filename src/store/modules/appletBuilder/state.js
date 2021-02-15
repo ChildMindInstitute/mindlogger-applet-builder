@@ -2,17 +2,20 @@
 import config from '../../../config';
 
 const baseImageURL = 'https://raw.githubusercontent.com/jj105/applet-builder-images/master/';
+export const initialProtocol = {
+  id: '',
+  description: '',
+  markdownData: '',
+  name: '',
+  protocolVersion: '',
+  isValid: false,
+  prizeActivity: null,
+  activities: [],
+  tokenPrizeModal: false
+};
+
 export default {
-  protocol: {
-    id: '',
-    description: '',
-    markdownData: '',
-    name: '',
-    protocolVersion: '',
-    isValid: false,
-    prizeActivity: null,
-    activities: []
-  },
+  protocol: initialProtocol,
   baseImageURL,
   templateUpdateRequest: {
     pending: false

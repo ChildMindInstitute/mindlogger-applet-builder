@@ -100,7 +100,7 @@ export default {
         original.protocol.data[
           'schema:schemaVersion'
         ] = original.protocol.data['schema:version'] = util.upgradeVersion(
-          this.protocolVersion,
+          original.protocol.data['schema:version'],
           '0.0.1'
         );
 

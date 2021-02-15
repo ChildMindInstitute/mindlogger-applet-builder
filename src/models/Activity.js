@@ -154,23 +154,8 @@ export default class Activity {
         })
       } else {
         let values = [], minValue;
-        if (isVis.includes('==')) {
-          values = isVis.split('==');
-          stateValue = {
-            name: 'IS EQUAL TO',
-            val: '==',
-          };
-          const itemIndex = items.findIndex(({ name }) => name === values[0]);
-
-          const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == values[1]);
-
-          ifValue = items[itemIndex];
-          answerValue = {
-            name: option['schema:name'],
-            value: option['schema:value']
-          };
-        } else if (isVis.includes('!=')) {
-          values = isVis.split('!=');
+        if (isVis.includes('!=')) {
+          values = isVis.includes('!==') ? isVis.split('!==') : isVis.split('!=');
           stateValue = {
             name: 'IS NOT EQUAL TO',
             val: '!=',
@@ -178,6 +163,21 @@ export default class Activity {
           const itemIndex = items.findIndex(({ name }) => name === values[0]);
           
           const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == values[1]);
+          ifValue = items[itemIndex];
+          answerValue = {
+            name: option['schema:name'],
+            value: option['schema:value']
+          };
+        } else if (isVis.includes('==')) {
+          values = isVis.split('==');
+          stateValue = {
+            name: 'IS EQUAL TO',
+            val: '==',
+          };
+
+          const itemIndex = items.findIndex(({ name }) => name === values[0]);
+          const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == values[1]);
+
           ifValue = items[itemIndex];
           answerValue = {
             name: option['schema:name'],

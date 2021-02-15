@@ -109,6 +109,8 @@ export default {
       }
 
       this.setFormattedOriginalProtocol(JSON.parse(JSON.stringify(original)));
+    } else {
+      this.resetProtocol();
     }
 
     this.$emit("setLoading", false);
@@ -157,6 +159,7 @@ export default {
       'setTokenPrizeModalStatus',
       'updateTemplateRequestStatus',
       'setVersions',
+      'resetProtocol',
     ]),
     ...mapGetters(config.MODULE_NAME, [
       'formattedProtocol'

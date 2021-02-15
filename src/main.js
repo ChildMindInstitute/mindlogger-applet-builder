@@ -26,7 +26,8 @@ Vue.use(mavonEditor);
 mavonEditor.markdownIt.use(html5Embed, {
   html5embed: {
     useImageSyntax: true
-}}).use(markdownItImSize);
+  }
+}).use(markdownItImSize);
 
 new Vue({
   vuetify,

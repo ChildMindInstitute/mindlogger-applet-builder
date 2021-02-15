@@ -551,37 +551,23 @@ export default class Item {
   }
 
   static parseJSONLD(item) {
-    let allow = []
-    if (item['reprolib:terms/allow'] &&
-        item['reprolib:terms/allow'][0] &&
-        item['reprolib:terms/allow'][0]['@list']) {
-      allow = item['reprolib:terms/allow'][0]['@list'].map(item => {
-        return item['@id'].substr(15)
-      })
-    }
+    let allow = _.get(item, ['reprolib:terms/allow', 0, '@list'], [])
+            .map(item => item['@id'].substr(15));
 
     let itemContent = {
       _id: item['_id'] && item['_id'].split('/')[1],
       name: item['@id'],
       question:
-        item['schema:question'] &&
-        item['schema:question'][0] &&
-        item['schema:question'][0]['@value'],
+        _.get(item, ['schema:question', 0, '@value']),
       description:
-        item['schema:description'] &&
-        item['schema:description'][0] &&
-        item['schema:description'][0]['@value'],
+        _.get(item, ['schema:description', 0, '@value']),
       ui: {
         allow,
         inputType:
-          item['reprolib:terms/inputType'] &&
-          item['reprolib:terms/inputType'][0] &&
-          item['reprolib:terms/inputType'][0]['@value'],
+          _.get(item, ['reprolib:terms/inputType', 0, '@value']),
       },
       allowEdit:
-        item['reprolib:terms/allowEdit'] &&
-        item['reprolib:terms/allowEdit'][0] ?
-        item['reprolib:terms/allowEdit'][0]['@value'] : true
+        _.get(item, ['reprolib:terms/allowEdit', 0, '@value'], true)
     };
 
     let responseOptions = item['reprolib:terms/responseOptions'];
@@ -590,37 +576,31 @@ export default class Item {
 
     if (responseOptions) {
       let multipleChoice =
-        responseOptions[0] &&
-        responseOptions[0]['reprolib:terms/multipleChoice'];
+        _.get(responseOptions, [0, 'reprolib:terms/multipleChoice']);
       let valueType = 
-        responseOptions[0] &&
-        responseOptions[0]['reprolib:terms/valueType']
+        _.get(responseOptions, [0, 'reprolib:terms/valueType']);
 
       let scoring = 
-        responseOptions[0] &&
-        responseOptions[0]['reprolib:terms/scoring'];
+        _.get(responseOptions, [0, 'reprolib:terms/scoring']);
 
       let responseAlert =
-        responseOptions[0] &&
-        responseOptions[0]['reprolib:terms/responseAlert'];
+        _.get(responseOptions, [0, 'reprolib:terms/responseAlert']);
 
       let responseAlertMessage = 
-        responseOptions[0] && 
-        responseOptions[0]['reprolib:terms/responseAlertMessage'];
+        _.get(responseOptions, [0, 'reprolib:terms/responseAlertMessage']);
 
       if (multipleChoice) {
-        itemContent.multipleChoice =
-          multipleChoice[0] && multipleChoice[0]['@value'];
+        itemContent.multipleChoice = _.get(multipleChoice, [0, '@value']);
       }
 
       if (scoring) {
         itemContent.scoring = 
-          scoring[0] && scoring[0]['@value'];
+          _.get(scoring, [0, '@value']);
       }
 
       if (responseAlert) {
         itemContent.responseAlert = 
-          responseAlert[0] && responseAlert[0]['@value'];
+          _.get(responseAlert, [0, '@value']);
       }
 
       if (responseAlertMessage) {
@@ -708,12 +688,7 @@ export default class Item {
       if (itemType === 'text') {
         itemContent.options = {
           requiredValue:
-            responseOptions[0] &&
-            responseOptions[0]['reprolib:terms/requiredValue'] &&
-            responseOptions[0]['reprolib:terms/requiredValue'][0] &&
-            responseOptions[0]['reprolib:terms/requiredValue'][0][
-              '@value'
-            ],
+            _.get(responseOptions, [0, 'reprolib:terms/requiredValue', 0, '@value']),
           // TODO: add 'maximum response length' value which is absent for now
         };
         if (item['schema:correctAnswer'] &&
@@ -728,25 +703,13 @@ export default class Item {
           hasResponseAlert: itemContent.responseAlert || false,
           responseAlertMessage: itemContent.responseAlertMessage || '',
           maxValue:
-            responseOptions[0] &&
-            responseOptions[0]['schema:maxValue'] &&
-            responseOptions[0]['schema:maxValue'][0] &&
-            responseOptions[0]['schema:maxValue'][0]['@value'],
+            _.get(responseOptions, [0, 'schema:maxValue', 0, '@value']),
           minValue:
-            responseOptions[0] &&
-            responseOptions[0]['schema:minValue'] &&
-            responseOptions[0]['schema:minValue'][0] &&
-            responseOptions[0]['schema:minValue'][0]['@value'],
+            _.get(responseOptions, [0, 'schema:minValue', 0, '@value']),
           maxValueImg:
-            responseOptions[0] &&
-            responseOptions[0]['schema:maxValueImg'] &&
-            responseOptions[0]['schema:maxValueImg'][0] &&
-            responseOptions[0]['schema:maxValueImg'][0]['@value'],
+            _.get(responseOptions, [0, 'schema:maxValueImg', 0, '@value']),
           minValueImg:
-            responseOptions[0] &&
-            responseOptions[0]['schema:minValueImg'] &&
-            responseOptions[0]['schema:minValueImg'][0] &&
-            responseOptions[0]['schema:minValueImg'][0]['@value'],
+            _.get(responseOptions, [0, 'schema:minValueImg', 0, '@value']),
           maxSliderTick:
             Math.min(..._.get(responseOptions, '0.schema:itemListElement', []).map(item => _.get(item, 'schema:value.0.@value'))),
           minSliderTick:
@@ -765,22 +728,11 @@ export default class Item {
       if (itemType === 'audioRecord' || itemType === 'audioImageRecord') {
         itemContent.options = {
           requiredValue:
-            responseOptions[0] &&
-            responseOptions[0]['reprolib:terms/requiredValue'] &&
-            responseOptions[0]['reprolib:terms/requiredValue'][0] &&
-            responseOptions[0]['reprolib:terms/requiredValue'][0][
-              '@value'
-            ],
+            _.get(responseOptions, [0, 'reprolib:terms/requiredValue', 0, '@value']),
           'schema:maxValue':
-            responseOptions[0] &&
-            responseOptions[0]['schema:maxValue'] &&
-            responseOptions[0]['schema:maxValue'][0] &&
-            responseOptions[0]['schema:maxValue'][0]['@value'],
+            _.get(responseOptions, [0, 'schema:maxValue', 0, '@value']),
           'schema:minValue':
-            responseOptions[0] &&
-            responseOptions[0]['schema:minValue'] &&
-            responseOptions[0]['schema:minValue'][0] &&
-            responseOptions[0]['schema:minValue'][0]['@value'],
+            _.get(responseOptions, [0, 'schema:minValue', 0, '@value']),
         };
       }
     }
@@ -814,18 +766,16 @@ export default class Item {
           [mediaUrl]: {
             'schema:contentUrl': [mediaUrl],
             'schema:name':
-              mediaData[0] &&
-              mediaData[0]['schema:name'] &&
-              mediaData[0]['schema:name'][0] &&
-              mediaData[0]['schema:name'][0]['@value'],
+              _.get(mediaData, [0, 'schema:name', 0, '@value']),
             'schema:transcript':
-              mediaData[0] &&
-              mediaData[0]['schema:transcript'] &&
-              mediaData[0]['schema:transcript'][0] &&
-              mediaData[0]['schema:transcript'][0]['@value'],
+              _.get(mediaData, [0, 'schema:transcript', 0, '@value']),
           },
         };
       }
+    }
+
+    if (itemContent.ui.inputType == 'markdown-message') {
+      itemContent.ui.inputType = 'markdownMessage';
     }
 
     itemContent.valid = true;

@@ -685,7 +685,7 @@ export default class Activity {
       ['schema:description']: description,
       ['reprolib:terms/preamble']: activityPreamble,
       ['reprolib:terms/shuffle']: shuffle,
-      ['reprolib:terms/allow']: isSkippable,
+      ['reprolib:terms/allow']: allow,
       ['reprolib:terms/addProperties']: addProperties,
       ['reprolib:terms/subScales']: subScales,
       ['reprolib:terms/compute']: compute,
@@ -776,28 +776,22 @@ export default class Activity {
         const outputType = msg['reprolib:terms/outputType']
 
         return {
-          jsExpression: jsExpression && jsExpression[0] && jsExpression[0]['@value'],
-          message: message && message[0] && message[0]['@value'],
-          outputType: outputType && outputType[0] && outputType[0]['@value'] || 'cumulative',
+          jsExpression: _.get(jsExpression, [0, '@value']),
+          message: _.get(message, [0, '@value']),
+          outputType: _.get(outputType, [0, '@value'], 'cumulative'),
         }
       }),
       orderList: _.get(orders, '0.@list', []).map(order => order['@id'])
     };
 
-    let isSkippableList =
-      (isSkippable && isSkippable[0] && isSkippable[0]['@list']) || [];
+    let allowList = _.get(allow, [0, '@list'], [])
+      .map(item => item["@id"]);
 
-    if (isSkippableList.length) {
-      if (
-        (isSkippableList[0] &&
-          isSkippableList[0]['@id'] &&
-          isSkippableList[0]['@id'].includes('refused_to_answer')) ||
-        (isSkippableList[0] &&
-          isSkippableList[0]['@id'] &&
-          isSkippableList[0]['@id'].includes('dontKnow'))
-      ) {
-        activityInfo.isSkippable = true;
-      }
+    if (allowList.some((item) => item.includes('refused_to_answer') || item.includes('dontKnow'))) {
+      activityInfo.isSkippable = true;
+    }
+    if (allowList.some((item) => item.includes('disable_back'))) {
+      activityInfo.disableBack = true;
     }
 
     activityInfo.valid = true;

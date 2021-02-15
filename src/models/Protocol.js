@@ -284,9 +284,7 @@ export default class Protocol {
 
     const protocolInfo = {
       id: protocol._id.split('/')[1],
-      name: prefLabel &&
-                  prefLabel[0] &&
-                  prefLabel[0]['@value'] || 'applet',
+      name: _.get(prefLabel, [0, '@value'], 'applet'),
       description: applet['schema:description'][0]['@value'],
       protocolVersion: _.get(applet, 'schema:schemaVersion[0].@value', this.protocolVersion)
     };
@@ -299,8 +297,7 @@ export default class Protocol {
         protocolInfo.markdownData = '';
       }
     } else {
-      protocolInfo.markdownData = 
-        applet["reprolib:terms/landingPageContent"] ? applet["reprolib:terms/landingPageContent"][0]["@value"] : "";
+      protocolInfo.markdownData = _.get(applet, ["reprolib:terms/landingPageContent", 0, "@value"], "");
     }
 
     return protocolInfo;

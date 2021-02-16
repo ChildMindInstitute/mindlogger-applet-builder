@@ -662,11 +662,11 @@ export default {
               itemContent.responseOptions = this.responseOptionsModifier(itemType, responseOptions2);
           }
 
-          const inputOptions = item['reprolib:terms/inputs'];
-          if(inputOptions && inputOptions.length > 0) {
-            // delete "itemType === 'drawing'" later !!!!!!! this should works for all items wich contains inputOptions, modification for specific values should be inside "inputOptionsModifier" function
-            if(itemType === 'drawing')
-              itemContent.inputOptions = this.inputOptionsModifier(itemType, inputOptions);
+          const inputOptions2 = item['reprolib:terms/inputs'];
+          if(inputOptions2 && inputOptions2.length > 0) {
+            // delete "itemType === 'drawing'" || itemType === 'audioStimulus' later !!!!!!! this should works for all items wich contains inputOptions, modification for specific values should be inside "inputOptionsModifier" function
+            if(itemType === 'drawing' || itemType === 'audioStimulus')
+              itemContent.inputOptions = this.inputOptionsModifier(itemType, inputOptions2);
           }
           // new block end
 
@@ -761,6 +761,10 @@ export default {
         const value = option['schema:value'];
         if(value)
           modifiedOption['schema:value'] = value[0]['@value'];
+
+        const contentUrl = option['schema:contentUrl'];
+        if(contentUrl)
+          modifiedOption['schema:contentUrl'] = contentUrl;
 
         modifiedInputOptions.push(modifiedOption);
       });

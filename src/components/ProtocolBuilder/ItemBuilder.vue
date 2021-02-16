@@ -1,7 +1,9 @@
 <template>
 <div>
 
-  <v-card>
+  <v-card
+    :class="{ 'item-not-editable': !isItemEditable }"
+  >
     <v-card-title class="headline grey lighten-2" primary-title>
       <v-icon left>{{ isItemEditable ? "mdi-pencil" : "mdi-eye" }}</v-icon>
       {{ isItemEditable ? "Edit Item" : "View Item" }}
@@ -163,14 +165,13 @@
 
         <AudioStimulusBuilder
           v-if="inputType === 'audioStimulus'"
-          :is-skippable-item="allow"
+          :is-item-skippable="allow"
           :initial-item-input-options="inputOptions"
           :initial-item-media="media"
-          :initial-item-data="options"
-          :is-item-editable="isItemEditable"
           @updateAllow="updateAllow"
           @updateInputOptions="updateInputOptions"
           @updateMedia="updateMedia"
+          @validation="isItemValid = $event"
           @loading="loading = $event"
           @notify="notify = $event"
         />
@@ -186,20 +187,31 @@
     </v-card-text>
     <v-alert v-if="isError" type="error" class="mx-2">{{ isError }}</v-alert>
     <v-divider />
-    <v-card-actions>
+    <v-card-actions
+      v-if="isItemEditable"
+    >
       <v-btn
         outlined
         color="primary"
         @click="onDiscardItem"
-      >{{ isItemEditable ? "Discard Changes" : "Close" }}</v-btn>
+      >Discard Changes</v-btn>
       <v-spacer />
       <v-btn
-        :disabled="!name || !inputType || (!valid && inputType === 'cumulativeScore') || (!valid && inputType === 'audioImageRecord')"
+        :disabled="!name || !inputType || (!valid && inputType === 'cumulativeScore') || (!valid && inputType === 'audioImageRecord') || !isItemValid"
         color="primary"
         @click="onSaveItem"
       >
         Save Item
       </v-btn>
+    </v-card-actions>
+    <v-card-actions 
+      v-if="!isItemEditable"
+    >
+      <v-btn 
+        outlined 
+        color="primary"
+        @click="onDiscardItem"
+      >Close</v-btn>
     </v-card-actions>
   </v-card>
 
@@ -208,14 +220,6 @@
 
 </div>
 </template>
-
-<style scoped>
-
-.disabled-option {
-  color: grey;
-}
-
-</style>
 
 <script>
 import Item from '../../models/Item';
@@ -294,6 +298,7 @@ export default {
       isError: '',
       questionText: '',
       headerImage: '',
+      isItemValid: true,
       loading: false,
       notify: {},
     };
@@ -416,3 +421,32 @@ export default {
   }
 };
 </script>
+
+<style lang="scss" scoped>
+
+.item-not-editable {
+  position: relative;
+
+  &:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    z-index: 1000;
+  }
+
+  .v-card__actions {
+    position: relative;
+    z-index: 1001;
+  }
+
+}
+
+.disabled-option {
+  color: grey;
+}
+
+</style>

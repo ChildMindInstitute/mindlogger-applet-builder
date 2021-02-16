@@ -1,19 +1,18 @@
 <template>
-  <v-form ref="form" v-model="valid">
+  <v-form ref="form">
 
     <v-text-field
-      v-if="isItemEditable"
-      v-model="transcript"
+      v-model="mediaObj['schema:transcript']"
       label="Media transcript"
       type="text"
-      @change="update"
+      @change="onUpdateMedia"
     />
 
     <AudioPlayer
-      v-if="url"
+      v-if="asInputOption['schema:value']"
       class="audio-player mt-4 mb-5"
       style="max-width: 370px"
-      :src="url"
+      :src="asInputOption['schema:value']"
     />
 
     <Uploader
@@ -33,15 +32,13 @@
     <v-checkbox
       v-model="isSkippable"
       label="Skippable Item"
-      :disabled="!isItemEditable"
-      @change="updateAllow"
+      @change="onUpdateAllow"
     />
 
     <v-checkbox
-      v-model="allowReplay"
+      v-model="replayInputOption['schema:value']"
       label="Media Replay Allowed"
-      :disabled="!isItemEditable"
-      @change="update"
+      @change="onUpdateInputOptions"
     />
 
     <v-dialog
@@ -106,105 +103,151 @@ export default {
     AudioPlayer: AudioRecorder.AudioPlayer,
   },
   props: {
-    initialItemData: {
-      type: Object,
-      required: true
-    },
-    isItemEditable: {
-      type: Boolean,
-      default: true
-    },
     initialItemInputOptions: {
       type: Array,
-      required: true,
-    },
-    isSkippableItem: {
-      type: Boolean,
-      default: false,
+      default: new Array(),
     },
     initialItemMedia: {
       type: Object,
-      required: true
-    }
+      default: new Object(),
+    },
+    isItemSkippable: {
+      type: Boolean,
+      default: false,
+    },
   },
   data: function() {
+
+    const inputOptions = this.initialItemInputOptions;
+    const media = this.initialItemMedia;
+    
+    let asInputOption = {
+      '@type': "schema:URL",
+      'schema:name': 'stimulus',
+      'schema:contentUrl': '',
+      'schema:value': '',
+    };
+
+    asInputOption = this.getInputOption(inputOptions, asInputOption);
+
+    let replayInputOption = {
+      '@type': 'schema:Boolean',
+      'schema:name': 'allowReplay',
+      'schema:value': true,
+    };
+
+    replayInputOption = this.getInputOption(inputOptions, replayInputOption);
+
+    let mediaObj = {
+      '@type': 'schema:AudioObject',
+      'schema:name': 'stimulus',
+      'schema:contentUrl': '',
+      'schema:transcript': '',
+    };
+
+    mediaObj = this.getMediaObject(asInputOption['schema:value'], media, mediaObj);
+
     return {
-      url:
-        this.initialItemData.url || Object.keys(this.initialItemMedia)[0] || "",
-      transcript: Object.keys(this.initialItemMedia)[0]
-        ? this.initialItemMedia[Object.keys(this.initialItemMedia)[0]][
-            "schema:transcript"
-          ]
-        : "",
-      allowReplay: this.initialItemInputOptions[1]
-        ? this.initialItemInputOptions[1]["schema:value"]
-        : true,
-      isSkippable: this.isSkippableItem || false,
-      valid: true,
-      urlRules: [v => !!v || "Media URL cannot be empty"],
+      inputOptions,
+      media,
+
+      asInputOption,
+      replayInputOption,
+
+      mediaObj,
+      
+      audio: asInputOption['schema:value'],
 
       isRecordProcess: false,
       isRecordProcessVisible: false,
       recordedAudioData: null,
-      audio: this.url,
+
+      isSkippable: this.isSkippableItem,
+
       loading: false,
       notify: {},
     };
   },
+  mounted() {
+    this.onValidate();
+  },
   methods: {
-    update() {
-      const inputOptions = [
-        {
-          "@type": "schema:URL",
-          "schema:name": "stimulus",
-          "schema:value": this.url,
-          "schema:contentUrl": this.url
-        },
-        {
-          "@type": "schema:Boolean",
-          "schema:name": "allowReplay",
-          "schema:value": this.allowReplay
-        }
-      ];
-      this.$emit("updateInputOptions", inputOptions);
 
-      const media = {};
-      media[this.url] = {
-        "@type": "schema:AudioObject",
-        "schema:name": "stimulus",
-        "schema:contentUrl": this.url,
-        "schema:transcript": this.transcript
-      };
-      this.$emit("updateMedia", media);
+    getInputOption(options, inputOptionSchema) {
+      const internalInputOption = options.find(option => option['schema:name'] === inputOptionSchema['schema:name']);
+
+      if(internalInputOption) {
+        return internalInputOption;
+      } else {
+        options.push(inputOptionSchema);
+        return inputOptionSchema;
+      }
     },
-    updateAllow() {
-      const allow = this.isSkippable
-      this.$emit('updateAllow', allow);
+
+    getMediaObject(mediaUrl, media, mediaSchema) {
+      const internalMedia = media[mediaUrl];
+
+      if(internalMedia) return internalMedia;
+      else return mediaSchema;
+    },
+
+    onUpdateAllow() {
+      this.$emit('updateAllow', this.isSkippable);
+    },
+
+    onUpdateInputOptions() {
+      console.log(this.inputOptions);
+      this.$emit('updateInputOptions', this.inputOptions);
+    },
+
+    onUpdateMedia() {
+      this.media = {};
+      const audioUrl = this.asInputOption['schema:value'];
+      if(audioUrl) {
+        this.mediaObj['schema:contentUrl'] = audioUrl;
+        this.media[audioUrl] = this.mediaObj;
+      }
+      console.log(this.media);
+      this.$emit('updateMedia', this.media);
+    },
+
+    onValidate() {
+      this.$emit('validation', this.asInputOption['schema:value'] ? true : false);
     },
 
     onAddAudioFromUrl(url) {
-      this.url = url;
-      this.audio = this.url;
+      this.asInputOption['schema:value'] = url;
+      this.asInputOption['schema:contentUrl'] = url;
+      this.audio = url;
+      
       this.$emit('notify', {
         type: 'success',
         message: 'Audio from URL successfully added to AudioStimulus Item.',
         duration: 3000,
       });
-      this.update();
+
+      this.onUpdateInputOptions();
+      this.onUpdateMedia();
+      this.onValidate();
     },
 
     async onAddAudioFromDevice(uploadFunction) {
       try {
-        this.url = await uploadFunction();
-        this.audio = this.url;
+        this.asInputOption['schema:value'] = await uploadFunction();
+        this.asInputOption['schema:contentUrl'] = this.asInputOption['schema:value'];
+        this.audio = this.asInputOption['schema:value'];
         this.recordedAudioData = null;
+
         this.$emit('loading', false);
         this.$emit('notify', {
           type: 'success',
           message: 'Audio successfully added to AudioStimulus Item.',
           duration: 3000,
         });
-        this.update();
+        
+        this.onUpdateInputOptions();
+        this.onUpdateMedia();
+        this.onValidate();
       } catch (error) {
         this.$emit('loading', false);
         this.$emit('notify', {
@@ -242,14 +285,19 @@ export default {
     },
 
     onRemoveAudio() {
-      this.url = '';
-      this.audio = this.url;
+      this.asInputOption['schema:value'] = '';
+      this.asInputOption['schema:contentUrl'] = '';
+      this.audio = '';
+
       this.$emit('notify', {
         type: 'warning',
         message: 'Audio successfully removed from AudioStimulus Item.',
         duration: 3000,
       });
-      this.update();
+
+      this.onUpdateInputOptions();
+      this.onUpdateMedia();
+      this.onValidate();
     }
 
   }

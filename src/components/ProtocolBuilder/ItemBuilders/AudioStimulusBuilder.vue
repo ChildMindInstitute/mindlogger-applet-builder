@@ -196,7 +196,6 @@ export default {
     },
 
     onUpdateInputOptions() {
-      console.log(this.inputOptions);
       this.$emit('updateInputOptions', this.inputOptions);
     },
 
@@ -207,7 +206,6 @@ export default {
         this.mediaObj['schema:contentUrl'] = audioUrl;
         this.media[audioUrl] = this.mediaObj;
       }
-      console.log(this.media);
       this.$emit('updateMedia', this.media);
     },
 

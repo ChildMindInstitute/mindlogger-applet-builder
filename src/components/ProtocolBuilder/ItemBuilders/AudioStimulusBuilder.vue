@@ -19,6 +19,7 @@
       class="mt-4 mb-10"
       style="max-width: 300px"
       :initialType="'audio'"
+      :initialAdditionalType="'stimulus'"
       :initialData="audio"
       :initialTitle="'Stimulus Audio'"
       @onAddFromUrl="onAddAudioFromUrl($event)"

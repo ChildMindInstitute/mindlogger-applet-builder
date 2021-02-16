@@ -73,7 +73,7 @@
             <!-- /if initialType === 'audio' -->
 
             <v-btn
-              v-if="uploadData"
+              v-if="uploadData && initialAdditionalType !== 'stimulus'"
               class="mt-4"
               color="error"
               @click="removeConfirm = true"

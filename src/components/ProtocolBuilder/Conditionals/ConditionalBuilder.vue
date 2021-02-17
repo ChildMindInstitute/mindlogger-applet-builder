@@ -6,7 +6,7 @@
       class="px-2 py-0 conditional-title"
       :class="current.valid ? '' : 'invalid'"
     >
-      <span v-if="stateValue">
+      <span v-if="stateValue && !isExpanded">
         <span
           :class="current.valid ? 'blue--text' : 'yellow-text'"
         >IF </span>
@@ -44,14 +44,14 @@
             v-if="!isExpanded"
             color="grey lighten-1"
           >
-            edit
+            mdi-chevron-down
           </v-icon>
 
           <v-icon
             v-else
             color="grey lighten-1"
           >
-            mdi-chevron-double-up
+            mdi-chevron-up
           </v-icon>
         </v-btn>
 
@@ -125,13 +125,27 @@
             @input="onUpdate"
           />
         </template>
-        <v-select
-          v-model="showValue"
-          item-text="name"
-          :items="items"
-          label="Show"
-          @change="onUpdate"
-        />
+        <v-row no-gutters>
+          <v-col cols="12" sm="9" class="d-flex align-self-center align-center">
+            <v-select
+              v-model="showValue"
+              :items="opers"
+              label="Show"
+              solo
+              @change="onUpdate"
+            />
+          </v-col>
+          <v-col cols="12" sm="3">
+            <v-select
+              v-model="showValue"
+              item-text="name"
+              :items="items"
+              label="Show"
+              solo
+              @change="onUpdate"
+            />
+          </v-col>
+        </v-row>
       </v-form>
     </div>
   </v-card>
@@ -144,6 +158,7 @@
 
   .invalid {
     background-color: #d44c4c;
+    color: white;
   }
 </style>
 
@@ -172,6 +187,7 @@ export default {
       maxValue: this.current.maxValue === undefined ? null : this.current.maxValue,
       answerValue: this.current.answerValue === undefined ? null : this.current.answerValue,
       showValue: this.current.showValue || null,
+      opers: ["ALL", "ANY"],
     }
   },
   beforeMount () {

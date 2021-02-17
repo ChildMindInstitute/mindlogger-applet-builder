@@ -76,7 +76,6 @@
       <v-row>
         <v-col
           v-if="isTokenValue"
-          comment="***Hide Token Prize button for now***"
           class="d-flex align-center"
           cols="auto"
         >
@@ -139,6 +138,12 @@
           />
         </v-col>
       </v-row>
+      <v-switch
+        v-if="isTokenValue"
+        label="Reduce cumulation of tokens with negative token responses"
+        v-model="enableNegativeTokens"
+        @change="update"
+      />
       <v-list>
         <v-subheader>
           Options
@@ -342,6 +347,7 @@ export default {
 
     return {
       isTokenValue: (this.responseOptions.valueType && this.responseOptions.valueType.includes("token")) || false,
+      enableNegativeTokens: this.initialItemData.enableNegativeTokens || false,
       isMultipleChoice: this.initialItemData.isMultipleChoice || false,
       isSkippable: this.isSkippableItem || false,
       isTemplate: false,
@@ -470,6 +476,7 @@ export default {
         'hasResponseAlert': this.hasResponseAlert,
         'responseAlertMessage': this.responseAlertMessage,
         'isTokenValue': this.isTokenValue,
+        'enableNegativeTokens': this.enableNegativeTokens,
         'isMultipleChoice': this.isMultipleChoice,
         'isSkippableItem': this.isSkippableItem,
         'nextOptionName': this.nextOptionName,

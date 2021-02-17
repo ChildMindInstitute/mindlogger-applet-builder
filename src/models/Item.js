@@ -122,6 +122,7 @@ export default class Item {
       const choices = this.getRadioChoices();
       return {
         "valueType": (this.ref.valueType.includes("token") || this.ref.options.isTokenValue) ? "xsd:token" : "xsd:anyURI",
+        "enableNegativeTokens": this.ref.options.enableNegativeTokens,
         "scoring": this.ref.options.hasScoreValue,
         "responseAlert": this.ref.options.hasResponseAlert,
         "multipleChoice": this.ref.options.isMultipleChoice,
@@ -496,6 +497,9 @@ export default class Item {
       'options.maxLength': {
         updated: valueUpdate('maxLength'),
         inserted: valueInsert('maxLength'),
+      },
+      'options.enableNegativeTokens': {
+        updated: optionUpdate('Enable Negative Tokens'),
       },
       'responseOptions.requiredValue': {
         updated: optionUpdate('Required option'),

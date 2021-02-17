@@ -503,7 +503,7 @@ export default class Item {
         updated: optionUpdate('Required option'),
       },
       'responseOptions.showTickMarks': {
-        updated: optionUpdate('Required option'),
+        updated: optionUpdate('Show tick marks'),
       },
       'responseOptions.schema:minValue': {
         updated: valueUpdate('minValue'),

@@ -279,9 +279,6 @@ export default {
 
     const questionBuilder = { text: '', imgURL: '', imgFile: null };
 
-    let isUploadingState = false;
-    let isError = '';
-
     return {
       model,
       ...model.getItemBuilderData(this.initialItemData),
@@ -289,8 +286,8 @@ export default {
       valid: (this.name && this.name.length > 0),
       imgUploader,
       questionBuilder,
-      isUploadingState,
-      isError,
+      isUploadingState: false,
+      isError: '',
     };
   },
   beforeMount() {

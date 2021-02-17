@@ -272,9 +272,7 @@ export default {
       this.applet = applet;
       const prefLabel = applet['http://www.w3.org/2004/02/skos/core#prefLabel'];
 
-      this.name = prefLabel &&
-                    prefLabel[0] &&
-                    prefLabel[0]['@value'] || 'applet';
+      this.name = _.get(prefLabel, [0, '@value'], 'applet');
 
       this.description = applet['schema:description'][0]['@value'];
       this.id = protocol._id.split('/')[1];
@@ -286,7 +284,7 @@ export default {
           this.markdownData = '';
         }
       } else {
-        this.markdownData = applet["reprolib:terms/landingPageContent"] ? applet["reprolib:terms/landingPageContent"][0]["@value"] : "";
+        this.markdownData = _.get(applet, ["reprolib:terms/landingPageContent", 0, "@value"], "");
       }
 
       this.protocolVersion = _.get(applet, 'schema:schemaVersion[0].@value', this.protocolVersion);
@@ -298,7 +296,7 @@ export default {
           ['schema:description']: description,
           ['reprolib:terms/preamble']: activityPreamble,
           ['reprolib:terms/shuffle']: shuffle,
-          ['reprolib:terms/allow']: isSkippable,
+          ['reprolib:terms/allow']: allow,
           ['reprolib:terms/addProperties']: addProperties,
           ['reprolib:terms/subScales']: subScales,
           ['reprolib:terms/compute']: compute,
@@ -388,27 +386,21 @@ export default {
             const outputType = msg['reprolib:terms/outputType']
 
             return {
-              jsExpression: jsExpression && jsExpression[0] && jsExpression[0]['@value'],
-              message: message && message[0] && message[0]['@value'],
-              outputType: outputType && outputType[0] && outputType[0]['@value'] || 'cumulative',
+              jsExpression: _.get(jsExpression, [0, '@value']),
+              message: _.get(message, [0, '@value']),
+              outputType: _.get(outputType, [0, '@value'], 'cumulative'),
             }
           })
         };
 
-        let isSkippableList =
-          (isSkippable && isSkippable[0] && isSkippable[0]['@list']) || [];
+        let allowList = _.get(allow, [0, '@list'], [])
+          .map(item => item["@id"]);
 
-        if (isSkippableList.length) {
-          if (
-            (isSkippableList[0] &&
-              isSkippableList[0]['@id'] &&
-              isSkippableList[0]['@id'].includes('refused_to_answer')) ||
-            (isSkippableList[0] &&
-              isSkippableList[0]['@id'] &&
-              isSkippableList[0]['@id'].includes('dontKnow'))
-          ) {
-            activityInfo.isSkippable = true;
-          }
+        if (allowList.some((item) => item.includes('refused_to_answer'))) {
+          activityInfo.isSkippable = true;
+        }
+        if (allowList.some((item) => item.includes('disable_back'))) {
+          activityInfo.disableBack = true;
         }
 
         activityInfo.items = _.get(
@@ -416,38 +408,20 @@ export default {
           'reprolib:terms/order.0.@list',
           []
         ).filter(key => items[key['@id']]).map((key) => {
-          let allow = []
           const item = items[key['@id']];
-          if (item['reprolib:terms/allow'] &&
-              item['reprolib:terms/allow'][0] &&
-              item['reprolib:terms/allow'][0]['@list']) {
-            allow = item['reprolib:terms/allow'][0]['@list'].map(item => {
-              return item['@id'].substr(15)
-            })
-          }
+          let allow = _.get(item, ['reprolib:terms/allow', 0, '@list'], [])
+            .map(item => item['@id'].substr(15));
 
           let itemContent = {
             _id: item['_id'] && item['_id'].split('/')[1],
             name: item['@id'],
-            question:
-              item['schema:question'] &&
-              item['schema:question'][0] &&
-              item['schema:question'][0]['@value'],
-            description:
-              item['schema:description'] &&
-              item['schema:description'][0] &&
-              item['schema:description'][0]['@value'],
+            question: _.get(item, ['schema:question', 0, '@value']),
+            description: _.get(item, ['schema:description', 0, '@value']),
             ui: {
               allow,
-              inputType:
-                item['reprolib:terms/inputType'] &&
-                item['reprolib:terms/inputType'][0] &&
-                item['reprolib:terms/inputType'][0]['@value'],
+              inputType: _.get(item, ['reprolib:terms/inputType', 0, '@value']),
             },
-            allowEdit:
-              item['reprolib:terms/allowEdit'] &&
-              item['reprolib:terms/allowEdit'][0] ?
-              item['reprolib:terms/allowEdit'][0]['@value'] : true
+            allowEdit: _.get(item, ['reprolib:terms/allowEdit', 0, '@value'], true),
           };
 
           if (itemContent.ui.inputType == 'markdown-message') {
@@ -459,37 +433,19 @@ export default {
           let itemType = itemContent.ui.inputType;
 
           if (responseOptions) {
-            let multipleChoice =
-              responseOptions[0] &&
-              responseOptions[0]['reprolib:terms/multipleChoice'];
-            let valueType = 
-              responseOptions[0] &&
-              responseOptions[0]['reprolib:terms/valueType']
-
-            let scoring = 
-              responseOptions[0] &&
-              responseOptions[0]['reprolib:terms/scoring'];
-
-            let continousSlider =
-              responseOptions[0] &&
-              responseOptions[0]['reprolib:terms/continousSlider'];
-
-            let responseAlert =
-              responseOptions[0] &&
-              responseOptions[0]['reprolib:terms/responseAlert'];
-
-            let responseAlertMessage = 
-              responseOptions[0] && 
-              responseOptions[0]['reprolib:terms/responseAlertMessage'];
+            let multipleChoice = _.get(responseOptions, [0, 'reprolib:terms/multipleChoice']);
+            let valueType = _.get(responseOptions, [0, 'reprolib:terms/valueType']);
+            let scoring = _.get(responseOptions, [0, 'reprolib:terms/scoring']);
+            let continousSlider =_.get(responseOptions, [0, 'reprolib:terms/continousSlider']);
+            let responseAlert = _.get(responseOptions, [0, 'reprolib:terms/responseAlert']);
+            let responseAlertMessage = _.get(responseOptions, [0, 'reprolib:terms/responseAlertMessage']);
 
             if (multipleChoice) {
-              itemContent.multipleChoice =
-                multipleChoice[0] && multipleChoice[0]['@value'];
+              itemContent.multipleChoice = _.get(multipleChoice, [0, '@value']);
             }
 
             if (scoring) {
-              itemContent.scoring = 
-                scoring[0] && scoring[0]['@value'];
+              itemContent.scoring = _.get(scoring, [0, '@value']);
             }
 
             if (continousSlider) {
@@ -498,8 +454,7 @@ export default {
             }
 
             if (responseAlert) {
-              itemContent.responseAlert = 
-                responseAlert[0] && responseAlert[0]['@value'];
+              itemContent.responseAlert = _.get(responseAlert, [0, '@value']);
             }
 
             if (responseAlertMessage) {
@@ -562,12 +517,16 @@ export default {
                   responseOptions[0]['schema:itemListElement'] &&
                   responseOptions[0]['schema:itemListElement'].map(
                     (itemListElement) => {
+                      const image = itemListElement['schema:image'];
                       const name = itemListElement["schema:name"];
                       const value = itemListElement["schema:value"];
                       const price = itemListElement["schema:price"];
                       const description = itemListElement["schema:description"];
 
                       return {
+                        image: 
+                          typeof image === 'string' && image ||
+                          Array.isArray(image) && image[0] && image[0]['@value'].toString(),
                         name:
                           typeof name == "string" && name ||
                           Array.isArray(name) && name[0] && name[0]['@value'].toString(),
@@ -586,13 +545,7 @@ export default {
 
             if (itemType === 'text') {
               itemContent.options = {
-                requiredValue:
-                  responseOptions[0] &&
-                  responseOptions[0]['reprolib:terms/requiredValue'] &&
-                  responseOptions[0]['reprolib:terms/requiredValue'][0] &&
-                  responseOptions[0]['reprolib:terms/requiredValue'][0][
-                    '@value'
-                  ],
+                requiredValue: _.get(responseOptions, [0, 'reprolib:terms/requiredValue', 0, '@value']),
                 // TODO: add 'maximum response length' value which is absent for now
               };
               if (item['schema:correctAnswer'] &&
@@ -607,26 +560,10 @@ export default {
                 hasResponseAlert: itemContent.responseAlert || false,
                 continousSlider: itemContent.continousSlider || false,
                 responseAlertMessage: itemContent.responseAlertMessage || '',
-                maxValue:
-                  responseOptions[0] &&
-                  responseOptions[0]['schema:maxValue'] &&
-                  responseOptions[0]['schema:maxValue'][0] &&
-                  responseOptions[0]['schema:maxValue'][0]['@value'],
-                minValue:
-                  responseOptions[0] &&
-                  responseOptions[0]['schema:minValue'] &&
-                  responseOptions[0]['schema:minValue'][0] &&
-                  responseOptions[0]['schema:minValue'][0]['@value'],
-                maxValueImg:
-                  responseOptions[0] &&
-                  responseOptions[0]['schema:maxValueImg'] &&
-                  responseOptions[0]['schema:maxValueImg'][0] &&
-                  responseOptions[0]['schema:maxValueImg'][0]['@value'],
-                minValueImg:
-                  responseOptions[0] &&
-                  responseOptions[0]['schema:minValueImg'] &&
-                  responseOptions[0]['schema:minValueImg'][0] &&
-                  responseOptions[0]['schema:minValueImg'][0]['@value'],
+                maxValue: _.get(responseOptions, [0, 'schema:maxValue', 0, '@value']),
+                minValue: _.get(responseOptions, [0, 'schema:minValue', 0, '@value']),
+                maxValueImg: _.get(responseOptions, [0, 'schema:maxValueImg', 0, '@value']),
+                minValueImg: _.get(responseOptions, [0, 'schema:minValueImg', 0, '@value']),
                 numOptions:
                   responseOptions[0] &&
                   responseOptions[0]['schema:itemListElement'] &&
@@ -643,23 +580,9 @@ export default {
             }
             if (itemType === 'audioRecord' || itemType === 'audioImageRecord') {
               itemContent.options = {
-                requiredValue:
-                  responseOptions[0] &&
-                  responseOptions[0]['reprolib:terms/requiredValue'] &&
-                  responseOptions[0]['reprolib:terms/requiredValue'][0] &&
-                  responseOptions[0]['reprolib:terms/requiredValue'][0][
-                    '@value'
-                  ],
-                'schema:maxValue':
-                  responseOptions[0] &&
-                  responseOptions[0]['schema:maxValue'] &&
-                  responseOptions[0]['schema:maxValue'][0] &&
-                  responseOptions[0]['schema:maxValue'][0]['@value'],
-                'schema:minValue':
-                  responseOptions[0] &&
-                  responseOptions[0]['schema:minValue'] &&
-                  responseOptions[0]['schema:minValue'][0] &&
-                  responseOptions[0]['schema:minValue'][0]['@value'],
+                requiredValue: _.get(responseOptions, [0, 'reprolib:terms/requiredValue', 0, '@value']),
+                'schema:maxValue': _.get(responseOptions, [0, 'schema:maxValue', 0, '@value']),
+                'schema:minValue': _.get(responseOptions, [0, 'schema:minValue', 0, '@value']),
               };
             }
           }
@@ -692,16 +615,8 @@ export default {
               itemContent.media = {
                 [mediaUrl]: {
                   'schema:contentUrl': [mediaUrl],
-                  'schema:name':
-                    mediaData[0] &&
-                    mediaData[0]['schema:name'] &&
-                    mediaData[0]['schema:name'][0] &&
-                    mediaData[0]['schema:name'][0]['@value'],
-                  'schema:transcript':
-                    mediaData[0] &&
-                    mediaData[0]['schema:transcript'] &&
-                    mediaData[0]['schema:transcript'][0] &&
-                    mediaData[0]['schema:transcript'][0]['@value'],
+                  'schema:name': _.get(mediaData, [0, 'schema:name', 0, '@value']),
+                  'schema:transcript': _.get(mediaData, [0, 'schema:transcript', 0, '@value']),
                 },
               };
             }

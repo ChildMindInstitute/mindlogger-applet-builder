@@ -35,6 +35,7 @@
             label="Shuffle item order"
           />
           <v-checkbox v-model="isSkippable" label="Allow user to skip all items" />
+          <v-checkbox v-model="disableBack" label="Disable the user's ability to change the response" />
           <v-tabs centered>
             <v-tab>
               Items

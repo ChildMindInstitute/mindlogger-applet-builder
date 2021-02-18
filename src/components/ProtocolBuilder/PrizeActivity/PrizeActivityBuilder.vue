@@ -10,6 +10,7 @@
 
 <script>
 import Activity from '../../../models/Activity';
+import Item from '../../../models/Item';
 import PrizeItemBuilder from './PrizeItemBuilder.vue';
 
 export default {
@@ -27,9 +28,14 @@ export default {
     const model = new Activity();
     model.updateReferenceObject(this);
 
+    let initialData = this.initialActivityData;
+
+    if (!Object.keys(this.initialActivityData).length) {
+      initialData = model.getActivityBuilderData({});
+    }
     return {
       model,
-      ...model.getActivityBuilderData(this.initialActivityData),
+      ...initialData,
       name: 'PrizeActivity',
       isPrize: true
     }
@@ -60,9 +66,14 @@ export default {
       const schema = this.model.getCompressedSchema();
       schema.ui.order = orderArr;
       schema.ui.addProperties = propertiesArr;
-      this.conditionalItems = this.model.getConditionalItems(schema, this.items);
 
-      this.$emit('closeModal', this.model.getActivityData());
+      const itemModel = new Item();
+      const activityData = this.model.getActivityData();
+
+      this.$emit('closeModal', this.model.getActivityBuilderData({
+        ...activityData,
+        items: activityData.items.map(item => itemModel.getItemBuilderData(item))
+      }));
     }
 
   }

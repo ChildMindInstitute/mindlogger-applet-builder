@@ -36,9 +36,17 @@ export default {
     const model = new Item();
     model.updateReferenceObject(this);
 
+    let initialData = this.initialItemData;
+
+    if (!Object.keys(this.initialItemData).length) {
+      initialData = model.getItemBuilderData({
+        options: {}
+      });
+    }
+
     return {
       model,
-      ...model.getItemBuilderData(this.initialItemData),
+      ...initialData,
       inputType: 'prize'
     }
   },

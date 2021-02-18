@@ -46,7 +46,7 @@ export default class Activity {
       textRules: [(v) => !!v || 'This field is required'],
       error: '',
       componentKey: 0,
-      initialItemData: initialActivityData.isPrize && initialActivityData.items ? initialActivityData.items[0] : { options: {}, },
+      initialItemData: initialActivityData.isPrize && initialActivityData.items ? initialActivityData.items[0] : {},
       isItemEditable: true,
       editIndex: -1,
       visibilities: initialActivityData.visibilities || [],
@@ -60,7 +60,7 @@ export default class Activity {
       })) || [],
       allowEdit: true,
       isPrize: initialActivityData.isPrize || false,
-      valid: initialActivityData.valid || false,
+      valid: initialActivityData.valid !== undefined ? initialActivityData.valid : true,
     };
   }
 
@@ -69,7 +69,7 @@ export default class Activity {
   }
 
   getConditionalItems(activity, items) {
-    const visibilities = activity.visibilities;
+    const visibilities = activity.visibilities || [];
     const conditionalItems = [];
 
     const itemChoices = [];

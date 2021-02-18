@@ -126,22 +126,29 @@
           />
         </template>
         <v-row no-gutters>
-          <v-col cols="12" sm="9" class="d-flex align-self-center align-center">
+          <v-col class="d-flex ds-panel align-self-center align-baseline justify-center">
+            <div class="text-uppercase h6">
+              If 
+            </div>
             <v-select
+              class="ds-opers ds-select-box"
               v-model="showValue"
               :items="opers"
-              label="Show"
-              solo
+              outlined
+              dense
               @change="onUpdate"
             />
-          </v-col>
-          <v-col cols="12" sm="3">
+            <div class="text-uppercase h6">
+              Of The "IF" Rules Are Matched, Show
+            </div>
+
             <v-select
+              class="ds-select-box ds-show-value"
               v-model="showValue"
               item-text="name"
               :items="items"
-              label="Show"
-              solo
+              dense
+              outlined
               @change="onUpdate"
             />
           </v-col>
@@ -159,6 +166,27 @@
   .invalid {
     background-color: #d44c4c;
     color: white;
+  }
+
+  .ds-select-box {
+    max-height: 40px;
+    margin: 5px;
+    background: white;
+  }
+
+  .ds-show-value {
+    max-width: 200px;
+  }
+  
+  .ds-opers {
+    max-width: 120px;
+  }
+
+  .ds-panel {
+    background: gray;
+    border-radius: 0 0 10px 10px;
+    color: white;
+    letter-spacing: 1px;
   }
 </style>
 

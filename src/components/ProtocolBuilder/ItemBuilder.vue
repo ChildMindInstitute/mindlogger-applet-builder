@@ -327,7 +327,7 @@ export default {
     onRemoveTemplate(option) {
       this.$emit('removeTemplate', option);
     },
-    updateOptions(newOptions) {
+    updateOptions(newOptions) { 
       this.options = newOptions;
       this.responseOptions = this.model.getResponseOptions();
     },

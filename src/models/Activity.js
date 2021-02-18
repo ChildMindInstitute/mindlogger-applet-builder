@@ -176,7 +176,15 @@ export default class Activity {
           };
 
           const itemIndex = items.findIndex(({ name }) => name === values[0]);
+          if (itemIndex < 0) {
+            return;
+          }
+
           const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == values[1]);
+
+          if (!option) {
+            return;
+          }
 
           ifValue = items[itemIndex];
           answerValue = {

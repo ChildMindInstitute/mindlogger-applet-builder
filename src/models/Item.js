@@ -26,7 +26,7 @@ export default class Item {
       inputType = 'checkbox';
     }
 
-    return {
+    const parsedData = {
       id: initialItemData._id || null,
       name: initialItemData.name || '',
       question,
@@ -46,6 +46,13 @@ export default class Item {
       markdownText: (initialItemData.question || ''),
       valid: initialItemData.valid || false,
     };
+
+    const model = new Item();
+    model.updateReferenceObject(parsedData);
+
+    parsedData.responseOptions = model.getResponseOptions()
+
+    return parsedData;
   }
 
   updateReferenceObject(ref) {

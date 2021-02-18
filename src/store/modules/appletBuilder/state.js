@@ -7,7 +7,7 @@ export const initialProtocol = {
   description: '',
   markdownData: '',
   name: '',
-  protocolVersion: '',
+  protocolVersion: '1.0.0',
   isValid: false,
   prizeActivity: null,
   activities: [],

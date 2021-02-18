@@ -20,7 +20,7 @@ export default {
 
     const model = new Item();
 
-    let item = model.getItemBuilderData({ question: this.option.question });
+    let item = model.getItemBuilderData({});
 
     Object.assign(item, {
       name: 'Confirmation' + (this.option.value + 1),
@@ -37,6 +37,10 @@ export default {
         options: [
           { name: "Yes", value: 0, score: 0 }
         ]
+      },
+      question: {
+        text: this.option.question,
+        image: this.option.image
       }
     })
     model.updateReferenceObject(item);
@@ -72,6 +76,8 @@ export default {
   },
   created() {
     this.item.responseOptions = this.model.getResponseOptions();
+  },
+  mounted() {
     this.$emit('onConfrimItemCreate', this.item);
   },
   methods: {

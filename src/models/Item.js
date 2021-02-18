@@ -59,6 +59,7 @@ export default class Item {
         ],
         allowEdit: initialItemData.allowEdit === undefined ? true : initialItemData.allowEdit,
         markdownText: (initialItemData.question || ''),
+        isOptionalText: initialItemData.isOptionalText || false,
     };
   }
 
@@ -250,6 +251,7 @@ export default class Item {
         : this.ref.markdownText,
       description: this.ref.description,
       options: this.ref.options,
+      isOptionalText: this.ref.isOptionalText,
       allowEdit: this.ref.allowEdit,
       ...schema
     };
@@ -439,6 +441,9 @@ export default class Item {
       'correctAnswer': {
         updated: (field) => `Correct answer was changed`
       }, 
+      'isOptionalText': {
+        updated: optionUpdate('Optional text option'),
+      }, 
       'ui.inputType': {
         updated: valueUpdate('Input type'),
         inserted: valueInsert('Input type'),
@@ -501,6 +506,9 @@ export default class Item {
       },
       'responseOptions.requiredValue': {
         updated: optionUpdate('Required option'),
+      },
+      'responseOptions.isOptionalTextRequired': {
+        updated: optionUpdate('Optional text required option'),
       },
       'responseOptions.showTickMarks': {
         updated: optionUpdate('Show tick marks'),

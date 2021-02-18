@@ -84,6 +84,7 @@ export default {
     this.setTemplates(this.templates);
     this.setVersions(this.versions);
     this.setCurrentScreen(config.PROTOCOL_SCREEN);
+    this.setCurrentActivity(-1);
 
     if (this.initialData) {
       if (!this.versions.length) {
@@ -155,6 +156,7 @@ export default {
       'setFormattedOriginalProtocol',
       'setPrizeActivity',
       'deleteActivity',
+      'setCurrentActivity',
       'replaceActivityData',
       'setTokenPrizeModalStatus',
       'updateTemplateRequestStatus',

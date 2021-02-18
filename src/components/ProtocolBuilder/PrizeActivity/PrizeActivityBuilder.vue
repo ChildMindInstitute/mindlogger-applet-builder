@@ -1,7 +1,7 @@
 <template>
   <PrizeItemBuilder 
-    :initial-item-data="initialItemData"
-    :items="items"
+    :initial-item-data="activity.initialItemData"
+    :items="activity.items"
     @updateItem="onUpdateItem"
     @closeOptions="$emit('closeModal', initialActivityData)"
     @deleteOptions="$emit('deleteOptions', null)"
@@ -24,58 +24,30 @@ export default {
     }
   },
   data: function() {
-
     const model = new Activity();
-    model.updateReferenceObject(this);
 
     let initialData = this.initialActivityData;
 
     if (!Object.keys(this.initialActivityData).length) {
       initialData = model.getActivityBuilderData({});
     }
-    return {
-      model,
-      ...initialData,
+    Object.assign(initialData, {
       name: 'PrizeActivity',
       isPrize: true
+    })
+
+    model.updateReferenceObject(initialData);
+
+    return {
+      model,
+      activity: initialData,
     }
   },
   methods: {
-
     onUpdateItem(items) {
-      this.items = [...items];
-
-      const prizeItem = this.items[0];
-      const propertiesArr = [{
-          "variableName": prizeItem.name,
-          "isAbout": prizeItem.name,
-          "isVis": true
-      }];
-      const orderArr = [prizeItem.name];
-
-      prizeItem.options.options.forEach((option, index) => {
-        const confirmItem = this.items[index + 1];
-        orderArr.push(confirmItem.name);
-        propertiesArr.push({
-          "variableName": confirmItem.name,
-          "isAbout": confirmItem.name,
-          "isVis": `${prizeItem.name} == ${option.value}`
-        });
-      });
-
-      const schema = this.model.getCompressedSchema();
-      schema.ui.order = orderArr;
-      schema.ui.addProperties = propertiesArr;
-
-      const itemModel = new Item();
-      const activityData = this.model.getActivityData();
-
-      this.$emit('closeModal', this.model.getActivityBuilderData({
-        ...activityData,
-        items: activityData.items.map(item => itemModel.getItemBuilderData(item))
-      }));
+      this.activity.items = [...items];
+      this.$emit('closeModal', this.activity);
     }
-
   }
 }
 </script>

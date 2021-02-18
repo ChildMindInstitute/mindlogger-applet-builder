@@ -1,6 +1,6 @@
 <template>
   <PrizeBuilder
-    :options="options"
+    :options="item.options"
     :items="items"
     :updateItem="updateItem"
     @updateOptions="onUpdateOptions"
@@ -34,7 +34,6 @@ export default {
   data: function() {
 
     const model = new Item();
-    model.updateReferenceObject(this);
 
     let initialData = this.initialItemData;
 
@@ -43,20 +42,23 @@ export default {
         options: {}
       });
     }
+    initialData.inputType = 'prize';
+
+    model.updateReferenceObject(initialData);
 
     return {
       model,
-      ...initialData,
-      inputType: 'prize'
+      item: initialData
     }
   },
   methods: {
 
     onUpdateOptions(newOptions, confirmItems) {
-      this.name = 'PrizeSelection';
-      this.options = newOptions;
-      this.responseOptions = this.model.getResponseOptions();
-      this.$emit('updateItem', [this.model.getItemData(), ...confirmItems]);
+      this.item.name = 'PrizeSelection';
+      this.item.options = newOptions;
+      this.item.responseOptions = this.model.getResponseOptions();
+
+      this.$emit('updateItem', [this.item, ...confirmItems]);
     }
 
   }

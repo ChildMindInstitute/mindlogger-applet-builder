@@ -240,6 +240,28 @@ export default class Activity {
 
   getAddProperties(itemOrder) {
     const addProperties = [];
+
+    if (this.ref.isPrize) {
+      const prizeItem = this.ref.items[0];
+      const propertiesArr = [{
+        "variableName": prizeItem.name,
+        "isAbout": prizeItem.name,
+        "isVis": true
+      }];
+
+      prizeItem.options.options.forEach((option, index) => {
+        const confirmItem = this.ref.items[index + 1];
+
+        propertiesArr.push({
+          "variableName": confirmItem.name,
+          "isAbout": confirmItem.name,
+          "isVis": `${prizeItem.name} == ${option.value}`
+        });
+      });
+
+      return propertiesArr;
+    }
+
     itemOrder.forEach((item) => {
       const conditionalItems = this.ref.conditionalItems.filter((cond) => {
         return cond.showValue === item;
@@ -284,6 +306,19 @@ export default class Activity {
     const itemNamesArray = [];
 
     if (!items.length) return itemNamesArray;
+
+    if (this.ref.isPrize) {
+      const prizeItem = items[0];
+
+      itemNamesArray.push(prizeItem.name);
+
+      prizeItem.options.options.forEach((option, index) => {
+        const confirmItem = items[index + 1];
+        itemNamesArray.push(confirmItem.name);
+      });
+
+      return itemNamesArray;
+    }
 
     itemNamesArray.push(items[0].name);
     for (let i = 0; i != itemNamesArray.length;) {

@@ -22,7 +22,6 @@ const itemMutations = {
       ui: {
         inputType: 'radio',
         allow: [
-          'dontKnow'
         ]
       }
     };

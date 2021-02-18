@@ -152,7 +152,9 @@
         <GeolocationBuilder
           v-if="inputType === 'geolocation'"
           :initial-item-response-options="responseOptions"
+          :initial-is-optional-text="isOptionalText"
           @uploading="isUploadingState = $event"
+          @updateOptionalText="isOptionalText = $event"
           @error="isError = $event"
           @updateResponseOptions="updateResponseOptions"
         />

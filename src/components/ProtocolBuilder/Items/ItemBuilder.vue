@@ -279,7 +279,7 @@
           :key="index"
         >
           <input
-            v-if="item.options.isMultipleChoice"
+            v-if="item.inputType == 'checkbox'"
             class="mx-2"
             type="checkbox"
             value="false"
@@ -585,6 +585,10 @@ export default {
     },
 
     updateOptions (newOptions) {
+      if (this.item.inputType == 'checkbox') {
+        newOptions['isMultipleChoice'] = true;
+      }
+
       this.updateItemMetaInfo({
         index: this.itemIndex,
         obj: { options: newOptions }

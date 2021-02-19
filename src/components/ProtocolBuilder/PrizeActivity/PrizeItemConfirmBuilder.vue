@@ -19,11 +19,10 @@ export default {
   data: function() {
 
     const model = new Item();
-    model.updateReferenceObject(this);
 
-    return {
-      model,
-      ...model.getItemBuilderData({ question: this.option.question }),
+    let item = model.getItemBuilderData({});
+
+    Object.assign(item, {
       name: 'Confirmation' + (this.option.value + 1),
       inputType: 'radio',
       options: {
@@ -38,7 +37,16 @@ export default {
         options: [
           { name: "Yes", value: 0, score: 0 }
         ]
+      },
+      question: {
+        text: this.option.question,
+        image: this.option.image
       }
+    })
+    model.updateReferenceObject(item);
+    return {
+      item,
+      model
     }
   },
   computed: {
@@ -47,25 +55,35 @@ export default {
     },
     optionPrice() {
       return this.option.price;
+    },
+    optionImage() {
+      return this.option.image;
     }
   },
   watch: {
     optionName() {
       this.createQuestion();
-      this.$emit('onConfrimItemCreate', this.model.getItemData());
+      this.$emit('onConfrimItemCreate', this.item);
     },
     optionPrice() {
       this.createQuestion();    
-      this.$emit('onConfrimItemCreate', this.model.getItemData());
+      this.$emit('onConfrimItemCreate', this.item);
+    },
+    optionImage() {
+      this.createQuestion();
+      this.$emit('onConfrimItemCreate', this.item)
     }
   },
   created() {
-    this.responseOptions = this.model.getResponseOptions();
-    this.$emit('onConfrimItemCreate', this.model.getItemData());
+    this.item.responseOptions = this.model.getResponseOptions();
+  },
+  mounted() {
+    this.$emit('onConfrimItemCreate', this.item);
   },
   methods: {
     createQuestion() {
-      this.question.text = `Do you want \"${this.option.name}\" for ${this.option.price} token${this.option.price >= 2 ? 's' : ''}?`;
+      this.item.question.text = `Do you want \"${this.option.name}\" for ${this.option.price} token${this.option.price >= 2 ? 's' : ''}?`;
+      this.item.question.image = this.optionImage;
     }
   }
 

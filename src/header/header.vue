@@ -238,11 +238,24 @@ export default {
       this.setCurrentActivity(-1);
     },
 
+    isAppletValid() {
+      if (!this.protocol.name) {
+        this.dataAlertDialog.message = 'Please input applet name.';
+      } else if (!this.activities.length) {
+        this.dataAlertDialog.message = 'Please add more than one activity.';
+      } else if(this.activities.find(({ valid }) => valid === false)) {
+        this.dataAlertDialog.message = 'Please fix errors in your activities.';
+      } else {
+        return true;
+      }
+
+      this.dataAlertDialog.visibility = true;
+      return false;
+    },
+
     saveToDashboard () {
-      if (!this.appletStatus()) {
-        this.dataAlertDialog.visibility = true;
-        this.dataAlertDialog.message = 'Please fix errors in your activity/items to save applet.';
-        return ;
+      if (!this.isAppletValid()) {
+        return;
       }
 
       this.formattedProtocol().then((data) => {

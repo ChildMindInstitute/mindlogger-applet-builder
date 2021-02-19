@@ -46,7 +46,7 @@ export default class Activity {
       textRules: [(v) => !!v || 'This field is required'],
       error: '',
       componentKey: 0,
-      initialItemData: initialActivityData.isPrize && initialActivityData.items ? initialActivityData.items[0] : { options: {}, },
+      initialItemData: initialActivityData.isPrize && initialActivityData.items ? initialActivityData.items[0] : {},
       isItemEditable: true,
       editIndex: -1,
       visibilities: initialActivityData.visibilities || [],
@@ -60,7 +60,7 @@ export default class Activity {
       })) || [],
       allowEdit: true,
       isPrize: initialActivityData.isPrize || false,
-      valid: initialActivityData.valid || false,
+      valid: initialActivityData.valid !== undefined ? initialActivityData.valid : true,
     };
   }
 
@@ -69,7 +69,7 @@ export default class Activity {
   }
 
   getConditionalItems(activity, items) {
-    const visibilities = activity.visibilities;
+    const visibilities = activity.visibilities || [];
     const conditionalItems = [];
 
     const itemChoices = [];
@@ -176,7 +176,15 @@ export default class Activity {
           };
 
           const itemIndex = items.findIndex(({ name }) => name === values[0]);
+          if (itemIndex < 0) {
+            return;
+          }
+
           const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == values[1]);
+
+          if (!option) {
+            return;
+          }
 
           ifValue = items[itemIndex];
           answerValue = {
@@ -232,6 +240,28 @@ export default class Activity {
 
   getAddProperties(itemOrder) {
     const addProperties = [];
+
+    if (this.ref.isPrize) {
+      const prizeItem = this.ref.items[0];
+      const propertiesArr = [{
+        "variableName": prizeItem.name,
+        "isAbout": prizeItem.name,
+        "isVis": true
+      }];
+
+      prizeItem.options.options.forEach((option, index) => {
+        const confirmItem = this.ref.items[index + 1];
+
+        propertiesArr.push({
+          "variableName": confirmItem.name,
+          "isAbout": confirmItem.name,
+          "isVis": `${prizeItem.name} == ${option.value}`
+        });
+      });
+
+      return propertiesArr;
+    }
+
     itemOrder.forEach((item) => {
       const conditionalItems = this.ref.conditionalItems.filter((cond) => {
         return cond.showValue === item;
@@ -276,6 +306,19 @@ export default class Activity {
     const itemNamesArray = [];
 
     if (!items.length) return itemNamesArray;
+
+    if (this.ref.isPrize) {
+      const prizeItem = items[0];
+
+      itemNamesArray.push(prizeItem.name);
+
+      prizeItem.options.options.forEach((option, index) => {
+        const confirmItem = items[index + 1];
+        itemNamesArray.push(confirmItem.name);
+      });
+
+      return itemNamesArray;
+    }
 
     itemNamesArray.push(items[0].name);
     for (let i = 0; i != itemNamesArray.length;) {

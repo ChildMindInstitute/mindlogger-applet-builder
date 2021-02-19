@@ -376,7 +376,6 @@ export default {
 
     return {
       isTokenValue: (this.responseOptions.valueType && this.responseOptions.valueType.includes("token")) || false,
-      isMultipleChoice: this.initialItemData.isMultipleChoice || false,
       isSkippable: this.isSkippableItem || false,
       isTemplate: false,
       nextOptionName: this.initialItemData.nextOptionName || '',
@@ -523,7 +522,7 @@ export default {
         'hasResponseAlert': this.hasResponseAlert,
         'responseAlertMessage': this.responseAlertMessage,
         'isTokenValue': this.isTokenValue,
-        'isMultipleChoice': this.isMultipleChoice,
+        'isMultipleChoice': false,
         'isSkippableItem': this.isSkippableItem,
         'nextOptionName': this.nextOptionName,
         'nextOptionValue': this.nextOptionValue,

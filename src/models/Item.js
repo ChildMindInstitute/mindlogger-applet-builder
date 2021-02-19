@@ -44,7 +44,7 @@ export default class Item {
       cumulativeScores: initialItemData.cumulativeScores  || [],
       allowEdit: initialItemData.allowEdit === undefined ? true : initialItemData.allowEdit,
       markdownText: (initialItemData.question || ''),
-      valid: initialItemData.valid || false,
+      valid: initialItemData.valid === undefined ? true : initialItemData.valid,
     };
 
     const model = new Item();

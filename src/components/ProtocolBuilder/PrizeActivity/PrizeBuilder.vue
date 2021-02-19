@@ -145,7 +145,11 @@ export default {
     const imgUpldr = new ImageUpldr();
 
     const localOptions = this.options && this.options.options && this.options.options.length ? this.avoidObjectsReference(this.options.options) : [];
-    localOptions.map((option, index) => option.question = this.items[index + 1].question);
+    localOptions.map((option, index) => {
+      option.question = this.items[index + 1].question.text;
+      option.image = this.items[index + 1].question.image;
+    });
+
     const discardLocalOptions = this.avoidObjectsReference(localOptions);
 
     const responseOptions = {

@@ -78,22 +78,27 @@
             v-model="markdownText"
           />
         </div>
+
         <RadioBuilder
           v-if="inputType === 'radio'"
           :is-skippable-item="allow"
-          :response-options="responseOptions"
+          :initial-response-options="responseOptions"
           :initial-item-data="options"
           :is-item-editable="isItemEditable"
           :item-templates="itemTemplates"
           :isPrizeActivity="isPrizeActivity"
+          :initial-is-optional-text="isOptionalText"
           @openPrize="$emit('openPrize')"
           @removeTemplate="onRemoveTemplate"
           @updateTemplates="onUpdateTemplates"
           @updateOptions="updateOptions"
           @updateAllow="updateAllow"
+          @updateOptionalText="isOptionalText = $event"
+          @updateResponseOptions="updateResponseOptions"
           @uploading="isUploadingState = $event"
           @error="isError = $event"
         />
+
         <TextBuilder
           v-if="inputType === 'text'"
           :is-skippable-item="allow"

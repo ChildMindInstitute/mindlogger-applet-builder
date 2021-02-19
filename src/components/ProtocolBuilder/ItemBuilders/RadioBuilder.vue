@@ -139,6 +139,18 @@
           />
         </v-col>
       </v-row>
+
+      <OptionalItemText
+        :colClasses="'d-flex align-center'"
+        :cols="12"
+        :md="3"
+        :sm="6"
+        :text="isOptionalText"
+        :required="responseOptions.isOptionalTextRequired"
+        @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
+        @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
+      />
+
       <v-list>
         <v-subheader>
           Options
@@ -293,10 +305,12 @@
 import ClickOutside from 'vue-click-outside';
 import ImageUploader from '../ImageUploader.vue';
 import ImageUpldr from '../../../models/ImageUploader';
+import OptionalItemText from '../Partial/OptionalItemText.vue';
 
 export default {
   components: {
-    ImageUploader
+    ImageUploader,
+    OptionalItemText,
   },
   props: {
     initialItemData: {
@@ -307,7 +321,7 @@ export default {
       type: Boolean,
       default: false,
     },
-    responseOptions: {
+    initialResponseOptions: {
       type: Object,
     },
     isItemEditable: {
@@ -321,7 +335,11 @@ export default {
     isPrizeActivity: {
       type: Object,
       default: null
-    }
+    },
+    initialIsOptionalText: {
+      type: Boolean,
+      default: false,
+    },
   },
   data: function () {
     const imgUpldr = new ImageUpldr();
@@ -341,7 +359,7 @@ export default {
     }
 
     return {
-      isTokenValue: (this.responseOptions.valueType && this.responseOptions.valueType.includes("token")) || false,
+      isTokenValue: (this.initialResponseOptions.valueType && this.initialResponseOptions.valueType.includes("token")) || false,
       isMultipleChoice: this.initialItemData.isMultipleChoice || false,
       isSkippable: this.isSkippableItem || false,
       isTemplate: false,
@@ -367,7 +385,9 @@ export default {
       nextOptionImageFile,
       hasResponseAlert: this.initialItemData.hasResponseAlert || false,
       responseAlertMessage: this.initialItemData.responseAlertMessage || '',
-      imgUpldr
+      imgUpldr,
+      responseOptions: this.initialResponseOptions,
+      isOptionalText: this.initialIsOptionalText,
     };
   },
   directives: {
@@ -483,6 +503,10 @@ export default {
     updateAllow() {
       const allow = this.isSkippable
       this.$emit('updateAllow', allow);
+    },
+
+    onUpdateResponseOptions() {
+      this.$emit('updateResponseOptions', this.responseOptions);
     },
 
     onAddImg(file) {

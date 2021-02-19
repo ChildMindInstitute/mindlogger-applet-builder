@@ -129,6 +129,7 @@ export default class Item {
         "responseAlertMessage": this.ref.options.responseAlertMessage,
         "schema:minValue": 1,
         "schema:maxValue": choices.length,
+        "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
         choices: choices
       };
     }
@@ -294,6 +295,7 @@ export default class Item {
       itemObj.options.hasResponseAlert = itemObj.options.hasResponseAlert || false;
     }
 
+    console.log(itemObj);
     return itemObj;
   }
 

@@ -153,6 +153,17 @@
       </v-card>
     </v-dialog>
 
+    <OptionalItemText
+      :colClasses="'d-flex align-center'"
+      :cols="12"
+      :md="3"
+      :sm="6"
+      :text="isOptionalText"
+      :required="responseOptions.isOptionalTextRequired"
+      @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
+      @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
+    />
+
     <v-row>
       <v-col cols="auto">
         <ImageUploader
@@ -216,10 +227,12 @@
 <script>
 import ImageUploader from '../ImageUploader.vue';
 import ImageUpldr from '../../../models/ImageUploader';
+import OptionalItemText from '../Partial/OptionalItemText.vue';
 
 export default {
   components: {
-    ImageUploader
+    ImageUploader,
+    OptionalItemText,
   },
   props: {
     initialItemData: {
@@ -233,6 +246,14 @@ export default {
     isItemEditable: {
       type: Boolean,
       default: true,
+    },
+    initialResponseOptions: {
+      type: Object,
+      default: new Object(),
+    },
+    initialIsOptionalText: {
+      type: Boolean,
+      default: false,
     },
   },
   data: function () {
@@ -261,7 +282,9 @@ export default {
       scores: this.initialItemData.scores || false,
       imgUpldr,
       imgFirstName: this.initialItemData.minValueImg || '',
-      imgLastName: this.initialItemData.maxValueImg || ''
+      imgLastName: this.initialItemData.maxValueImg || '',
+      responseOptions: this.initialResponseOptions,
+      isOptionalText: this.initialIsOptionalText,
     };
   },
   mounted() {
@@ -324,6 +347,10 @@ export default {
     updateAllow() {
       const allow = this.isSkippable
       this.$emit('updateAllow', allow);
+    },
+
+    onUpdateResponseOptions() {
+      this.$emit('updateResponseOptions', this.responseOptions);
     },
 
     async onUploadImg(option, data) {

@@ -110,16 +110,22 @@
           @updateOptions="updateOptions"
           @updateAllow="updateAllow"
         />
+
         <SliderBuilder
           v-if="inputType === 'slider'"
           :is-skippable-item="allow"
           :initial-item-data="options"
           :is-item-editable="isItemEditable"
+          :initial-response-options="responseOptions"
+          :initial-is-optional-text="isOptionalText"
           @updateOptions="updateOptions"
           @updateAllow="updateAllow"
+          @updateOptionalText="isOptionalText = $event"
+          @updateResponseOptions="updateResponseOptions"
           @uploading="isUploadingState = $event"
           @error="isError = $event"
         />
+
         <VideoBuilder v-if="inputType === 'video'" />
         <PhotoBuilder v-if="inputType === 'photo'" />
         <TimeRangeBuilder v-if="inputType === 'timeRange'" />

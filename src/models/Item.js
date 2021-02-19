@@ -151,6 +151,7 @@ export default class Item {
         "schema:minValueImg": this.ref.options.minValueImg,
         "schema:maxValueImg": this.ref.options.maxValueImg,
         "showTickMarks": this.ref.options.showTickMarks,
+        "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
         choices: choices
       };
     }

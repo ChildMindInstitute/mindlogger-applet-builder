@@ -437,6 +437,7 @@ export default {
             let valueType = _.get(responseOptions, [0, 'reprolib:terms/valueType']);
             let scoring = _.get(responseOptions, [0, 'reprolib:terms/scoring']);
             let continousSlider =_.get(responseOptions, [0, 'reprolib:terms/continousSlider']);
+            let showTickMarks = _.get(responseOptions, [0, 'reprolib:terms/showTickMarks'])
             let responseAlert = _.get(responseOptions, [0, 'reprolib:terms/responseAlert']);
             let responseAlertMessage = _.get(responseOptions, [0, 'reprolib:terms/responseAlertMessage']);
 
@@ -451,6 +452,11 @@ export default {
             if (continousSlider) {
               itemContent.continousSlider = 
                 continousSlider[0] && continousSlider[0]['@value'];
+            }
+            
+            if (showTickMarks) {
+              itemContent.showTickMarks = 
+                showTickMarks[0] && showTickMarks[0]['@value'];
             }
 
             if (responseAlert) {
@@ -559,6 +565,7 @@ export default {
                 hasScoreValue: itemContent.scoring || false,
                 hasResponseAlert: itemContent.responseAlert || false,
                 continousSlider: itemContent.continousSlider || false,
+                showTickMarks: itemContent.showTickMarks || false,
                 responseAlertMessage: itemContent.responseAlertMessage || '',
                 maxValue: _.get(responseOptions, [0, 'schema:maxValue', 0, '@value']),
                 minValue: _.get(responseOptions, [0, 'schema:minValue', 0, '@value']),

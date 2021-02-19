@@ -519,6 +519,14 @@ export default {
         index: this.itemIndex,
         obj: updates
       })
+
+      const model = new Item();
+      model.updateReferenceObject(this.item);
+
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { responseOptions: model.getResponseOptions() }
+      })
     },
 
     onUpdateName (name) {

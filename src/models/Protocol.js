@@ -136,12 +136,12 @@ export default class Protocol {
         updated: (field) => `About page was changed}`,
       },
       'skos:prefLabel': {
-        updated: (field) => `Protocol name was changed to ${_.get(newValue, field)}`,
+        updated: (field) => `Applet name was changed to ${_.get(newValue, field)}`,
       },
       'schema:description': {
-        updated: (field) => `Protocol description was changed to ${_.get(newValue, field)}`,
-        removed: (field) => `Protocol description was removed`,
-        inserted: (field) => `Protocol description was added (${_.get(newValue, field)})`
+        updated: (field) => `Applet description was changed to ${_.get(newValue, field)}`,
+        removed: (field) => `Applet description was removed`,
+        inserted: (field) => `Applet description was added (${_.get(newValue, field)})`
       }, 
     }
   }

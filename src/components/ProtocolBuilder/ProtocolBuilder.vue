@@ -7,7 +7,7 @@
           :rules="textRules"
           counter="55"
           maxlength="55"
-          label="Protocol Name"
+          label="Applet Name"
           required
         />
         <v-text-field
@@ -15,7 +15,7 @@
           :rules="textRules"
           counter="230"
           maxlength="230"
-          label="Protocol Description"
+          label="Protocol Applet"
           required
         />
         <div class="d-flex flex-row mt-6">
@@ -790,13 +790,13 @@ export default {
     },
     isProtocolValid() {
       if (!this.name) {
-        this.error = 'Protocol Name is required';
+        this.error = 'Applet Name is required';
         return false;
       } else if (!this.description) {
-        this.error = 'Protocol Description is required';
+        this.error = 'Applet Description is required';
         return false;
       } else if (this.activities.length == 0) {
-        this.error = 'Protocol must contain at least one activity';
+        this.error = 'Applet must contain at least one activity';
         return false;
       } else {
         this.error = '';

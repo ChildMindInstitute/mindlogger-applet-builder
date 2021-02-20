@@ -273,6 +273,25 @@
         </v-btn>
       </div>
 
+      <v-row
+        v-if="hasResponseAlert"
+      >
+        <v-col
+          class="d-flex align-center"
+          cols="12"
+          sm="12"
+        >
+          <v-text-field
+            v-model="responseAlertMessage"
+            label="Alert Message"
+            :rules="alertTextRules"
+            :disabled="!isItemEditable"
+            required
+            @change="update"
+          />
+        </v-col>
+      </v-row>
+
       <v-divider
         class="mt-4"
       />
@@ -326,24 +345,6 @@
             v-model="hasScoreValue"
             label="Option Score"
             :disabled="!isItemEditable"
-            @change="update"
-          />
-        </v-col>
-      </v-row>
-      <v-row
-        v-if="hasResponseAlert"
-      >
-        <v-col
-          class="d-flex align-center"
-          cols="12"
-          sm="12"
-        >
-          <v-text-field
-            v-model="responseAlertMessage"
-            label="Alert Message"
-            :rules="alertTextRules"
-            :disabled="!isItemEditable"
-            required
             @change="update"
           />
         </v-col>

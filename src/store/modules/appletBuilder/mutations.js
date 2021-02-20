@@ -32,6 +32,10 @@ const itemMutations = {
 
     let lastIndex = state.currentActivity.items.findIndex(item => !item.allowEdit || item.inputType == 'cumulativeScore');
 
+    if (!obj) {
+      item.name = `Screen${lastIndex >= 0 ? lastIndex + 1 : state.currentActivity.items.length + 1}`;
+    }
+
     if (lastIndex >= 0) {
       state.currentActivity.items.splice(lastIndex, 0, model.getItemBuilderData(item));
     } else {

@@ -82,6 +82,8 @@ export default class Activity {
       itemChoices.push(options.choices);
     }
 
+    console.log('visibility -------------->', this.visibilities);
+
     visibilities.forEach((property) => {
       let ifValue, stateValue, answerValue;
       const showValue = property.variableName;

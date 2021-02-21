@@ -40,7 +40,7 @@ const itemMutations = {
   },
 
   duplicateItem(state, index) {
-    const item = state.currentActivity.items[index];
+    const item = JSON.parse(JSON.stringify(state.currentActivity.items[index]));
 
     const names = state.currentActivity.items.map((item) => item.name);
 

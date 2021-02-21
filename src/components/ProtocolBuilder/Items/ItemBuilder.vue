@@ -6,7 +6,12 @@
       class="px-2 py-0"
       :class="item.valid ? '' : 'invalid'"
     >
-      <span class="item-name">{{ item.name }}</span>
+      <span
+        v-if="!isExpanded"
+        class="item-name"
+      >
+        {{ item.name }}
+      </span>
       <v-spacer />
       <v-card-actions>
         <v-btn icon @click="duplicateItem(itemIndex)">
@@ -53,15 +58,29 @@
       ref="form"
       lazy-validation
     >
-      <v-text-field
-        v-model="item.name"
-        @input="onUpdateName"
-        label="Item Name"
-        :rules="nameRules"
-        :disabled="!item.allowEdit || item.inputType == 'cumulativeScore'"
-        required
-        @keydown="nameKeydown($event)"
-      />
+      <div class="item-name-edit-wrapper"
+        v-bind:class="{ 'editing': isItemNameEditing }"
+      >
+        <span
+          v-bind:class="{ 'hide': isItemNameEditing }"
+          class="item-name"
+        >
+          {{ item.name }}
+        </span>
+        <v-text-field
+          class="item-name-input"
+          v-bind:class="{ 'focus': isItemNameEditing }"
+          v-model="item.name"
+          @focus="isItemNameEditing = true"
+          @blur="isItemNameEditing = false"
+          @input="onUpdateName"
+          label="Item Name"
+          :rules="nameRules"
+          :disabled="!item.allowEdit || item.inputType == 'cumulativeScore'"
+          required
+          @keydown="nameKeydown($event)"
+        />
+      </div>
       <template
         v-if="item.inputType !== 'markdownMessage'"
       >
@@ -315,9 +334,49 @@
 </template>
 
 <style scoped>
+
+  .item-name-edit-wrapper {
+    position: relative;
+    height: 27px;
+    transition: height 0.2s ease;
+  }
+
+  .item-name-edit-wrapper:hover,
+  .item-name-edit-wrapper.editing {
+    height: 66px;
+  }
+
+  .item-name-edit-wrapper > * {
+    transition: opacity 0.2s ease;
+  }
+
+  .item-name-edit-wrapper:hover .item-name,
+  .item-name-edit-wrapper .item-name.hide,
+  .item-name-edit-wrapper .item-name-input {
+    opacity: 0;
+  }
+
+  .item-name-edit-wrapper .item-name-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .item-name-edit-wrapper:hover .item-name-input,
+  .item-name-edit-wrapper .item-name-input.focus {
+    opacity: 1;
+  }
+
+  .item-name {
+    font-size: 1.25rem;
+    letter-spacing: 0.0125em;
+  }
+
   .item-name, .item-quiz {
     font-weight: 600;
   }
+
   .item-quiz {
     display: flex;
     align-items: center;
@@ -397,6 +456,7 @@ export default {
       isUploadingState: false,
       isError: '',
       isExpanded: false,
+      isItemNameEditing: false,
     }
   },
 

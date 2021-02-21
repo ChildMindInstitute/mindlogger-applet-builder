@@ -81,6 +81,16 @@
           @keydown="nameKeydown($event)"
         />
       </div>
+      <ImageUploader
+        class="my-4"
+        style="max-width: 300px"
+        :uploadFor="'activity-item'"
+        :itemImg="questionBuilder.imgURL"
+        :notify-enabled="false"
+        :disabled="!item.allowEdit"
+        @onAddImg="onAddImg"
+        @onRemoveImg="onRemoveImg"
+      />
       <template
         v-if="item.inputType !== 'markdownMessage'"
       >
@@ -91,16 +101,6 @@
           :disabled="!item.allowEdit"
           auto-grow
           rows="1"
-        />
-        <ImageUploader
-          class="mt-3 mb-4"
-          style="max-width: 300px"
-          :uploadFor="'activity-item'"
-          :itemImg="questionBuilder.imgURL"
-          :notify-enabled="false"
-          :disabled="!item.allowEdit"
-          @onAddImg="onAddImg"
-          @onRemoveImg="onRemoveImg"
         />
       </template>
       <v-select
@@ -339,6 +339,7 @@
     position: relative;
     height: 27px;
     transition: height 0.2s ease;
+    overflow: hidden;
   }
 
   .item-name-edit-wrapper:hover,

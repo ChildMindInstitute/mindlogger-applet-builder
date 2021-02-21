@@ -26,10 +26,30 @@
       required
     />
 
-    <v-checkbox
-      v-model="isSkippable"
-      label="Allow user to skip all items"
-    />
+    <v-row
+      class="align-center"
+    >
+      <v-col
+        class="py-0"
+        cols="12"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="isSkippable"
+          label="Allow user to skip all items"
+        />
+      </v-col>
+      <v-col
+        class="py-0"
+        cols="12"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="isDisableResponseChanges"
+          label="Disable the users's ability to change the response"
+        />
+      </v-col>
+    </v-row>
   </v-card>
 </template>
 
@@ -85,7 +105,15 @@ export default {
       set: function (isSkippable) {
         this.updateActivityMetaInfo({ isSkippable });
       }
-    }
+    },
+    isDisableResponseChanges: {
+      get: function () {
+        return this.currentActivity && this.currentActivity.disableBack;
+      },
+      set: function (isDisableResponseChanges) {
+        this.updateActivityMetaInfo({ disableBack: isDisableResponseChanges });
+      }
+    },
   }
 }
 </script>

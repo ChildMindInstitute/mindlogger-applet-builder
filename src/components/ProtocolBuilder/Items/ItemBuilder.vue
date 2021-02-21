@@ -81,22 +81,22 @@
           @keydown="nameKeydown($event)"
         />
       </div>
-      <ImageUploader
-        class="my-4"
-        style="max-width: 300px"
-        :uploadFor="'activity-item'"
-        :itemImg="questionBuilder.imgURL"
-        :notify-enabled="false"
-        :disabled="!item.allowEdit"
-        @onAddImg="onAddImg"
-        @onRemoveImg="onRemoveImg"
-      />
       <template
         v-if="item.inputType !== 'markdownMessage'"
       >
+        <ImageUploader
+          class="my-4"
+          style="max-width: 300px"
+          :uploadFor="'activity-item'"
+          :itemImg="questionBuilder.imgURL"
+          :notify-enabled="false"
+          :disabled="!item.allowEdit"
+          @onAddImg="onAddImg"
+          @onRemoveImg="onRemoveImg"
+        />
         <v-textarea
           v-model="questionBuilder.text"
-          label="Question"
+          label="Large text"
           v-if="item.inputType !== 'cumulativeScore'"
           :disabled="!item.allowEdit"
           auto-grow

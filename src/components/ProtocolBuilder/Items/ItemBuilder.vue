@@ -401,6 +401,7 @@ export default {
   },
 
   beforeMount() {
+
     Object.assign(this, {
       valid: this.item.name && this.item.name.length > 0,
       hasScoringItem: this.currentActivity.items.some((item) => item.options.hasScoreValue),
@@ -409,7 +410,10 @@ export default {
         imgURL: this.item.question.image
       },
       isExpanded: !this.item.name.length
-    })
+    });
+
+    this.setItemName();
+
   },
 
   watch: {
@@ -462,6 +466,10 @@ export default {
         'insertTemplateUpdateRequest',
       ],
     ),
+
+    setItemName() {
+      if(!this.item.name) this.onUpdateName(`Screen${this.itemIndex + 1}`);
+    },
 
     editItem () {
       this.isExpanded = !this.isExpanded;

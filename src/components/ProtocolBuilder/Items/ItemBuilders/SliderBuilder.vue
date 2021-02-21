@@ -18,7 +18,9 @@
           />
         </v-col>
 
-        <v-col>
+        <v-col
+          sm="3"
+        >
           <v-text-field
             v-model="minValue"
             label="Min Label"
@@ -56,7 +58,9 @@
           />
         </v-col>
 
-        <v-col>
+        <v-col
+          sm="3"
+        >
           <v-text-field
             v-model="maxValue"
             label="Max Label"

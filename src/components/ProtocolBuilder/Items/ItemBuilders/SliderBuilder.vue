@@ -357,12 +357,6 @@ export default {
         while (this.scores.length > (this.maxSliderTick - this.minSliderTick + 1)) {
           this.scores.pop();
         }
-
-        if (type == 'min') {
-            
-        } else {
-
-        }
       }
 
       this.update();

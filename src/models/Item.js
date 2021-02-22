@@ -144,11 +144,13 @@ export default class Item {
         "valueType": "xsd:integer",
         "scoring": this.ref.options.hasScoreValue,
         "responseAlert": this.ref.options.hasResponseAlert,
+        "continousSlider": this.ref.options.continousSlider,
         "responseAlertMessage": this.ref.options.responseAlertMessage,
         "schema:minValue": this.ref.options.minValue,
         "schema:maxValue": this.ref.options.maxValue,
         "schema:minValueImg": this.ref.options.minValueImg,
         "schema:maxValueImg": this.ref.options.maxValueImg,
+        "showTickMarks": this.ref.options.showTickMarks,
         choices: choices
       };
     }
@@ -241,7 +243,7 @@ export default class Item {
   }
 
   getItemData() {
-    const schema = this.getCompressedSchema();
+    const schema = this.getCompressedSchema()
     const itemObj = {
       name: this.ref.name,
       question: 
@@ -285,8 +287,10 @@ export default class Item {
       itemObj.options.minValue = itemObj.options.minValue || "Min";
       itemObj.options.minValueImg = itemObj.options.minValueImg || "";
       itemObj.options.maxValue = itemObj.options.maxValue || "Max";
+      itemObj.options.showTickMarks = itemObj.options.showTickMarks || false;
       itemObj.options.maxValueImg = itemObj.options.maxValueImg || "";
       itemObj.options.numOptions = itemObj.options.numOptions || 5;
+      itemObj.options.continousSlider = itemObj.options.continousSlider || false;
       itemObj.options.hasScoreValue = itemObj.options.hasScoreValue || false;
       itemObj.options.hasResponseAlert = itemObj.options.hasResponseAlert || false;
     }
@@ -491,6 +495,9 @@ export default class Item {
       'options.responseAlertMessage': {
         updated: valueUpdate('Alert Message'),
       },
+      'options.continousSlider': {
+        updated: valueUpdate('Continous Slider'),
+      },
       'options.scores': {
         updated: scoreUpdate,
       },
@@ -503,6 +510,9 @@ export default class Item {
       },
       'responseOptions.requiredValue': {
         updated: optionUpdate('Required option'),
+      },
+      'responseOptions.showTickMarks': {
+        updated: optionUpdate('Show tick marks'),
       },
       'responseOptions.schema:minValue': {
         updated: valueUpdate('minValue'),

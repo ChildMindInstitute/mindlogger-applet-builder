@@ -207,7 +207,7 @@
                   v-model="nextOptionValue"
                   :rules="textRules"
                   type="number"
-                  label="Option Value"
+                  label="Token Value"
                   counter="5"
                   maxlength="5"
                   :disabled="!isItemEditable"

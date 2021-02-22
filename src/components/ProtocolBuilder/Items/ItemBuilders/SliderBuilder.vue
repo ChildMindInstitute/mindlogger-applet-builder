@@ -327,44 +327,50 @@ export default {
     },
 
     sliderRangeUpdate(ev, type) {
-      if (this.hasScoreValue) {
-        this.scores = this.scores || [];
+      if (Number(slider.maxSliderTick) > 12) {
+        return false;
+      }
 
-        const tickCount = this.maxSliderTick - this.minSliderTick + 1;
+      if (Number(slider.minSliderTick) < 0) {
+        return false;
+      }
 
-        if (type == 'max') {
-          while (this.scores.length < tickCount) {
-            this.scores.push(Number(this.minSliderTick) + this.scores.length);
-          }
+      if (this.minSliderTick === '' || this.maxSliderTick === '' || this.minSliderTick > this.maxSliderTick) {
+        return ;
+      }
 
-          while (this.scores.length > tickCount) {
-            this.scores.pop();
-          }
-        } else {
-          while (this.scores.length < tickCount) {
-            this.scores.unshift(Number(this.minSliderTick) + (tickCount - this.scores.length - 1));
-          }
+      this.scores = this.scores || [];
 
-          while (this.scores.length > tickCount) {
-            this.scores.shift();
-          }
+      const tickCount = this.maxSliderTick - this.minSliderTick + 1;
+      if (tickCount < 0) {
+        return;
+      }
+
+      if (type == 'max') {
+        while (this.scores.length < tickCount) {
+          this.scores.push(Number(this.minSliderTick) + this.scores.length);
         }
 
-        while (this.scores.length < (this.maxSliderTick - this.minSliderTick + 1)) {
-          this.scores.push(this.scores.length + 1);
-        }
-
-        while (this.scores.length > (this.maxSliderTick - this.minSliderTick + 1)) {
+        while (this.scores.length > tickCount) {
           this.scores.pop();
         }
+      } else {
+        while (this.scores.length < tickCount) {
+          this.scores.unshift(Number(this.minSliderTick) + (tickCount - this.scores.length - 1));
+        }
 
-        if (type == 'min') {
-            
-        } else {
-
+        while (this.scores.length > tickCount) {
+          this.scores.shift();
         }
       }
 
+      while (this.scores.length < (this.maxSliderTick - this.minSliderTick + 1)) {
+        this.scores.push(this.scores.length + 1);
+      }
+
+      while (this.scores.length > (this.maxSliderTick - this.minSliderTick + 1)) {
+        this.scores.pop();
+      }
       this.update();
     },
 

@@ -459,13 +459,24 @@ export default {
     },
 
     sliderRangeUpdate(ev, type, slider) {
-      if (slider.minSliderTick === '' || slider.maxSliderTick === '') {
+      if (Number(slider.maxSliderTick) > 12) {
+        return false;
+      }
+
+      if (Number(slider.minSliderTick) < 0) {
+        return false;
+      }
+
+      if (slider.minSliderTick === '' || slider.maxSliderTick === '' || slider.minSliderTick > slider.maxSliderTick) {
         return ;
       }
 
       slider.scores = slider.scores || [];
 
       const tickCount = slider.maxSliderTick - slider.minSliderTick + 1;
+      if (tickCount <= 0) {
+        return ;
+      }
 
       if (type == 'max') {
         while (slider.scores.length < tickCount) {

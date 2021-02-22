@@ -673,19 +673,6 @@ export default class Item {
       let options = 
         _.get(responseOptions, [0, 'reprolib:terms/options'], []);
 
-      let parsedItemOptions = [];
-      for (let i = 0; i < itemList.length; i++) {
-        const data = [];
-
-        for (let j = 0; j < options.length; j++) {
-          data.push({
-            score: _.get(itemOptions[options.length*i + j], ['schema:score', 0, '@value'], ''),
-            value: _.get(itemOptions[options.length*i + j], ['schema:value', 0, '@value'], '')
-          })
-        }
-
-        parsedItemOptions.push(data);
-      }
       if (multipleChoice) {
         itemContent.multipleChoice = _.get(multipleChoice, [0, '@value']);
       }
@@ -748,6 +735,20 @@ export default class Item {
       }
 
       if (itemType === 'stackedRadio') {
+        let parsedItemOptions = [];
+        for (let i = 0; i < itemList.length; i++) {
+          const data = [];
+  
+          for (let j = 0; j < options.length; j++) {
+            data.push({
+              score: _.get(itemOptions[options.length*i + j], ['schema:score', 0, '@value'], ''),
+              value: _.get(itemOptions[options.length*i + j], ['schema:value', 0, '@value'], '')
+            })
+          }
+  
+          parsedItemOptions.push(data);
+        }
+
         itemContent.options = {
           isMultipleChoice: itemContent.multipleChoice || false,
           hasScoreValue: itemContent.scoring || false,
@@ -826,9 +827,9 @@ export default class Item {
           minValueImg:
             _.get(responseOptions, [0, 'schema:minValueImg', 0, '@value']),
           maxSliderTick:
-            Math.min(..._.get(responseOptions, '0.schema:itemListElement', []).map(item => _.get(item, 'schema:value.0.@value'))),
-          minSliderTick:
             Math.max(..._.get(responseOptions, '0.schema:itemListElement', []).map(item => _.get(item, 'schema:value.0.@value'))),
+          minSliderTick:
+            Math.min(..._.get(responseOptions, '0.schema:itemListElement', []).map(item => _.get(item, 'schema:value.0.@value'))),
 
           scores: itemContent.scoring && responseOptions[0] &&
             responseOptions[0]['schema:itemListElement'] &&
@@ -857,9 +858,9 @@ export default class Item {
             minValueImg:
               _.get(slider, ['schema:minValueImg', 0, '@value']),
             maxSliderTick:
-              Math.min(..._.get(slider, 'schema:itemListElement', []).map(item => _.get(item, 'schema:value.0.@value'))),
-            minSliderTick:
               Math.max(..._.get(slider, 'schema:itemListElement', []).map(item => _.get(item, 'schema:value.0.@value'))),
+            minSliderTick:
+              Math.min(..._.get(slider, 'schema:itemListElement', []).map(item => _.get(item, 'schema:value.0.@value'))),
             scores: itemContent.scoring && _.get(slider, ['schema:itemListElement'], []).map(
                 (itemListElement) => {
                   const score = itemListElement["schema:score"];
@@ -868,6 +869,14 @@ export default class Item {
               )
           })),
         };
+        itemContent.options.sliderOptions.forEach(slider => {
+          if (!isFinite(slider.minValue)) {
+            slider.minValue = 0;
+          }
+          if (!isFinite(slider.maxValue)) {
+            slider.maxValue = 5;
+          }
+        })
       }
       if (itemType === 'audioRecord' || itemType === 'audioImageRecord') {
         itemContent.options = {

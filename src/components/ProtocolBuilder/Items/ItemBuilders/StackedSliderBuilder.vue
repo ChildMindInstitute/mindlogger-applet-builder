@@ -81,6 +81,7 @@
                 @input="sliderRangeUpdate($event, 'min', slider)"
                 min="1"
                 :max="slider.maxSliderTick"
+                :rules="numberRules"
               />
             </v-col>
 
@@ -121,6 +122,7 @@
                 @input="sliderRangeUpdate($event, 'max', slider)"
                 :min="slider.minSliderTick"
                 max="12"
+                :rules="numberRules"
               />
             </v-col>
 
@@ -457,6 +459,10 @@ export default {
     },
 
     sliderRangeUpdate(ev, type, slider) {
+      if (slider.minSliderTick === '' || slider.maxSliderTick === '') {
+        return ;
+      }
+
       slider.scores = slider.scores || [];
 
       const tickCount = slider.maxSliderTick - slider.minSliderTick + 1;

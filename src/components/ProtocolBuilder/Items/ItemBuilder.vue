@@ -196,6 +196,20 @@
         @uploading="isUploadingState = $event"
         @error="isError = $event"
       />
+      <StackedRadioBuilder
+        v-if="item.inputType === 'stackedRadio' || item.inputType === 'stackedCheckbox'"
+        :is-multiple-choice="item.inputType === 'stackedCheckbox'"
+        :is-skippable-item="item.allow"
+        :response-options="item.responseOptions"
+        :initial-item-data="item.options"
+        :is-item-editable="item.allowEdit"
+        :item-templates="itemTemplates"
+        :has-prize-activity="hasPrizeActivity"
+        @updateOptions="updateOptions"
+        @updateAllow="updateAllow"
+        @uploading="isUploadingState = $event"
+        @error="isError = $event"
+      />
       <TextBuilder
         v-if="item.inputType === 'text'"
         :is-skippable-item="item.allow"
@@ -209,6 +223,16 @@
       />
       <SliderBuilder
         v-if="item.inputType === 'slider'"
+        :is-skippable-item="item.allow"
+        :initial-item-data="item.options"
+        :is-item-editable="item.allowEdit"
+        @updateOptions="updateOptions"
+        @updateAllow="updateAllow"
+        @uploading="isUploadingState = $event"
+        @error="isError = $event"
+      />
+      <StackedSliderBuilder
+        v-if="item.inputType === 'stackedSlider'"
         :is-skippable-item="item.allow"
         :initial-item-data="item.options"
         :is-item-editable="item.allowEdit"
@@ -365,6 +389,7 @@
 
 import ImageUploader from '../ImageUploader.vue';
 import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
+import StackedRadioBuilder from "./ItemBuilders/StackedRadioBuilder.vue";
 import TextBuilder from "./ItemBuilders/TextBuilder.vue";
 import SliderBuilder from "./ItemBuilders/SliderBuilder.vue";
 import VideoBuilder from "./ItemBuilders/VideoBuilder.vue";
@@ -377,6 +402,7 @@ import AudioImageRecordBuilder from "./ItemBuilders/AudioImageRecordBuilder.vue"
 import GeolocationBuilder from "./ItemBuilders/GeolocationBuilder.vue";
 import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
 import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
+import StackedSliderBuilder from "./ItemBuilders/StackedSliderBuilder";
 import MarkDownEditor from "../MarkDownEditor";
 import Item from '../../../models/Item';
 import ImageUpldr from '../../../models/ImageUploader';
@@ -400,6 +426,8 @@ export default {
     CumulativeScoreBuilder,
     ImageUploader,
     MarkDownEditor,
+    StackedRadioBuilder,
+    StackedSliderBuilder,
   },
   props: {
     itemIndex: {

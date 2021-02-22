@@ -26,6 +26,10 @@ export default class Item {
       inputType = 'checkbox';
     }
 
+    if (inputType == 'stackedRadio' && initialItemData.options.isMultipleChoice) {
+      inputType = 'stackedCheckbox';
+    }
+
     const parsedData = {
       id: initialItemData._id || null,
       name: initialItemData.name || '',
@@ -59,23 +63,23 @@ export default class Item {
     this.ref = ref;
   }
 
-  getSliderChoices() {
+  getSliderChoices(slider, hasScoreValue) {
     const choices = [];
-    for (let i = this.ref.options.minSliderTick; i <= this.ref.options.maxSliderTick; i++) {
+    for (let i = slider.minSliderTick; i <= slider.maxSliderTick; i++) {
       let obj = {
         "schema:name": i.toString(),
         "schema:value": i
       };
 
-      if (this.ref.options.hasScoreValue) {
-        obj["schema:score"] = this.ref.options.scores[i - this.ref.options.minSliderTick];
+      if (hasScoreValue) {
+        obj["schema:score"] = slider.scores[i - slider.minSliderTick];
       }
 
-      if (this.ref.options.minValueImg && i === 1)
-        obj["schema:image"] = this.ref.options.minValueImg;
+      if (slider.minValueImg && i === 1)
+        obj["schema:image"] = slider.minValueImg;
       
-      if(this.ref.options.maxValueImg && i == this.ref.options.maxSliderTick)
-        obj["schema:image"] = this.ref.options.maxValueImg;
+      if(slider.maxValueImg && i == slider.maxSliderTick)
+        obj["schema:image"] = slider.maxValueImg;
 
       choices.push(obj);
     }
@@ -111,6 +115,36 @@ export default class Item {
   }
 
   getResponseOptions() {
+    if (this.ref.inputType === 'stackedRadio' || this.ref.inputType === 'stackedCheckbox') {
+      return {
+        "valueType": (this.ref.valueType.includes("token") || this.ref.options.isTokenValue) ? "xsd:token" : "xsd:anyURI",
+        "scoring": this.ref.options.hasScoreValue,
+        "responseAlert": this.ref.options.hasResponseAlert,
+        "multipleChoice": this.ref.options.isMultipleChoice,
+        "responseAlertMessage": this.ref.options.responseAlertMessage,
+        "options": this.ref.options.options.map(option => ({
+          "schema:description": option.description,
+          "schema:image": option.image,
+          "schema:name": option.name
+        })),
+        "itemList": this.ref.options.itemList && this.ref.options.itemList.map(item => ({
+          "schema:description": item.description,
+          "schema:image": item.image,
+          "schema:name": item.name
+        })) || [],
+        "itemOptions": this.ref.options.choices && this.ref.options.choices.map(choices => choices.map(choice => {
+          const info = {};
+          if (this.ref.options.isTokenValue) {
+            info['schema:value'] = Number(choice.value);
+          }
+          if (this.ref.options.hasScoreValue) {
+            info['schema:score'] = Number(choice.score);
+          }
+
+          return info;
+        })) || []
+      }
+    }
     if (this.ref.inputType === "radio" || this.ref.inputType === "prize" || this.ref.inputType === "checkbox") {
       const choices = this.getRadioChoices();
       return {
@@ -131,7 +165,7 @@ export default class Item {
       }
     }
     if (this.ref.inputType === "slider") {
-      const choices = this.getSliderChoices();
+      const choices = this.getSliderChoices(this.ref.options, this.ref.options.hasScoreValue);
       return {
         "valueType": "xsd:integer",
         "scoring": this.ref.options.hasScoreValue,
@@ -143,6 +177,22 @@ export default class Item {
         "schema:maxValueImg": this.ref.options.maxValueImg,
         choices: choices
       };
+    }
+    if (this.ref.inputType === 'stackedSlider') {
+      return {
+        "valueType": "xsd:integer",
+        "scoring": this.ref.options.hasScoreValue,
+        "responseAlert": this.ref.options.hasResponseAlert,
+        "responseAlertMessage": this.ref.options.responseAlertMessage,
+        "sliderOptions": (this.ref.options.sliderOptions || []).map(slider => ({
+          "schema:minValue": slider.minValue,
+          "schema:maxValue": slider.maxValue,
+          "schema:minValueImg": slider.minValueImg,
+          "schema:maxValueImg": slider.maxValueImg,
+          "schema:sliderLabel": slider.sliderLabel,
+          "choices": this.getSliderChoices(slider, this.ref.options.hasScoreValue)
+        }))
+      }
     }
     if (this.ref.inputType === "date") {
       return {
@@ -195,8 +245,16 @@ export default class Item {
       schema['cumulativeScores'] = cumulativeScores;
     }
 
-    if (this.ref.inputType === 'radio' || this.ref.inputType === 'checkbox' || this.ref.inputType === 'prize') {
-      const inputType = (this.ref.inputType === 'radio' || this.ref.inputType === 'checkbox') ? 'radio' : 'prize';
+    if (this.ref.inputType === 'radio' || this.ref.inputType === 'checkbox' || this.ref.inputType === 'prize' || this.ref.inputType == 'stackedRadio' || this.ref.inputType == 'stackedCheckbox') {
+      let inputType = this.ref.inputType;
+
+      if (this.ref.inputType == 'radio' || this.ref.inputType == 'checkbox') {
+        this.ref.inputType = 'radio';
+      } else if (this.ref.inputType == 'stackedRadio' || this.ref.inputType == 'stackedCheckbox') {
+        this.ref.inputType = 'stackedRadio';
+      } else {
+        this.ref.inputType = 'prize';
+      }
 
       if (this.ref.options.isMultipleChoice) {
         schema["ui"] = {
@@ -253,6 +311,8 @@ export default class Item {
       (this.ref.inputType === "radio" ||
         this.ref.inputType === "checkbox" ||
         this.ref.inputType === "prize" ||
+        this.ref.inputType === "stackedRadio" ||
+        this.ref.inputType === "stackedCheckbox" ||
         this.ref.inputType === "audioRecord") &&
       Object.keys(this.ref.responseOptions).length
     ) {
@@ -445,6 +505,15 @@ export default class Item {
       'options.isMultipleChoice': {
         updated: optionUpdate('Multiple choice option'),
       },
+      'options.sliderOptions': {
+        updated: (field) =>'sliderOptions are updated',
+      },
+      'options.itemList': {
+        updated: (field) =>'itemList is updated',
+      },
+      'options.choices': {
+        updated: (field) =>'choices are updated',
+      },
       'options.options': {
         updated: radioOptionListUpdate,
       },
@@ -596,6 +665,27 @@ export default class Item {
       let responseAlertMessage = 
         _.get(responseOptions, [0, 'reprolib:terms/responseAlertMessage']);
 
+      let itemOptions = 
+        _.get(responseOptions, [0, 'reprolib:terms/itemOptions'], []);
+
+      let itemList = 
+        _.get(responseOptions, [0, 'reprolib:terms/itemList'], []);
+      let options = 
+        _.get(responseOptions, [0, 'reprolib:terms/options'], []);
+
+      let parsedItemOptions = [];
+      for (let i = 0; i < itemList.length; i++) {
+        const data = [];
+
+        for (let j = 0; j < options.length; j++) {
+          data.push({
+            score: _.get(itemOptions[options.length*i + j], ['schema:score', 0, '@value'], ''),
+            value: _.get(itemOptions[options.length*i + j], ['schema:value', 0, '@value'], '')
+          })
+        }
+
+        parsedItemOptions.push(data);
+      }
       if (multipleChoice) {
         itemContent.multipleChoice = _.get(multipleChoice, [0, '@value']);
       }
@@ -654,6 +744,26 @@ export default class Item {
                 };
               }
             ),
+        };
+      }
+
+      if (itemType === 'stackedRadio') {
+        itemContent.options = {
+          isMultipleChoice: itemContent.multipleChoice || false,
+          hasScoreValue: itemContent.scoring || false,
+          hasResponseAlert: itemContent.responseAlert || false,
+          responseAlertMessage: itemContent.responseAlertMessage || '',
+          itemList: itemList.map(item => ({
+            name: _.get(item, ['schema:name', 0, '@value'], ''),
+            image: _.get(item, ['schema:image', 0, '@value'], ''),
+            description: _.get(item, ['schema:description', 0, '@value'], '')
+          })),
+          options: options.map(option => ({
+            name: _.get(option, ['schema:name', 0, '@value'], ''),
+            image: _.get(option, ['schema:image', 0, '@value'], ''),
+            description: _.get(option, ['schema:description', 0, '@value'], '')
+          })),
+          choices: parsedItemOptions
         };
       }
 
@@ -728,6 +838,35 @@ export default class Item {
                 return Array.isArray(score) && score[0] && score[0]['@value']
               }
             )
+        };
+      }
+      if (itemType === 'stackedSlider') {
+        itemContent.options = {
+          hasScoreValue: itemContent.scoring || false,
+          hasResponseAlert: itemContent.responseAlert || false,
+          responseAlertMessage: itemContent.responseAlertMessage || '',
+          sliderOptions: _.get(responseOptions, [0, 'reprolib:terms/sliderOptions'], []).map(slider => ({
+            sliderLabel: 
+              _.get(slider, ['schema:sliderLabel', 0, '@value'], ''),
+            maxValue:
+              _.get(slider, ['schema:maxValue', 0, '@value']),
+            minValue:
+              _.get(slider, ['schema:minValue', 0, '@value']),
+            maxValueImg:
+              _.get(slider, ['schema:maxValueImg', 0, '@value']),
+            minValueImg:
+              _.get(slider, ['schema:minValueImg', 0, '@value']),
+            maxSliderTick:
+              Math.min(..._.get(slider, 'schema:itemListElement', []).map(item => _.get(item, 'schema:value.0.@value'))),
+            minSliderTick:
+              Math.max(..._.get(slider, 'schema:itemListElement', []).map(item => _.get(item, 'schema:value.0.@value'))),
+            scores: itemContent.scoring && _.get(slider, ['schema:itemListElement'], []).map(
+                (itemListElement) => {
+                  const score = itemListElement["schema:score"];
+                  return Array.isArray(score) && score[0] && score[0]['@value']
+                }
+              )
+          })),
         };
       }
       if (itemType === 'audioRecord' || itemType === 'audioImageRecord') {

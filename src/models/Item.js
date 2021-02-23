@@ -938,7 +938,7 @@ export default class Item {
 
   // Modifiers for data from schema for using data inside app - Start
   // response options modifier
-  responseOptionsModifier(itemType, options) {
+  static responseOptionsModifier(itemType, options) {
     const responseOptions = options[0];
     const modifiedResponseOptions = {};
 
@@ -970,7 +970,7 @@ export default class Item {
   }
 
   // input options modifier
-  inputOptionsModifier(itemType, options) {
+  static inputOptionsModifier(itemType, options) {
     const modifiedInputOptions = [];
 
     options.forEach(option => {
@@ -995,7 +995,7 @@ export default class Item {
   }
 
   // helper functions for modifiers
-  getTypeOfActionFromSchemaURL(url) {
+  static getTypeOfActionFromSchemaURL(url) {
     const index = url.lastIndexOf('/');
     if(index >= 0 && url.length - 1 > index) return url.slice(index + 1);
     else return '';

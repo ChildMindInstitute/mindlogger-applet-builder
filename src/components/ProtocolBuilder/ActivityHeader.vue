@@ -53,11 +53,30 @@
         required
       />
 
-      <v-checkbox
-        v-model="isSkippable"
-        label="Allow user to skip all items"
-      />
-    </div>
+    <v-row
+      class="align-center"
+    >
+      <v-col
+        class="py-0"
+        cols="12"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="isSkippable"
+          label="Allow user to skip all items"
+        />
+      </v-col>
+      <v-col
+        class="py-0"
+        cols="12"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="isDisableResponseChanges"
+          label="Disable the users's ability to change the response"
+        />
+      </v-col>
+    </v-row>
   </v-card>
 </template>
 
@@ -70,7 +89,7 @@
   background-color: #d44c4c;
 }
 </style>
-
+¸
 <script>
 import { mapGetters, mapMutations } from 'vuex';
 import config from '../../config';
@@ -136,6 +155,7 @@ export default {
       set: function (isSkippable) {
         this.updateActivityMetaInfo({ isSkippable });
       }
+<<<<<<< HEAD
     }
   },
   watch: {
@@ -148,5 +168,17 @@ export default {
       }
     }
   },
+=======
+    },
+    isDisableResponseChanges: {
+      get: function () {
+        return this.currentActivity && this.currentActivity.disableBack;
+      },
+      set: function (isDisableResponseChanges) {
+        this.updateActivityMetaInfo({ disableBack: isDisableResponseChanges });
+      }
+    },
+  }
+>>>>>>> 32b7212bccfedca058f9fd6c1a6ccdf61164210e
 }
 </script>

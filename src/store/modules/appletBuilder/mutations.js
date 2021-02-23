@@ -32,6 +32,10 @@ const itemMutations = {
 
     let lastIndex = state.currentActivity.items.findIndex(item => !item.allowEdit || item.inputType == 'cumulativeScore');
 
+    if (!obj) {
+      item.name = `Screen${lastIndex >= 0 ? lastIndex + 1 : state.currentActivity.items.length + 1}`;
+    }
+
     if (lastIndex >= 0) {
       state.currentActivity.items.splice(lastIndex, 0, model.getItemBuilderData(item));
     } else {
@@ -40,7 +44,7 @@ const itemMutations = {
   },
 
   duplicateItem(state, index) {
-    const item = state.currentActivity.items[index];
+    const item = JSON.parse(JSON.stringify(state.currentActivity.items[index]));
 
     const names = state.currentActivity.items.map((item) => item.name);
 

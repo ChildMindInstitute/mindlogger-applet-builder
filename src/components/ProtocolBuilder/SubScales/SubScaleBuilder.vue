@@ -63,7 +63,7 @@
 
         <v-btn
           icon
-          @click="deleteSubScale(subScaleIndex)"
+          @click="$emit('onDeleteLookupTable', subScaleIndex); deleteSubScale(subScaleIndex);"
         >
           <v-icon color="grey lighten-1">
             mdi-delete

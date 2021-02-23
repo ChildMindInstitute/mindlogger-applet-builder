@@ -238,23 +238,8 @@ export default {
       this.setCurrentActivity(-1);
     },
 
-    isAppletValid() {
-      if (!this.protocol.name) {
-        this.dataAlertDialog.message = 'Please input applet name.';
-      } else if (!this.activities.length) {
-        this.dataAlertDialog.message = 'Please add more than one activity.';
-      } else if(this.activities.find(({ valid }) => valid === false)) {
-        this.dataAlertDialog.message = 'Please fix errors in your activities.';
-      } else {
-        return true;
-      }
-
-      this.dataAlertDialog.visibility = true;
-      return false;
-    },
-
     saveToDashboard () {
-      if (!this.isAppletValid()) {
+      if (!this.appletStatus()) {
         return;
       }
 
@@ -345,8 +330,12 @@ export default {
     },
 
     appletStatus () {
-      if (!this.protocol.valid) {
-        return false;
+      this.dataAlertDialog.message = '';
+
+      if (!this.protocol.name) {
+        this.dataAlertDialog.message = 'Please input applet name.';
+      } else if (!this.activities.length) {
+        this.dataAlertDialog.message = 'Please add more than one activity.';
       }
 
       for (let activity of this.protocol.activities) {
@@ -355,14 +344,18 @@ export default {
             || activity.items.some(item => !item.valid) 
             || activity.subScales.some(subScale => !subScale.valid)
             || activity.conditionalItems.some(conditional => !conditional.valid)
+            || (activity.items.length === 0)
         );
 
         if (!valid) {
-          return false;
+          this.dataAlertDialog.message = 'Please fix errors in your activities/items.';
+          break;
         }
       }
 
-      return true;
+      this.dataAlertDialog.visibility = (this.dataAlertDialog.message.length !== 0);
+
+      return !this.dataAlertDialog.visibility;
     },
 
     viewConditionalLogic () {
@@ -375,8 +368,6 @@ export default {
 
     viewHistory () {
       if (!this.appletStatus()) {
-        this.dataAlertDialog.visibility = true;
-        this.dataAlertDialog.message = 'Please fix errors in your activity/items to view history.';
         return ;
       }
 

@@ -6,7 +6,25 @@
       class="px-2 py-0"
       :class="item.valid ? '' : 'invalid'"
     >
-      <span class="item-name">{{ item.name }}</span>
+      <div
+        v-if="!nameFocused"
+        class="item-name"
+        @click="onNameFocus"
+      >
+        {{ item.name }}
+      </div>
+
+      <v-text-field
+        v-if="nameFocused"
+        v-model="item.name"
+        @input="onUpdateName"
+        @blur="nameFocused=false;"
+        :color="item.valid ? '' : 'white'"
+        ref="itemName"
+        :disabled="!item.allowEdit || item.inputType == 'cumulativeScore'"
+        required
+        @keydown="nameKeydown($event)"
+      />
       <v-spacer />
       <v-card-actions>
         <v-btn icon @click="duplicateItem(itemIndex)">
@@ -53,26 +71,9 @@
       ref="form"
       lazy-validation
     >
-      <v-text-field
-        v-model="item.name"
-        @input="onUpdateName"
-        label="Item Name"
-        :rules="nameRules"
-        :disabled="!item.allowEdit || item.inputType == 'cumulativeScore'"
-        required
-        @keydown="nameKeydown($event)"
-      />
       <template
         v-if="item.inputType !== 'markdownMessage'"
       >
-        <v-textarea
-          v-model="questionBuilder.text"
-          label="Question"
-          v-if="item.inputType !== 'cumulativeScore'"
-          :disabled="!item.allowEdit"
-          auto-grow
-          rows="1"
-        />
         <ImageUploader
           class="mt-3 mb-4"
           style="max-width: 300px"
@@ -83,71 +84,90 @@
           @onAddImg="onAddImg"
           @onRemoveImg="onRemoveImg"
         />
+        <v-textarea
+          v-model="questionBuilder.text"
+          label="Large Text"
+          v-if="item.inputType !== 'cumulativeScore'"
+          :disabled="!item.allowEdit"
+          auto-grow
+          filled
+          rows="1"
+        />
       </template>
-      <v-select
-        class="mt-6"
-        :value="item.inputType"
-        :items="itemInputTypes"
-        label="Input Type"
-        :disabled="!item.allowEdit"
-        @change="onUpdateInputType($event)"
-      >
-        <template
-          v-slot:item="{ item, attrs, on }"
+
+      <v-row>
+        <v-col
+          cols="12"
+          sm="6"
         >
-          <v-list-item
-            v-on="on"
-            v-bind="attrs"
+          <v-select
+            class="mt-4"
+            :value="item.inputType"
+            :items="itemInputTypes"
+            :disabled="!item.allowEdit"
+            label="Input Type"
+            @change="onUpdateInputType($event)"
+            outlined
+            hide-details
           >
-            <v-tooltip
-              v-if="!hasScoringItem && item.text == 'cumulativeScore'"
-              top
+            <template
+              v-slot:item="{ item, attrs, on }"
             >
-              <template
-                v-slot:activator="{ on }"
+              <v-list-item
+                v-on="on"
+                v-bind="attrs"
               >
+                <v-tooltip
+                  v-if="!hasScoringItem && item.text == 'cumulativeScore'"
+                  top
+                >
+                  <template
+                    v-slot:activator="{ on }"
+                  >
+                    <div
+                      class="disabled-option"
+                      v-on="on"
+                      @click.stop=""
+                    >
+                      <img
+                        height="20"
+                        class="px-2 pt-2"
+                        :src="item.icon"
+                      />
+                      <span>{{ item.text }}</span>
+                    </div>
+                  </template>
+                  <span>Please create an item with scores before creating this page</span>
+                </v-tooltip>
                 <div
-                  class="disabled-option"
-                  v-on="on"
-                  @click.stop=""
+                  v-else
                 >
                   <img
                     height="20"
                     class="px-2 pt-2"
                     :src="item.icon"
                   />
-                  <span>{{ item.text }}</span>
+                  {{ item.text }}
                 </div>
-              </template>
-              <span>Please create an item with scores before creating this page</span>
-            </v-tooltip>
-            <div
-              v-else
+              </v-list-item>
+            </template>
+
+            <template
+              v-slot:selection="{ item }"
             >
-              <img
-                height="20"
-                class="px-2 pt-2"
-                :src="item.icon"
-              />
-              {{ item.text }}
-            </div>
-          </v-list-item>
-        </template>
+              <v-list-item>
+                <img
+                  height="20"
+                  class="pr-2"
+                  :src="item.icon"
+                />
 
-        <template
-          v-slot:selection="{ item }"
-        >
-          <v-list-item>
-            <img
-              height="20"
-              class="pr-2"
-              :src="item.icon"
-            />
-
-            {{ item.text }}
-          </v-list-item>
-        </template>
-      </v-select>
+                {{ item.text }}
+              </v-list-item>
+            </template>
+          </v-select>
+        </v-col>
+      </v-row>
 
       <div
         v-if="item.inputType === 'markdownMessage'"
@@ -161,6 +181,7 @@
       </div>
       <RadioBuilder
         v-if="item.inputType === 'radio' || item.inputType === 'checkbox'"
+        :is-multiple-choice="item.inputType === 'checkbox'"
         :is-skippable-item="item.allow"
         :response-options="item.responseOptions"
         :initial-item-data="item.options"
@@ -315,6 +336,10 @@
 </template>
 
 <style scoped>
+  .item-name {
+    width: 50%;
+    height: 30px;
+  }
   .item-name, .item-quiz {
     font-weight: 600;
   }
@@ -325,6 +350,10 @@
 
   .invalid {
     background-color: #d44c4c;
+  }
+
+  .invalid /deep/ input {
+    color: white !important;
   }
 
   .disabled-option {
@@ -397,6 +426,7 @@ export default {
       isUploadingState: false,
       isError: '',
       isExpanded: false,
+      nameFocused: false,
     }
   },
 
@@ -463,6 +493,16 @@ export default {
       ],
     ),
 
+    onNameFocus () {
+      if (this.isExpanded) {
+        this.nameFocused = true;
+
+        setTimeout(() => {
+          this.$refs.itemName.$refs.input.focus();
+        });
+      }
+    },
+
     editItem () {
       this.isExpanded = !this.isExpanded;
     },
@@ -518,6 +558,14 @@ export default {
       this.updateItemMetaInfo({
         index: this.itemIndex,
         obj: updates
+      })
+
+      const model = new Item();
+      model.updateReferenceObject(this.item);
+
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { responseOptions: model.getResponseOptions() }
       })
     },
 
@@ -585,10 +633,6 @@ export default {
     },
 
     updateOptions (newOptions) {
-      if (this.item.inputType == 'checkbox') {
-        newOptions['isMultipleChoice'] = true;
-      }
-
       this.updateItemMetaInfo({
         index: this.itemIndex,
         obj: { options: newOptions }

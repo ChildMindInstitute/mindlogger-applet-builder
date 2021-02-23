@@ -626,8 +626,6 @@ export default class Item {
           hasScoreValue: itemContent.scoring || false,
           hasResponseAlert: itemContent.responseAlert || false,
           responseAlertMessage: itemContent.responseAlertMessage || '',
-          nextOptionImage: '',
-          nextOptionName: '',
           options:
             responseOptions[0] &&
             responseOptions[0]['schema:itemListElement'] &&
@@ -863,6 +861,14 @@ export default class Item {
     if (item.cumulativeScores) {
       for (let i = 0; i < item.cumulativeScores.length; i++) {
         if (!item.cumulativeScores[i].valid) {
+          return false;
+        }
+      }
+    }
+
+    if (item.options && Array.isArray(item.options.options)) {
+      for (let option of item.options.options) {
+        if (option.valid === false) {
           return false;
         }
       }

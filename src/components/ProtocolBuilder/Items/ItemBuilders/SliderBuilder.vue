@@ -1,5 +1,128 @@
 <template>
   <v-form>
+    <div class="slider-meta">
+      <v-row>
+        <v-col 
+          class="d-flex align-center"
+          cols="12"
+          sm="3"
+        >
+          <v-text-field
+            v-model="minSliderTick"
+            label="Min Value"
+            :disabled="!isItemEditable"
+            type="number"
+            @change="sliderRangeUpdate($event, 'min')"
+            min="1"
+            :max="maxSliderTick"
+          />
+        </v-col>
+
+        <v-col
+          sm="3"
+        >
+          <v-text-field
+            v-model="minValue"
+            label="Min Label"
+            counter="20"
+            maxlength="20"
+            :disabled="!isItemEditable"
+            @change="update"
+          />
+        </v-col>
+
+        <v-col cols="auto">
+          <ImageUploader
+            :uploadFor="'item-radio-option-pc'"
+            :itemImg="imgFirstName"
+            @onAddImg="onUploadImg('first', $event)"
+            @onRemoveImg="onRemoveImg('first')"
+          />
+        </v-col>
+      </v-row>
+
+      <v-row>
+        <v-col 
+          class="d-flex align-center"
+          cols="12"
+          sm="3"
+        >
+          <v-text-field
+            v-model="maxSliderTick"
+            label="Max Value"
+            :disabled="!isItemEditable"
+            type="number"
+            @change="sliderRangeUpdate($event, 'max')"
+            :min="minSliderTick"
+            max="12"
+          />
+        </v-col>
+
+        <v-col
+          sm="3"
+        >
+          <v-text-field
+            v-model="maxValue"
+            label="Max Label"
+            counter="20"
+            maxlength="20"
+            :disabled="!isItemEditable"
+            @change="update"
+          />
+        </v-col>
+
+        <v-col cols="auto">
+          <ImageUploader
+            :uploadFor="'item-radio-option-pc'"
+            :itemImg="imgLastName"
+            @onAddImg="onUploadImg('last', $event)"
+            @onRemoveImg="onRemoveImg('last')"
+          />
+        </v-col>
+      </v-row>
+
+      <v-row
+        v-if="hasResponseAlert"
+      >
+        <v-col 
+          class="d-flex align-center"
+          cols="12"
+          sm="12"
+        >
+          <v-text-field
+            v-model="responseAlertMessage"
+            label="Alert Message"
+            :rules="alertTextRules"
+            :disabled="!isItemEditable"
+            required
+            @change="update"
+          />
+        </v-col>
+      </v-row>
+
+      <v-row
+        v-if="hasScoreValue"
+      >
+        <v-col 
+          class="d-flex align-center"
+          cols="12"
+          sm="12"
+        >
+          <v-btn
+            class="deep-orange"
+            color="primary"
+            dark
+            @click="scoreDialog = true"
+          >
+            Edit Score
+          </v-btn>
+        </v-col>
+      </v-row>
+    </div>
+    <v-divider
+      class="mt-4"
+    />
+
     <v-row>
       <v-col 
         class="d-flex align-center"
@@ -36,75 +159,6 @@
           v-model="hasResponseAlert"
           label="Set Alert"
           :disabled="!isItemEditable"
-          @change="update"
-        />
-      </v-col>
-    </v-row>
-
-    <v-row>
-      <v-col 
-        class="d-flex align-center"
-        cols="12"
-        sm="3"
-      >
-        <v-text-field
-          v-model="minSliderTick"
-          label="Minimum Slider Value"
-          :disabled="!isItemEditable"
-          type="number"
-          @change="sliderRangeUpdate($event, 'min')"
-          min="1"
-          :max="maxSliderTick"
-        />
-      </v-col>
-
-      <v-col 
-        class="d-flex align-center"
-        cols="12"
-        sm="3"
-      >
-        <v-text-field
-          v-model="maxSliderTick"
-          label="Maximum Slider Value"
-          :disabled="!isItemEditable"
-          type="number"
-          @change="sliderRangeUpdate($event, 'max')"
-          :min="minSliderTick"
-          max="12"
-        />
-      </v-col>
-
-      <v-col 
-        v-if="hasScoreValue"
-        class="d-flex align-center"
-        cols="12"
-        sm="3"
-      >
-        <v-btn
-          class="deep-orange"
-          color="primary"
-          dark
-          @click="scoreDialog = true"
-        >
-          Edit Score
-        </v-btn>
-      </v-col>
-    </v-row>
-
-    <v-row
-      v-if="hasResponseAlert"
-    >
-      <v-col 
-        class="d-flex align-center"
-        cols="12"
-        sm="12"
-      >
-        <v-text-field
-          v-model="responseAlertMessage"
-          label="Alert Message"
-          :rules="alertTextRules"
-          :disabled="!isItemEditable"
-          required
           @change="update"
         />
       </v-col>
@@ -158,52 +212,13 @@
       </v-card>
     </v-dialog>
 
-    <v-row>
-      <v-col cols="auto">
-        <ImageUploader
-          :uploadFor="'item-radio-option-pc'"
-          :itemImg="imgFirstName"
-          @onAddImg="onUploadImg('first', $event)"
-          @onRemoveImg="onRemoveImg('first')"
-        />
-      </v-col>
-      <v-col>
-        <v-text-field
-          v-model="minValue"
-          label="First option"
-          counter="20"
-          maxlength="20"
-          :disabled="!isItemEditable"
-          @change="update"
-        />
-      </v-col>
-    </v-row>
-
-    <v-row>
-      <v-col cols="auto">
-        <ImageUploader
-          :uploadFor="'item-radio-option-pc'"
-          :itemImg="imgLastName"
-          @onAddImg="onUploadImg('last', $event)"
-          @onRemoveImg="onRemoveImg('last')"
-        />
-      </v-col>
-      <v-col>
-        <v-text-field
-          v-model="maxValue"
-          label="Last option"
-          counter="20"
-          maxlength="20"
-          :disabled="!isItemEditable"
-          @change="update"
-        />
-      </v-col>
-    </v-row>
-
   </v-form>
 </template>
 
 <style scoped>
+  .slider-meta {
+    width: 80%;
+  }
   .option-score, .option-value {
     width: 50%;
   }
@@ -341,12 +356,6 @@ export default {
 
         while (this.scores.length > (this.maxSliderTick - this.minSliderTick + 1)) {
           this.scores.pop();
-        }
-
-        if (type == 'min') {
-            
-        } else {
-
         }
       }
 

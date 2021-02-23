@@ -54,7 +54,6 @@ export default {
   },
   methods: {
     handleAddItem() {
-      console.log('item is added')
       this.isExpanded = false;
     },
     handleExpansion() {

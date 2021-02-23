@@ -52,31 +52,31 @@
         label="Preamble"
         required
       />
-
-    <v-row
-      class="align-center"
-    >
-      <v-col
-        class="py-0"
-        cols="12"
-        sm="6"
+      <v-row
+        class="align-center"
       >
-        <v-checkbox
-          v-model="isSkippable"
-          label="Allow user to skip all items"
-        />
-      </v-col>
-      <v-col
-        class="py-0"
-        cols="12"
-        sm="6"
-      >
-        <v-checkbox
-          v-model="isDisableResponseChanges"
-          label="Disable the users's ability to change the response"
-        />
-      </v-col>
-    </v-row>
+        <v-col
+          class="py-0"
+          cols="12"
+          sm="6"
+        >
+          <v-checkbox
+            v-model="isSkippable"
+            label="Allow user to skip all items"
+          />
+        </v-col>
+        <v-col
+          class="py-0"
+          cols="12"
+          sm="6"
+        >
+          <v-checkbox
+            v-model="isDisableResponseChanges"
+            label="Disable the users's ability to change the response"
+          />
+        </v-col>
+      </v-row>
+    </div>
   </v-card>
 </template>
 
@@ -155,20 +155,6 @@ export default {
       set: function (isSkippable) {
         this.updateActivityMetaInfo({ isSkippable });
       }
-<<<<<<< HEAD
-    }
-  },
-  watch: {
-    headerExpanded: {
-      handler () {
-        console.log('updated', this.headerExpanded)
-        if (!this.headerExpanded) {
-          this.isExpanded = false;
-        }
-      }
-    }
-  },
-=======
     },
     isDisableResponseChanges: {
       get: function () {
@@ -178,7 +164,15 @@ export default {
         this.updateActivityMetaInfo({ disableBack: isDisableResponseChanges });
       }
     },
-  }
->>>>>>> 32b7212bccfedca058f9fd6c1a6ccdf61164210e
+  },
+  watch: {
+    headerExpanded: {
+      handler () {
+        if (!this.headerExpanded) {
+          this.isExpanded = false;
+        }
+      }
+    }
+  },
 }
 </script>

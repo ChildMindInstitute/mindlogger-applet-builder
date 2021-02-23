@@ -1,46 +1,91 @@
 <template>
   <v-card>
-    <v-text-field
-      v-model="name"
-      :rules="textRules"
-      counter="55"
-      maxlength="55"
-      label="Activity Name"
-      required
-    />
-    <v-text-field
-      v-model="description"
-      :rules="textRules"
-      counter="230"
-      maxlength="230"
-      label="Activity Description"
-      required
-    />
+    <v-card-title
+      class="px-2 py-0"
+      :class="name ? '' : 'invalid'"
+    >
+      <span class="activity-name">{{ name }}</span>
+      <v-spacer />
+      <v-card-actions>
+        <v-btn 
+          icon 
+          @click="editActivtiy"
+        >
+          <v-icon
+            v-if="!isExpanded"
+            color="grey lighten-1"
+          >
+            edit
+          </v-icon>
+          <v-icon
+            v-else
+            color="grey lighten-1"
+          >
+            mdi-chevron-up
+          </v-icon>
+        </v-btn>
+      </v-card-actions>
+    </v-card-title>
+    <div v-if="isExpanded">
+      <v-text-field
+        v-model="name"
+        :rules="textRules"
+        counter="55"
+        maxlength="55"
+        label="Activity Name"
+        required
+      />
+      <v-text-field
+        v-model="description"
+        :rules="textRules"
+        counter="230"
+        maxlength="230"
+        label="Activity Description"
+        required
+      />
 
-    <v-text-field
-      v-model="preamble"
-      :rules="textRules"
-      counter="230"
-      maxlength="230"
-      label="Preamble"
-      required
-    />
+      <v-text-field
+        v-model="preamble"
+        :rules="textRules"
+        counter="230"
+        maxlength="230"
+        label="Preamble"
+        required
+      />
 
-    <v-checkbox
-      v-model="isSkippable"
-      label="Allow user to skip all items"
-    />
+      <v-checkbox
+        v-model="isSkippable"
+        label="Allow user to skip all items"
+      />
+    </div>
   </v-card>
 </template>
+
+<style scoped>
+.activity-name {
+  font-weight: 600;
+}
+
+.invalid {
+  background-color: #d44c4c;
+}
+</style>
 
 <script>
 import { mapGetters, mapMutations } from 'vuex';
 import config from '../../config';
 
 export default {
+  props: {
+    headerExpanded: {
+      type: Boolean,
+      required: true,
+    },
+  },
   data() {
     return {
       textRules: [(v) => !!v || 'This field is required'],
+      isExpanded: true,
     }
   },
   mounted() {
@@ -48,7 +93,13 @@ export default {
   methods: {
     ...mapMutations(config.MODULE_NAME, [
       'updateActivityMetaInfo',
-    ])
+    ]),
+    editActivtiy () {
+      this.isExpanded = !this.isExpanded;
+      if (this.isExpanded) {
+        this.$emit('onExpand');
+      }
+    },
   },
   computed: {
     ...mapGetters(config.MODULE_NAME, [
@@ -86,6 +137,16 @@ export default {
         this.updateActivityMetaInfo({ isSkippable });
       }
     }
-  }
+  },
+  watch: {
+    headerExpanded: {
+      handler () {
+        console.log('updated', this.headerExpanded)
+        if (!this.headerExpanded) {
+          this.isExpanded = false;
+        }
+      }
+    }
+  },
 }
 </script>

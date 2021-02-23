@@ -327,11 +327,11 @@ export default {
     },
 
     sliderRangeUpdate(ev, type) {
-      if (Number(slider.maxSliderTick) > 12) {
+      if (Number(maxSliderTick) > 12) {
         return false;
       }
 
-      if (Number(slider.minSliderTick) < 0) {
+      if (Number(minSliderTick) < 0) {
         return false;
       }
 

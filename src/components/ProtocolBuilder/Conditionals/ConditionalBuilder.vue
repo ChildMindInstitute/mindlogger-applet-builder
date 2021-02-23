@@ -4,7 +4,7 @@
   >
     <v-card-title
       class="px-2 py-0 conditional-title"
-      :class="current.valid ? '' : 'invalid'"
+      :class="valid ? '' : 'invalid'"
     >
       <span v-if="!isExpanded">
         <span
@@ -228,7 +228,7 @@ export default {
     return {
       isExpanded: !this.current.stateValue,
       conditions: this.current.conditions || [],
-
+      valid: this.current.valid || false,
       ifValue: this.current.ifValue || null,
       stateValue: this.current.stateValue || null,
       minValue: this.current.minValue === undefined ? null : this.current.minValue,
@@ -247,7 +247,7 @@ export default {
   },
   beforeMount () {
     if (!this.conditions.length) {
-      this.conditions.push(this.initialCondition)
+      this.conditions.push({ ...this.initialCondition });
     }
   },
   computed: {
@@ -312,6 +312,7 @@ export default {
 
     answerItems (ifValue) {
       if (!ifValue) return [];
+      console.log('if value', ifValue);
       return ifValue.inputType !== 'slider' && ifValue.options.options || [];
     },
     isValid () {
@@ -337,21 +338,23 @@ export default {
       this.conditions.splice(index, 1);
     },
     onAddcondition () {
+      console.log('initial condition-------', this.initialCondition)
       this.conditions.push({ ...this.initialCondition });
       this.onUpdate();
     },
     onUpdate () {
       const { conditions, operation, showValue } = this;
 
+      this.valid = this.isValid();
       this.updateConditionalData({
         index: this.conditionalIndex,
         obj: {
           conditions,
           operation,
           showValue,
-          valid: this.isValid()
+          valid: this.valid,
         }
-      })
+      });
     }
   },
 }

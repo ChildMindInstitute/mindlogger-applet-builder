@@ -74,15 +74,13 @@ export default class Activity {
 
     const itemChoices = [];
 
-    for (let i = 0; i < items.length; i++) {
+    for (let i = 0; i < items.length; i += 1) {
       const itemModel = new Item();
       itemModel.updateReferenceObject(items[i]);
 
       const options = itemModel.getResponseOptions();
       itemChoices.push(options.choices);
     }
-
-    console.log('visibility -------------->', this.visibilities);
 
     visibilities.forEach((property) => {
       let ifValue, stateValue, answerValue;
@@ -234,7 +232,8 @@ export default class Activity {
 
   getItemVisibility() {
     const visibilityObj = {};
-    this.ref.items.forEach(function(item) {
+
+    this.ref.items.forEach(function (item) {
       visibilityObj[item.name] = true;
     });
     return visibilityObj;
@@ -265,28 +264,30 @@ export default class Activity {
     }
 
     itemOrder.forEach((item) => {
-      const conditionalItems = this.ref.conditionalItems.filter((cond) => {
-        return cond.showValue === item;
-      });
-      
+      console.log('121212121212121212 raw conditionalItems', this.ref.conditionalItems);
+      const conditionalItem = this.ref.conditionalItems.find((cond) => cond.showValue === item);
+      console.log('131313131313131313 conditionalItems', this.ref.conditionalItems);
       let isVis = true;
-      if (conditionalItems.length) {
-        const visibleItems = conditionalItems.map((cond) => {
+      if (conditionalItem) {
+        const operation = conditionalItem.operation === 'ANY' ? ' || ' : ' && ';
+        const visibleItems = conditionalItem.conditions.map((cond) => {
           if (cond.stateValue.val === 'within') {
-            return `${cond.ifValue.name} > ${cond.minValue} && ${cond.ifValue.name} < ${cond.maxValue}`;
+            return `(${cond.ifValue.name} > ${cond.minValue} && ${cond.ifValue.name} < ${cond.maxValue})`;
           } else if (cond.stateValue.val === 'outsideof') {
-            return `${cond.ifValue.name} < ${cond.minValue} || ${cond.ifValue.name} > ${cond.maxValue}`;
+            return `(${cond.ifValue.name} < ${cond.minValue} || ${cond.ifValue.name} > ${cond.maxValue})`;
           } else if (cond.stateValue.val === 'includes') { 
             return `${cond.ifValue.name}.${cond.stateValue.val}(${cond.answerValue.value})`
           } else if (cond.stateValue.val === '!includes') {
             return `!${cond.ifValue.name}.includes(${cond.answerValue.value})`
+          } else if (cond.stateValue.val === '=') {
+            return `${cond.ifValue.name} ${cond.stateValue.val}${cond.stateValue.val} ${cond.minValue}`; 
           } else if (!cond.answerValue) {
             return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.minValue}`;
           } else {
             return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.answerValue.value}`;
           }
         });
-        isVis = visibleItems.join(' && ');
+        isVis = visibleItems.join(operation);
       }
       if (this.ref.visibilities && this.ref.visibilities.length) {
         const visibility = this.ref.visibilities.find(({ variableName }) => variableName === item);
@@ -305,51 +306,18 @@ export default class Activity {
 
   getItemOrder() {
     const { items, conditionalItems } = this.ref;
-    const itemNamesArray = [];
 
-    if (!items.length) return itemNamesArray;
-
-    if (this.ref.isPrize) {
-      const prizeItem = items[0];
-
-      itemNamesArray.push(prizeItem.name);
-
-      prizeItem.options.options.forEach((option, index) => {
-        const confirmItem = items[index + 1];
-        itemNamesArray.push(confirmItem.name);
-      });
-
-      return itemNamesArray;
-    }
-
-    itemNamesArray.push(items[0].name);
-    for (let i = 0; i != itemNamesArray.length;) {
-      i = itemNamesArray.length;
-      itemNamesArray.forEach(name => {
-        conditionalItems.forEach(item => {
-          if (item.ifValue.name === name && !itemNamesArray.includes(item.showValue)) {
-            itemNamesArray.push(item.showValue);
-          }
-        })
-      })
-
-      if (i === itemNamesArray.length) {
-        items.forEach(({ name }) => {
-          const endedItems = conditionalItems.filter(item => item.showValue === name);
-          if (!itemNamesArray.includes(name) && !endedItems.length) {
-            itemNamesArray.push(name);
-          }
-        })
-      }
-    }
-
-    return itemNamesArray;
+    if (!items.length) return [];
+    return items.map(({ name }) => name);
   }
 
   getCompressedSchema() {
     const visibility = this.getItemVisibility();
+    console.log('000000');
     const itemOrder = this.getItemOrder();
+    console.log('1111111 itemOrder', itemOrder)
     const addProperties = this.getAddProperties(itemOrder);
+    console.log('2222222 addProperties', addProperties);
     const allowed = [];
     this.ref.isSkippable && allowed.push('skipped');
     this.ref.disableBack && allowed.push('disableBack');

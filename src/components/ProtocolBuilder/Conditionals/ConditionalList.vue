@@ -85,7 +85,7 @@ export default {
 
     onAddConditional () {
       this.alertMessage = this.getConditionalAlertMsg()
-
+      console.log('items', this.currentActivity.items)
       if (this.alertMessage) {
         this.conditionalAlert = true;
         return ;

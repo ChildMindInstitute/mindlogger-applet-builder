@@ -295,10 +295,12 @@
     >
       <div class="item-quiz">
         <img
-          width="25"
-          :src="questionBuilder.imgURL"
+          v-if="questionBuilder.text"
+          width="15"
+          :src="itemInputTypes.find(({ text }) => text === item.inputType).icon" 
         />
-        <span>{{ questionBuilder.text }}</span>
+        
+        <span class="ml-2">{{ questionBuilder.text }}</span>
       </div>
 
       <div

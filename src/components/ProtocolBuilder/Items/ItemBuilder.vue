@@ -6,25 +6,12 @@
       class="px-2 py-0"
       :class="item.valid ? '' : 'invalid'"
     >
-      <div
-        v-if="!nameFocused"
+      <span
+        v-if="!isExpanded"
         class="item-name"
-        @click="onNameFocus"
       >
         {{ item.name }}
-      </div>
-
-      <v-text-field
-        v-if="nameFocused"
-        v-model="item.name"
-        @input="onUpdateName"
-        @blur="nameFocused=false;"
-        :color="item.valid ? '' : 'white'"
-        ref="itemName"
-        :disabled="!item.allowEdit || item.inputType == 'cumulativeScore'"
-        required
-        @keydown="nameKeydown($event)"
-      />
+      </span>
       <v-spacer />
       <v-card-actions>
         <v-btn icon @click="duplicateItem(itemIndex)">
@@ -71,11 +58,34 @@
       ref="form"
       lazy-validation
     >
+      <div class="item-name-edit-wrapper"
+        v-bind:class="{ 'editing': isItemNameEditing }"
+      >
+        <span
+          v-bind:class="{ 'hide': isItemNameEditing }"
+          class="item-name"
+        >
+          {{ item.name }}
+        </span>
+        <v-text-field
+          class="item-name-input"
+          v-bind:class="{ 'focus': isItemNameEditing }"
+          v-model="item.name"
+          @focus="isItemNameEditing = true"
+          @blur="isItemNameEditing = false"
+          @input="onUpdateName"
+          label="Item Name"
+          :rules="nameRules"
+          :disabled="!item.allowEdit || item.inputType == 'cumulativeScore'"
+          required
+          @keydown="nameKeydown($event)"
+        />
+      </div>
       <template
         v-if="item.inputType !== 'markdownMessage'"
       >
         <ImageUploader
-          class="mt-3 mb-4"
+          class="my-4"
           style="max-width: 300px"
           :uploadFor="'activity-item'"
           :itemImg="questionBuilder.imgURL"
@@ -336,13 +346,50 @@
 </template>
 
 <style scoped>
-  .item-name {
-    width: 50%;
-    height: 30px;
+
+  .item-name-edit-wrapper {
+    position: relative;
+    height: 27px;
+    transition: height 0.2s ease;
+    overflow: hidden;
   }
+
+  .item-name-edit-wrapper:hover,
+  .item-name-edit-wrapper.editing {
+    height: 66px;
+  }
+
+  .item-name-edit-wrapper > * {
+    transition: opacity 0.2s ease;
+  }
+
+  .item-name-edit-wrapper:hover .item-name,
+  .item-name-edit-wrapper .item-name.hide,
+  .item-name-edit-wrapper .item-name-input {
+    opacity: 0;
+  }
+
+  .item-name-edit-wrapper .item-name-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .item-name-edit-wrapper:hover .item-name-input,
+  .item-name-edit-wrapper .item-name-input.focus {
+    opacity: 1;
+  }
+
+  .item-name {
+    font-size: 1.25rem;
+    letter-spacing: 0.0125em;
+  }
+
   .item-name, .item-quiz {
     font-weight: 600;
   }
+
   .item-quiz {
     display: flex;
     align-items: center;
@@ -426,11 +473,12 @@ export default {
       isUploadingState: false,
       isError: '',
       isExpanded: false,
-      nameFocused: false,
+      isItemNameEditing: false,
     }
   },
 
   beforeMount() {
+
     Object.assign(this, {
       valid: this.item.name && this.item.name.length > 0,
       hasScoringItem: this.currentActivity.items.some((item) => item.options.hasScoreValue),
@@ -439,7 +487,10 @@ export default {
         imgURL: this.item.question.image
       },
       isExpanded: !this.item.name.length
-    })
+    });
+
+    this.setItemName();
+
   },
 
   watch: {
@@ -493,14 +544,8 @@ export default {
       ],
     ),
 
-    onNameFocus () {
-      if (this.isExpanded) {
-        this.nameFocused = true;
-
-        setTimeout(() => {
-          this.$refs.itemName.$refs.input.focus();
-        });
-      }
+    setItemName() {
+      if(!this.item.name) this.onUpdateName(`Screen${this.itemIndex + 1}`);
     },
 
     editItem () {

@@ -716,9 +716,9 @@ export default class Item {
           minValueImg:
             _.get(responseOptions, [0, 'schema:minValueImg', 0, '@value']),
           maxSliderTick:
-            Math.min(..._.get(responseOptions, '0.schema:itemListElement', []).map(item => _.get(item, 'schema:value.0.@value'))),
-          minSliderTick:
             Math.max(..._.get(responseOptions, '0.schema:itemListElement', []).map(item => _.get(item, 'schema:value.0.@value'))),
+          minSliderTick:
+            Math.min(..._.get(responseOptions, '0.schema:itemListElement', []).map(item => _.get(item, 'schema:value.0.@value'))),
 
           scores: itemContent.scoring && responseOptions[0] &&
             responseOptions[0]['schema:itemListElement'] &&

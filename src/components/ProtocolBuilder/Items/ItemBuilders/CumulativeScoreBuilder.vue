@@ -29,7 +29,6 @@
             label="Cumulative Score Title"
             type="text"
             maxlength="55"
-            :disabled="!isItemEditable"
             @input="onUpdateRule(rule)"
             @keydown="nameKeydown($event)"
           />
@@ -68,7 +67,6 @@
           <v-select
             v-model="rule.operator"
             :items="options"
-            :disabled="!isItemEditable"
             item-text="text"
             item-value="value"
             label="Options"
@@ -80,7 +78,6 @@
             v-model="rule.score"
             label="Score"
             type="number"
-            :disabled="!isItemEditable"
             :rules="scoreValueRules"
             @input="onUpdateRule(rule)"
           />
@@ -88,7 +85,6 @@
           <v-select
             v-model="rule.outputType"
             :items="outputTypes"
-            :disabled="!isItemEditable"
             item-text="text"
             item-value="value"
             label="Output Type"
@@ -100,7 +96,6 @@
             v-model="rule.messageInRange"
             :label="`Message ${rule.operator.text}`"
             type="text"
-            :disabled="!isItemEditable"
             :rules="textRules"
             @input="onUpdateRule(rule)"
           />
@@ -109,7 +104,6 @@
             v-model="rule.messageOutRange"
             label="Message out of range"
             type="text"
-            :disabled="!isItemEditable"
             :rules="textRules"
             @input="onUpdateRule(rule)"
           />
@@ -118,7 +112,6 @@
     </v-expansion-panels>
 
     <v-btn
-      :disabled="!isItemEditable"
       class="mt-4"
       @click="addNewCumulative"
     >
@@ -166,10 +159,6 @@ export default {
     items: {
       type: Array,
       required: true,
-    },
-    isItemEditable: {
-      type: Boolean,
-      default: true,
     },
   },
   data: function () {

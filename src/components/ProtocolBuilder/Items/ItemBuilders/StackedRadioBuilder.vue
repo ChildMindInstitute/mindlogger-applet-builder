@@ -51,7 +51,6 @@
                 <div class="d-flex align-center justify-end">
                   <v-btn
                     icon
-                    :disabled="!isItemEditable"
                     large
                     @click="option.expanded = !option.expanded"
                   >
@@ -116,7 +115,6 @@
 
                   <v-btn
                     icon
-                    :disabled="!isItemEditable"
                     large
                     @click="deleteOption(index)"
                   >
@@ -143,7 +141,6 @@
                       label="Option Text"
                       counter="75"
                       maxlength="75"
-                      :disabled="!isItemEditable"
                       @change="updateOption(option)"
                     />
                   </v-col>
@@ -167,7 +164,6 @@
 
           <div class="pa-2">
             <v-btn
-              :disabled="!isItemEditable"
               fab
               x-small
               color="deep-purple"
@@ -214,7 +210,6 @@
                 <div class="d-flex align-center justify-end">
                   <v-btn
                     icon
-                    :disabled="!isItemEditable"
                     large
                     @click="item.expanded = !item.expanded"
                   >
@@ -279,7 +274,6 @@
 
                   <v-btn
                     icon
-                    :disabled="!isItemEditable"
                     large
                     @click="deleteItem(index)"
                   >
@@ -306,7 +300,6 @@
                       label="Item Text"
                       counter="75"
                       maxlength="75"
-                      :disabled="!isItemEditable"
                       @change="updateItem(item)"
                     />
                   </v-col>
@@ -330,7 +323,6 @@
 
           <div class="pa-2">
             <v-btn
-              :disabled="!isItemEditable"
               fab
               x-small
               color="deep-purple"
@@ -388,7 +380,6 @@
             v-model="responseAlertMessage"
             label="Alert Message"
             :rules="alertTextRules"
-            :disabled="!isItemEditable"
             required
             @change="update"
           />
@@ -408,7 +399,6 @@
           <v-checkbox
             v-model="isTokenValue"
             label="Token Value"
-            :disabled="!isItemEditable"
             @change="update"
           />
         </v-col>
@@ -421,7 +411,6 @@
           <v-checkbox
             v-model="isSkippable"
             label="Skippable Item"
-            :disabled="!isItemEditable"
             @change="updateAllow"
           />
         </v-col>
@@ -434,7 +423,6 @@
           <v-checkbox
             v-model="hasResponseAlert"
             label="Set Alert"
-            :disabled="!isItemEditable"
             @change="update"
           />
         </v-col>
@@ -447,7 +435,6 @@
           <v-checkbox
             v-model="hasScoreValue"
             label="Option Score"
-            :disabled="!isItemEditable"
             @change="update"
           />
         </v-col>
@@ -569,10 +556,6 @@ export default {
     responseOptions: {
       type: Object,
       required: true
-    },
-    isItemEditable: {
-      type: Boolean,
-      default: true,
     },
     itemTemplates: {
       type: Array,

@@ -22,7 +22,6 @@
           <div class="d-flex align-center justify-end">
             <v-btn
               icon
-              :disabled="!isItemEditable"
               large
               @click="slider.expanded = !slider.expanded"
             >
@@ -41,7 +40,6 @@
 
             <v-btn
               icon
-              :disabled="!isItemEditable"
               large
               @click="deleteSlider(index)"
             >
@@ -62,7 +60,6 @@
                 v-model="slider.sliderLabel"
                 label="Slider Label"
                 :rules="textRules"
-                :disabled="!isItemEditable"
                 @input="update"
               />
             </v-col>
@@ -76,7 +73,6 @@
               <v-text-field
                 v-model="slider.minSliderTick"
                 label="Min Value"
-                :disabled="!isItemEditable"
                 type="number"
                 min="1"
                 :max="slider.maxSliderTick"
@@ -93,7 +89,6 @@
                 label="Min Label"
                 counter="20"
                 maxlength="20"
-                :disabled="!isItemEditable"
                 @input="update"
               />
             </v-col>
@@ -117,7 +112,6 @@
               <v-text-field
                 v-model="slider.maxSliderTick"
                 label="Max Value"
-                :disabled="!isItemEditable"
                 type="number"
                 :min="slider.minSliderTick"
                 max="12"
@@ -134,7 +128,6 @@
                 label="Max Label"
                 counter="20"
                 maxlength="20"
-                :disabled="!isItemEditable"
                 @input="update"
               />
             </v-col>
@@ -172,7 +165,6 @@
 
       <div class="pa-2">
         <v-btn
-          :disabled="!isItemEditable"
           fab
           x-small
           color="deep-purple"
@@ -197,7 +189,6 @@
           v-model="responseAlertMessage"
           label="Alert Message"
           :rules="alertTextRules"
-          :disabled="!isItemEditable"
           required
           @input="update"
         />
@@ -216,7 +207,6 @@
         <v-checkbox
           v-model="isSkippable"
           label="Skippable Item"
-          :disabled="!isItemEditable"
           @change="updateAllow"
         />
       </v-col>
@@ -229,7 +219,6 @@
         <v-checkbox
           v-model="hasScoreValue"
           label="Option Score"
-          :disabled="!isItemEditable"
           @change="update"
         />
       </v-col>
@@ -242,7 +231,6 @@
         <v-checkbox
           v-model="hasResponseAlert"
           label="Set Alert"
-          :disabled="!isItemEditable"
           @change="update"
         />
       </v-col>
@@ -284,7 +272,6 @@
                 v-model="scoreDialog.slider.scores[i]"
                 class="option-score mt-0 pt-0"
                 type="number"
-                :disabled="!isItemEditable"
                 :rules="numberRules"
               />
             </div>
@@ -292,14 +279,13 @@
 
           <v-card-actions class="d-flex justify-space-around">
             <v-btn
-              :disabled="!valid || !isItemEditable"
+              :disabled="!valid"
               color="primary"
               @click="saveScores"
             >
               Save
             </v-btn>
             <v-btn
-              :disabled="!isItemEditable"
               @click="resetScores"
             >
               Reset
@@ -346,10 +332,6 @@ export default {
     isSkippableItem: {
       type: Boolean,
       default: false,
-    },
-    isItemEditable: {
-      type: Boolean,
-      default: true,
     },
   },
   data: function () {

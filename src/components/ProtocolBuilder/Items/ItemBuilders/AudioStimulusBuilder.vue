@@ -7,12 +7,10 @@
       v-model="url"
       label="Media URL"
       type="text"
-      :disabled="!isItemEditable"
       :rules="urlRules"
       @change="update"
     />
     <v-text-field
-      v-if="isItemEditable"
       v-model="transcript"
       label="Media transcript"
       type="text"
@@ -21,13 +19,11 @@
     <v-checkbox
       v-model="isSkippable"
       label="Skippable Item"
-      :disabled="!isItemEditable"
       @change="updateAllow"
     />
     <v-checkbox
       v-model="allowReplay"
       label="Media Replay Allowed"
-      :disabled="!isItemEditable"
       @change="update"
     />
   </v-form>
@@ -39,10 +35,6 @@ export default {
     initialItemData: {
       type: Object,
       required: true
-    },
-    isItemEditable: {
-      type: Boolean,
-      default: true
     },
     initialItemInputOptions: {
       type: Object,

@@ -1,9 +1,10 @@
 <template>
   <v-card
-    class="pa-2"
+    class="item pa-2"
+    :class="item.allowEdit ? '' : 'not-editable'"
   >
     <v-card-title
-      class="px-2 py-0"
+      class="item-title px-2 py-0"
       :class="item.valid ? '' : 'invalid'"
     >
       <span
@@ -80,7 +81,7 @@
           :class="{ 'focus': isItemNameEditing }"
           label="Item Name"
           :rules="nameRules"
-          :disabled="!item.allowEdit || item.inputType == 'cumulativeScore'"
+          :disabled="item.inputType == 'cumulativeScore'"
           required
           @focus="isItemNameEditing = true"
           @blur="isItemNameEditing = false"
@@ -97,7 +98,6 @@
           :uploadFor="'activity-item'"
           :itemImg="questionBuilder.imgURL"
           :notify-enabled="false"
-          :disabled="!item.allowEdit"
           @onAddImg="onAddImg"
           @onRemoveImg="onRemoveImg"
         />
@@ -105,7 +105,6 @@
           v-if="item.inputType !== 'cumulativeScore'"
           v-model="questionBuilder.text"
           label="Large Text"
-          :disabled="!item.allowEdit"
           auto-grow
           filled
           rows="1"
@@ -121,7 +120,6 @@
             class="mt-4"
             :value="item.inputType"
             :items="itemInputTypes"
-            :disabled="!item.allowEdit"
             label="Input Type"
             outlined
             hide-details
@@ -196,6 +194,7 @@
           @input="onUpdateMarkdownText"
         />
       </div>
+
       <RadioBuilder
         v-if="item.inputType === 'radio' || item.inputType === 'checkbox'"
         :key="`${baseKey}-radio`"
@@ -203,7 +202,6 @@
         :is-skippable-item="item.allow"
         :response-options="item.responseOptions"
         :initial-item-data="item.options"
-        :is-item-editable="item.allowEdit"
         :item-templates="itemTemplates"
         :has-prize-activity="hasPrizeActivity"
         @openPrize="setTokenPrizeModalStatus(true)"
@@ -214,6 +212,7 @@
         @uploading="isUploadingState = $event"
         @error="isError = $event"
       />
+
       <StackedRadioBuilder
         v-if="item.inputType === 'stackedRadio' || item.inputType === 'stackedCheckbox'"
         :key="`${baseKey}-stackedRadio`"
@@ -221,7 +220,6 @@
         :is-skippable-item="item.allow"
         :response-options="item.responseOptions"
         :initial-item-data="item.options"
-        :is-item-editable="item.allowEdit"
         :item-templates="itemTemplates"
         :has-prize-activity="hasPrizeActivity"
         @updateOptions="updateOptions"
@@ -229,6 +227,7 @@
         @uploading="isUploadingState = $event"
         @error="isError = $event"
       />
+
       <TextBuilder
         v-if="item.inputType === 'text'"
         :key="`${baseKey}-text`"
@@ -236,45 +235,48 @@
         :initial-item-data="item.options"
         :response-option="item.responseOptions"
         :initial-answer="item.correctAnswer"
-        :is-item-editable="item.allowEdit"
         @updateAnswer="updateAnswer"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
       />
+
       <SliderBuilder
         v-if="item.inputType === 'slider'"
         :key="`${baseKey}-slider`"
         :is-skippable-item="item.allow"
         :initial-item-data="item.options"
-        :is-item-editable="item.allowEdit"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
         @uploading="isUploadingState = $event"
         @error="isError = $event"
       />
+
       <StackedSliderBuilder
         v-if="item.inputType === 'stackedSlider'"
         :key="`${baseKey}-stackedSlider`"
         :is-skippable-item="item.allow"
         :initial-item-data="item.options"
-        :is-item-editable="item.allowEdit"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
         @uploading="isUploadingState = $event"
         @error="isError = $event"
       />
+
       <VideoBuilder
         v-if="item.inputType === 'video'"
         :key="`${baseKey}-video`"
       />
+
       <PhotoBuilder
         v-if="item.inputType === 'photo'"
         :key="`${baseKey}-photo`"
       />
+
       <TimeRangeBuilder
         v-if="item.inputType === 'timeRange'"
         :key="`${baseKey}-timeRange`"
       />
+
       <DateBuilder
         v-if="item.inputType === 'date'"
         :key="`${baseKey}-date`"
@@ -328,19 +330,19 @@
         :initial-item-input-options="item.inputOptions"
         :initial-item-media="item.media"
         :initial-item-data="item.options"
-        :is-item-editable="item.allowEdit"
         @updateAllow="updateAllow"
         @updateInputOptions="updateInputOptions"
         @updateMedia="updateMedia"
       />
+
       <CumulativeScoreBuilder
         v-if="item.inputType === 'cumulativeScore'"
         :key="`${baseKey}-cumulativeScore`"
         :items="currentActivity.items"
-        :is-item-editable="item.allowEdit"
         :initial-item-data="item"
         @updateCumulativeScore="updateCumulativeScore"
       />
+      
     </v-form>
 
     <div
@@ -405,6 +407,27 @@
 </template>
 
 <style scoped>
+
+  .item.not-editable {
+    position: relative;
+  }
+
+  .item.not-editable:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    z-index: 2;
+    background-color: rgba(145, 145, 145, 0.1);
+  }
+
+  .item-title {
+    position: relative;
+    z-index: 3;
+  }
 
   .item-name-edit-wrapper {
     position: relative;

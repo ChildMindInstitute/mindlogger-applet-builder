@@ -127,7 +127,7 @@ export default {
         obj: updatedSubScale
       });
 
-      if (!this.currentActivity.subScales.find((subScale) => !!subScale['lookupTable'])) {
+      if (this.currentActivity.subScales.find((subScale) => !!subScale['lookupTable'])) {
         const itemCount = this.currentActivity.items.length;
 
         for (let i = itemCount - 1; i >= 0; i--) {

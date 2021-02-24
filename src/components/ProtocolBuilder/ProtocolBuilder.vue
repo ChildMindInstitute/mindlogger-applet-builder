@@ -7,7 +7,7 @@
           :rules="textRules"
           counter="55"
           maxlength="55"
-          label="Protocol Name"
+          label="Applet Name"
           required
         />
         <v-text-field
@@ -15,7 +15,7 @@
           :rules="textRules"
           counter="230"
           maxlength="230"
-          label="Protocol Description"
+          label="Applet Description"
           required
         />
         <div class="d-flex flex-row mt-6">

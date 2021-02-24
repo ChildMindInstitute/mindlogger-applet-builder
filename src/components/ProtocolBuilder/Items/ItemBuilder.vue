@@ -211,6 +211,8 @@
         @updateTemplates="onUpdateTemplates"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
+        @loading="loading = $event"
+        @notify="notify = $event"
       />
 
       <StackedRadioBuilder

@@ -104,8 +104,10 @@
 
           <v-text-field
             v-if="
-              stateValue.name === 'WITHIN' ||
+              stateValue && (
+                stateValue.name === 'WITHIN' ||
                 stateValue.name === 'OUTSIDE OF'
+              )
             "
             v-model="maxValue"
             label="Max value"

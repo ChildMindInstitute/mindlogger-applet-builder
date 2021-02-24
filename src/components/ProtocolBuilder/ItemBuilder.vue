@@ -142,7 +142,15 @@
           @updateResponseOptions="updateResponseOptions"
         />
 
-        <TimeRangeBuilder v-if="inputType === 'timeRange'" />
+        <TimeRangeBuilder 
+          v-if="inputType === 'timeRange'"
+          :initial-is-optional-text="isOptionalText"
+          :initial-item-response-options="responseOptions"
+          @updateOptionalText="isOptionalText = $event"
+          @updateResponseOptions="updateResponseOptions"
+        />
+
+
         <DateBuilder v-if="inputType === 'date'" />
 
         <DrawingBuilder

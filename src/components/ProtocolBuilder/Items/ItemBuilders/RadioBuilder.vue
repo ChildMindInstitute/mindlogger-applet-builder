@@ -348,6 +348,14 @@
             @change="update"
           />
         </v-col>
+        <v-col>
+          <v-checkbox
+            v-if="isTokenValue"
+            label="Reduce cumulation of tokens with negative token responses"
+            v-model="enableNegativeTokens"
+            @change="update"
+          />
+        </v-col>
       </v-row>
     </v-form>
 
@@ -483,6 +491,7 @@ export default {
       responseAlertMessage: this.initialItemData.responseAlertMessage || '',
       imgUploader,
       isSkippable: this.isSkippableItem || false,
+      enableNegativeTokens: this.initialItemData.enableNegativeTokens || false,
     };
   },
 
@@ -569,6 +578,7 @@ export default {
         'hasResponseAlert': this.hasResponseAlert,
         'responseAlertMessage': this.responseAlertMessage,
         'isTokenValue': this.isTokenValue,
+        'enableNegativeTokens': this.enableNegativeTokens,
         'isMultipleChoice': this.isMultipleChoice,
         'isSkippableItem': this.isSkippable,
         'options': this.options,

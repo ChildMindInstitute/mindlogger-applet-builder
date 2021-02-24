@@ -670,6 +670,9 @@ export default class Item {
       let valueType = 
         _.get(responseOptions, [0, 'reprolib:terms/valueType']);
 
+      let enableNegativeTokens = 
+        _.get(responseOptions, [0, 'reprolib:terms/enableNegativeTokens']);
+
       let scoring = 
         _.get(responseOptions, [0, 'reprolib:terms/scoring']);
 
@@ -689,6 +692,10 @@ export default class Item {
 
       if (multipleChoice) {
         itemContent.multipleChoice = _.get(multipleChoice, [0, '@value']);
+      }
+
+      if (enableNegativeTokens) {
+        itemContent.enableNegativeTokens = _.get(enableNegativeTokens, [0, '@value']);
       }
 
       if (scoring) {
@@ -714,6 +721,7 @@ export default class Item {
       if (itemType === 'radio') {
         itemContent.options = {
           isMultipleChoice: itemContent.multipleChoice || false,
+          enableNegativeTokens: itemContent.enableNegativeTokens || false,
           hasScoreValue: itemContent.scoring || false,
           hasResponseAlert: itemContent.responseAlert || false,
           responseAlertMessage: itemContent.responseAlertMessage || '',

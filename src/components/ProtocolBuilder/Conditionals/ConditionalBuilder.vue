@@ -245,7 +245,7 @@ export default {
       }
 
       if (this.ifValue.inputType == 'slider') {
-        if ( (stateValue.name === 'WITHIN' || stateValue.name === 'OUTSIDE OF') && (!this.maxValue && this.maxValue !== 0) ) {
+        if ( (this.stateValue.name === 'WITHIN' || this.stateValue.name === 'OUTSIDE OF') && (!this.maxValue && this.maxValue !== 0) ) {
           return false;
         }
 

@@ -516,10 +516,8 @@ export default {
         'valid': true,
       };
 
-      if (this.isTokenValue) {
-        nextOption.value = this.nextOptionValue;
-        this.nextOptionValue++;
-      }
+      nextOption.value = this.nextOptionValue;
+      this.nextOptionValue++;
 
       if (this.hasScoreValue) {
         nextOption.score = this.nextOptionScore;
@@ -527,6 +525,8 @@ export default {
       }
 
       this.options.push(nextOption);
+
+      this.update();
     },
 
     removeTemplate(item) {

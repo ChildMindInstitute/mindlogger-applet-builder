@@ -190,6 +190,7 @@
         />
       </div>
       <RadioBuilder
+        :key="`${baseKey}-radio`"
         v-if="item.inputType === 'radio' || item.inputType === 'checkbox'"
         :is-multiple-choice="item.inputType === 'checkbox'"
         :is-skippable-item="item.allow"
@@ -207,6 +208,7 @@
         @error="isError = $event"
       />
       <StackedRadioBuilder
+        :key="`${baseKey}-stackedRadio`"
         v-if="item.inputType === 'stackedRadio' || item.inputType === 'stackedCheckbox'"
         :is-multiple-choice="item.inputType === 'stackedCheckbox'"
         :is-skippable-item="item.allow"
@@ -221,6 +223,7 @@
         @error="isError = $event"
       />
       <TextBuilder
+        :key="`${baseKey}-text`"
         v-if="item.inputType === 'text'"
         :is-skippable-item="item.allow"
         :initial-item-data="item.options"
@@ -232,6 +235,7 @@
         @updateAllow="updateAllow"
       />
       <SliderBuilder
+        :key="`${baseKey}-slider`"
         v-if="item.inputType === 'slider'"
         :is-skippable-item="item.allow"
         :initial-item-data="item.options"
@@ -242,6 +246,7 @@
         @error="isError = $event"
       />
       <StackedSliderBuilder
+        :key="`${baseKey}-stackedSlider`"
         v-if="item.inputType === 'stackedSlider'"
         :is-skippable-item="item.allow"
         :initial-item-data="item.options"
@@ -251,12 +256,25 @@
         @uploading="isUploadingState = $event"
         @error="isError = $event"
       />
-      <VideoBuilder v-if="item.inputType === 'video'" />
-      <PhotoBuilder v-if="item.inputType === 'photo'" />
-      <TimeRangeBuilder v-if="item.inputType === 'timeRange'" />
-      <DateBuilder v-if="item.inputType === 'date'" />
+      <VideoBuilder
+        :key="`${baseKey}-video`"
+        v-if="item.inputType === 'video'"
+      />
+      <PhotoBuilder
+        :key="`${baseKey}-photo`"
+        v-if="item.inputType === 'photo'"
+      />
+      <TimeRangeBuilder
+        :key="`${baseKey}-timeRange`"
+        v-if="item.inputType === 'timeRange'"
+      />
+      <DateBuilder
+        :key="`${baseKey}-date`"
+        v-if="item.inputType === 'date'"
+      />
 
       <DrawingBuilder
+        :key="`${baseKey}-drawing`"
         v-if="item.inputType === 'drawing'"
         :initial-item-response-options="item.responseOptions"
         :initial-item-input-options="item.inputOptions"
@@ -267,6 +285,7 @@
       />
 
       <AudioRecordBuilder
+        :key="`${baseKey}-audioRecord`"
         v-if="item.inputType === 'audioRecord'"
         :is-skippable-item="item.allow"
         :initial-item-data="item.options"
@@ -275,6 +294,7 @@
       />
 
       <AudioImageRecordBuilder
+        :key="`${baseKey}-audioImageRecord`"
         v-if="item.inputType === 'audioImageRecord'"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="item.allow"
@@ -286,6 +306,7 @@
       />
 
       <GeolocationBuilder
+        :key="`${baseKey}-geolocation`"
         v-if="item.inputType === 'geolocation'"
         :initial-item-response-options="item.responseOptions"
         @uploading="isUploadingState = $event"
@@ -294,6 +315,7 @@
       />
 
       <AudioStimulusBuilder
+        :key="`${baseKey}-audioStimulus`"
         v-if="item.inputType === 'audioStimulus'"
         :is-skippable-item="item.allow"
         :initial-item-input-options="item.inputOptions"
@@ -305,6 +327,7 @@
         @updateMedia="updateMedia"
       />
       <CumulativeScoreBuilder
+        :key="`${baseKey}-cumulativeScore`"
         v-if="item.inputType === 'cumulativeScore'"
         :items="currentActivity.items"
         :is-item-editable="item.allowEdit"
@@ -504,6 +527,7 @@ export default {
       isError: '',
       isExpanded: false,
       isItemNameEditing: false,
+      baseKey: 0,
     }
   },
 
@@ -630,6 +654,8 @@ export default {
         updates.name = 'cumulatives';
       }
 
+      updates.options = { options: [] };
+
       this.updateItemMetaInfo({
         index: this.itemIndex,
         obj: updates
@@ -642,6 +668,8 @@ export default {
         index: this.itemIndex,
         obj: { responseOptions: model.getResponseOptions() }
       })
+
+      this.baseKey++;
     },
 
     onUpdateName (name) {

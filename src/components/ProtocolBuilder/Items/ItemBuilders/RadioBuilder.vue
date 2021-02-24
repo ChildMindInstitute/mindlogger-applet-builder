@@ -450,9 +450,8 @@ export default {
       if (this.initialItemData.hasScoreValue && lastOption.score) {
         nextOptionScore = lastOption.score + 1
       }
-      if (isTokenValue && lastOption.value) {
-        nextOptionValue = lastOption.value + 1;
-      }
+
+      nextOptionValue = lastOption.value + 1;
     }
 
     return {

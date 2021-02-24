@@ -145,8 +145,12 @@
           v-if="inputType === 'audioRecord'"
           :is-skippable-item="allow"
           :initial-item-data="options"
+          :initial-item-response-options="responseOptions"
+          :initial-is-optional-text="isOptionalText"
           @updateOptions="updateOptions"
           @updateAllow="updateAllow"
+          @updateOptionalText="isOptionalText = $event"
+          @updateResponseOptions="updateResponseOptions"
         />
 
         <AudioImageRecordBuilder

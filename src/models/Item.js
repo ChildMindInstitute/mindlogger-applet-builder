@@ -166,6 +166,7 @@ export default class Item {
       return this.ref.responseOptions;
     }
     if (this.ref.inputType === "audioRecord") {
+        this.ref.options.isOptionalTextRequired = this.ref.responseOptions.isOptionalTextRequired;
         return this.ref.options;
     } else {
         return {};

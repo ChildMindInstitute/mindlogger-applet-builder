@@ -676,6 +676,12 @@ export default class Item {
       let scoring = 
         _.get(responseOptions, [0, 'reprolib:terms/scoring']);
 
+      let continousSlider =
+        _.get(responseOptions, [0, 'reprolib:terms/continousSlider']);
+
+      let showTickMarks =
+        _.get(responseOptions, [0, 'reprolib:terms/showTickMarks']);
+
       let responseAlert =
         _.get(responseOptions, [0, 'reprolib:terms/responseAlert']);
 
@@ -701,6 +707,16 @@ export default class Item {
       if (scoring) {
         itemContent.scoring = 
           _.get(scoring, [0, '@value']);
+      }
+
+      if (continousSlider) {
+        itemContent.continousSlider = 
+          continousSlider[0] && continousSlider[0]['@value'];
+      }
+
+      if (showTickMarks) {
+        itemContent.showTickMarks = 
+          showTickMarks[0] && showTickMarks[0]['@value'];
       }
 
       if (responseAlert) {
@@ -839,6 +855,7 @@ export default class Item {
         itemContent.options = {
           hasScoreValue: itemContent.scoring || false,
           hasResponseAlert: itemContent.responseAlert || false,
+          continousSlider: itemContent.continousSlider || false,
           responseAlertMessage: itemContent.responseAlertMessage || '',
           maxValue:
             _.get(responseOptions, [0, 'schema:maxValue', 0, '@value']),
@@ -852,7 +869,7 @@ export default class Item {
             Math.max(..._.get(responseOptions, '0.schema:itemListElement', []).map(item => _.get(item, 'schema:value.0.@value'))),
           minSliderTick:
             Math.min(..._.get(responseOptions, '0.schema:itemListElement', []).map(item => _.get(item, 'schema:value.0.@value'))),
-
+          showTickMarks: itemContent.showTickMarks || false,
           scores: itemContent.scoring && responseOptions[0] &&
             responseOptions[0]['schema:itemListElement'] &&
             responseOptions[0]['schema:itemListElement'].map(

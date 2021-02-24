@@ -331,6 +331,9 @@
         @updateAllow="updateAllow"
         @updateInputOptions="updateInputOptions"
         @updateMedia="updateMedia"
+        @validation="item.valid = $event"
+        @loading="loading = $event"
+        @notify="notify = $event"
       />
 
       <CumulativeScoreBuilder
@@ -548,7 +551,6 @@ export default {
       headerImage: '',
       isExpanded: false,
       isItemNameEditing: false,
-      isItemValid: true,
       baseKey: 0,
       loading: false,
       notify: {},

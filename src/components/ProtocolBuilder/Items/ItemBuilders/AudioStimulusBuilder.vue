@@ -92,7 +92,7 @@
 
 <script>
 import Vue from 'vue';
-import Uploader from '../Uploader.vue';
+import Uploader from '../../Uploader.vue';
 import AudioRecorder from 'vue-audio-recorder';
 
 Vue.use(AudioRecorder);

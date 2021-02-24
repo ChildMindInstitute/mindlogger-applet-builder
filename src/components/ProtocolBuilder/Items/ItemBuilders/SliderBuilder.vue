@@ -12,7 +12,7 @@
             label="Min Value"
             :disabled="!isItemEditable"
             type="number"
-            @change="sliderRangeUpdate($event, 'min')"
+            @input="sliderRangeUpdate($event, 'min')"
             min="1"
             :max="maxSliderTick"
           />
@@ -52,7 +52,7 @@
             label="Max Value"
             :disabled="!isItemEditable"
             type="number"
-            @change="sliderRangeUpdate($event, 'max')"
+            @input="sliderRangeUpdate($event, 'max')"
             :min="minSliderTick"
             max="12"
           />
@@ -358,12 +358,10 @@ export default {
       if (Number(this.maxSliderTick) > 12) {
         return false;
       }
-
       if (Number(this.minSliderTick) < 0) {
         return false;
       }
-
-      if (this.minSliderTick === '' || this.maxSliderTick === '' || this.minSliderTick > this.maxSliderTick) {
+      if (this.minSliderTick === '' || this.maxSliderTick === '' || Number(this.minSliderTick) > Number(this.maxSliderTick)) {
         return ;
       }
 

@@ -467,7 +467,7 @@ export default {
         return false;
       }
 
-      if (slider.minSliderTick === '' || slider.maxSliderTick === '' || slider.minSliderTick > slider.maxSliderTick) {
+      if (slider.minSliderTick === '' || slider.maxSliderTick === '' || Number(slider.minSliderTick) > Number(slider.maxSliderTick)) {
         return ;
       }
 

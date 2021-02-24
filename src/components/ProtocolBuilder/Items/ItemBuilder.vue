@@ -285,6 +285,8 @@
         :initial-item-input-options="item.inputOptions"
         @updateResponseOptions="updateResponseOptions"
         @updateInputOptions="updateInputOptions"
+        @loading="loading = $event"
+        @notify="notify = $event"
       />
 
       <AudioRecordBuilder

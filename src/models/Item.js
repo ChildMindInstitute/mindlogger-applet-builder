@@ -159,7 +159,8 @@ export default class Item {
       return {
         valueType: "xsd:date",
         requiredValue: true,
-        "schema:maxValue": "new Date()"
+        "schema:maxValue": "new Date()",
+        "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
       };
     }
     if (this.ref.inputType === "audioImageRecord" || this.ref.inputType === "drawing" || this.ref.inputType === "geolocation" || this.ref.inputType === "photo" || this.ref.inputType === "video" || this.ref.inputType === "timeRange") {
@@ -297,7 +298,6 @@ export default class Item {
       itemObj.options.hasResponseAlert = itemObj.options.hasResponseAlert || false;
     }
 
-    console.log(itemObj);
     return itemObj;
   }
 

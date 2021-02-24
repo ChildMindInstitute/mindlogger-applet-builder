@@ -151,7 +151,13 @@
         />
 
 
-        <DateBuilder v-if="inputType === 'date'" />
+        <DateBuilder
+          v-if="inputType === 'date'"
+          :initial-is-optional-text="isOptionalText"
+          :initial-item-response-options="responseOptions"
+          @updateOptionalText="isOptionalText = $event"
+          @updateResponseOptions="updateResponseOptions"
+        />
 
         <DrawingBuilder
           v-if="inputType === 'drawing'"

@@ -220,6 +220,8 @@ export default {
       activities: [],
       tokenPrizeModal: false
     };
+
+    state.original = null;
   },
 
   setTokenPrizeModalStatus (state, status) {

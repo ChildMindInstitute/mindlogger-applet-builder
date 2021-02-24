@@ -12,36 +12,44 @@
         :sub-scale="subScale"
         :sub-scales="currentActivity.subScales"
         :items="currentActivity.items"
+        class="ma-4"
         @onCreateLookupTable="onCreateLookupTable"
         @onDeleteLookupTable="onDeleteLookupTable"
-        class="ma-4"
-      >
-      </SubScaleBuilder>
+      />
     </div>
     <v-btn
-      @click="onAddSubScale"
       color="primary"
       class="mx-4 my-2"
       rounded
+      @click="onAddSubScale"
     >
       Add Sub-Scale
     </v-btn>
 
-    <v-dialog v-model="subScaleAlert" width="350">
+    <v-dialog
+      v-model="subScaleAlert"
+      width="350"
+    >
       <v-card>
-        <v-card-title class="grey lighten-2">Sub Scale Alert</v-card-title>
-        <v-card-text class="pa-4">Please insert two or more items with scoring option to add sub-scale.</v-card-text>
+        <v-card-title class="grey lighten-2">
+          Sub Scale Alert
+        </v-card-title>
+        <v-card-text class="pa-4">
+          Please insert two or more items with scoring option to add sub-scale.
+        </v-card-text>
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="lookupTableDialog" persistent>
+    <v-dialog
+      v-model="lookupTableDialog"
+      persistent
+    >
       <LookUpTableUploader
-        :sub-scale="currentActivity.subScales[subScaleEditIndex]"
         :key="`lookup-table-${lookupTableUploadDlgKey}`"
+        :sub-scale="currentActivity.subScales[subScaleEditIndex]"
         @closeLookupTableModal="onCloseLookUpTableModal"
       />
     </v-dialog>
-
   </v-card>
 </template>
 

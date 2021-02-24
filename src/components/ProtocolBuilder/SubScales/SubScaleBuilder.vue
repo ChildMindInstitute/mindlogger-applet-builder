@@ -17,7 +17,11 @@
       <v-card-actions>
         <v-menu bottom>
           <template v-slot:activator="{ on, attrs }">
-            <v-btn icon v-bind="attrs" v-on="on">
+            <v-btn
+              icon
+              v-bind="attrs"
+              v-on="on"
+            >
               <v-icon color="grey lighten-1">
                 mdi-table-search
               </v-icon>
@@ -69,7 +73,6 @@
             mdi-delete
           </v-icon>
         </v-btn>
-
       </v-card-actions>
     </v-card-title>
 
@@ -82,18 +85,23 @@
           cols="12"
           sm="6"
         >
-          <v-card width="100%" class="items">
+          <v-card
+            width="100%"
+            class="items"
+          >
             <v-list subheader>
               <v-subheader>Items not included in a sub-scale</v-subheader>
 
               <template v-for="(item, index) in itemsFormatted">
-                <v-list-item :key="index" v-if="item.subScales.length == 0">
+                <v-list-item
+                  v-if="item.subScales.length == 0"
+                  :key="index"
+                >
                   <v-list-item-content>
                     {{ item.name }}
                   </v-list-item-content>
                 </v-list-item>
               </template>
-
             </v-list>
           </v-card>
         </v-col>
@@ -103,12 +111,18 @@
           cols="12"
           sm="6"
         >
-          <v-card width="100%" class="items">
+          <v-card
+            width="100%"
+            class="items"
+          >
             <v-list subheader>
               <v-subheader>Items associated with one or more sub-scales</v-subheader>
 
               <template v-for="(item, index) in itemsFormatted">
-                <v-list-item :key="index" v-if="item.subScales.length > 0">
+                <v-list-item
+                  v-if="item.subScales.length > 0"
+                  :key="index"
+                >
                   <v-list-item-content>
                     <div class="item-with-subscale d-flex">
                       <div class="item-name">
@@ -121,7 +135,6 @@
                   </v-list-item-content>
                 </v-list-item>
               </template>
-
             </v-list>
           </v-card>
         </v-col>
@@ -135,7 +148,10 @@
           @input="saveSubScale"
         />
 
-        <v-card width="100%" class="items">
+        <v-card
+          width="100%"
+          class="items"
+        >
           <v-list subheader>
             <v-subheader>Items within sub-scale</v-subheader>
             <v-list-item-group
@@ -148,10 +164,10 @@
               >
                 <v-list-item-action>
                   <v-checkbox
-                    color="primary"
                     v-model="item.selected"
+                    color="primary"
                     disabled
-                  ></v-checkbox>
+                  />
                 </v-list-item-action>
                 <v-list-item-content>
                   <v-list-item-title v-text="item.name" />
@@ -204,24 +220,6 @@ export default {
       required: true
     }
   },
-  created() {
-    const self = this;
-    self.keyDownHandler = function ({ key }) {
-      if (key == "Shift") self.shiftKeyOn = true;
-    };
-    self.keyUpHandler = function ({ key }) {
-      if (key == "Shift") self.shiftKeyOn = false;
-    };
-
-    window.addEventListener("keydown", this.keyDownHandler);
-    window.addEventListener("keyup", this.keyUpHandler);
-  },
-  beforeDestroy() {
-    if (this.multiSelectionEnabled) {
-      window.removeEventListener("keydown", this.keyDownHandler);
-      window.removeEventListener("keyup", this.keyUpHandler);
-    }
-  },
   data: function () {
     return {
       itemsFormatted: [],
@@ -241,17 +239,6 @@ export default {
       hasLookupTable: !!this.subScale.lookupTable
     };
   },
-  beforeMount() {
-    this.itemsFormatted = this.formattedItems();
-  },
-  watch: {
-    subScale: {
-      deep: true,
-      handler() {
-        this.hasLookupTable = !!this.subScale.lookupTable;
-      }
-    }
-  },
   computed: {
     config () {
       return config;
@@ -266,6 +253,35 @@ export default {
 
       return itemCount;
     }
+  },
+  watch: {
+    subScale: {
+      deep: true,
+      handler() {
+        this.hasLookupTable = !!this.subScale.lookupTable;
+      }
+    }
+  },
+  created() {
+    const self = this;
+    self.keyDownHandler = function ({ key }) {
+      if (key == "Shift") self.shiftKeyOn = true;
+    };
+    self.keyUpHandler = function ({ key }) {
+      if (key == "Shift") self.shiftKeyOn = false;
+    };
+
+    window.addEventListener("keydown", this.keyDownHandler);
+    window.addEventListener("keyup", this.keyUpHandler);
+  },
+  beforeDestroy() {
+    if (this.multiSelectionEnabled) {
+      window.removeEventListener("keydown", this.keyDownHandler);
+      window.removeEventListener("keyup", this.keyUpHandler);
+    }
+  },
+  beforeMount() {
+    this.itemsFormatted = this.formattedItems();
   },
   methods: {
     ...mapMutations(config.MODULE_NAME, 

@@ -1,10 +1,10 @@
 <template>
   <div>
     <mavon-editor
-      :value="value"
       ref="md"
-      @input="$emit('input', $event)"
+      :value="value"
       :language="'en'"
+      @input="$emit('input', $event)"
       @imgAdd="$imgAdd"
     >
       <template slot="left-toolbar-after">
@@ -18,30 +18,30 @@
         >
           <v-icon>video_library</v-icon>
           <transition name="fade"> 
+            <div 
+              v-show="videoDropDown"
+              class="op-image popup-dropdown transition"
+              @mouseleave="$mouseleave_video_dropdown"
+              @mouseenter="$mouseenter_video_dropdown"
+            >
               <div 
-                class="op-image popup-dropdown transition"
-                v-show="videoDropDown"
-                @mouseleave="$mouseleave_video_dropdown"
-                @mouseenter="$mouseenter_video_dropdown"
+                class="dropdown-item"
+                @click.stop="linkType='Video'; linkDialog=true;"
               >
-                  <div 
-                    class="dropdown-item"
-                    @click.stop="linkType='Video'; linkDialog=true;"
-                  >
-                    <span>Video Link</span>
-                  </div>
-                  <div
-                    class="dropdown-item"
-                    style="overflow: hidden"
-                  >
-                    <input
-                      type="file"
-                      accept="video/*"
-                      @change="$addMedia"
-                    />
-                    Upload Video
-                  </div>
+                <span>Video Link</span>
               </div>
+              <div
+                class="dropdown-item"
+                style="overflow: hidden"
+              >
+                <input
+                  type="file"
+                  accept="video/*"
+                  @change="$addMedia"
+                >
+                Upload Video
+              </div>
+            </div>
           </transition>
         </div>
 
@@ -55,30 +55,30 @@
         >
           <v-icon>audiotrack</v-icon>
           <transition name="fade"> 
+            <div 
+              v-show="audioDropDown"
+              class="op-image popup-dropdown transition"
+              @mouseleave="$mouseleave_audio_dropdown"
+              @mouseenter="$mouseenter_audio_dropdown"
+            >
               <div 
-                class="op-image popup-dropdown transition"
-                v-show="audioDropDown"
-                @mouseleave="$mouseleave_audio_dropdown"
-                @mouseenter="$mouseenter_audio_dropdown"
+                class="dropdown-item"
+                @click.stop="linkType='Audio'; linkDialog=true;"
               >
-                  <div 
-                    class="dropdown-item"
-                    @click.stop="linkType='Audio'; linkDialog=true;"
-                  >
-                    <span>Audio Link</span>
-                  </div>
-                  <div
-                    class="dropdown-item"
-                    style="overflow: hidden"
-                  >
-                    <input
-                      type="file"
-                      accept="audio/*"
-                      @change="$addMedia"
-                    />
-                    Upload Audio
-                  </div>
+                <span>Audio Link</span>
               </div>
+              <div
+                class="dropdown-item"
+                style="overflow: hidden"
+              >
+                <input
+                  type="file"
+                  accept="audio/*"
+                  @change="$addMedia"
+                >
+                Upload Audio
+              </div>
+            </div>
           </transition>
         </div>
       </template>
@@ -90,28 +90,59 @@
       width="400"
     >
       <v-card class="pt-5 pb-6 text-center">
-        <v-progress-circular class="d-block mx-auto mt-2" color="primary" indeterminate :size="50">
-        </v-progress-circular>
+        <v-progress-circular
+          class="d-block mx-auto mt-2"
+          color="primary"
+          indeterminate
+          :size="50"
+        />
         <span> Uploading ... </span>
       </v-card>
     </v-dialog>
 
     <transition name="fade">
-        <div class="add-link-wrapper" v-if="linkDialog">
-            <div class="add-link">
-                <i @click.stop.prevent="linkDialog = false" class="fa fa-mavon-times"
-                    aria-hidden="true"></i>
-                <h3 class="title">{{`Add Link ${linkType}`}}</h3>
-                <div class="link-text input-wrapper">
-                    <input ref="linkTextInput" type="text" v-model="linkText" :placeholder="`${linkType} text`">
-                </div>
-                <div class="link-addr input-wrapper">
-                    <input type="text" v-model="linkAddr" :placeholder="`${linkType} address`">
-                </div>
-                <div class="op-btn cancel" @click.stop="linkDialog = false">{{'Cancel'}}</div>
-                <div class="op-btn sure" @click.stop="$linkAdd()">{{'Sure'}}</div>
-            </div>
+      <div
+        v-if="linkDialog"
+        class="add-link-wrapper"
+      >
+        <div class="add-link">
+          <i
+            class="fa fa-mavon-times"
+            aria-hidden="true"
+            @click.stop.prevent="linkDialog = false"
+          />
+          <h3 class="title">
+            {{ `Add Link ${linkType}` }}
+          </h3>
+          <div class="link-text input-wrapper">
+            <input
+              ref="linkTextInput"
+              v-model="linkText"
+              type="text"
+              :placeholder="`${linkType} text`"
+            >
+          </div>
+          <div class="link-addr input-wrapper">
+            <input
+              v-model="linkAddr"
+              type="text"
+              :placeholder="`${linkType} address`"
+            >
+          </div>
+          <div
+            class="op-btn cancel"
+            @click.stop="linkDialog = false"
+          >
+            {{ 'Cancel' }}
+          </div>
+          <div
+            class="op-btn sure"
+            @click.stop="$linkAdd()"
+          >
+            {{ 'Sure' }}
+          </div>
         </div>
+      </div>
     </transition>
   </div>
 </template>

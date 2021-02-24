@@ -4,11 +4,11 @@
       <template v-slot:default>
         <thead>
           <tr>
-            <th class="text-left"></th>
+            <th class="text-left" />
             <th 
               v-for="(option) in options"
-              class="text-left"
               :key="option.name"
+              class="text-left"
             >
               {{ option.name }}
             </th>
@@ -34,14 +34,13 @@
             </td>
           </tr>
         </tbody>
-        
       </template>
     </v-simple-table>
 
     <v-card-actions class="d-flex justify-space-around">
       <v-btn
-        @click="saveValues"
         color="primary"
+        @click="saveValues"
       >
         Save
       </v-btn>

@@ -17,7 +17,7 @@
           </v-container>
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
+          <v-spacer />
           <v-btn
             color="blue darken-1"
             text
@@ -66,6 +66,11 @@ export default {
       markdownData: this.markdownText,
     }
   },
+  watch: {
+    visibility: function (vis) {
+      this.dialog = vis
+    }
+  },
   methods: {
     /**
      * Submit markdown dialog
@@ -85,11 +90,6 @@ export default {
       this.dialog = false;
       this.$emit("close");
     },
-  },
-  watch: {
-    visibility: function (vis) {
-      this.dialog = vis
-    }
   }
 }
 </script>

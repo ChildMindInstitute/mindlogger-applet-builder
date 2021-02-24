@@ -88,7 +88,6 @@
               >
                 ( {{ option.description }} )
               </span>
-
             </div>
 
             <v-spacer />
@@ -97,8 +96,8 @@
               <v-btn
                 icon
                 :disabled="!isItemEditable"
-                @click="option.expanded = !option.expanded"
                 large
+                @click="option.expanded = !option.expanded"
               >
                 <v-icon
                   v-if="!option.expanded"
@@ -116,9 +115,9 @@
               <v-menu offset-y>
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
-                    v-on="on"
                     v-bind="attrs"
                     icon
+                    v-on="on"
                   >
                     <v-icon
                       :color="option.image ? 'primary' : ''"
@@ -162,8 +161,8 @@
               <v-btn
                 icon
                 :disabled="!isItemEditable"
-                @click="deleteOption(index)"
                 large
+                @click="deleteOption(index)"
               >
                 <v-icon color="grey lighten-1">
                   delete
@@ -262,10 +261,10 @@
       <div class="pa-2">
         <v-btn
           :disabled="!isItemEditable"
-          @click="addOption"
           fab
           x-small
           color="deep-purple"
+          @click="addOption"
         >
           <v-icon color="white">
             mdi-plus
@@ -351,37 +350,59 @@
         <v-col>
           <v-checkbox
             v-if="isTokenValue"
-            label="Reduce cumulation of tokens with negative token responses"
             v-model="enableNegativeTokens"
+            label="Reduce cumulation of tokens with negative token responses"
             @change="update"
           />
         </v-col>
       </v-row>
     </v-form>
 
-    <v-dialog v-model="imageUrlDialog.visible" persistent width="800">
+    <v-dialog
+      v-model="imageUrlDialog.visible"
+      persistent
+      width="800"
+    >
       <v-card>
-        <v-card-title class="headline grey lighten-2" primary-title>
-          <v-icon left>mdi-pencil</v-icon>
+        <v-card-title
+          class="headline grey lighten-2"
+          primary-title
+        >
+          <v-icon left>
+            mdi-pencil
+          </v-icon>
           Upload from URL
         </v-card-title>
         <v-card-text>
-          <v-text-field label="URL" v-model="imageUrlDialog.url" />
+          <v-text-field
+            v-model="imageUrlDialog.url"
+            label="URL"
+          />
         </v-card-text>
         <v-divider />
         <v-card-actions>
-          <v-btn outlined color="primary" @click="imageUrlDialog.visible = false;">
+          <v-btn
+            outlined
+            color="primary"
+            @click="imageUrlDialog.visible = false;"
+          >
             Close
           </v-btn>
           <v-spacer />
-          <v-btn color="primary" @click="onAddImageFromUrl">
+          <v-btn
+            color="primary"
+            @click="onAddImageFromUrl"
+          >
             Add
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="inValidFileDlg" width="400">
+    <v-dialog
+      v-model="inValidFileDlg"
+      width="400"
+    >
       <v-alert type="error">
         <span>{{ fileErrorMsg }}</span>
       </v-alert>

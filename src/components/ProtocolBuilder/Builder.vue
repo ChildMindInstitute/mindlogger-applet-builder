@@ -14,7 +14,11 @@
         v-else
       />
 
-      <v-dialog v-model="tokenPrizeDialog" persistent width="800">
+      <v-dialog
+        v-model="tokenPrizeDialog"
+        persistent
+        width="800"
+      >
         <PrizeActivityBuilder
           :initial-activity-data="prizeActivity || {}"
           @closeModal="onClosePrizeActivityModal"
@@ -80,6 +84,38 @@ export default {
       default: null,
     }
   },
+  computed: {
+    ...mapGetters(config.MODULE_NAME, [
+      'currentScreen',
+      'tokenPrizeModal',
+      'activities',
+      'prizeActivity',
+      'templateUpdateRequest',
+    ]),
+    config() {
+      return config;
+    },
+    tokenPrizeDialog: {
+      get: function () {
+        return this.tokenPrizeModal;
+      },
+      set: function (value) {
+        this.setTokenPrizeModalStatus(value);
+      }
+    }
+  },
+  watch: {
+    templateUpdateRequest: {
+      deep: true,
+      handler () {
+        const req = this.templateUpdateRequest;
+        if (req.pending) {
+          this.$emit(req.type, req.option);
+          this.updateTemplateRequestStatus(false);
+        }
+      }
+    }
+  },
   async beforeMount() {
     this.setTemplates(this.templates);
     this.setVersions(this.versions);
@@ -115,38 +151,6 @@ export default {
     }
 
     this.$emit("setLoading", false);
-  },
-  watch: {
-    templateUpdateRequest: {
-      deep: true,
-      handler () {
-        const req = this.templateUpdateRequest;
-        if (req.pending) {
-          this.$emit(req.type, req.option);
-          this.updateTemplateRequestStatus(false);
-        }
-      }
-    }
-  },
-  computed: {
-    ...mapGetters(config.MODULE_NAME, [
-      'currentScreen',
-      'tokenPrizeModal',
-      'activities',
-      'prizeActivity',
-      'templateUpdateRequest',
-    ]),
-    config() {
-      return config;
-    },
-    tokenPrizeDialog: {
-      get: function () {
-        return this.tokenPrizeModal;
-      },
-      set: function (value) {
-        this.setTokenPrizeModalStatus(value);
-      }
-    }
   },
   methods: {
     ...mapMutations(config.MODULE_NAME, [

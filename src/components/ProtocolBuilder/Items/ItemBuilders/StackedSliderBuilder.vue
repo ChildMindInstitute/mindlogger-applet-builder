@@ -23,8 +23,8 @@
             <v-btn
               icon
               :disabled="!isItemEditable"
-              @click="slider.expanded = !slider.expanded"
               large
+              @click="slider.expanded = !slider.expanded"
             >
               <v-icon
                 v-if="!slider.expanded"
@@ -42,8 +42,8 @@
             <v-btn
               icon
               :disabled="!isItemEditable"
-              @click="deleteSlider(index)"
               large
+              @click="deleteSlider(index)"
             >
               <v-icon color="grey lighten-1">
                 delete
@@ -78,10 +78,10 @@
                 label="Min Value"
                 :disabled="!isItemEditable"
                 type="number"
-                @input="sliderRangeUpdate($event, 'min', slider)"
                 min="1"
                 :max="slider.maxSliderTick"
                 :rules="numberRules"
+                @input="sliderRangeUpdate($event, 'min', slider)"
               />
             </v-col>
 
@@ -119,10 +119,10 @@
                 label="Max Value"
                 :disabled="!isItemEditable"
                 type="number"
-                @input="sliderRangeUpdate($event, 'max', slider)"
                 :min="slider.minSliderTick"
                 max="12"
                 :rules="numberRules"
+                @input="sliderRangeUpdate($event, 'max', slider)"
               />
             </v-col>
 
@@ -173,10 +173,10 @@
       <div class="pa-2">
         <v-btn
           :disabled="!isItemEditable"
-          @click="addNewSlider"
           fab
           x-small
           color="deep-purple"
+          @click="addNewSlider"
         >
           <v-icon color="white">
             mdi-plus
@@ -248,16 +248,27 @@
       </v-col>
     </v-row>
 
-    <v-dialog max-width="350" v-model="scoreDialog.visible" persistent>
-      <v-card class="pa-4" v-if="scoreDialog.slider.scores">
+    <v-dialog
+      v-model="scoreDialog.visible"
+      max-width="350"
+      persistent
+    >
+      <v-card
+        v-if="scoreDialog.slider.scores"
+        class="pa-4"
+      >
         <v-form
           ref="form"
           v-model="valid"
         >
           <v-card>
             <div class="d-flex">
-              <div class="option-value">Value</div>
-              <div class="option-score">Score</div>
+              <div class="option-value">
+                Value
+              </div>
+              <div class="option-score">
+                Score
+              </div>
             </div>
           </v-card>
           <v-card class="options">
@@ -266,7 +277,9 @@
               :key="i"
               class="d-flex"
             >
-              <div class="option-value pt-2">{{i + Number(scoreDialog.slider.minSliderTick)}}</div>
+              <div class="option-value pt-2">
+                {{ i + Number(scoreDialog.slider.minSliderTick) }}
+              </div>
               <v-text-field
                 v-model="scoreDialog.slider.scores[i]"
                 class="option-score mt-0 pt-0"
@@ -280,8 +293,8 @@
           <v-card-actions class="d-flex justify-space-around">
             <v-btn
               :disabled="!valid || !isItemEditable"
-              @click="saveScores"
               color="primary"
+              @click="saveScores"
             >
               Save
             </v-btn>
@@ -295,7 +308,6 @@
         </v-form>
       </v-card>
     </v-dialog>
-
   </v-form>
 </template>
 

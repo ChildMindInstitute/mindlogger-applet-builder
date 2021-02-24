@@ -174,11 +174,6 @@ export default {
       showValue: this.current.showValue || null,
     }
   },
-  beforeMount () {
-    if (!this.ifValue) {
-      this.ifValue = this.filteredItems[0];
-    }
-  },
   computed: {
     config () {
       return config;
@@ -230,6 +225,11 @@ export default {
 
     answerItems () {
       return this.ifValue.inputType != 'slider' && this.ifValue.options.options || [];
+    }
+  },
+  beforeMount () {
+    if (!this.ifValue) {
+      this.ifValue = this.filteredItems[0];
     }
   },
   methods: {

@@ -6,31 +6,36 @@
 
     <div>
       <ConditionalBuilder
-        class="ma-4"
         v-for="(conditional, index) in conditionals"
         :key="index"
+        class="ma-4"
         :conditional-index="index"
         :current="conditional"
-      >
-      </ConditionalBuilder>
+      />
     </div>
 
     <v-btn
-      @click="onAddConditional"
       color="primary"
       class="mx-4 my-2"
       rounded
+      @click="onAddConditional"
     >
       Add Conditional
     </v-btn>
 
-    <v-dialog v-model="conditionalAlert" width="350">
+    <v-dialog
+      v-model="conditionalAlert"
+      width="350"
+    >
       <v-card>
-        <v-card-title class="grey lighten-2">Conditional Logic Alert</v-card-title>
-        <v-card-text class="pa-4">{{ alertMessage }}</v-card-text>
+        <v-card-title class="grey lighten-2">
+          Conditional Logic Alert
+        </v-card-title>
+        <v-card-text class="pa-4">
+          {{ alertMessage }}
+        </v-card-text>
       </v-card>
     </v-dialog>
-
   </v-card>
 </template>
 

@@ -1,16 +1,16 @@
 <template>
   <div>
-  <p>
-    Users will be prompted to grant access to their location. Latitude and longitude will be recorded.
-  </p>
-  <ImageUploader
-    class="my-5"
-    style="max-width: 300px"
-    :uploadFor="'default-item'"
-    :itemImg="responseOptions['schema:image']"
-    @onAddImg="onUploadImg"
-    @onRemoveImg="onRemoveImg"
-  />
+    <p>
+      Users will be prompted to grant access to their location. Latitude and longitude will be recorded.
+    </p>
+    <ImageUploader
+      class="my-5"
+      style="max-width: 300px"
+      :uploadFor="'default-item'"
+      :itemImg="responseOptions['schema:image']"
+      @onAddImg="onUploadImg"
+      @onRemoveImg="onRemoveImg"
+    />
   </div>
 </template>
 

@@ -2,14 +2,14 @@
   <div>
     <ActivityHeader
       :headerExpanded="isExpanded"
-      @onExpand="handleExpansion()"
       class="pa-4 my-4"
+      @onExpand="handleExpansion()"
     />
 
     <ItemList
       v-if="currentScreen == config.ITEM_SCREEN"
-      @onAddItem="handleAddItem()"
       class="pb-2"
+      @onAddItem="handleAddItem()"
     />
 
     <SubScaleList

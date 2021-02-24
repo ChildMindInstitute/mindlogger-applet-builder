@@ -12,9 +12,9 @@
             label="Min Value"
             :disabled="!isItemEditable"
             type="number"
-            @input="sliderRangeUpdate($event, 'min')"
             min="1"
             :max="maxSliderTick"
+            @input="sliderRangeUpdate($event, 'min')"
           />
         </v-col>
 
@@ -52,9 +52,9 @@
             label="Max Value"
             :disabled="!isItemEditable"
             type="number"
-            @input="sliderRangeUpdate($event, 'max')"
             :min="minSliderTick"
             max="12"
+            @input="sliderRangeUpdate($event, 'max')"
           />
         </v-col>
 
@@ -188,16 +188,27 @@
       </v-col>
     </v-row>
 
-    <v-dialog max-width="350" v-model="scoreDialog" persistent>
-      <v-card class="pa-4" v-if="scores">
+    <v-dialog
+      v-model="scoreDialog"
+      max-width="350"
+      persistent
+    >
+      <v-card
+        v-if="scores"
+        class="pa-4"
+      >
         <v-form
           ref="form"
           v-model="valid"
         >
           <v-card>
             <div class="d-flex">
-              <div class="option-value">Value</div>
-              <div class="option-score">Score</div>
+              <div class="option-value">
+                Value
+              </div>
+              <div class="option-score">
+                Score
+              </div>
             </div>
           </v-card>
           <v-card class="options">
@@ -206,7 +217,9 @@
               :key="i"
               class="d-flex"
             >
-              <div class="option-value pt-2">{{i + Number(minSliderTick)}}</div>
+              <div class="option-value pt-2">
+                {{ i + Number(minSliderTick) }}
+              </div>
               <v-text-field
                 v-model="scores[i]"
                 class="option-score mt-0 pt-0"
@@ -220,8 +233,8 @@
           <v-card-actions class="d-flex justify-space-around">
             <v-btn
               :disabled="!valid || !isItemEditable"
-              @click="saveScores"
               color="primary"
+              @click="saveScores"
             >
               Save
             </v-btn>
@@ -235,7 +248,6 @@
         </v-form>
       </v-card>
     </v-dialog>
-
   </v-form>
 </template>
 

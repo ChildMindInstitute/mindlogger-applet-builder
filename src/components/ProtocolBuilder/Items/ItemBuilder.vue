@@ -14,12 +14,18 @@
       </span>
       <v-spacer />
       <v-card-actions>
-        <v-btn icon @click="duplicateItem(itemIndex)">
+        <v-btn
+          icon
+          @click="duplicateItem(itemIndex)"
+        >
           <v-icon color="grey lighten-1">
             content_copy
           </v-icon>
         </v-btn>
-        <v-btn icon @click="editItem">
+        <v-btn
+          icon
+          @click="editItem"
+        >
           <v-icon
             v-if="!isExpanded && item.allowEdit"
             color="grey lighten-1"
@@ -54,30 +60,31 @@
 
     <v-form
       v-if="isExpanded"
-      class="px-2"
       ref="form"
+      class="px-2"
       lazy-validation
     >
-      <div class="item-name-edit-wrapper"
-        v-bind:class="{ 'editing': isItemNameEditing }"
+      <div
+        class="item-name-edit-wrapper"
+        :class="{ 'editing': isItemNameEditing }"
       >
         <span
-          v-bind:class="{ 'hide': isItemNameEditing }"
+          :class="{ 'hide': isItemNameEditing }"
           class="item-name"
         >
           {{ item.name }}
         </span>
         <v-text-field
-          class="item-name-input"
-          v-bind:class="{ 'focus': isItemNameEditing }"
           v-model="item.name"
-          @focus="isItemNameEditing = true"
-          @blur="isItemNameEditing = false"
-          @input="onUpdateName"
+          class="item-name-input"
+          :class="{ 'focus': isItemNameEditing }"
           label="Item Name"
           :rules="nameRules"
           :disabled="!item.allowEdit || item.inputType == 'cumulativeScore'"
           required
+          @focus="isItemNameEditing = true"
+          @blur="isItemNameEditing = false"
+          @input="onUpdateName"
           @keydown="nameKeydown($event)"
         />
       </div>
@@ -95,9 +102,9 @@
           @onRemoveImg="onRemoveImg"
         />
         <v-textarea
+          v-if="item.inputType !== 'cumulativeScore'"
           v-model="questionBuilder.text"
           label="Large Text"
-          v-if="item.inputType !== 'cumulativeScore'"
           :disabled="!item.allowEdit"
           auto-grow
           filled
@@ -116,16 +123,16 @@
             :items="itemInputTypes"
             :disabled="!item.allowEdit"
             label="Input Type"
-            @change="onUpdateInputType($event)"
             outlined
             hide-details
+            @change="onUpdateInputType($event)"
           >
             <template
               v-slot:item="{ item, attrs, on }"
             >
               <v-list-item
-                v-on="on"
                 v-bind="attrs"
+                v-on="on"
               >
                 <v-tooltip
                   v-if="!hasScoringItem && item.text == 'cumulativeScore'"
@@ -143,7 +150,7 @@
                         height="20"
                         class="px-2 pt-2"
                         :src="item.icon"
-                      />
+                      >
                       <span>{{ item.text }}</span>
                     </div>
                   </template>
@@ -156,7 +163,7 @@
                     height="20"
                     class="px-2 pt-2"
                     :src="item.icon"
-                  />
+                  >
                   {{ item.text }}
                 </div>
               </v-list-item>
@@ -170,7 +177,7 @@
                   height="20"
                   class="pr-2"
                   :src="item.icon"
-                />
+                >
 
                 {{ item.text }}
               </v-list-item>
@@ -190,8 +197,8 @@
         />
       </div>
       <RadioBuilder
-        :key="`${baseKey}-radio`"
         v-if="item.inputType === 'radio' || item.inputType === 'checkbox'"
+        :key="`${baseKey}-radio`"
         :is-multiple-choice="item.inputType === 'checkbox'"
         :is-skippable-item="item.allow"
         :response-options="item.responseOptions"
@@ -208,8 +215,8 @@
         @error="isError = $event"
       />
       <StackedRadioBuilder
-        :key="`${baseKey}-stackedRadio`"
         v-if="item.inputType === 'stackedRadio' || item.inputType === 'stackedCheckbox'"
+        :key="`${baseKey}-stackedRadio`"
         :is-multiple-choice="item.inputType === 'stackedCheckbox'"
         :is-skippable-item="item.allow"
         :response-options="item.responseOptions"
@@ -223,8 +230,8 @@
         @error="isError = $event"
       />
       <TextBuilder
-        :key="`${baseKey}-text`"
         v-if="item.inputType === 'text'"
+        :key="`${baseKey}-text`"
         :is-skippable-item="item.allow"
         :initial-item-data="item.options"
         :response-option="item.responseOptions"
@@ -235,8 +242,8 @@
         @updateAllow="updateAllow"
       />
       <SliderBuilder
-        :key="`${baseKey}-slider`"
         v-if="item.inputType === 'slider'"
+        :key="`${baseKey}-slider`"
         :is-skippable-item="item.allow"
         :initial-item-data="item.options"
         :is-item-editable="item.allowEdit"
@@ -246,8 +253,8 @@
         @error="isError = $event"
       />
       <StackedSliderBuilder
-        :key="`${baseKey}-stackedSlider`"
         v-if="item.inputType === 'stackedSlider'"
+        :key="`${baseKey}-stackedSlider`"
         :is-skippable-item="item.allow"
         :initial-item-data="item.options"
         :is-item-editable="item.allowEdit"
@@ -257,25 +264,25 @@
         @error="isError = $event"
       />
       <VideoBuilder
-        :key="`${baseKey}-video`"
         v-if="item.inputType === 'video'"
+        :key="`${baseKey}-video`"
       />
       <PhotoBuilder
-        :key="`${baseKey}-photo`"
         v-if="item.inputType === 'photo'"
+        :key="`${baseKey}-photo`"
       />
       <TimeRangeBuilder
-        :key="`${baseKey}-timeRange`"
         v-if="item.inputType === 'timeRange'"
+        :key="`${baseKey}-timeRange`"
       />
       <DateBuilder
-        :key="`${baseKey}-date`"
         v-if="item.inputType === 'date'"
+        :key="`${baseKey}-date`"
       />
 
       <DrawingBuilder
-        :key="`${baseKey}-drawing`"
         v-if="item.inputType === 'drawing'"
+        :key="`${baseKey}-drawing`"
         :initial-item-response-options="item.responseOptions"
         :initial-item-input-options="item.inputOptions"
         @uploading="isUploadingState = $event"
@@ -285,8 +292,8 @@
       />
 
       <AudioRecordBuilder
-        :key="`${baseKey}-audioRecord`"
         v-if="item.inputType === 'audioRecord'"
+        :key="`${baseKey}-audioRecord`"
         :is-skippable-item="item.allow"
         :initial-item-data="item.options"
         @updateOptions="updateOptions"
@@ -294,8 +301,8 @@
       />
 
       <AudioImageRecordBuilder
-        :key="`${baseKey}-audioImageRecord`"
         v-if="item.inputType === 'audioImageRecord'"
+        :key="`${baseKey}-audioImageRecord`"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="item.allow"
         @uploading="isUploadingState = $event"
@@ -306,8 +313,8 @@
       />
 
       <GeolocationBuilder
-        :key="`${baseKey}-geolocation`"
         v-if="item.inputType === 'geolocation'"
+        :key="`${baseKey}-geolocation`"
         :initial-item-response-options="item.responseOptions"
         @uploading="isUploadingState = $event"
         @error="isError = $event"
@@ -315,8 +322,8 @@
       />
 
       <AudioStimulusBuilder
-        :key="`${baseKey}-audioStimulus`"
         v-if="item.inputType === 'audioStimulus'"
+        :key="`${baseKey}-audioStimulus`"
         :is-skippable-item="item.allow"
         :initial-item-input-options="item.inputOptions"
         :initial-item-media="item.media"
@@ -327,8 +334,8 @@
         @updateMedia="updateMedia"
       />
       <CumulativeScoreBuilder
-        :key="`${baseKey}-cumulativeScore`"
         v-if="item.inputType === 'cumulativeScore'"
+        :key="`${baseKey}-cumulativeScore`"
         :items="currentActivity.items"
         :is-item-editable="item.allowEdit"
         :initial-item-data="item"
@@ -345,7 +352,7 @@
           v-if="questionBuilder.text"
           width="15"
           :src="itemInputTypes.find(({ text }) => text === item.inputType).icon" 
-        />
+        >
         
         <span class="ml-2">{{ questionBuilder.text }}</span>
       </div>
@@ -385,12 +392,15 @@
       width="400"
     >
       <v-card class="pt-5 pb-6 text-center">
-        <v-progress-circular class="d-block mx-auto mt-2" color="primary" indeterminate :size="50">
-        </v-progress-circular>
+        <v-progress-circular
+          class="d-block mx-auto mt-2"
+          color="primary"
+          indeterminate
+          :size="50"
+        />
         <span> Uploading ... </span>
       </v-card>
     </v-dialog>
-
   </v-card>
 </template>
 
@@ -530,40 +540,6 @@ export default {
       baseKey: 0,
     }
   },
-
-  beforeMount() {
-
-    Object.assign(this, {
-      valid: this.item.name && this.item.name.length > 0,
-      hasScoringItem: this.currentActivity.items.some((item) => item.options.hasScoreValue),
-      questionBuilder: {
-        text: this.item.question.text,
-        imgURL: this.item.question.image
-      },
-      isExpanded: !this.item.name.length
-    });
-
-    this.setItemName();
-
-  },
-
-  watch: {
-    questionBuilder: {
-      deep: true,
-      handler() {
-        this.updateItemMetaInfo({
-          index: this.itemIndex,
-          obj: {
-            question: {
-              text: this.questionBuilder.text,
-              image: this.questionBuilder.imgURL
-            }
-          }
-        })
-      }
-    },
-  },
-
   computed: {
     config () {
       return config;
@@ -585,6 +561,38 @@ export default {
     item () {
       return this.currentActivity.items[this.itemIndex];
     }
+  },
+  watch: {
+    questionBuilder: {
+      deep: true,
+      handler() {
+        this.updateItemMetaInfo({
+          index: this.itemIndex,
+          obj: {
+            question: {
+              text: this.questionBuilder.text,
+              image: this.questionBuilder.imgURL
+            }
+          }
+        })
+      }
+    },
+  },
+
+  beforeMount() {
+
+    Object.assign(this, {
+      valid: this.item.name && this.item.name.length > 0,
+      hasScoringItem: this.currentActivity.items.some((item) => item.options.hasScoreValue),
+      questionBuilder: {
+        text: this.item.question.text,
+        imgURL: this.item.question.image
+      },
+      isExpanded: !this.item.name.length
+    });
+
+    this.setItemName();
+
   },
   methods: {
     ...mapMutations(config.MODULE_NAME,

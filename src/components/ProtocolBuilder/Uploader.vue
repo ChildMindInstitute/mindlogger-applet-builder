@@ -13,21 +13,15 @@
 
     <div v-if="initialType === 'audio' || initialType === 'image'">
       
-      <v-expansion-panels>
+      <v-expansion-panels
+        v-if="initialAdditionalType !== 'small-circle'"
+      >
         <v-expansion-panel>
           <v-expansion-panel-header>
             {{ uploadData ? 'Change' : 'Add' }} {{initialTitle}}
           </v-expansion-panel-header>
           <v-expansion-panel-content>
             <div class="input-file-container">
-
-              <input
-                class="file-input"
-                type="file"
-                ref="fileInput"
-                accept="audio/mpeg, audio/ogg, audio/wav"
-                @change="onAddFromDevice($event, null)"
-              >
 
               <input
                 v-if="initialType === 'audio'"
@@ -106,11 +100,101 @@
                 </span>
               </v-tooltip>
             </div>
-            <!-- /Image Upload Rules -->
 
           </v-expansion-panel-content>
         </v-expansion-panel>
       </v-expansion-panels>
+      <!-- default structure -->
+
+      <v-menu
+        v-if="initialType === 'image' && initialAdditionalType === 'small-circle'"
+        offset-y
+      >
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn
+            v-bind="attrs"
+            icon
+            v-on="on"
+          >
+            <v-icon
+              :color="uploadData ? 'primary' : ''"
+            >
+              mdi-image-search
+            </v-icon>
+          </v-btn>
+        </template>
+        <v-list>
+          
+          <v-list-item
+            class="v-file-input-list-item"
+          >
+            <div class="input-file-container">
+              <input
+                class="file-input"
+                type="file"
+                ref="fileInput"
+                accept="image/jpeg, image/png, image/bmp"
+                @change="onAddFromDevice($event, null)"
+              >
+              <v-list-item-title
+                class="v-list-item-title d-flex align-center"
+              >
+                Your computer
+                <v-icon right>mdi-monitor</v-icon>
+              </v-list-item-title>
+            </div>
+          </v-list-item>
+
+          <v-list-item
+            @click="isAddingFromUrl = true"
+          >
+            <v-list-item-title
+              class="d-flex align-center"
+            >
+              From URL
+              <v-icon right>mdi-link-variant-plus</v-icon>
+            </v-list-item-title>
+          </v-list-item>
+
+          <v-list-item
+            v-if="uploadData"
+            @click="removeConfirm = true"
+          >
+            <v-list-item-title
+              style="color: #ff5252"
+            >
+              Remove
+            </v-list-item-title>
+          </v-list-item>
+
+            <div
+              class="text-right px-2"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-icon
+                    color="primary"
+                    dark
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    mdi-information-outline
+                  </v-icon>
+                </template>
+                <span>
+                  <p>Image Requirements</p>
+                  <ul>
+                    <li>Size: less than 8MB</li>
+                    <li>Width: between 100px and 1920px</li>
+                    <li>Height: between 100px and 1920px</li>
+                  </ul>
+                </span>
+              </v-tooltip>
+            </div>
+
+        </v-list>
+      </v-menu>
+      <!-- small-circle structure -->
 
     </div>
     <!-- Image/Audio Uploader Structure -->
@@ -304,6 +388,26 @@ export default {
 
 .v-dialog .v-alert {
   margin-bottom: 0px;
+}
+
+.v-file-input-list-item {
+  padding: 0px;
+  min-height: auto;
+}
+
+.v-file-input-list-item .input-file-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding-left: 16px;
+  padding-right: 16px;
+  min-height: 48px;
+  background-color: transparent;
+  transition: 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
+}
+
+.v-file-input-list-item .input-file-container:hover {
+  background-color: rgba(0, 0, 0, 0.04);
 }
 
 </style>

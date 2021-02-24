@@ -92,18 +92,20 @@
       <template
         v-if="item.inputType !== 'markdownMessage'"
       >
-        <ImageUploader
-          class="my-4"
+        <Uploader
+          class="mt-3 mb-4"
           style="max-width: 300px"
-          :uploadFor="'activity-item'"
-          :itemImg="questionBuilder.imgURL"
-          :notify-enabled="false"
-          @onAddImg="onAddImg"
-          @onRemoveImg="onRemoveImg"
+          :initialType="'image'"
+          :initialData="headerImage"
+          :initialTitle="'Header Item Image'"
+          @onAddFromUrl="onAddHeaderImageFromUrl($event)"
+          @onAddFromDevice="loading = true; onAddHeaderImageFromDevice($event);"
+          @onRemove="onRemoveHeaderImage()"
+          @onNotify="loading = false; notify = $event;"
         />
         <v-textarea
           v-if="item.inputType !== 'cumulativeScore'"
-          v-model="questionBuilder.text"
+          v-model="largeText"
           label="Large Text"
           auto-grow
           filled
@@ -209,8 +211,6 @@
         @updateTemplates="onUpdateTemplates"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
-        @uploading="isUploadingState = $event"
-        @error="isError = $event"
       />
 
       <StackedRadioBuilder
@@ -224,8 +224,6 @@
         :has-prize-activity="hasPrizeActivity"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
-        @uploading="isUploadingState = $event"
-        @error="isError = $event"
       />
 
       <TextBuilder
@@ -247,8 +245,6 @@
         :initial-item-data="item.options"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
-        @uploading="isUploadingState = $event"
-        @error="isError = $event"
       />
 
       <StackedSliderBuilder
@@ -258,8 +254,6 @@
         :initial-item-data="item.options"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
-        @uploading="isUploadingState = $event"
-        @error="isError = $event"
       />
 
       <VideoBuilder
@@ -287,8 +281,6 @@
         :key="`${baseKey}-drawing`"
         :initial-item-response-options="item.responseOptions"
         :initial-item-input-options="item.inputOptions"
-        @uploading="isUploadingState = $event"
-        @error="isError = $event"
         @updateResponseOptions="updateResponseOptions"
         @updateInputOptions="updateInputOptions"
       />
@@ -307,8 +299,6 @@
         :key="`${baseKey}-audioImageRecord`"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="item.allow"
-        @uploading="isUploadingState = $event"
-        @error="isError = $event"
         @checkValidation="valid = $event"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
@@ -318,9 +308,9 @@
         v-if="item.inputType === 'geolocation'"
         :key="`${baseKey}-geolocation`"
         :initial-item-response-options="item.responseOptions"
-        @uploading="isUploadingState = $event"
-        @error="isError = $event"
         @updateResponseOptions="updateResponseOptions"
+        @loading="loading = $event"
+        @notify="notify = $event"
       />
 
       <AudioStimulusBuilder
@@ -351,12 +341,12 @@
     >
       <div class="item-quiz">
         <img
-          v-if="questionBuilder.text"
+          v-if="largeText"
           width="15"
           :src="itemInputTypes.find(({ text }) => text === item.inputType).icon" 
         >
         
-        <span class="ml-2">{{ questionBuilder.text }}</span>
+        <span class="ml-2">{{ largeText }}</span>
       </div>
 
       <div
@@ -388,21 +378,9 @@
       </div>
     </div>
 
-    <v-dialog
-      v-model="isUploadingState"
-      persistent
-      width="400"
-    >
-      <v-card class="pt-5 pb-6 text-center">
-        <v-progress-circular
-          class="d-block mx-auto mt-2"
-          color="primary"
-          indeterminate
-          :size="50"
-        />
-        <span> Uploading ... </span>
-      </v-card>
-    </v-dialog>
+    <Notify :notify="notify" />
+    <Loading :loading="loading" />
+
   </v-card>
 </template>
 
@@ -491,8 +469,8 @@
 </style>
 
 <script>
+import Uploader from '../Uploader.vue';
 
-import ImageUploader from '../ImageUploader.vue';
 import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
 import StackedRadioBuilder from "./ItemBuilders/StackedRadioBuilder.vue";
 import TextBuilder from "./ItemBuilders/TextBuilder.vue";
@@ -508,14 +486,20 @@ import GeolocationBuilder from "./ItemBuilders/GeolocationBuilder.vue";
 import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
 import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
 import StackedSliderBuilder from "./ItemBuilders/StackedSliderBuilder";
+
 import MarkDownEditor from "../MarkDownEditor";
+
 import Item from '../../../models/Item';
-import ImageUpldr from '../../../models/ImageUploader';
+
+import Notify from '../Additional/Notify.vue';
+import Loading from '../Additional/Loading.vue';
+
 import { mapMutations, mapGetters } from 'vuex';
 import config from '../../../config';
 
 export default {
   components: {
+    Uploader,
     RadioBuilder,
     TextBuilder,
     SliderBuilder,
@@ -529,10 +513,11 @@ export default {
     GeolocationBuilder,
     AudioStimulusBuilder,
     CumulativeScoreBuilder,
-    ImageUploader,
     MarkDownEditor,
     StackedRadioBuilder,
     StackedSliderBuilder,
+    Notify,
+    Loading,
   },
   props: {
     itemIndex: {
@@ -551,16 +536,14 @@ export default {
       ],
       hasScoringItem: false,
       valid: false,
-      imgUploader: new ImageUpldr(),
-      questionBuilder: {
-        text: '',
-        imgURL: ''
-      },
-      isUploadingState: false,
-      isError: '',
+      largeText: '',
+      headerImage: '',
       isExpanded: false,
       isItemNameEditing: false,
+      isItemValid: true,
       baseKey: 0,
+      loading: false,
+      notify: {},
     }
   },
   computed: {
@@ -586,19 +569,17 @@ export default {
     }
   },
   watch: {
-    questionBuilder: {
-      deep: true,
-      handler() {
-        this.updateItemMetaInfo({
-          index: this.itemIndex,
-          obj: {
-            question: {
-              text: this.questionBuilder.text,
-              image: this.questionBuilder.imgURL
-            }
-          }
-        })
-      }
+    largeText: function(text) {
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { question: { text, image: this.headerImage } }
+      });
+    },
+    headerImage: function(image) {
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { question: { text: this.largeText, image } }
+      });
     },
   },
 
@@ -607,10 +588,8 @@ export default {
     Object.assign(this, {
       valid: this.item.name && this.item.name.length > 0,
       hasScoringItem: this.currentActivity.items.some((item) => item.options.hasScoreValue),
-      questionBuilder: {
-        text: this.item.question.text,
-        imgURL: this.item.question.image
-      },
+      largeText: this.item.question.text,
+      headerImage: this.item.question.image,
       isExpanded: !this.item.name.length
     });
 
@@ -645,36 +624,6 @@ export default {
       if (!/^[a-zA-Z0-9-_]+$/.test(e.key)) {
         e.preventDefault();
       }
-    },
-
-    async onAddImg (data) {
-      this.isError = '';
-
-      if ( typeof data !== 'string' ) {
-        this.isUploadingState = true;
-        const response = await this.imgUploader.uploadImage(data);
-        this.questionBuilder.imgURL = response.location;
-      } else {
-        this.questionBuilder.imgURL = data;
-      }
-
-      this.isUploadingState = false;
-
-      this.updateItemMetaInfo({
-        index: this.itemIndex,
-        obj: {
-          question: {
-            text: this.questionBuilder.text,
-            image: this.questionBuilder.imgURL
-          }
-        }
-      });
-    },
-
-    onRemoveImg () {
-      this.isError = '';
-      this.questionBuilder.imgFile = null;
-      this.questionBuilder.imgURL = '';
     },
 
     onUpdateInputType (inputType) {
@@ -786,7 +735,44 @@ export default {
         index: this.itemIndex,
         obj: { cumulativeScores: scoreRules }
       });
-    }
+    },
+
+    onAddHeaderImageFromUrl(url) {
+      this.headerImage = url;
+      this.notify = {
+        type: 'success',
+        message: 'Header image from URL successfully added to Item.',
+        duration: 3000,
+      };
+    },
+
+    async onAddHeaderImageFromDevice(uploadFunction) {
+      try {
+        this.headerImage = await uploadFunction();
+        this.loading = false;
+        this.notify = {
+          type: 'success',
+          message: 'Header image successfully added to Item.',
+          duration: 3000,
+        };
+      } catch (error) {
+        this.loading = false;
+        this.notify = {
+          type: 'error',
+          message: 'Something went wrong with uploading header image for Item. Please try to upload again or just save Item without changes for header image.',
+        };
+      }
+    },
+
+    onRemoveHeaderImage() {
+      this.headerImage = '';
+      this.notify = {
+        type: 'warning',
+        message: 'Header image successfully removed from Item.',
+        duration: 3000,
+      };
+    },
+
   }
 }
 </script>

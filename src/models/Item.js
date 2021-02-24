@@ -252,11 +252,11 @@ export default class Item {
       let inputType = this.ref.inputType;
 
       if (this.ref.inputType == 'radio' || this.ref.inputType == 'checkbox') {
-        this.ref.inputType = 'radio';
+        inputType = 'radio';
       } else if (this.ref.inputType == 'stackedRadio' || this.ref.inputType == 'stackedCheckbox') {
-        this.ref.inputType = 'stackedRadio';
+        inputType = 'stackedRadio';
       } else {
-        this.ref.inputType = 'prize';
+        inputType = 'prize';
       }
 
       if (this.ref.options.isMultipleChoice) {

@@ -304,6 +304,8 @@
         @checkValidation="valid = $event"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
+        @loading="loading = $event"
+        @notify="notify = $event"
       />
 
       <GeolocationBuilder

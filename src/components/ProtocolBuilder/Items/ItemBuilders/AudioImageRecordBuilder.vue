@@ -19,13 +19,16 @@
       @click="onUpdateResponseOptions"
       @keyup="onUpdateResponseOptions"
     />
-    <ImageUploader
+    <Uploader
       class="my-3"
       style="max-width: 300px"
-      :uploadFor="'default-item'"
-      :itemImg="responseOptions['schema:image']"
-      @onAddImg="onUploadImg"
-      @onRemoveImg="onRemoveImg"
+      :initialType="'image'"
+      :initialData="responseOptions['schema:image']"
+      :initialTitle="'Geolocation Image'"
+      @onAddFromUrl="onAddAudioImageFromUrl($event)"
+      @onAddFromDevice="$emit('loading', true); onAddAudioImageFromDevice($event);"
+      @onRemove="onRemoveAudioImage()"
+      @onNotify="$emit('loading', false); $emit('notify', $event);"
     />
     <p class="mb-8">
       For this type of item will be added default image if you are not going use your own image.
@@ -44,12 +47,11 @@
 </template>
 
 <script>
-import ImageUpldr from '../../../../models/ImageUploader';
-import ImageUploader from '../../ImageUploader.vue';
+import Uploader from '../../Uploader.vue';
 
 export default {
   components: {
-    ImageUploader
+    Uploader,
   },
   props: {
     initialItemResponseOptions: {
@@ -76,7 +78,6 @@ export default {
     this.$emit('checkValidation', true);
 
     return {
-      imgUpldr: new ImageUpldr(),
       responseOptions,
       isSkippable: this.isSkippableItem || false,
       valid: true,
@@ -99,35 +100,43 @@ export default {
       this.$emit('updateAllow', this.isSkippable);
     },
 
-    async onUploadImg(data) {
+    onAddAudioImageFromUrl(url) {
+      this.responseOptions['schema:image'] = url;
+      this.onUpdateResponseOptions();
+      this.$emit('notify', {
+        type: 'success',
+        message: 'Image from URL successfully added to AudioImageRecord Item.',
+        duration: 3000,
+      });
+    },
+
+    async onAddAudioImageFromDevice(uploadFunction) {
       try {
-        this.$emit('error', '');
-        setTimeout(() => { this.$emit('uploading', true); }, 2000);
-
-        if(typeof data === 'string') {
-          this.responseOptions['schema:image'] = data;
-        } else {
-          const response = await this.imgUpldr.uploadImage(data);
-          this.responseOptions['schema:image'] = response.location;
-        }
-
-        setTimeout(() => {
-          this.onUpdateResponseOptions();
-          this.$emit('uploading', false);
-        }, 2100);
-
-      } catch(e) {
-        setTimeout(() => {
-          this.$emit('uploading', false);
-          this.$emit('error', 'Something went wrong with uploading image for "AudioImageRecord" item. Please try to upload image again...');
-        }, 2000);
+        this.responseOptions['schema:image'] = await uploadFunction();
+        this.onUpdateResponseOptions();
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'success',
+          message: 'Image successfully added to AudioImageRecord Item.',
+          duration: 3000,
+        });
+      } catch (error) {
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'error',
+          message: 'Something went wrong with uploading image for Item > AudioImageRecord. Please try to upload again or just save AudioImageRecord without image changes.',
+        });
       }
     },
 
-    onRemoveImg() {
-      this.$emit('error', '');
+    onRemoveAudioImage() {
       this.responseOptions['schema:image'] = '';
       this.onUpdateResponseOptions();
+      this.$emit('notify', {
+        type: 'warning',
+        message: 'Image successfully removed from AudioImageRecord Item.',
+        duration: 3000,
+      });
     },
 
   }

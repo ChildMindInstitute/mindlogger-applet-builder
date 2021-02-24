@@ -126,7 +126,13 @@
           @error="isError = $event"
         />
 
-        <VideoBuilder v-if="inputType === 'video'" />
+        <VideoBuilder
+          v-if="inputType === 'video'"
+          :initial-is-optional-text="isOptionalText"
+          :initial-item-response-options="responseOptions"
+          @updateOptionalText="isOptionalText = $event"
+          @updateResponseOptions="updateResponseOptions"
+        />
 
         <PhotoBuilder
           v-if="inputType === 'photo'"

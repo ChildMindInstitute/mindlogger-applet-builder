@@ -127,7 +127,15 @@
         />
 
         <VideoBuilder v-if="inputType === 'video'" />
-        <PhotoBuilder v-if="inputType === 'photo'" />
+
+        <PhotoBuilder
+          v-if="inputType === 'photo'"
+          :initial-is-optional-text="isOptionalText"
+          :initial-item-response-options="responseOptions"
+          @updateOptionalText="isOptionalText = $event"
+          @updateResponseOptions="updateResponseOptions"
+        />
+
         <TimeRangeBuilder v-if="inputType === 'timeRange'" />
         <DateBuilder v-if="inputType === 'date'" />
 

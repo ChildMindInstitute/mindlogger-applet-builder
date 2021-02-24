@@ -162,7 +162,7 @@ export default class Item {
         "schema:maxValue": "new Date()"
       };
     }
-    if (this.ref.inputType === "audioImageRecord" || this.ref.inputType === "drawing" || this.ref.inputType === "geolocation") {
+    if (this.ref.inputType === "audioImageRecord" || this.ref.inputType === "drawing" || this.ref.inputType === "geolocation" || this.ref.inputType === "photo") {
       return this.ref.responseOptions;
     }
     if (this.ref.inputType === "audioRecord") {

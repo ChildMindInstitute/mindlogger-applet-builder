@@ -31,6 +31,7 @@
     "raw-loader": "^4.0.2",
     "style-loader": "^2.0.0",
     "vue": "^2.6.10",
+    "vue-audio-recorder": "^3.0.1",
     "vue-click-outside": "^1.1.0",
     "vue-router": "^3.4.3",
     "vuedraggable": "^2.24.2",

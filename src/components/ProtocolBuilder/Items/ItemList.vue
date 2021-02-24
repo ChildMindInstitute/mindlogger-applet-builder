@@ -97,11 +97,13 @@ export default {
       this.urlDialog = false;
       if (response) {
         this.addItem(response);
+        this.$emit('onAddItem');
       }
     },
 
     addBlankItem () {
       this.addItem();
+      this.$emit('onAddItem');
     }
   }
 }

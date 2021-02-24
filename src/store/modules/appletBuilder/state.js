@@ -26,7 +26,15 @@ export default {
       icon: baseImageURL + 'item-types/radio-icon.png',
     },
     {
+      text: "stackedRadio",
+      icon: baseImageURL + 'item-types/radio-icon.png',
+    },
+    {
       text: 'checkbox',
+      icon: baseImageURL + 'item-types/check-box-icon.png',
+    },
+    {
+      text: "stackedCheckbox",
       icon: baseImageURL + 'item-types/check-box-icon.png',
     },
     {
@@ -35,6 +43,10 @@ export default {
     },
     {
       text: "slider",
+      icon: baseImageURL + 'item-types/slider-icon.png',
+    },
+    {
+      text: "stackedSlider",
       icon: baseImageURL + 'item-types/slider-icon.png',
     },
     {

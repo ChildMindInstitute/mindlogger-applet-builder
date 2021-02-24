@@ -173,6 +173,7 @@ export default {
       return this.withoutPrize.map(activity => !(
         !activity.valid 
           || activity.items.some(item => !item.valid) 
+          || activity.items.length === 0
           || activity.subScales.some(subScale => !subScale.valid)
           || activity.conditionalItems.some(conditional => !conditional.valid)
       ))

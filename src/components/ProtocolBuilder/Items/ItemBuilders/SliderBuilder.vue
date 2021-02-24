@@ -30,11 +30,15 @@
         </v-col>
 
         <v-col cols="auto">
-          <ImageUploader
-            :uploadFor="'item-radio-option-pc'"
-            :itemImg="imgFirstName"
-            @onAddImg="onUploadImg('first', $event)"
-            @onRemoveImg="onRemoveImg('first')"
+          <Uploader
+            :initialType="'image'"
+            :initialData="minValueImg"
+            :initialAdditionalType="'small-circle'"
+            :initialTitle="'Slider Min Image'"
+            @onAddFromUrl="minValueImg = $event; onAddSliderImageFromUrl('Min');"
+            @onAddFromDevice="$emit('loading', true); onAddSliderImageFromDevice($event, 'Min');"
+            @onRemove="minValueImg = ''; onRemoveSliderImage('Min');"
+            @onNotify="$emit('loading', false); $emit('notify', $event);"
           />
         </v-col>
       </v-row>
@@ -68,11 +72,15 @@
         </v-col>
 
         <v-col cols="auto">
-          <ImageUploader
-            :uploadFor="'item-radio-option-pc'"
-            :itemImg="imgLastName"
-            @onAddImg="onUploadImg('last', $event)"
-            @onRemoveImg="onRemoveImg('last')"
+          <Uploader
+            :initialType="'image'"
+            :initialData="maxValueImg"
+            :initialAdditionalType="'small-circle'"
+            :initialTitle="'Slider Max Image'"
+            @onAddFromUrl="maxValueImg = $event; onAddSliderImageFromUrl('Max');"
+            @onAddFromDevice="$emit('loading', true); onAddSliderImageFromDevice($event, 'Max');"
+            @onRemove="maxValueImg = ''; onRemoveSliderImage('Max');"
+            @onNotify="$emit('loading', false); $emit('notify', $event);"
           />
         </v-col>
       </v-row>
@@ -259,12 +267,11 @@
 </style>
 
 <script>
-import ImageUploader from '../../ImageUploader.vue';
-import ImageUpldr from '../../../../models/ImageUploader';
+import Uploader from '../../Uploader.vue';
 
 export default {
   components: {
-    ImageUploader
+    Uploader,
   },
   props: {
     initialItemData: {
@@ -277,13 +284,13 @@ export default {
     },
   },
   data: function () {
-    const imgUpldr = new ImageUpldr();
-    
     return {
       minSliderTick: this.initialItemData.minSliderTick || 0,
       maxSliderTick: this.initialItemData.maxSliderTick || 5,
       minValue: this.initialItemData.minValue || '',
+      minValueImg: this.initialItemData.minValueImg || '',
       maxValue: this.initialItemData.maxValue || '',
+      maxValueImg: this.initialItemData.maxValueImg || '',
       isSkippable: this.isSkippableItem || false,
       valid: true,
       textRules: [
@@ -302,9 +309,6 @@ export default {
       scoreDialog: false,
       showTickMarks: this.initialItemData.showTickMarks || false,
       scores: this.initialItemData.scores || false,
-      imgUpldr,
-      imgFirstName: this.initialItemData.minValueImg || '',
-      imgLastName: this.initialItemData.maxValueImg || ''
     };
   },
   mounted() {
@@ -338,9 +342,9 @@ export default {
         'minSliderTick': this.minSliderTick,
         'maxSliderTick': this.maxSliderTick,
         'minValue': this.minValue || "Min",
-        'minValueImg': this.imgFirstName,
+        'minValueImg': this.minValueImg,
         'maxValue': this.maxValue || "Max",
-        'maxValueImg': this.imgLastName,
+        'maxValueImg': this.maxValueImg,
         'hasScoreValue': this.hasScoreValue,
         'hasResponseAlert': this.hasResponseAlert,
         'continousSlider': this.continousSlider,
@@ -402,27 +406,44 @@ export default {
       this.$emit('updateAllow', allow);
     },
 
-    async onUploadImg(option, data) {
+    onAddSliderImageFromUrl(type) {
+      this.update();
+      this.$emit('notify', {
+        type: 'success',
+        message: `${type} Image from URL successfully added to Slider.`,
+        duration: 3000,
+      });
+    },
+
+    async onAddSliderImageFromDevice(uploadFunction, type) {
       try {
-        this.$emit('error', '');
-        setTimeout(() => { this.$emit('uploading', true); }, 2000);
-        const response = await this.imgUpldr.uploadImage(data);
-        if(option === 'first') this.imgFirstName = response.location;
-        else if(option === 'last') this.imgLastName = response.location;
-        setTimeout(() => { this.$emit('uploading', false); }, 2100);
+        const uploadedImageUrl = await uploadFunction();
+        if(type === 'Min') this.minValueImg = uploadedImageUrl;
+        else this.maxValueImg = uploadedImageUrl;
         this.update();
-      } catch(e) {
-        setTimeout(() => {
-          this.$emit('uploading', false);
-          this.$emit('error', 'Something went wrong with uploading image for "Score Option". Please try to upload image again...');
-        }, 2000);
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'success',
+          message: `${type} Image successfully added to Slider.`,
+          duration: 3000,
+        });
+      } catch (error) {
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'error',
+          message: `Something went wrong with uploading image for Item > ${type} Slider. Please try to upload again or just save Slider without image changes.`,
+        });
       }
     },
-    onRemoveImg(option) {
-      if(option === 'first') this.imgFirstName = '';
-      else if(option === 'last') this.imgLastName = '';
+
+    onRemoveSliderImage(type) {
       this.update();
-    }
+      this.$emit('notify', {
+        type: 'warning',
+        message: `${type} Image successfully removed from Slider.`,
+        duration: 3000,
+      });
+    },
 
   }
 }

@@ -162,6 +162,30 @@
           @change="update"
         />
       </v-col>
+
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        sm="3"
+      >
+        <v-checkbox
+          v-model="continousSlider"
+          label="Use Continous Slider"
+          :disabled="!isItemEditable"
+        />
+      </v-col>
+
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        sm="3"
+      >
+        <v-checkbox
+          v-model="showTickMarks"
+          label="Turn off Tick Marks & Labels"
+          @change="update"
+        />
+      </v-col>
     </v-row>
 
     <v-dialog max-width="350" v-model="scoreDialog" persistent>
@@ -274,10 +298,12 @@ export default {
       alertTextRules: [
         v => !!v || 'Alert Message cannot be empty',
       ],
+      continousSlider: this.initialItemData.continousSlider || false,
       hasScoreValue: this.initialItemData.hasScoreValue || false,
       hasResponseAlert: this.initialItemData.hasResponseAlert || false,
       responseAlertMessage: this.initialItemData.responseAlertMessage || '',
       scoreDialog: false,
+      showTickMarks: this.initialItemData.showTickMarks || false,
       scores: this.initialItemData.scores || false,
       imgUpldr,
       imgFirstName: this.initialItemData.minValueImg || '',
@@ -320,7 +346,9 @@ export default {
         'maxValueImg': this.imgLastName,
         'hasScoreValue': this.hasScoreValue,
         'hasResponseAlert': this.hasResponseAlert,
+        'continousSlider': this.continousSlider,
         'responseAlertMessage': this.responseAlertMessage,
+        'showTickMarks': this.showTickMarks,
         'scores': this.hasScoreValue ? this.scores : false
       };
       this.$emit('updateOptions', responseOptions);

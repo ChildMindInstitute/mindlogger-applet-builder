@@ -9,19 +9,19 @@
       </v-card-title>
       <v-card-text>
         <v-select
+          v-model="selectedVersion"
           :items="allVersions"
           label="Versions"
-          v-model="selectedVersion"
           @change="change"
-        ></v-select>
+        />
 
         <v-treeview
+          v-if="history.length"
           :items="history"
           :color="accent"
-          v-if="history.length"
           activatable
           hoverable
-        ></v-treeview>
+        />
         <div v-else>
           No Changes
         </div>
@@ -56,6 +56,11 @@ export default {
       default: ''
     }
   },
+  data: function () {
+    return {
+      selectedVersion: this.defaultVersion || `current (${ this.currentVersion})`
+    };
+  },
   computed: {
     allVersions: function () {
       return [
@@ -63,11 +68,6 @@ export default {
         ...this.versions.slice(0, -1)
       ]
     }
-  },
-  data: function () {
-    return {
-      selectedVersion: this.defaultVersion || `current (${ this.currentVersion})`
-    };
   },
   methods: {
     change($ev) {

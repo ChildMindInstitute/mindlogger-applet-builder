@@ -27,7 +27,9 @@
       @onAddImg="onUploadImg"
       @onRemoveImg="onRemoveImg"
     />
-    <p class="mb-8">For this type of item will be added default image if you are not going use your own image.</p>
+    <p class="mb-8">
+      For this type of item will be added default image if you are not going use your own image.
+    </p>
     <v-checkbox
       v-model="isSkippable"
       label="Skippable Item"

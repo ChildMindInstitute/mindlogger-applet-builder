@@ -88,7 +88,6 @@
               >
                 ( {{ option.description }} )
               </span>
-
             </div>
 
             <v-spacer />
@@ -97,8 +96,8 @@
               <v-btn
                 icon
                 :disabled="!isItemEditable"
-                @click="option.expanded = !option.expanded"
                 large
+                @click="option.expanded = !option.expanded"
               >
                 <v-icon
                   v-if="!option.expanded"
@@ -116,9 +115,9 @@
               <v-menu offset-y>
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
-                    v-on="on"
                     v-bind="attrs"
                     icon
+                    v-on="on"
                   >
                     <v-icon
                       :color="option.image ? 'primary' : ''"
@@ -162,8 +161,8 @@
               <v-btn
                 icon
                 :disabled="!isItemEditable"
-                @click="deleteOption(index)"
                 large
+                @click="deleteOption(index)"
               >
                 <v-icon color="grey lighten-1">
                   delete
@@ -202,7 +201,7 @@
                   v-model="option.value"
                   :rules="numberRules"
                   type="number"
-                  label="Option Value"
+                  label="Token Value"
                   counter="5"
                   maxlength="5"
                   :disabled="!isItemEditable"
@@ -262,10 +261,10 @@
       <div class="pa-2">
         <v-btn
           :disabled="!isItemEditable"
-          @click="addOption"
           fab
           x-small
           color="deep-purple"
+          @click="addOption"
         >
           <v-icon color="white">
             mdi-plus
@@ -348,32 +347,62 @@
             @change="update"
           />
         </v-col>
+        <v-col>
+          <v-checkbox
+            v-if="isTokenValue"
+            v-model="enableNegativeTokens"
+            label="Reduce cumulation of tokens with negative token responses"
+            @change="update"
+          />
+        </v-col>
       </v-row>
     </v-form>
 
-    <v-dialog v-model="imageUrlDialog.visible" persistent width="800">
+    <v-dialog
+      v-model="imageUrlDialog.visible"
+      persistent
+      width="800"
+    >
       <v-card>
-        <v-card-title class="headline grey lighten-2" primary-title>
-          <v-icon left>mdi-pencil</v-icon>
+        <v-card-title
+          class="headline grey lighten-2"
+          primary-title
+        >
+          <v-icon left>
+            mdi-pencil
+          </v-icon>
           Upload from URL
         </v-card-title>
         <v-card-text>
-          <v-text-field label="URL" v-model="imageUrlDialog.url" />
+          <v-text-field
+            v-model="imageUrlDialog.url"
+            label="URL"
+          />
         </v-card-text>
         <v-divider />
         <v-card-actions>
-          <v-btn outlined color="primary" @click="imageUrlDialog.visible = false;">
+          <v-btn
+            outlined
+            color="primary"
+            @click="imageUrlDialog.visible = false;"
+          >
             Close
           </v-btn>
           <v-spacer />
-          <v-btn color="primary" @click="onAddImageFromUrl">
+          <v-btn
+            color="primary"
+            @click="onAddImageFromUrl"
+          >
             Add
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="inValidFileDlg" width="400">
+    <v-dialog
+      v-model="inValidFileDlg"
+      width="400"
+    >
       <v-alert type="error">
         <span>{{ fileErrorMsg }}</span>
       </v-alert>
@@ -442,9 +471,8 @@ export default {
       if (this.initialItemData.hasScoreValue && lastOption.score) {
         nextOptionScore = lastOption.score + 1
       }
-      if (isTokenValue && lastOption.value) {
-        nextOptionValue = lastOption.value + 1;
-      }
+
+      nextOptionValue = lastOption.value + 1;
     }
 
     return {
@@ -483,6 +511,7 @@ export default {
       responseAlertMessage: this.initialItemData.responseAlertMessage || '',
       imgUploader,
       isSkippable: this.isSkippableItem || false,
+      enableNegativeTokens: this.initialItemData.enableNegativeTokens || false,
     };
   },
 
@@ -507,10 +536,8 @@ export default {
         'valid': true,
       };
 
-      if (this.isTokenValue) {
-        nextOption.value = this.nextOptionValue;
-        this.nextOptionValue++;
-      }
+      nextOption.value = this.nextOptionValue;
+      this.nextOptionValue++;
 
       if (this.hasScoreValue) {
         nextOption.score = this.nextOptionScore;
@@ -518,6 +545,8 @@ export default {
       }
 
       this.options.push(nextOption);
+
+      this.update();
     },
 
     removeTemplate(item) {
@@ -569,6 +598,7 @@ export default {
         'hasResponseAlert': this.hasResponseAlert,
         'responseAlertMessage': this.responseAlertMessage,
         'isTokenValue': this.isTokenValue,
+        'enableNegativeTokens': this.enableNegativeTokens,
         'isMultipleChoice': this.isMultipleChoice,
         'isSkippableItem': this.isSkippable,
         'options': this.options,

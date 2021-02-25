@@ -318,7 +318,6 @@ export default {
     isValid () {
       if (!this.operation || !this.showValue) return false;
 
-
       for(const condition of this.conditions) {
         if (!condition.ifValue || !condition.stateValue) return false;
         if (condition.ifValue.inputType === 'slider') {

@@ -10,8 +10,7 @@
         :key="`${index}-${item.id || 0}`"
         :item-index="index"
         class="ma-4"
-      >
-      </ItemBuilder>
+      />
     </div>
 
     <v-dialog
@@ -31,10 +30,10 @@
       >
         <v-btn
           v-bind="attrs"
-          v-on="on"
           color="primary"
           class="mx-4 my-2"
           rounded
+          v-on="on"
         >
           Add item
         </v-btn>
@@ -64,16 +63,16 @@ import ItemBuilder from './ItemBuilder';
 import UrlItemUploader from './UrlItemUploader';
 
 export default {
+  components: {
+    ItemBuilder,
+    UrlItemUploader,
+  },
   data() {
     return {
       urlItemUploaderKey: 0,
       urlDialog: false,
       baseKey: 0,
     }
-  },
-  components: {
-    ItemBuilder,
-    UrlItemUploader,
   },
   computed: {
     config () {
@@ -97,11 +96,13 @@ export default {
       this.urlDialog = false;
       if (response) {
         this.addItem(response);
+        this.$emit('onAddItem');
       }
     },
 
     addBlankItem () {
       this.addItem();
+      this.$emit('onAddItem');
     }
   }
 }

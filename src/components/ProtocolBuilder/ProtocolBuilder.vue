@@ -1,13 +1,16 @@
 <template>
   <div>
-    <v-form ref="form" lazy-validation>
+    <v-form
+      ref="form"
+      lazy-validation
+    >
       <v-card class="pa-4 my-4">
         <v-text-field
           v-model="name"
           :rules="textRules"
           counter="55"
           maxlength="55"
-          label="Protocol Name"
+          label="Applet Name"
           required
         />
         <v-text-field
@@ -15,11 +18,13 @@
           :rules="textRules"
           counter="230"
           maxlength="230"
-          label="Protocol Description"
+          label="Applet Description"
           required
         />
         <div class="d-flex flex-row mt-6">
-          <v-subheader class="ml-2"> Edit About Page </v-subheader>
+          <v-subheader class="ml-2">
+            Edit About Page
+          </v-subheader>
           <v-btn
             class="ml-10"
             fab
@@ -38,10 +43,10 @@
           Activities
           <v-spacer />
           <v-btn
-            @click="newActivity"
             color="primary"
             class="mt-2"
             rounded
+            @click="newActivity"
           >
             <v-icon>
               add
@@ -59,22 +64,31 @@
             class="py-0"
             :class="activityStatus[index] ? '' : 'invalid'"
           >
-            {{activity.name}}
+            {{ activity.name }}
             <v-spacer />
             <v-card-actions>
-              <v-btn icon @click="duplicateActivity(index)">
+              <v-btn
+                icon
+                @click="duplicateActivity(index)"
+              >
                 <v-icon color="grey lighten-1">
                   content_copy
                 </v-icon>
               </v-btn>
 
-              <v-btn icon @click="editActivity(index)">
+              <v-btn
+                icon
+                @click="editActivity(index)"
+              >
                 <v-icon color="grey lighten-1">
                   edit
                 </v-icon>
               </v-btn>
 
-              <v-btn icon @click="deleteActivity(index)">
+              <v-btn
+                icon
+                @click="deleteActivity(index)"
+              >
                 <v-icon color="grey lighten-1">
                   delete
                 </v-icon>
@@ -87,8 +101,7 @@
             label="Description"
             class="px-4"
             disabled
-          ></v-text-field>
-
+          />
         </v-card>
       </v-card>
     </v-form>
@@ -173,6 +186,7 @@ export default {
       return this.withoutPrize.map(activity => !(
         !activity.valid 
           || activity.items.some(item => !item.valid) 
+          || activity.items.length === 0
           || activity.subScales.some(subScale => !subScale.valid)
           || activity.conditionalItems.some(conditional => !conditional.valid)
       ))

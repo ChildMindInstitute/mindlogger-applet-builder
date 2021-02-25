@@ -12,9 +12,9 @@
             label="Min Value"
             :disabled="!isItemEditable"
             type="number"
-            @change="sliderRangeUpdate($event, 'min')"
             min="1"
             :max="maxSliderTick"
+            @input="sliderRangeUpdate($event, 'min')"
           />
         </v-col>
 
@@ -52,9 +52,9 @@
             label="Max Value"
             :disabled="!isItemEditable"
             type="number"
-            @change="sliderRangeUpdate($event, 'max')"
             :min="minSliderTick"
             max="12"
+            @input="sliderRangeUpdate($event, 'max')"
           />
         </v-col>
 
@@ -162,18 +162,53 @@
           @change="update"
         />
       </v-col>
+
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        sm="3"
+      >
+        <v-checkbox
+          v-model="continousSlider"
+          label="Use Continous Slider"
+          :disabled="!isItemEditable"
+        />
+      </v-col>
+
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        sm="3"
+      >
+        <v-checkbox
+          v-model="showTickMarks"
+          label="Turn off Tick Marks & Labels"
+          @change="update"
+        />
+      </v-col>
     </v-row>
 
-    <v-dialog max-width="350" v-model="scoreDialog" persistent>
-      <v-card class="pa-4" v-if="scores">
+    <v-dialog
+      v-model="scoreDialog"
+      max-width="350"
+      persistent
+    >
+      <v-card
+        v-if="scores"
+        class="pa-4"
+      >
         <v-form
           ref="form"
           v-model="valid"
         >
           <v-card>
             <div class="d-flex">
-              <div class="option-value">Value</div>
-              <div class="option-score">Score</div>
+              <div class="option-value">
+                Value
+              </div>
+              <div class="option-score">
+                Score
+              </div>
             </div>
           </v-card>
           <v-card class="options">
@@ -182,7 +217,9 @@
               :key="i"
               class="d-flex"
             >
-              <div class="option-value pt-2">{{i + Number(minSliderTick)}}</div>
+              <div class="option-value pt-2">
+                {{ i + Number(minSliderTick) }}
+              </div>
               <v-text-field
                 v-model="scores[i]"
                 class="option-score mt-0 pt-0"
@@ -196,8 +233,8 @@
           <v-card-actions class="d-flex justify-space-around">
             <v-btn
               :disabled="!valid || !isItemEditable"
-              @click="saveScores"
               color="primary"
+              @click="saveScores"
             >
               Save
             </v-btn>
@@ -211,7 +248,6 @@
         </v-form>
       </v-card>
     </v-dialog>
-
   </v-form>
 </template>
 
@@ -274,10 +310,12 @@ export default {
       alertTextRules: [
         v => !!v || 'Alert Message cannot be empty',
       ],
+      continousSlider: this.initialItemData.continousSlider || false,
       hasScoreValue: this.initialItemData.hasScoreValue || false,
       hasResponseAlert: this.initialItemData.hasResponseAlert || false,
       responseAlertMessage: this.initialItemData.responseAlertMessage || '',
       scoreDialog: false,
+      showTickMarks: this.initialItemData.showTickMarks || false,
       scores: this.initialItemData.scores || false,
       imgUpldr,
       imgFirstName: this.initialItemData.minValueImg || '',
@@ -320,45 +358,57 @@ export default {
         'maxValueImg': this.imgLastName,
         'hasScoreValue': this.hasScoreValue,
         'hasResponseAlert': this.hasResponseAlert,
+        'continousSlider': this.continousSlider,
         'responseAlertMessage': this.responseAlertMessage,
+        'showTickMarks': this.showTickMarks,
         'scores': this.hasScoreValue ? this.scores : false
       };
       this.$emit('updateOptions', responseOptions);
     },
 
     sliderRangeUpdate(ev, type) {
-      if (this.hasScoreValue) {
-        this.scores = this.scores || [];
+      if (Number(this.maxSliderTick) > 12) {
+        return false;
+      }
+      if (Number(this.minSliderTick) < 0) {
+        return false;
+      }
+      if (this.minSliderTick === '' || this.maxSliderTick === '' || Number(this.minSliderTick) > Number(this.maxSliderTick)) {
+        return ;
+      }
 
-        const tickCount = this.maxSliderTick - this.minSliderTick + 1;
+      this.scores = this.scores || [];
 
-        if (type == 'max') {
-          while (this.scores.length < tickCount) {
-            this.scores.push(Number(this.minSliderTick) + this.scores.length);
-          }
+      const tickCount = this.maxSliderTick - this.minSliderTick + 1;
+      if (tickCount < 0) {
+        return;
+      }
 
-          while (this.scores.length > tickCount) {
-            this.scores.pop();
-          }
-        } else {
-          while (this.scores.length < tickCount) {
-            this.scores.unshift(Number(this.minSliderTick) + (tickCount - this.scores.length - 1));
-          }
-
-          while (this.scores.length > tickCount) {
-            this.scores.shift();
-          }
+      if (type == 'max') {
+        while (this.scores.length < tickCount) {
+          this.scores.push(Number(this.minSliderTick) + this.scores.length);
         }
 
-        while (this.scores.length < (this.maxSliderTick - this.minSliderTick + 1)) {
-          this.scores.push(this.scores.length + 1);
-        }
-
-        while (this.scores.length > (this.maxSliderTick - this.minSliderTick + 1)) {
+        while (this.scores.length > tickCount) {
           this.scores.pop();
+        }
+      } else {
+        while (this.scores.length < tickCount) {
+          this.scores.unshift(Number(this.minSliderTick) + (tickCount - this.scores.length - 1));
+        }
+
+        while (this.scores.length > tickCount) {
+          this.scores.shift();
         }
       }
 
+      while (this.scores.length < (this.maxSliderTick - this.minSliderTick + 1)) {
+        this.scores.push(this.scores.length + 1);
+      }
+
+      while (this.scores.length > (this.maxSliderTick - this.minSliderTick + 1)) {
+        this.scores.pop();
+      }
       this.update();
     },
 

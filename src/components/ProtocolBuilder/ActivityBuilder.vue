@@ -1,12 +1,15 @@
 <template>
   <div>
     <ActivityHeader
+      :headerExpanded="isExpanded"
       class="pa-4 my-4"
+      @onExpand="handleExpansion()"
     />
 
     <ItemList
       v-if="currentScreen == config.ITEM_SCREEN"
       class="pb-2"
+      @onAddItem="handleAddItem()"
     />
 
     <SubScaleList
@@ -36,6 +39,11 @@ export default {
     SubScaleList,
     ConditionalList,
   },
+  data() {
+    return {
+      isExpanded: true,
+    }
+  },
   computed: {
     config () {
       return config;
@@ -43,6 +51,14 @@ export default {
     ...mapGetters(config.MODULE_NAME, [
       'currentScreen'
     ]),
+  },
+  methods: {
+    handleAddItem() {
+      this.isExpanded = false;
+    },
+    handleExpansion() {
+      this.isExpanded = true;
+    }
   }
 }
 </script>

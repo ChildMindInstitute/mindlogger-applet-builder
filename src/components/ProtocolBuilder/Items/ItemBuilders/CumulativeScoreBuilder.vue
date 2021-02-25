@@ -35,7 +35,9 @@
           />
 
           <div class="item-list">
-            <div class="list-title">Items within cumulative score</div>
+            <div class="list-title">
+              Items within cumulative score
+            </div>
             <v-list
               class="items"
               subheader
@@ -50,10 +52,10 @@
                 >
                   <v-list-item-action>
                     <v-checkbox
-                      color="primary"
                       v-model="item.selected"
+                      color="primary"
                       disabled
-                    ></v-checkbox>
+                    />
                   </v-list-item-action>
                   <v-list-item-content>
                     <v-list-item-title v-text="item.name" />
@@ -70,8 +72,8 @@
             item-text="text"
             item-value="value"
             label="Options"
-            @change="onUpdateRule(rule)"
             return-object
+            @change="onUpdateRule(rule)"
           />
 
           <v-text-field
@@ -90,8 +92,8 @@
             item-text="text"
             item-value="value"
             label="Output Type"
-            @change="onUpdateRule(rule)"
             return-object
+            @change="onUpdateRule(rule)"
           />
 
           <v-text-field
@@ -112,14 +114,13 @@
             @input="onUpdateRule(rule)"
           />
         </v-expansion-panel-content>
-
       </v-expansion-panel>
     </v-expansion-panels>
 
     <v-btn
       :disabled="!isItemEditable"
-      @click="addNewCumulative"
       class="mt-4"
+      @click="addNewCumulative"
     >
       Add cumulative
     </v-btn>

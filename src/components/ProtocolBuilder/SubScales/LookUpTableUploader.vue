@@ -10,7 +10,7 @@
         {{ isEditing ? "mdi-pencil" : "mdi-upload" }}
       </v-icon>
 
-      {{ isEditing ? "Replace Lookup Table" : "Upload Lookup Table"}}
+      {{ isEditing ? "Replace Lookup Table" : "Upload Lookup Table" }}
     </v-card-title>
 
     <v-card-text>
@@ -19,10 +19,10 @@
         label="Upload CSV"
         accept=".csv"
         @change="onCSVInput"
-      ></v-file-input>
+      />
 
       <h2 class="table-title">
-        {{isExampleTable ? 'Example Lookup Table' : 'Current Lookup Table'}}
+        {{ isExampleTable ? 'Example Lookup Table' : 'Current Lookup Table' }}
       </h2>
 
       <v-data-table
@@ -40,18 +40,31 @@
         outlined
         color="primary"
         @click="onDiscardChanges"
-      >{{ "Discard Changes" }}</v-btn>
+      >
+        {{ "Discard Changes" }}
+      </v-btn>
       <v-spacer />
-      <v-btn color="primary" @click="onSaveLookupTable">Save Table</v-btn>
+      <v-btn
+        color="primary"
+        @click="onSaveLookupTable"
+      >
+        Save Table
+      </v-btn>
     </v-card-actions>
 
-    <v-dialog v-model="dialog" width="500">
+    <v-dialog
+      v-model="dialog"
+      width="500"
+    >
       <v-card>
-        <v-card-title class="grey lighten-2">Lookup Table Upload</v-card-title>
-        <v-card-text class="pa-4">{{dialogText}}</v-card-text>
+        <v-card-title class="grey lighten-2">
+          Lookup Table Upload
+        </v-card-title>
+        <v-card-text class="pa-4">
+          {{ dialogText }}
+        </v-card-text>
       </v-card>
     </v-dialog>
-
   </v-card>
 </template>
 

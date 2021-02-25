@@ -11,7 +11,7 @@
         </v-icon>
       </v-btn>
 
-      <v-spacer/>
+      <v-spacer />
 
       <v-tooltip
         v-if="currentActivity"
@@ -19,14 +19,24 @@
       >
         <template v-slot:activator="{ on }">
           <v-btn
-            @click="viewItems"
-            v-on="on"
             :color="currentScreen == config.ITEM_SCREEN ? 'primary' : ''"
             class="mx-1"
             :class="itemStatus ? '' : 'invalid'"
+            @click="viewItems"
+            v-on="on"
           >
-            <img v-show="currentScreen === config.ITEM_SCREEN" height="25" alt='' v-bind:src="baseImageURL + 'header-icons/white/items.png'"/>
-            <img v-show="currentScreen !== config.ITEM_SCREEN" height="25" alt='' v-bind:src="baseImageURL + 'header-icons/black/items.png'"/>
+            <img
+              v-show="currentScreen === config.ITEM_SCREEN"
+              height="25"
+              alt=""
+              :src="baseImageURL + 'header-icons/white/items.png'"
+            >
+            <img
+              v-show="currentScreen !== config.ITEM_SCREEN"
+              height="25"
+              alt=""
+              :src="baseImageURL + 'header-icons/black/items.png'"
+            >
           </v-btn>
         </template>
         <span>Item List</span>
@@ -38,14 +48,24 @@
       >
         <template v-slot:activator="{ on }">
           <v-btn
-            @click="viewConditionalLogic"
-            v-on="on"
             :color="currentScreen == config.CONDITIONAL_SCREEN ? 'primary' : ''"
             class="mx-1"
             :class="conditionalStatus ? '' : 'invalid'"
+            @click="viewConditionalLogic"
+            v-on="on"
           >
-            <img v-show="currentScreen === config.CONDITIONAL_SCREEN" height="25" alt='' v-bind:src="baseImageURL + 'header-icons/white/conditional-icon.png'" />
-            <img v-show="currentScreen !== config.CONDITIONAL_SCREEN" height="25" alt='' v-bind:src="baseImageURL + 'header-icons/black/conditional-icon.png'" />
+            <img
+              v-show="currentScreen === config.CONDITIONAL_SCREEN"
+              height="25"
+              alt=""
+              :src="baseImageURL + 'header-icons/white/conditional-icon.png'"
+            >
+            <img
+              v-show="currentScreen !== config.CONDITIONAL_SCREEN"
+              height="25"
+              alt=""
+              :src="baseImageURL + 'header-icons/black/conditional-icon.png'"
+            >
           </v-btn>
         </template>
         <span>Conditional Logic</span>
@@ -57,14 +77,24 @@
       >
         <template v-slot:activator="{ on }">
           <v-btn
-            @click="viewSubScales"
-            v-on="on"
             :color="currentScreen == config.SUBSCALE_SCREEN ? 'primary' : ''"
             class="mx-1"
             :class="subScaleStatus ? '' : 'invalid'"
+            @click="viewSubScales"
+            v-on="on"
           >
-            <img v-show="currentScreen === config.SUBSCALE_SCREEN" height="25" alt='' v-bind:src="baseImageURL + 'header-icons/white/subscale-icon.png'"/>
-            <img v-show="currentScreen !== config.SUBSCALE_SCREEN" height="25" alt='' v-bind:src="baseImageURL + 'header-icons/black/subscale-icon.png'"/>
+            <img
+              v-show="currentScreen === config.SUBSCALE_SCREEN"
+              height="25"
+              alt=""
+              :src="baseImageURL + 'header-icons/white/subscale-icon.png'"
+            >
+            <img
+              v-show="currentScreen !== config.SUBSCALE_SCREEN"
+              height="25"
+              alt=""
+              :src="baseImageURL + 'header-icons/black/subscale-icon.png'"
+            >
           </v-btn>
         </template>
         <span>SubScales</span>
@@ -75,11 +105,15 @@
       >
         <template v-slot:activator="{ on }">
           <v-btn
+            class="mx-1"
             @click="saveToDashboard"
             v-on="on"
-            class="mx-1"
           >
-            <img height="25" alt='' v-bind:src="baseImageURL + 'header-icons/black/save-icon.png'"/>
+            <img
+              height="25"
+              alt=""
+              :src="baseImageURL + 'header-icons/black/save-icon.png'"
+            >
           </v-btn>
         </template>
         <span>Save To Dashboard</span>
@@ -90,11 +124,15 @@
       >
         <template v-slot:activator="{ on }">
           <v-btn
+            class="mx-1"
             @click="downloadSchema"
             v-on="on"
-            class="mx-1"
           >
-            <img height="25" alt='' v-bind:src="baseImageURL + 'header-icons/black/export-icon.png'"/>
+            <img
+              height="25"
+              alt=""
+              :src="baseImageURL + 'header-icons/black/export-icon.png'"
+            >
           </v-btn>
         </template>
         <span>Download Schema</span>
@@ -106,27 +144,35 @@
       >
         <template v-slot:activator="{ on }">
           <v-btn
+            class="mx-1"
             @click="resetBuilder"
             v-on="on"
-            class="mx-1"
           >
-            <img height="25" alt='' v-bind:src="baseImageURL + 'header-icons/black/refresh-icon.png'"/>
+            <img
+              height="25"
+              alt=""
+              :src="baseImageURL + 'header-icons/black/refresh-icon.png'"
+            >
           </v-btn>
         </template>
         <span>Reset Builder</span>
       </v-tooltip>
 
       <v-tooltip
-        bottom
         v-if="formattedOriginalProtocol"
+        bottom
       >
         <template v-slot:activator="{ on }">
           <v-btn
+            class="mx-1"
             @click="viewHistory"
             v-on="on"
-            class="mx-1"
           >
-            <img height="25" alt='' v-bind:src="baseImageURL + 'header-icons/black/history-icon.png'"/>
+            <img
+              height="25"
+              alt=""
+              :src="baseImageURL + 'header-icons/black/history-icon.png'"
+            >
           </v-btn>
         </template>
         <span>View History</span>
@@ -148,10 +194,17 @@
       />
     </v-dialog>
 
-    <v-dialog v-model="dataAlertDialog.visibility" width="350">
+    <v-dialog
+      v-model="dataAlertDialog.visibility"
+      width="350"
+    >
       <v-card>
-        <v-card-title class="grey lighten-2">Protocol Data Alert</v-card-title>
-        <v-card-text class="pa-4">{{ dataAlertDialog.message }}</v-card-text>
+        <v-card-title class="grey lighten-2">
+          Protocol Data Alert
+        </v-card-title>
+        <v-card-text class="pa-4">
+          {{ dataAlertDialog.message }}
+        </v-card-text>
       </v-card>
     </v-dialog>
   </v-card>
@@ -238,23 +291,8 @@ export default {
       this.setCurrentActivity(-1);
     },
 
-    isAppletValid() {
-      if (!this.protocol.name) {
-        this.dataAlertDialog.message = 'Please input applet name.';
-      } else if (!this.activities.length) {
-        this.dataAlertDialog.message = 'Please add more than one activity.';
-      } else if(this.activities.find(({ valid }) => valid === false)) {
-        this.dataAlertDialog.message = 'Please fix errors in your activities.';
-      } else {
-        return true;
-      }
-
-      this.dataAlertDialog.visibility = true;
-      return false;
-    },
-
     saveToDashboard () {
-      if (!this.isAppletValid()) {
+      if (!this.appletStatus()) {
         return;
       }
 
@@ -345,8 +383,12 @@ export default {
     },
 
     appletStatus () {
-      if (!this.protocol.valid) {
-        return false;
+      this.dataAlertDialog.message = '';
+
+      if (!this.protocol.name) {
+        this.dataAlertDialog.message = 'Please input applet name.';
+      } else if (!this.activities.length) {
+        this.dataAlertDialog.message = 'Please add more than one activity.';
       }
 
       for (let activity of this.protocol.activities) {
@@ -355,14 +397,18 @@ export default {
             || activity.items.some(item => !item.valid) 
             || activity.subScales.some(subScale => !subScale.valid)
             || activity.conditionalItems.some(conditional => !conditional.valid)
+            || (activity.items.length === 0)
         );
 
         if (!valid) {
-          return false;
+          this.dataAlertDialog.message = 'Please fix errors in your activities/items.';
+          break;
         }
       }
 
-      return true;
+      this.dataAlertDialog.visibility = (this.dataAlertDialog.message.length !== 0);
+
+      return !this.dataAlertDialog.visibility;
     },
 
     viewConditionalLogic () {
@@ -375,8 +421,6 @@ export default {
 
     viewHistory () {
       if (!this.appletStatus()) {
-        this.dataAlertDialog.visibility = true;
-        this.dataAlertDialog.message = 'Please fix errors in your activity/items to view history.';
         return ;
       }
 

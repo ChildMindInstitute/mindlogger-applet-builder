@@ -170,7 +170,7 @@
       >
         <v-checkbox
           v-model="continousSlider"
-          label="Use Continous Slider"
+          label="Use Continuous Slider"
           :disabled="!isItemEditable"
         />
       </v-col>

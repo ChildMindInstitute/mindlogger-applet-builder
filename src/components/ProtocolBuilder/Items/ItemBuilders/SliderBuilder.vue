@@ -172,6 +172,7 @@
           v-model="continousSlider"
           label="Use Continuous Slider"
           :disabled="!isItemEditable"
+          @change="update"
         />
       </v-col>
 

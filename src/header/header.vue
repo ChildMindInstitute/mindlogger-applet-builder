@@ -260,7 +260,6 @@ export default {
 
       this.formattedProtocol().then((data) => {
         if (!this.formattedOriginalProtocol) {
-          console.log('protocol data -------------', data);
           this.$emit("uploadProtocol", data);
         } else {
           let { upgrade, updates, removed } = Protocol.getChangeInfo(this.formattedOriginalProtocol, data, true);

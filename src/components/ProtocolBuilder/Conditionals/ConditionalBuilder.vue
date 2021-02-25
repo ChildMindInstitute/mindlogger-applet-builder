@@ -55,7 +55,7 @@
 
         <v-btn
           icon
-          @click="deleteConditional(conditionalIndex)"
+          @click="onDeleteConditional()"
         >
           <v-icon color="grey lighten-1">
             mdi-delete
@@ -274,7 +274,7 @@ export default {
     ...mapMutations(config.MODULE_NAME,
       [
         'deleteConditional',
-        'updateConditionalData'
+        'updateConditionalData',
       ]
     ),
 
@@ -295,7 +295,7 @@ export default {
       return [
         { name: "GREATER THAN", val: ">" },
         { name: "LESS THAN", val: "<" },
-        { name: "EQUAL TO", val: "=" },
+        { name: "EQUAL TO", val: "==" },
         { name: "WITHIN", val: "within" },
         { name: "OUTSIDE OF", val: "outsideof" }
       ];
@@ -312,7 +312,7 @@ export default {
 
     answerItems (ifValue) {
       if (!ifValue) return [];
-      console.log('if value', ifValue);
+
       return ifValue.inputType !== 'slider' && ifValue.options.options || [];
     },
     isValid () {
@@ -338,9 +338,11 @@ export default {
       this.conditions.splice(index, 1);
     },
     onAddcondition () {
-      console.log('initial condition-------', this.initialCondition)
       this.conditions.push({ ...this.initialCondition });
       this.onUpdate();
+    },
+    onDeleteConditional () {
+      this.deleteConditional(this.conditionalIndex);
     },
     onUpdate () {
       const { conditions, operation, showValue } = this;

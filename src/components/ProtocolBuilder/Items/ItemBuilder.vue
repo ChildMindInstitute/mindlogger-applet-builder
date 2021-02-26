@@ -115,7 +115,7 @@
       <v-row>
         <v-col
           cols="12"
-          sm="6"
+          sm="3"
         >
           <v-select
             class="mt-4"
@@ -663,6 +663,7 @@ export default {
       }
 
       updates.options = { options: [] };
+      updates.allow = false;
 
       this.updateItemMetaInfo({
         index: this.itemIndex,

@@ -349,40 +349,11 @@
     >
       <div class="item-quiz">
         <img
-          v-if="questionBuilder.text"
           width="15"
           :src="itemInputTypes.find(({ text }) => text === item.inputType).icon" 
         >
         
         <span class="ml-2">{{ questionBuilder.text }}</span>
-      </div>
-
-      <div
-        v-if="item.inputType == 'radio' || item.inputType == 'checkbox'"
-        class="mt-4"
-      >
-        <div
-          v-for="(option, index) in item.options.options"
-          :key="index"
-        >
-          <input
-            v-if="item.inputType == 'checkbox'"
-            class="mx-2"
-            type="checkbox"
-            value="false"
-            disabled
-          >
-
-          <input
-            v-else
-            class="mx-2"
-            type="radio"
-            value="false"
-            disabled
-          >
-
-          <span>{{ option.name }}</span>
-        </div>
       </div>
     </div>
 

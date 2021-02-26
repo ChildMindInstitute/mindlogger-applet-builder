@@ -6,10 +6,10 @@
 
     <div>
       <ConditionalBuilder
-        v-for="(conditional, index) in conditionals"
-        :key="index"
+        v-for="(conditional) in currentConditionals"
         class="ma-4"
-        :conditional-index="index"
+        :key="conditional.id"
+        :conditional-index="currentConditionals.findIndex(({ id }) => id === conditional.id)"
         :current="conditional"
       />
     </div>
@@ -50,6 +50,7 @@ export default {
   },
   data () {
     return {
+      currentConditionals: [],
       conditionalAlert: false,
       alertMessage: ''
     }
@@ -67,10 +68,13 @@ export default {
       return this.currentActivity.conditionalItems;
     },
   },
+  beforeMount() {
+    this.currentConditionals = [...this.conditionals];
+  },
   methods: {
     ...mapMutations(config.MODULE_NAME,
       [
-        'addConditional'
+        'addConditional',
       ]
     ),
     getConditionalAlertMsg () {
@@ -98,6 +102,14 @@ export default {
 
       this.addConditional();
     },
-  }
+  },
+  watch: {
+    conditionals: {
+      deep: true,
+      handler() {
+        this.currentConditionals = [...this.conditionals];
+      }
+    },
+  },
 }
 </script>

@@ -196,24 +196,29 @@
           @input="onUpdateMarkdownText"
         />
       </div>
+
       <RadioBuilder
         v-if="item.inputType === 'radio' || item.inputType === 'checkbox'"
         :key="`${baseKey}-radio`"
         :is-multiple-choice="item.inputType === 'checkbox'"
         :is-skippable-item="item.allow"
-        :response-options="item.responseOptions"
+        :initial-response-options="item.responseOptions"
         :initial-item-data="item.options"
         :is-item-editable="item.allowEdit"
         :item-templates="itemTemplates"
         :has-prize-activity="hasPrizeActivity"
+        :initial-is-optional-text="item.isOptionalText"
         @openPrize="setTokenPrizeModalStatus(true)"
         @removeTemplate="onRemoveTemplate"
         @updateTemplates="onUpdateTemplates"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
+        @updateOptionalText="item.isOptionalText = $event"
+        @updateResponseOptions="updateResponseOptions"
         @uploading="isUploadingState = $event"
         @error="isError = $event"
       />
+
       <StackedRadioBuilder
         v-if="item.inputType === 'stackedRadio' || item.inputType === 'stackedCheckbox'"
         :key="`${baseKey}-stackedRadio`"
@@ -229,6 +234,7 @@
         @uploading="isUploadingState = $event"
         @error="isError = $event"
       />
+
       <TextBuilder
         v-if="item.inputType === 'text'"
         :key="`${baseKey}-text`"
@@ -241,17 +247,23 @@
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
       />
+
       <SliderBuilder
         v-if="item.inputType === 'slider'"
         :key="`${baseKey}-slider`"
         :is-skippable-item="item.allow"
         :initial-item-data="item.options"
         :is-item-editable="item.allowEdit"
+        :initial-response-options="item.responseOptions"
+        :initial-is-optional-text="item.isOptionalText"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
+        @updateOptionalText="item.isOptionalText = $event"
+        @updateResponseOptions="updateResponseOptions"
         @uploading="isUploadingState = $event"
         @error="isError = $event"
       />
+
       <StackedSliderBuilder
         v-if="item.inputType === 'stackedSlider'"
         :key="`${baseKey}-stackedSlider`"
@@ -263,21 +275,41 @@
         @uploading="isUploadingState = $event"
         @error="isError = $event"
       />
+
       <VideoBuilder
         v-if="item.inputType === 'video'"
         :key="`${baseKey}-video`"
+        :initial-is-optional-text="item.isOptionalText"
+        :initial-item-response-options="item.responseOptions"
+        @updateOptionalText="item.isOptionalText = $event"
+        @updateResponseOptions="updateResponseOptions"
       />
+
       <PhotoBuilder
         v-if="item.inputType === 'photo'"
         :key="`${baseKey}-photo`"
+        :initial-is-optional-text="item.isOptionalText"
+        :initial-item-response-options="item.responseOptions"
+        @updateOptionalText="item.isOptionalText = $event"
+        @updateResponseOptions="updateResponseOptions"
       />
+
       <TimeRangeBuilder
         v-if="item.inputType === 'timeRange'"
         :key="`${baseKey}-timeRange`"
+        :initial-is-optional-text="item.isOptionalText"
+        :initial-item-response-options="item.responseOptions"
+        @updateOptionalText="item.isOptionalText = $event"
+        @updateResponseOptions="updateResponseOptions"
       />
+
       <DateBuilder
         v-if="item.inputType === 'date'"
         :key="`${baseKey}-date`"
+        :initial-is-optional-text="item.isOptionalText"
+        :initial-item-response-options="item.responseOptions"
+        @updateOptionalText="item.isOptionalText = $event"
+        @updateResponseOptions="updateResponseOptions"
       />
 
       <DrawingBuilder
@@ -285,10 +317,12 @@
         :key="`${baseKey}-drawing`"
         :initial-item-response-options="item.responseOptions"
         :initial-item-input-options="item.inputOptions"
+        :initial-is-optional-text="item.isOptionalText"
         @uploading="isUploadingState = $event"
         @error="isError = $event"
         @updateResponseOptions="updateResponseOptions"
         @updateInputOptions="updateInputOptions"
+        @updateOptionalText="item.isOptionalText = $event"
       />
 
       <AudioRecordBuilder
@@ -296,8 +330,12 @@
         :key="`${baseKey}-audioRecord`"
         :is-skippable-item="item.allow"
         :initial-item-data="item.options"
+        :initial-is-optional-text="item.isOptionalText"
+        :initial-item-response-options="item.responseOptions"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
+        @updateOptionalText="item.isOptionalText = $event"
+        @updateResponseOptions="updateResponseOptions"
       />
 
       <AudioImageRecordBuilder
@@ -316,7 +354,9 @@
         v-if="item.inputType === 'geolocation'"
         :key="`${baseKey}-geolocation`"
         :initial-item-response-options="item.responseOptions"
+        :initial-is-optional-text="item.isOptionalText"
         @uploading="isUploadingState = $event"
+        @updateOptionalText="item.isOptionalText = $event"
         @error="isError = $event"
         @updateResponseOptions="updateResponseOptions"
       />

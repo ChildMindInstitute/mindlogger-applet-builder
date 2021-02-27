@@ -17,16 +17,28 @@
       @onAddImg="onUploadBgImg"
       @onRemoveImg="onRemoveBgImg"
     />
+    <OptionalItemText
+      :colClasses="'d-flex align-center'"
+      :cols="12"
+      :md="3"
+      :sm="6"
+      :text="isOptionalText"
+      :required="responseOptions.isOptionalTextRequired"
+      @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
+      @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
+    />
   </div>
 </template>
 
 <script>
 import ImageUpldr from '../../../../models/ImageUploader';
 import ImageUploader from '../../ImageUploader.vue';
+import OptionalItemText from '../../Partial/OptionalItemText.vue';
 
 export default {
   components: {
-    ImageUploader
+    ImageUploader,
+    OptionalItemText,
   },
   props: {
     initialItemResponseOptions: {
@@ -37,11 +49,16 @@ export default {
       type: Array,
       required: true
     },
+    initialIsOptionalText: {
+      type: Boolean,
+      default: false,
+    },
   },
   data: function () {
 
     let responseOptions = {
       "schema:image": '',
+      "isOptionalTextRequired": false,
     };
     responseOptions = Object.assign(responseOptions, this.initialItemResponseOptions);
     responseOptions['valueType'] = 'drawing';
@@ -58,6 +75,7 @@ export default {
       responseOptions,
       inputBackgroundOption,
       inputOptions,
+      isOptionalText: this.initialIsOptionalText,
     }
   },
   methods: {

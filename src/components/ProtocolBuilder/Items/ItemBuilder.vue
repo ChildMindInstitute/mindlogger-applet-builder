@@ -346,18 +346,19 @@
       
     </v-form>
 
-    <div
-      v-else-if="item.inputType !== 'cumulativeScore' && item.inputType !== 'markdownMessage'"
-      class="px-2"
-    >
+    <div class="px-2">
       <div class="item-quiz">
         <img
-          v-if="largeText"
           width="15"
           :src="itemInputTypes.find(({ text }) => text === item.inputType).icon" 
         >
         
-        <span class="ml-2">{{ largeText }}</span>
+        <span 
+          class="ml-2"
+          v-if="item.inputType !== 'cumulativeScore' && item.inputType !== 'markdownMessage'"
+        >
+          {{ largeText }}
+        </span>
       </div>
     </div>
 

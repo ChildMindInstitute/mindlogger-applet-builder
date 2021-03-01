@@ -43,7 +43,7 @@
               >
               <!-- /if initialType === 'image' -->
 
-              <v-btn>
+              <v-btn @click="$refs.fileInput.click()">
                 Your computer
                 <v-icon right>mdi-monitor</v-icon>
               </v-btn>

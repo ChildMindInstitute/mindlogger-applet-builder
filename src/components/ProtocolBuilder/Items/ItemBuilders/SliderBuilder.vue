@@ -10,7 +10,6 @@
           <v-text-field
             v-model="minSliderTick"
             label="Min Value"
-            :disabled="!isItemEditable"
             type="number"
             min="1"
             :max="maxSliderTick"
@@ -26,17 +25,20 @@
             label="Min Label"
             counter="20"
             maxlength="20"
-            :disabled="!isItemEditable"
             @change="update"
           />
         </v-col>
 
         <v-col cols="auto">
-          <ImageUploader
-            :uploadFor="'item-radio-option-pc'"
-            :itemImg="imgFirstName"
-            @onAddImg="onUploadImg('first', $event)"
-            @onRemoveImg="onRemoveImg('first')"
+          <Uploader
+            :initialType="'image'"
+            :initialData="minValueImg"
+            :initialAdditionalType="'small-circle'"
+            :initialTitle="'Slider Min Image'"
+            @onAddFromUrl="minValueImg = $event; onAddSliderImageFromUrl('Min');"
+            @onAddFromDevice="$emit('loading', true); onAddSliderImageFromDevice($event, 'Min');"
+            @onRemove="minValueImg = ''; onRemoveSliderImage('Min');"
+            @onNotify="$emit('loading', false); $emit('notify', $event);"
           />
         </v-col>
       </v-row>
@@ -50,7 +52,6 @@
           <v-text-field
             v-model="maxSliderTick"
             label="Max Value"
-            :disabled="!isItemEditable"
             type="number"
             :min="minSliderTick"
             max="12"
@@ -66,17 +67,20 @@
             label="Max Label"
             counter="20"
             maxlength="20"
-            :disabled="!isItemEditable"
             @change="update"
           />
         </v-col>
 
         <v-col cols="auto">
-          <ImageUploader
-            :uploadFor="'item-radio-option-pc'"
-            :itemImg="imgLastName"
-            @onAddImg="onUploadImg('last', $event)"
-            @onRemoveImg="onRemoveImg('last')"
+          <Uploader
+            :initialType="'image'"
+            :initialData="maxValueImg"
+            :initialAdditionalType="'small-circle'"
+            :initialTitle="'Slider Max Image'"
+            @onAddFromUrl="maxValueImg = $event; onAddSliderImageFromUrl('Max');"
+            @onAddFromDevice="$emit('loading', true); onAddSliderImageFromDevice($event, 'Max');"
+            @onRemove="maxValueImg = ''; onRemoveSliderImage('Max');"
+            @onNotify="$emit('loading', false); $emit('notify', $event);"
           />
         </v-col>
       </v-row>
@@ -93,7 +97,6 @@
             v-model="responseAlertMessage"
             label="Alert Message"
             :rules="alertTextRules"
-            :disabled="!isItemEditable"
             required
             @change="update"
           />
@@ -132,7 +135,6 @@
         <v-checkbox
           v-model="isSkippable"
           label="Skippable Item"
-          :disabled="!isItemEditable"
           @change="updateAllow"
         />
       </v-col>
@@ -145,7 +147,6 @@
         <v-checkbox
           v-model="hasScoreValue"
           label="Option Score"
-          :disabled="!isItemEditable"
           @change="sliderRangeUpdate($event, 'max')"
         />
       </v-col>
@@ -158,7 +159,6 @@
         <v-checkbox
           v-model="hasResponseAlert"
           label="Set Alert"
-          :disabled="!isItemEditable"
           @change="update"
         />
       </v-col>
@@ -225,7 +225,6 @@
                 v-model="scores[i]"
                 class="option-score mt-0 pt-0"
                 type="number"
-                :disabled="!isItemEditable"
                 :rules="numberRules"
               />
             </div>
@@ -233,14 +232,13 @@
 
           <v-card-actions class="d-flex justify-space-around">
             <v-btn
-              :disabled="!valid || !isItemEditable"
+              :disabled="!valid"
               color="primary"
               @click="saveScores"
             >
               Save
             </v-btn>
             <v-btn
-              :disabled="!isItemEditable"
               @click="resetScores"
             >
               Reset
@@ -271,12 +269,11 @@
 </style>
 
 <script>
-import ImageUploader from '../../ImageUploader.vue';
-import ImageUpldr from '../../../../models/ImageUploader';
+import Uploader from '../../Uploader.vue';
 
 export default {
   components: {
-    ImageUploader
+    Uploader,
   },
   props: {
     initialItemData: {
@@ -287,19 +284,15 @@ export default {
       type: Boolean,
       default: false,
     },
-    isItemEditable: {
-      type: Boolean,
-      default: true,
-    },
   },
   data: function () {
-    const imgUpldr = new ImageUpldr();
-    
     return {
       minSliderTick: this.initialItemData.minSliderTick || 0,
       maxSliderTick: this.initialItemData.maxSliderTick || 5,
       minValue: this.initialItemData.minValue || '',
+      minValueImg: this.initialItemData.minValueImg || '',
       maxValue: this.initialItemData.maxValue || '',
+      maxValueImg: this.initialItemData.maxValueImg || '',
       isSkippable: this.isSkippableItem || false,
       valid: true,
       textRules: [
@@ -318,9 +311,6 @@ export default {
       scoreDialog: false,
       showTickMarks: this.initialItemData.showTickMarks || false,
       scores: this.initialItemData.scores || false,
-      imgUpldr,
-      imgFirstName: this.initialItemData.minValueImg || '',
-      imgLastName: this.initialItemData.maxValueImg || ''
     };
   },
   mounted() {
@@ -354,9 +344,9 @@ export default {
         'minSliderTick': this.minSliderTick,
         'maxSliderTick': this.maxSliderTick,
         'minValue': this.minValue || "Min",
-        'minValueImg': this.imgFirstName,
+        'minValueImg': this.minValueImg,
         'maxValue': this.maxValue || "Max",
-        'maxValueImg': this.imgLastName,
+        'maxValueImg': this.maxValueImg,
         'hasScoreValue': this.hasScoreValue,
         'hasResponseAlert': this.hasResponseAlert,
         'continousSlider': this.continousSlider,
@@ -418,27 +408,44 @@ export default {
       this.$emit('updateAllow', allow);
     },
 
-    async onUploadImg(option, data) {
+    onAddSliderImageFromUrl(type) {
+      this.update();
+      this.$emit('notify', {
+        type: 'success',
+        message: `${type} Image from URL successfully added to Slider.`,
+        duration: 3000,
+      });
+    },
+
+    async onAddSliderImageFromDevice(uploadFunction, type) {
       try {
-        this.$emit('error', '');
-        setTimeout(() => { this.$emit('uploading', true); }, 2000);
-        const response = await this.imgUpldr.uploadImage(data);
-        if(option === 'first') this.imgFirstName = response.location;
-        else if(option === 'last') this.imgLastName = response.location;
-        setTimeout(() => { this.$emit('uploading', false); }, 2100);
+        const uploadedImageUrl = await uploadFunction();
+        if(type === 'Min') this.minValueImg = uploadedImageUrl;
+        else this.maxValueImg = uploadedImageUrl;
         this.update();
-      } catch(e) {
-        setTimeout(() => {
-          this.$emit('uploading', false);
-          this.$emit('error', 'Something went wrong with uploading image for "Score Option". Please try to upload image again...');
-        }, 2000);
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'success',
+          message: `${type} Image successfully added to Slider.`,
+          duration: 3000,
+        });
+      } catch (error) {
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'error',
+          message: `Something went wrong with uploading image for Item > ${type} Slider. Please try to upload again or just save Slider without image changes.`,
+        });
       }
     },
-    onRemoveImg(option) {
-      if(option === 'first') this.imgFirstName = '';
-      else if(option === 'last') this.imgLastName = '';
+
+    onRemoveSliderImage(type) {
       this.update();
-    }
+      this.$emit('notify', {
+        type: 'warning',
+        message: `${type} Image successfully removed from Slider.`,
+        duration: 3000,
+      });
+    },
 
   }
 }

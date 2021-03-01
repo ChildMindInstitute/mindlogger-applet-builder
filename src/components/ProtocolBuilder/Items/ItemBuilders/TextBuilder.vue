@@ -7,7 +7,6 @@
       v-model="maxLength"
       label="Maximum response length"
       type="number"
-      :disabled="!isItemEditable"
       :rules="maxLengthRules"
       @change="update"
     />
@@ -15,7 +14,6 @@
       v-if="requiredAnswer"
       v-model="correctAnswer"
       label="Correct answer"
-      :disabled="!isItemEditable"
       @change="updateAnswer"
     />
     <v-row>
@@ -27,7 +25,6 @@
         <v-checkbox
           v-model="requiredAnswer"
           label="Correct answer required"
-          :disabled="!isItemEditable"
           @change="updateAnswer"
         />
       </v-col>
@@ -39,7 +36,6 @@
         <v-checkbox
           v-model="isSkippable"
           label="Skippable Item"
-          :disabled="!isItemEditable"
           @change="updateAllow"
         />
       </v-col>
@@ -51,7 +47,6 @@
         <v-checkbox
           v-model="isNumerical"
           label="Numerical Response Required"
-          :disabled="!isItemEditable"
           @change="update"
         />
       </v-col>
@@ -63,7 +58,6 @@
         <v-checkbox
           v-model="requiredValue"
           label="Response required"
-          :disabled="!isItemEditable"
           @change="update"
         />
       </v-col>
@@ -89,10 +83,6 @@ export default {
     initialAnswer: {
       type: String,
       default: "",
-    },
-    isItemEditable: {
-      type: Boolean,
-      default: true,
     },
   },
   data: function () {

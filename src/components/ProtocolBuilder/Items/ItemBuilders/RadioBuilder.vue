@@ -95,7 +95,6 @@
             <div class="d-flex align-center justify-end">
               <v-btn
                 icon
-                :disabled="!isItemEditable"
                 large
                 @click="option.expanded = !option.expanded"
               >
@@ -111,56 +110,18 @@
                   mdi-chevron-double-up
                 </v-icon>
               </v-btn>
-
-              <v-menu offset-y>
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    v-bind="attrs"
-                    icon
-                    v-on="on"
-                  >
-                    <v-icon
-                      :color="option.image ? 'primary' : ''"
-                    >
-                      mdi-image-search
-                    </v-icon>
-                  </v-btn>
-                </template>
-                <v-list>
-                  <v-list-item @click="onAddImageUrl(option)">
-                    <v-list-item-title>{{ option.image ? 'Edit Image Url' : 'Add Image Url' }} </v-list-item-title>
-                  </v-list-item>
-
-                  <v-list-item>
-                    <v-list-item-title>
-                      <div
-                        class="upload-from-pc"
-                      >
-                        <input 
-                          class="file-input" 
-                          type="file" 
-                          accept="image/jpeg, image/png, image/bmp" 
-                          @change="onChangeFile($event, option)"
-                        >
-                        Upload From Your computer
-                      </div>
-                    </v-list-item-title>
-                  </v-list-item>
-
-                  <v-list-item
-                    :disabled="!option.image"
-                    @click="onRemoveImage(option)"
-                  >
-                    <v-list-item-title>
-                      Remove Image
-                    </v-list-item-title>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
-
+              <Uploader
+                :initialType="'image'"
+                :initialTitle="'Option Image'"
+                :initialAdditionalType="'small-circle'"
+                :initialData="option.image"
+                @onAddFromUrl="onAddOptionImageFromUrl(option, $event)"
+                @onAddFromDevice="$emit('loading', true); onAddOptionImageFromDevice(option, $event);"
+                @onRemove="onRemoveOptionImage(option)"
+                @onNotify="$emit('loading', false); $emit('notify', $event);"
+              />
               <v-btn
                 icon
-                :disabled="!isItemEditable"
                 large
                 @click="deleteOption(index)"
               >
@@ -187,7 +148,6 @@
                   label="Option Text"
                   counter="75"
                   maxlength="75"
-                  :disabled="!isItemEditable"
                   @change="updateOption(option)"
                 />
               </v-col>
@@ -204,7 +164,6 @@
                   label="Token Value"
                   counter="5"
                   maxlength="5"
-                  :disabled="!isItemEditable"
                   @change="updateOption(option)"
                 />
               </v-col>
@@ -222,7 +181,6 @@
                   label="Score Value"
                   counter="5"
                   maxlength="5"
-                  :disabled="!isItemEditable"
                   @change="updateOption(option)"
                 />
               </v-col>
@@ -260,7 +218,6 @@
 
       <div class="pa-2">
         <v-btn
-          :disabled="!isItemEditable"
           fab
           x-small
           color="primary"
@@ -284,7 +241,6 @@
             v-model="responseAlertMessage"
             label="Alert Message"
             :rules="alertTextRules"
-            :disabled="!isItemEditable"
             required
             @change="update"
           />
@@ -317,7 +273,6 @@
           <v-checkbox
             v-model="isSkippable"
             label="Skippable Item"
-            :disabled="!isItemEditable"
             @change="updateAllow"
           />
         </v-col>
@@ -330,7 +285,6 @@
           <v-checkbox
             v-model="hasResponseAlert"
             label="Set Alert"
-            :disabled="!isItemEditable"
             @change="update"
           />
         </v-col>
@@ -343,7 +297,6 @@
           <v-checkbox
             v-model="hasScoreValue"
             label="Option Score"
-            :disabled="!isItemEditable"
             @change="update"
           />
         </v-col>
@@ -357,56 +310,6 @@
         </v-col>
       </v-row>
     </v-form>
-
-    <v-dialog
-      v-model="imageUrlDialog.visible"
-      persistent
-      width="800"
-    >
-      <v-card>
-        <v-card-title
-          class="headline grey lighten-2"
-          primary-title
-        >
-          <v-icon left>
-            mdi-pencil
-          </v-icon>
-          Upload from URL
-        </v-card-title>
-        <v-card-text>
-          <v-text-field
-            v-model="imageUrlDialog.url"
-            label="URL"
-          />
-        </v-card-text>
-        <v-divider />
-        <v-card-actions>
-          <v-btn
-            outlined
-            color="primary"
-            @click="imageUrlDialog.visible = false;"
-          >
-            Close
-          </v-btn>
-          <v-spacer />
-          <v-btn
-            color="primary"
-            @click="onAddImageFromUrl"
-          >
-            Add
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <v-dialog
-      v-model="inValidFileDlg"
-      width="400"
-    >
-      <v-alert type="error">
-        <span>{{ fileErrorMsg }}</span>
-      </v-alert>
-    </v-dialog>
   </div>
 </template>
 
@@ -457,11 +360,11 @@
 
 
 <script>
-import ImageUpldr from '../../../../models/ImageUploader';
+import Uploader from '../../Uploader.vue';
 
 export default {
   components: {
-    
+    Uploader,
   },
   props: {
     initialItemData: {
@@ -474,10 +377,6 @@ export default {
     },
     responseOptions: {
       type: Object,
-    },
-    isItemEditable: {
-      type: Boolean,
-      default: true,
     },
     itemTemplates: {
       type: Array,
@@ -495,8 +394,6 @@ export default {
     }
   },
   data: function () {
-    const imgUploader = new ImageUpldr();
-
     const isTokenValue = (this.responseOptions.valueType && this.responseOptions.valueType.includes("token")) || false;
     let nextOptionScore = 1;
 
@@ -509,8 +406,6 @@ export default {
     }
 
     return {
-      inValidFileDlg: false,
-      fileErrorMsg: '',
       options: (this.initialItemData.options || []).map(option => ({
         name: option.name,
         value: option.value || 0,
@@ -520,11 +415,6 @@ export default {
         expanded: false,
         valid: true
       })),
-      imageUrlDialog: {
-        visible: false,
-        option: null,
-        url: ''
-      },
       textRules: [
         v => !!v || 'Radio options cannot be empty',
       ],
@@ -541,7 +431,6 @@ export default {
       hasScoreValue: this.initialItemData.hasScoreValue || false,
       hasResponseAlert: this.initialItemData.hasResponseAlert || false,
       responseAlertMessage: this.initialItemData.responseAlertMessage || '',
-      imgUploader,
       isSkippable: this.isSkippableItem || false,
       enableNegativeTokens: this.initialItemData.enableNegativeTokens || false,
     };
@@ -675,47 +564,42 @@ export default {
       this.$emit('updateAllow', allow);
     },
 
-    onAddImageUrl(option) {
-      this.imageUrlDialog.visible = true;
-      this.imageUrlDialog.option = option;
-      this.imageUrlDialog.url = option.image;
+    onAddOptionImageFromUrl(option, url) {
+      option.image = url;
+      this.$emit('notify', {
+        type: 'success',
+        message: 'Image from URL successfully added to Option.',
+        duration: 3000,
+      });
     },
 
-    onRemoveImage(option) {
+    async onAddOptionImageFromDevice(option, uploadFunction) {
+      try {
+        option.image = await uploadFunction();
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'success',
+          message: 'Image successfully added to Option.',
+          duration: 3000,
+        });
+      } catch (error) {
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'error',
+          message: 'Something went wrong with uploading image for Item > Option. Please try to upload again or just save Option without image changes.',
+        });
+      }
+    },
+
+    onRemoveOptionImage(option) {
       option.image = '';
+      this.$emit('notify', {
+        type: 'warning',
+        message: 'Image successfully removed from Option.',
+        duration: 3000,
+      });
     },
 
-    onAddImageFromUrl() {
-      const { option } = this.imageUrlDialog;
-      this.imageUrlDialog.visible = false;
-
-      option.image = this.imageUrlDialog.url;
-      option.valid = this.isValidOption(option);
-      this.update();
-    },
-
-    async onChangeFile(event, option) {
-      if (!event.target.files.length) {
-        return ;
-      }
-
-      const file = event.target.files[0];
-
-      this.fileErrorMsg = await this.imgUploader.isImageValid(file);
-      if (this.fileErrorMsg) {
-        this.inValidFileDlg = true;
-      }
-
-      this.$emit('uploading', true);
-
-      const response = await this.imgUploader.uploadImage(file);
-      option.image = response.location;
-      option.valid = this.isValidOption(option);
-
-      this.$emit('uploading', false);
-
-      this.update();
-    }
   }
 }
 </script>

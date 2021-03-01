@@ -1,9 +1,10 @@
 <template>
   <v-card
-    class="pa-2"
+    class="item pa-2"
+    :class="item.allowEdit ? '' : 'not-editable'"
   >
     <v-card-title
-      class="px-2 py-0"
+      class="item-title px-2 py-0"
       :class="item.valid ? '' : 'invalid'"
     >
       <span
@@ -80,7 +81,7 @@
           :class="{ 'focus': isItemNameEditing }"
           label="Item Name"
           :rules="nameRules"
-          :disabled="!item.allowEdit || item.inputType == 'cumulativeScore'"
+          :disabled="item.inputType == 'cumulativeScore'"
           required
           @focus="isItemNameEditing = true"
           @blur="isItemNameEditing = false"
@@ -91,21 +92,21 @@
       <template
         v-if="item.inputType !== 'markdownMessage'"
       >
-        <ImageUploader
-          class="my-4"
+        <Uploader
+          class="mt-3 mb-4"
           style="max-width: 300px"
-          :uploadFor="'activity-item'"
-          :itemImg="questionBuilder.imgURL"
-          :notify-enabled="false"
-          :disabled="!item.allowEdit"
-          @onAddImg="onAddImg"
-          @onRemoveImg="onRemoveImg"
+          :initialType="'image'"
+          :initialData="headerImage"
+          :initialTitle="'Header Item Image'"
+          @onAddFromUrl="onAddHeaderImageFromUrl($event)"
+          @onAddFromDevice="loading = true; onAddHeaderImageFromDevice($event);"
+          @onRemove="onRemoveHeaderImage()"
+          @onNotify="loading = false; notify = $event;"
         />
         <v-textarea
           v-if="item.inputType !== 'cumulativeScore'"
-          v-model="questionBuilder.text"
+          v-model="largeText"
           label="Large Text"
-          :disabled="!item.allowEdit"
           auto-grow
           filled
           rows="1"
@@ -121,7 +122,6 @@
             class="mt-4"
             :value="item.inputType"
             :items="itemInputTypes"
-            :disabled="!item.allowEdit"
             label="Input Type"
             outlined
             hide-details
@@ -204,7 +204,6 @@
         :is-skippable-item="item.allow"
         :initial-response-options="item.responseOptions"
         :initial-item-data="item.options"
-        :is-item-editable="item.allowEdit"
         :item-templates="itemTemplates"
         :has-prize-activity="hasPrizeActivity"
         :initial-is-optional-text="item.isOptionalText"
@@ -215,8 +214,8 @@
         @updateAllow="updateAllow"
         @updateOptionalText="item.isOptionalText = $event"
         @updateResponseOptions="updateResponseOptions"
-        @uploading="isUploadingState = $event"
-        @error="isError = $event"
+        @loading="loading = $event"
+        @notify="notify = $event"
       />
 
       <StackedRadioBuilder
@@ -226,13 +225,10 @@
         :is-skippable-item="item.allow"
         :response-options="item.responseOptions"
         :initial-item-data="item.options"
-        :is-item-editable="item.allowEdit"
         :item-templates="itemTemplates"
         :has-prize-activity="hasPrizeActivity"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
-        @uploading="isUploadingState = $event"
-        @error="isError = $event"
       />
 
       <TextBuilder
@@ -242,7 +238,6 @@
         :initial-item-data="item.options"
         :response-option="item.responseOptions"
         :initial-answer="item.correctAnswer"
-        :is-item-editable="item.allowEdit"
         @updateAnswer="updateAnswer"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
@@ -253,15 +248,14 @@
         :key="`${baseKey}-slider`"
         :is-skippable-item="item.allow"
         :initial-item-data="item.options"
-        :is-item-editable="item.allowEdit"
         :initial-response-options="item.responseOptions"
         :initial-is-optional-text="item.isOptionalText"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
         @updateOptionalText="item.isOptionalText = $event"
         @updateResponseOptions="updateResponseOptions"
-        @uploading="isUploadingState = $event"
-        @error="isError = $event"
+        @loading="loading = $event"
+        @notify="notify = $event"
       />
 
       <StackedSliderBuilder
@@ -269,11 +263,8 @@
         :key="`${baseKey}-stackedSlider`"
         :is-skippable-item="item.allow"
         :initial-item-data="item.options"
-        :is-item-editable="item.allowEdit"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
-        @uploading="isUploadingState = $event"
-        @error="isError = $event"
       />
 
       <VideoBuilder
@@ -318,11 +309,11 @@
         :initial-item-response-options="item.responseOptions"
         :initial-item-input-options="item.inputOptions"
         :initial-is-optional-text="item.isOptionalText"
-        @uploading="isUploadingState = $event"
-        @error="isError = $event"
         @updateResponseOptions="updateResponseOptions"
         @updateInputOptions="updateInputOptions"
         @updateOptionalText="item.isOptionalText = $event"
+        @loading="loading = $event"
+        @notify="notify = $event"
       />
 
       <AudioRecordBuilder
@@ -343,11 +334,11 @@
         :key="`${baseKey}-audioImageRecord`"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="item.allow"
-        @uploading="isUploadingState = $event"
-        @error="isError = $event"
         @checkValidation="valid = $event"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
+        @loading="loading = $event"
+        @notify="notify = $event"
       />
 
       <GeolocationBuilder
@@ -355,10 +346,10 @@
         :key="`${baseKey}-geolocation`"
         :initial-item-response-options="item.responseOptions"
         :initial-is-optional-text="item.isOptionalText"
-        @uploading="isUploadingState = $event"
         @updateOptionalText="item.isOptionalText = $event"
-        @error="isError = $event"
         @updateResponseOptions="updateResponseOptions"
+        @loading="loading = $event"
+        @notify="notify = $event"
       />
 
       <AudioStimulusBuilder
@@ -368,19 +359,22 @@
         :initial-item-input-options="item.inputOptions"
         :initial-item-media="item.media"
         :initial-item-data="item.options"
-        :is-item-editable="item.allowEdit"
         @updateAllow="updateAllow"
         @updateInputOptions="updateInputOptions"
         @updateMedia="updateMedia"
+        @validation="item.valid = $event"
+        @loading="loading = $event"
+        @notify="notify = $event"
       />
+
       <CumulativeScoreBuilder
         v-if="item.inputType === 'cumulativeScore'"
         :key="`${baseKey}-cumulativeScore`"
         :items="currentActivity.items"
-        :is-item-editable="item.allowEdit"
         :initial-item-data="item"
         @updateCumulativeScore="updateCumulativeScore"
       />
+      
     </v-form>
 
     <div
@@ -389,33 +383,43 @@
     >
       <div class="item-quiz">
         <img
+          v-if="largeText"
           width="15"
           :src="itemInputTypes.find(({ text }) => text === item.inputType).icon" 
         >
         
-        <span class="ml-2">{{ questionBuilder.text }}</span>
+        <span class="ml-2">{{ largeText }}</span>
       </div>
     </div>
 
-    <v-dialog
-      v-model="isUploadingState"
-      persistent
-      width="400"
-    >
-      <v-card class="pt-5 pb-6 text-center">
-        <v-progress-circular
-          class="d-block mx-auto mt-2"
-          color="primary"
-          indeterminate
-          :size="50"
-        />
-        <span> Uploading ... </span>
-      </v-card>
-    </v-dialog>
+    <Notify :notify="notify" />
+    <Loading :loading="loading" />
+
   </v-card>
 </template>
 
 <style scoped>
+
+  .item.not-editable {
+    position: relative;
+  }
+
+  .item.not-editable:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    z-index: 2;
+    background-color: rgba(145, 145, 145, 0.1);
+  }
+
+  .item-title {
+    position: relative;
+    z-index: 3;
+  }
 
   .item-name-edit-wrapper {
     position: relative;
@@ -479,8 +483,8 @@
 </style>
 
 <script>
+import Uploader from '../Uploader.vue';
 
-import ImageUploader from '../ImageUploader.vue';
 import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
 import StackedRadioBuilder from "./ItemBuilders/StackedRadioBuilder.vue";
 import TextBuilder from "./ItemBuilders/TextBuilder.vue";
@@ -496,14 +500,20 @@ import GeolocationBuilder from "./ItemBuilders/GeolocationBuilder.vue";
 import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
 import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
 import StackedSliderBuilder from "./ItemBuilders/StackedSliderBuilder";
+
 import MarkDownEditor from "../MarkDownEditor";
+
 import Item from '../../../models/Item';
-import ImageUpldr from '../../../models/ImageUploader';
+
+import Notify from '../Additional/Notify.vue';
+import Loading from '../Additional/Loading.vue';
+
 import { mapMutations, mapGetters } from 'vuex';
 import config from '../../../config';
 
 export default {
   components: {
+    Uploader,
     RadioBuilder,
     TextBuilder,
     SliderBuilder,
@@ -517,10 +527,11 @@ export default {
     GeolocationBuilder,
     AudioStimulusBuilder,
     CumulativeScoreBuilder,
-    ImageUploader,
     MarkDownEditor,
     StackedRadioBuilder,
     StackedSliderBuilder,
+    Notify,
+    Loading,
   },
   props: {
     itemIndex: {
@@ -539,16 +550,13 @@ export default {
       ],
       hasScoringItem: false,
       valid: false,
-      imgUploader: new ImageUpldr(),
-      questionBuilder: {
-        text: '',
-        imgURL: ''
-      },
-      isUploadingState: false,
-      isError: '',
+      largeText: '',
+      headerImage: '',
       isExpanded: false,
       isItemNameEditing: false,
       baseKey: 0,
+      loading: false,
+      notify: {},
     }
   },
   computed: {
@@ -574,19 +582,17 @@ export default {
     }
   },
   watch: {
-    questionBuilder: {
-      deep: true,
-      handler() {
-        this.updateItemMetaInfo({
-          index: this.itemIndex,
-          obj: {
-            question: {
-              text: this.questionBuilder.text,
-              image: this.questionBuilder.imgURL
-            }
-          }
-        })
-      }
+    largeText: function(text) {
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { question: { text, image: this.headerImage } }
+      });
+    },
+    headerImage: function(image) {
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { question: { text: this.largeText, image } }
+      });
     },
   },
 
@@ -595,10 +601,8 @@ export default {
     Object.assign(this, {
       valid: this.item.name && this.item.name.length > 0,
       hasScoringItem: this.currentActivity.items.some((item) => item.options.hasScoreValue),
-      questionBuilder: {
-        text: this.item.question.text,
-        imgURL: this.item.question.image
-      },
+      largeText: this.item.question.text,
+      headerImage: this.item.question.image,
       isExpanded: !this.item.name.length
     });
 
@@ -633,36 +637,6 @@ export default {
       if (!/^[a-zA-Z0-9-_]+$/.test(e.key)) {
         e.preventDefault();
       }
-    },
-
-    async onAddImg (data) {
-      this.isError = '';
-
-      if ( typeof data !== 'string' ) {
-        this.isUploadingState = true;
-        const response = await this.imgUploader.uploadImage(data);
-        this.questionBuilder.imgURL = response.location;
-      } else {
-        this.questionBuilder.imgURL = data;
-      }
-
-      this.isUploadingState = false;
-
-      this.updateItemMetaInfo({
-        index: this.itemIndex,
-        obj: {
-          question: {
-            text: this.questionBuilder.text,
-            image: this.questionBuilder.imgURL
-          }
-        }
-      });
-    },
-
-    onRemoveImg () {
-      this.isError = '';
-      this.questionBuilder.imgFile = null;
-      this.questionBuilder.imgURL = '';
     },
 
     onUpdateInputType (inputType) {
@@ -775,7 +749,44 @@ export default {
         index: this.itemIndex,
         obj: { cumulativeScores: scoreRules }
       });
-    }
+    },
+
+    onAddHeaderImageFromUrl(url) {
+      this.headerImage = url;
+      this.notify = {
+        type: 'success',
+        message: 'Header image from URL successfully added to Item.',
+        duration: 3000,
+      };
+    },
+
+    async onAddHeaderImageFromDevice(uploadFunction) {
+      try {
+        this.headerImage = await uploadFunction();
+        this.loading = false;
+        this.notify = {
+          type: 'success',
+          message: 'Header image successfully added to Item.',
+          duration: 3000,
+        };
+      } catch (error) {
+        this.loading = false;
+        this.notify = {
+          type: 'error',
+          message: 'Something went wrong with uploading header image for Item. Please try to upload again or just save Item without changes for header image.',
+        };
+      }
+    },
+
+    onRemoveHeaderImage() {
+      this.headerImage = '';
+      this.notify = {
+        type: 'warning',
+        message: 'Header image successfully removed from Item.',
+        duration: 3000,
+      };
+    },
+
   }
 }
 </script>

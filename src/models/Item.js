@@ -457,11 +457,11 @@ export default class Item {
     const inputOptionsListUpdate = (field) => {
 
       const oldOptions = _.get(oldValue, field, []).map(option => {
-        return { value: option['schema:value'] }
+        return { value: option['schema:value'], name: option['schema:name'] }
       });
 
       const newOptions = _.get(newValue, field, []).map(option => {
-        return { value: option['schema:value'] }
+        return { value: option['schema:value'], name: option['schema:name'] }
       });
 
       const removedOptions = oldOptions.filter(option => {
@@ -477,8 +477,8 @@ export default class Item {
       });
 
       return [
-        ...removedOptions.map(option => `${option.value} option was removed`),
-        ...insertedOptions.map(option => `${option.value} option was inserted`)
+        ...removedOptions.map(option => `${option.name}: ${option.value} option was removed`),
+        ...insertedOptions.map(option => `${option.name}: ${option.value} option was inserted`),
       ];
     };
 

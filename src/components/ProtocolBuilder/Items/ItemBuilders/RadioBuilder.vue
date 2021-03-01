@@ -260,7 +260,6 @@
           <v-checkbox
             v-model="isTokenValue"
             label="Token Value"
-            :disabled="!isItemEditable"
             @change="updateTokenOption"
           />
         </v-col>

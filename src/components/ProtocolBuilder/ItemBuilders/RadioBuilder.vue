@@ -274,10 +274,8 @@
                 cols="12"
                 sm="12"
               >
-                <v-text-field
+                <MarkDownEditor
                   v-model="nextOptionDescription"
-                  label="Option Description"
-                  @change="update"
                 />
               </v-col>
             </v-row>
@@ -298,10 +296,12 @@
 import ClickOutside from 'vue-click-outside';
 import ImageUploader from '../ImageUploader.vue';
 import ImageUpldr from '../../../models/ImageUploader';
+import MarkDownEditor from './MarkDownEditor';
 
 export default {
   components: {
-    ImageUploader
+    ImageUploader,
+    MarkDownEditor
   },
   props: {
     initialItemData: {
@@ -378,6 +378,11 @@ export default {
   },
   directives: {
     ClickOutside
+  },
+  watch: {
+    nextOptionDescription() {
+      this.update();
+    }
   },
   async beforeMount() {
     this.items = this.itemTemplates

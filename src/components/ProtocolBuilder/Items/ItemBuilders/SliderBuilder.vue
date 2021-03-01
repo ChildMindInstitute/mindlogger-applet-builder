@@ -188,6 +188,17 @@
       </v-col>
     </v-row>
 
+    <OptionalItemText
+      :colClasses="'d-flex align-center'"
+      :cols="12"
+      :md="3"
+      :sm="6"
+      :text="isOptionalText"
+      :required="responseOptions.isOptionalTextRequired"
+      @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
+      @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
+    />
+
     <v-dialog
       v-model="scoreDialog"
       max-width="350"
@@ -269,10 +280,12 @@
 
 <script>
 import Uploader from '../../Uploader.vue';
+import OptionalItemText from '../../Partial/OptionalItemText.vue';
 
 export default {
   components: {
     Uploader,
+    OptionalItemText,
   },
   props: {
     initialItemData: {
@@ -280,6 +293,14 @@ export default {
       required: true
     },
     isSkippableItem: {
+      type: Boolean,
+      default: false,
+    },
+    initialResponseOptions: {
+      type: Object,
+      default: new Object(),
+    },
+    initialIsOptionalText: {
       type: Boolean,
       default: false,
     },
@@ -310,6 +331,8 @@ export default {
       scoreDialog: false,
       showTickMarks: this.initialItemData.showTickMarks || false,
       scores: this.initialItemData.scores || false,
+      isOptionalText: this.initialIsOptionalText,
+      responseOptions: this.initialResponseOptions,
     };
   },
   mounted() {
@@ -405,6 +428,10 @@ export default {
     updateAllow() {
       const allow = this.isSkippable
       this.$emit('updateAllow', allow);
+    },
+
+    onUpdateResponseOptions() {
+      this.$emit('updateResponseOptions', this.responseOptions);
     },
 
     onAddSliderImageFromUrl(type) {

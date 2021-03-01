@@ -27,17 +27,42 @@
       label="Response required"
       @change="update"
     />
+
+    <OptionalItemText
+      :colClasses="'d-flex align-center'"
+      :cols="12"
+      :md="3"
+      :sm="6"
+      :text="isOptionalText"
+      :required="responseOptions.isOptionalTextRequired"
+      @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
+      @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
+    />
+
   </v-form>
 </template>
 
 <script>
+import OptionalItemText from '../../Partial/OptionalItemText.vue';
+
 export default {
+  components: {
+    OptionalItemText,
+  },
   props: {
     initialItemData: {
       type: Object,
       required: true
     },
     isSkippableItem: {
+      type: Boolean,
+      default: false,
+    },
+    initialItemResponseOptions: {
+      type: Object,
+      required: true,
+    },
+    initialIsOptionalText: {
       type: Boolean,
       default: false,
     },
@@ -54,7 +79,9 @@ export default {
       ],
       maxValueRules: [
         v => (v > 0 && v % 1 === 0) || 'Max response length must be a positive integer',
-      ]
+      ],
+      responseOptions: this.initialItemResponseOptions,
+      isOptionalText: this.initialIsOptionalText,
     };
   },
   methods: {
@@ -69,7 +96,10 @@ export default {
     updateAllow() {
       const allow = this.isSkippable
       this.$emit('updateAllow', allow);
-    }
+    },
+    onUpdateResponseOptions() {
+      this.$emit('updateResponseOptions', this.responseOptions);
+    },
   }
 }
 </script>

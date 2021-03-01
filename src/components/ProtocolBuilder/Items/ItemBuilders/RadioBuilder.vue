@@ -308,6 +308,16 @@
           />
         </v-col>
       </v-row>
+      <OptionalItemText
+        :colClasses="'d-flex align-center'"
+        :cols="12"
+        :md="3"
+        :sm="6"
+        :text="isOptionalText"
+        :required="responseOptions.isOptionalTextRequired"
+        @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
+        @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
+      />
     </v-form>
   </div>
 </template>
@@ -360,10 +370,12 @@
 
 <script>
 import Uploader from '../../Uploader.vue';
+import OptionalItemText from '../../Partial/OptionalItemText.vue';
 
 export default {
   components: {
     Uploader,
+    OptionalItemText,
   },
   props: {
     initialItemData: {
@@ -374,7 +386,7 @@ export default {
       type: Boolean,
       default: false,
     },
-    responseOptions: {
+    initialResponseOptions: {
       type: Object,
     },
     itemTemplates: {
@@ -390,10 +402,15 @@ export default {
       type: Boolean,
       required: false,
       default: false
-    }
+    },
+    initialIsOptionalText: {
+      type: Boolean,
+      default: false,
+    },
   },
   data: function () {
-    const isTokenValue = (this.responseOptions.valueType && this.responseOptions.valueType.includes("token")) || false;
+
+    const isTokenValue = (this.initialResponseOptions.valueType && this.initialResponseOptions.valueType.includes("token")) || false;
     let nextOptionScore = 1;
 
     if (this.initialItemData.options.length > 0) {
@@ -432,6 +449,8 @@ export default {
       responseAlertMessage: this.initialItemData.responseAlertMessage || '',
       isSkippable: this.isSkippableItem || false,
       enableNegativeTokens: this.initialItemData.enableNegativeTokens || false,
+      responseOptions: this.initialResponseOptions,
+      isOptionalText: this.initialIsOptionalText,
     };
   },
 
@@ -561,6 +580,10 @@ export default {
     updateAllow() {
       const allow = this.isSkippable
       this.$emit('updateAllow', allow);
+    },
+
+    onUpdateResponseOptions() {
+      this.$emit('updateResponseOptions', this.responseOptions);
     },
 
     onAddOptionImageFromUrl(option, url) {

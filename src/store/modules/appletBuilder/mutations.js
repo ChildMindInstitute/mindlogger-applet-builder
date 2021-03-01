@@ -167,7 +167,7 @@ const subScaleMutations = {
 const conditionalMutations = {
   addConditional (state) {
     if (state.currentActivity) {
-      state.currentActivity.conditionalItems.push({});
+      state.currentActivity.conditionalItems.push({ id: Date.now() });
     }
   },
 
@@ -175,9 +175,15 @@ const conditionalMutations = {
     state.currentActivity.conditionalItems[index] = obj;
   },
 
-  deleteConditional (state, index) {
-    state.currentActivity.conditionalItems.splice(index, 1);
-  }
+  deleteConditional(state, index) {
+    const conditionalItems = state.currentActivity.conditionalItems;
+    
+    conditionalItems.splice(index, 1);
+    state.currentActivity = {
+      ...state.currentActivity,
+      conditionalItems,
+    };
+  },
 }
 
 export default {
@@ -220,6 +226,8 @@ export default {
       activities: [],
       tokenPrizeModal: false
     };
+
+    state.original = null;
   },
 
   setTokenPrizeModalStatus (state, status) {

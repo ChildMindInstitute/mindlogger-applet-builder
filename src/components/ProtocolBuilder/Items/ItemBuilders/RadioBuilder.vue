@@ -220,7 +220,7 @@
         <v-btn
           fab
           x-small
-          color="deep-purple"
+          color="primary"
           @click="addOption"
         >
           <v-icon color="white">
@@ -260,7 +260,8 @@
           <v-checkbox
             v-model="isTokenValue"
             label="Token Value"
-            @change="update"
+            :disabled="!isItemEditable"
+            @change="updateTokenOption"
           />
         </v-col>
         <v-col 
@@ -312,7 +313,7 @@
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
   .radio-option {
     display: flex;
     align-items: center;
@@ -321,7 +322,42 @@
   .radio-option > * {
     margin-left: 10px;
   }
+
+  .mx-template-list {
+    position: absolute;
+    margin-top: 36px;
+    z-index: 1;
+  }
+
+  .option-list {
+    width: 65%;
+  }
+
+  .upload-from-pc {
+    position: relative;
+
+    .file-input, .file-input:after {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      border-radius: 4px;
+      z-index: 1;
+      opacity: 0;
+    }
+
+    .file-input {
+      &:after {
+        content: '';
+        cursor: pointer;
+      }
+    }
+  }
 </style>
+
+
 
 <script>
 import Uploader from '../../Uploader.vue';
@@ -359,7 +395,7 @@ export default {
   },
   data: function () {
     const isTokenValue = (this.responseOptions.valueType && this.responseOptions.valueType.includes("token")) || false;
-    let nextOptionScore = 1, nextOptionValue = 1;
+    let nextOptionScore = 1;
 
     if (this.initialItemData.options.length > 0) {
       const lastOption = this.initialItemData.options[this.initialItemData.options.length - 1];
@@ -367,8 +403,6 @@ export default {
       if (this.initialItemData.hasScoreValue && lastOption.score) {
         nextOptionScore = lastOption.score + 1
       }
-
-      nextOptionValue = lastOption.value + 1;
     }
 
     return {
@@ -391,7 +425,6 @@ export default {
         v => !!v || 'Alert Text cannot be empty',
       ],
       nextOptionScore,
-      nextOptionValue,
       items: [],
 
       isTokenValue,
@@ -424,12 +457,13 @@ export default {
         'valid': true,
       };
 
-      nextOption.value = this.nextOptionValue;
-      this.nextOptionValue++;
-
       if (this.hasScoreValue) {
         nextOption.score = this.nextOptionScore;
         this.nextOptionScore++;
+      }
+
+      if (!this.isTokenValue) {
+        nextOption.value = this.options.length;
       }
 
       this.options.push(nextOption);
@@ -494,6 +528,20 @@ export default {
       this.$emit('updateOptions', responseOptions);
     },
 
+    updateTokenOption() {
+      if (this.isTokenValue) {
+        for (let i = 0; i < this.options.length; i++) {
+          this.options[i].value = 0;
+        }
+      } else {
+        for (let i = 0; i < this.options.length; i++) {
+          this.options[i].value = i;
+        }
+      }
+
+      this.update();
+    },
+
     updateOption(option) {
       option.valid = this.isValidOption(option);
 
@@ -555,38 +603,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-.mx-template-list {
-  position: absolute;
-  margin-top: 36px;
-  z-index: 1;
-}
-
-.option-list {
-  width: 65%;
-}
-
-.upload-from-pc {
-  position: relative;
-
-  .file-input, .file-input:after {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    border-radius: 4px;
-    z-index: 1;
-    opacity: 0;
-  }
-
-  .file-input {
-    &:after {
-      content: '';
-      cursor: pointer;
-    }
-  }
-}
-</style>

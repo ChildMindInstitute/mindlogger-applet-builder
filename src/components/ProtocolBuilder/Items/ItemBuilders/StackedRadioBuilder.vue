@@ -166,7 +166,7 @@
             <v-btn
               fab
               x-small
-              color="deep-purple"
+              color="primary"
               @click="addOption"
             >
               <v-icon color="white">

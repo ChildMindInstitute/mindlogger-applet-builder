@@ -116,7 +116,7 @@
       <v-row>
         <v-col
           cols="12"
-          sm="6"
+          sm="3"
         >
           <v-select
             class="mt-4"
@@ -358,34 +358,6 @@
         >
         
         <span class="ml-2">{{ largeText }}</span>
-      </div>
-
-      <div
-        v-if="item.inputType == 'radio' || item.inputType == 'checkbox'"
-        class="mt-4"
-      >
-        <div
-          v-for="(option, index) in item.options.options"
-          :key="index"
-        >
-          <input
-            v-if="item.inputType == 'checkbox'"
-            class="mx-2"
-            type="checkbox"
-            value="false"
-            disabled
-          >
-
-          <input
-            v-else
-            class="mx-2"
-            type="radio"
-            value="false"
-            disabled
-          >
-
-          <span>{{ option.name }}</span>
-        </div>
       </div>
     </div>
 
@@ -645,6 +617,7 @@ export default {
       }
 
       updates.options = { options: [] };
+      updates.allow = false;
 
       this.updateItemMetaInfo({
         index: this.itemIndex,

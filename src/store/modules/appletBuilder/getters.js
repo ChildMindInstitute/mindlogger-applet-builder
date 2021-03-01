@@ -31,7 +31,6 @@ export default {
   formattedProtocol (state) {
     const protocol = state.protocol;
     const protocolModel = new Protocol();
-
     const activities = protocol.activities.map(activity => {
       const activityModel = new Activity();
 

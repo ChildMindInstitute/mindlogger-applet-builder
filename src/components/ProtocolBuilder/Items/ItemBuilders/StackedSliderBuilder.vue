@@ -167,7 +167,7 @@
         <v-btn
           fab
           x-small
-          color="deep-purple"
+          color="primary"
           @click="addNewSlider"
         >
           <v-icon color="white">

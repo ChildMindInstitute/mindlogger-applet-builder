@@ -522,7 +522,11 @@ export default {
         'enableNegativeTokens': this.enableNegativeTokens,
         'isMultipleChoice': this.isMultipleChoice,
         'isSkippableItem': this.isSkippable,
-        'options': this.options,
+        'options': this.options.map(option => ({
+          ...option,
+          value: Number(option.value),
+          score: Number(option.score),
+        })),
       };
       this.$emit('updateOptions', responseOptions);
     },

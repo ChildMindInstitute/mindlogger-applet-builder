@@ -49,6 +49,7 @@ export default class Item {
       allowEdit: initialItemData.allowEdit === undefined ? true : initialItemData.allowEdit,
       markdownText: (initialItemData.question || ''),
       valid: initialItemData.valid === undefined ? true : initialItemData.valid,
+      isOptionalText: initialItemData.isOptionalText || false,
     };
 
     const model = new Item();
@@ -156,6 +157,7 @@ export default class Item {
         "responseAlertMessage": this.ref.options.responseAlertMessage,
         "schema:minValue": 1,
         "schema:maxValue": choices.length,
+        "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
         choices: choices
       };
     }
@@ -178,6 +180,7 @@ export default class Item {
         "schema:minValueImg": this.ref.options.minValueImg,
         "schema:maxValueImg": this.ref.options.maxValueImg,
         "showTickMarks": this.ref.options.showTickMarks,
+        "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
         choices: choices
       };
     }
@@ -201,13 +204,15 @@ export default class Item {
       return {
         valueType: "xsd:date",
         requiredValue: true,
-        "schema:maxValue": "new Date()"
+        "schema:maxValue": "new Date()",
+        "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
       };
     }
-    if (this.ref.inputType === "audioImageRecord" || this.ref.inputType === "drawing" || this.ref.inputType === "geolocation") {
+    if (this.ref.inputType === "audioImageRecord" || this.ref.inputType === "drawing" || this.ref.inputType === "geolocation" || this.ref.inputType === "photo" || this.ref.inputType === "video" || this.ref.inputType === "timeRange") {
       return this.ref.responseOptions;
     }
     if (this.ref.inputType === "audioRecord") {
+        this.ref.options.isOptionalTextRequired = this.ref.responseOptions.isOptionalTextRequired;
         return this.ref.options;
     } else {
         return {};
@@ -306,6 +311,7 @@ export default class Item {
         : this.ref.markdownText,
       description: this.ref.description,
       options: this.ref.options,
+      isOptionalText: this.ref.isOptionalText,
       allowEdit: this.ref.allowEdit,
       ...schema
     };
@@ -500,6 +506,9 @@ export default class Item {
       'correctAnswer': {
         updated: (field) => `Correct answer was changed`
       }, 
+      'isOptionalText': {
+        updated: optionUpdate('Optional text option'),
+      }, 
       'ui.inputType': {
         updated: valueUpdate('Input type'),
         inserted: valueInsert('Input type'),
@@ -584,6 +593,9 @@ export default class Item {
       },
       'responseOptions.requiredValue': {
         updated: optionUpdate('Required option'),
+      },
+      'responseOptions.isOptionalTextRequired': {
+        updated: optionUpdate('Optional text required option'),
       },
       'responseOptions.showTickMarks': {
         updated: optionUpdate('Show tick marks'),

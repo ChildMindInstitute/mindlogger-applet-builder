@@ -177,6 +177,7 @@ export default {
         ... await Protocol.parseJSONLD(applet, protocol),
         valid: true,
         activities: [],
+        tokenPrizeModal: false,
       };
 
       const activityModel = new Activity();

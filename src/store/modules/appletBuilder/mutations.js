@@ -221,7 +221,7 @@ export default {
       markdownData: '',
       name: '',
       protocolVersion: '1.0.0',
-      isValid: false,
+      valid: false,
       prizeActivity: null,
       activities: [],
       tokenPrizeModal: false

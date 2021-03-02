@@ -219,6 +219,7 @@ export default {
       id: '',
       description: '',
       markdownData: '',
+      image: '',
       name: '',
       protocolVersion: '1.0.0',
       isValid: false,

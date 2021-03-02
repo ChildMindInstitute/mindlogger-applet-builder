@@ -48,9 +48,7 @@ export default class Protocol {
 
   getCompressedSchema() {
     const variableMap = this.getVariableMap();
-    const activityDisplayNames = this.getActivityDisplayNames();
     const activityOrder = this.getActivityOrder();
-    const activityVisibility = this.getActivityVisibility();
     const schema = {
       "@context": [
         "https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json",
@@ -61,6 +59,7 @@ export default class Protocol {
       "@id": `${this.ref.name}_schema`,
       "skos:prefLabel": this.ref.name,
       "schema:description": this.ref.description,
+      "schema:image": this.ref.image,
       "schema:schemaVersion": this.ref.protocolVersion,
       "schema:version": this.ref.protocolVersion,
       landingPageContent: this.ref.markdownData, //point to the readme of protocol
@@ -138,6 +137,11 @@ export default class Protocol {
       'skos:prefLabel': {
         updated: (field) => `Applet name was changed to ${_.get(newValue, field)}`,
       },
+      'schema:image': {
+        updated: (field) => `Applet image was changed to ${_.get(newValue, field)}`,
+        removed: (field) => `Applet image was removed`,
+        inserted: (field) => `Applet image was added (${_.get(newValue, field)})`
+      }, 
       'schema:description': {
         updated: (field) => `Applet description was changed to ${_.get(newValue, field)}`,
         removed: (field) => `Applet description was removed`,
@@ -281,10 +285,10 @@ export default class Protocol {
 
   static async parseJSONLD(applet, protocol) {
     const prefLabel = applet['http://www.w3.org/2004/02/skos/core#prefLabel'];
-
     const protocolInfo = {
       id: protocol._id.split('/')[1],
       name: _.get(prefLabel, [0, '@value'], 'applet'),
+      image: applet['schema:image'],
       description: applet['schema:description'][0]['@value'],
       protocolVersion: _.get(applet, 'schema:schemaVersion[0].@value', this.protocolVersion)
     };

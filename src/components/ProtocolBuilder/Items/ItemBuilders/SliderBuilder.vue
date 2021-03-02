@@ -457,6 +457,7 @@ export default {
 
       this.alertMinValue = this.minSliderTick;
       this.alertMaxValue = this.maxSliderTick;
+      this.alertMessage = '';
     },
 
     saveScores () {

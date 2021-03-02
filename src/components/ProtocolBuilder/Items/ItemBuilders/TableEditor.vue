@@ -29,7 +29,7 @@
             >
               <v-text-field
                 v-model="values[i][j]"
-                type="number"
+                :type="inputType"
               />
             </td>
           </tr>
@@ -73,6 +73,11 @@ export default {
       type: String,
       required: true,
     },
+    inputType: {
+      type: String,
+      required: false,
+      default: 'number'
+    }
   },
   data() {
     const values = [];

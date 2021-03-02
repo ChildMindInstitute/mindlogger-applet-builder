@@ -150,13 +150,11 @@
             </v-col>
           </v-row>
 
-          <v-row
-            v-if="hasScoreValue"
-          >
+          <v-row>
             <v-col 
+              v-if="hasScoreValue"
               class="d-flex align-center"
-              cols="12"
-              sm="12"
+              cols="auto"
             >
               <v-btn
                 class="deep-orange"
@@ -165,6 +163,21 @@
                 @click="onEditScore(slider)"
               >
                 Edit Score
+              </v-btn>
+            </v-col>
+
+            <v-col 
+              v-if="hasResponseAlert"
+              class="d-flex align-center"
+              cols="auto"
+            >
+              <v-btn
+                class="deep-orange"
+                color="primary"
+                dark
+                @click="onEditAlerts(slider)"
+              >
+                Edit Alerts
               </v-btn>
             </v-col>
           </v-row>
@@ -185,23 +198,6 @@
       </div>
     </div>
 
-    <v-row
-      v-if="hasResponseAlert"
-    >
-      <v-col 
-        class="d-flex align-center"
-        cols="12"
-        sm="12"
-      >
-        <v-text-field
-          v-model="responseAlertMessage"
-          label="Alert Message"
-          :rules="alertTextRules"
-          required
-          @input="update"
-        />
-      </v-col>
-    </v-row>
     <v-divider
       class="mt-4"
     />
@@ -302,6 +298,57 @@
         </v-form>
       </v-card>
     </v-dialog>
+
+    <v-dialog
+      v-model="alertDialog.visible"
+      max-width="600"
+      persistent
+    >
+      <v-card
+        v-if="alertDialog.slider.alerts"
+        class="pa-4 alert-dialog"
+      >
+        <v-card>
+          <div class="d-flex">
+            <div class="option-value">
+              Value
+            </div>
+            <div class="option-alert">
+              Alert
+            </div>
+          </div>
+        </v-card>
+        <v-card class="options">
+          <div
+            v-for="(alert, i) in alertDialog.slider.alerts"
+            :key="i"
+            class="d-flex"
+          >
+            <div class="option-value pt-2">
+              {{ i + Number(alertDialog.slider.minSliderTick) }}
+            </div>
+            <v-text-field
+              v-model="alertDialog.slider.alerts[i]"
+              class="option-alert mt-0 pt-0"
+            />
+          </div>
+        </v-card>
+
+        <v-card-actions class="d-flex justify-space-around">
+          <v-btn
+            color="primary"
+            @click="saveAlerts"
+          >
+            Save
+          </v-btn>
+          <v-btn
+            @click="resetAlerts"
+          >
+            Reset
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-form>
 </template>
 
@@ -312,6 +359,13 @@
   .option-value {
     text-align: center;
     line-height: 20px;
+  }
+
+  .alert-dialog .option-alert {
+    width: 80%;
+  }
+  .alert-dialog .option-value {
+    width: 20%;
   }
 
   .options {
@@ -355,6 +409,12 @@ export default {
         imgFirstName: slider.minValueImg || '',
         imgLastName: slider.maxValueImg || '',
         scores: slider.scores || [],
+        alerts: slider.alerts || [],
+
+        alertMessage: slider.responseAlertMessage || '',
+        alertMinValue: Number(slider.minAlertValue || slider.minSliderTick || 0),
+        alertMaxValue: Number(slider.maxAlertValue || slider.maxSliderTick || 0),
+
         expanded: false,
       })),
       isSkippable: this.isSkippableItem || false,
@@ -370,8 +430,12 @@ export default {
       ],
       hasScoreValue: this.initialItemData.hasScoreValue || false,
       hasResponseAlert: this.initialItemData.hasResponseAlert || false,
-      responseAlertMessage: this.initialItemData.responseAlertMessage || '',
       scoreDialog: {
+        visible: false,
+        key: 0,
+        slider: {}
+      },
+      alertDialog: {
         visible: false,
         key: 0,
         slider: {}
@@ -396,6 +460,13 @@ export default {
       }
     },
 
+    resetAlerts () {
+      const slider = this.alertDialog.slider;
+      for (let i = slider.minSliderTick; i < slider.maxSliderTick; i++) {
+        this.$set(slider.alerts, i - slider.minSliderTick, '');
+      }
+    },
+
     saveScores () {
       const slider = this.scoreDialog.slider;
 
@@ -405,6 +476,11 @@ export default {
 
       this.scoreDialog.visible = false;
 
+      this.update();
+    },
+
+    saveAlerts () {
+      this.alertDialog.visible = false;
       this.update();
     },
 
@@ -418,6 +494,7 @@ export default {
         imgFirstName: '',
         imgLastName: '',
         scores: [1,2,3,4,5],
+        alerts: ['','','','',''],
         expanded: false,
         valid: true,
       };
@@ -444,7 +521,6 @@ export default {
       const responseOptions = {
         'hasScoreValue': this.hasScoreValue,
         'hasResponseAlert': this.hasResponseAlert,
-        'responseAlertMessage': this.responseAlertMessage,
         'sliderOptions': this.sliders.map(slider => ({
           'minSliderTick': slider.minSliderTick,
           'maxSliderTick': slider.maxSliderTick,
@@ -453,7 +529,8 @@ export default {
           'maxValue': slider.maxValue || "Max",
           'maxValueImg': slider.imgLastName,
           'sliderLabel': slider.sliderLabel,
-          'scores': this.hasScoreValue ? slider.scores : false
+          'scores': this.hasScoreValue ? slider.scores : false,
+          'alerts': this.hasResponseAlert ? slider.alerts : false,
         }))
       };
 
@@ -474,6 +551,7 @@ export default {
       }
 
       slider.scores = slider.scores || [];
+      slider.alerts = slider.alerts || [];
 
       const tickCount = slider.maxSliderTick - slider.minSliderTick + 1;
       if (tickCount <= 0) {
@@ -483,18 +561,22 @@ export default {
       if (type == 'max') {
         while (slider.scores.length < tickCount) {
           slider.scores.push(Number(slider.minSliderTick) + slider.scores.length);
+          slider.alerts.push('');
         }
 
         while (slider.scores.length > tickCount) {
           slider.scores.pop();
+          slider.alerts.pop();
         }
       } else {
         while (slider.scores.length < tickCount) {
           slider.scores.unshift(Number(slider.minSliderTick) + (tickCount - slider.scores.length - 1));
+          slider.alerts.unshift('');
         }
 
         while (slider.scores.length > tickCount) {
           slider.scores.shift();
+          slider.alerts.shift();
         }
       }
 
@@ -555,6 +637,12 @@ export default {
       this.scoreDialog.slider = slider;
       this.scoreDialog.visible = true;
       this.scoreDialog.key++;
+    },
+
+    onEditAlerts(slider) {
+      this.alertDialog.slider = slider;
+      this.alertDialog.visible = true;
+      this.alertDialog.key++;
     }
   }
 }

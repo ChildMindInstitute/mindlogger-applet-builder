@@ -101,8 +101,26 @@ export default class Activity {
         const includeValues = isVis.match(includeRegExp);
         const excludeRegExp = /!(\w+)\.includes\((\w+)\)/;
         const excludeValues = isVis.match(excludeRegExp);
+        const lessThanRegExp = /(\w+)<(\d+)/;
+        const lessThanValues = isVis.match(lessThanRegExp);
+        const greaterThanRegExp = /(\w+)>(\d+)/;
+        const greaterThanValues = isVis.match(greaterThanRegExp);
+        const equalToRegExp = /(\w+)==(\d+)/;
+        const equalToValues = isVis.match(equalToRegExp);
+        const notEqualToRegExp = /(\w+)!=(\d+)/;
+        const notEqualToValues = isVis.match(notEqualToRegExp);
+        const minIndex = Math.min(
+          outsideValues ? outsideValues.index : isVis.length,
+          withinValues ? withinValues.index : isVis.length,
+          includeValues ? includeValues.index : isVis.length,
+          excludeValues ? excludeValues.index : isVis.length,
+          lessThanValues ? lessThanValues.index : isVis.length,
+          greaterThanValues ? greaterThanValues.index : isVis.length,
+          equalToValues ? equalToValues.index : isVis.length,
+          notEqualToValues ? notEqualToValues.index : isVis.length
+        );
 
-        if (outsideValues && outsideValues[1] === outsideValues[3]) {
+        if (outsideValues && minIndex === outsideValues.index && outsideValues[1] === outsideValues[3]) {
           isVis = isVis.replace(outsideRegExp, '');
           conditionalItem.conditions.push({
             ifValue: items.find(({ name }) => name === outsideValues[1]),
@@ -113,7 +131,7 @@ export default class Activity {
               val: "outsideof"
             }
           });
-        } else if (withinValues && withinValues[1] === withinValues[3]) {
+        } else if (withinValues && minIndex === withinValues.index && withinValues[1] === withinValues[3]) {
           isVis = isVis.replace(insideRegExp, '');
           conditionalItem.conditions.push({
             ifValue: items.find(({ name }) => name === withinValues[1]),
@@ -124,7 +142,7 @@ export default class Activity {
               val: "within"
             }
           });
-        } else if (excludeValues) {
+        } else if (excludeValues && minIndex === excludeValues.index) {
           isVis = isVis.replace(excludeRegExp, '');
           const itemIndex = items.findIndex(({ name }) => name === excludeValues[1]);
           const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == excludeValues[2]);
@@ -140,7 +158,7 @@ export default class Activity {
               val: "!includes",
             }
           })
-        } else if (includeValues) {
+        } else if (includeValues && minIndex === includeValues.index) {
           isVis = isVis.replace(includeRegExp, '');
           const itemIndex = items.findIndex(({ name }) => name === includeValues[1]);
 
@@ -159,22 +177,7 @@ export default class Activity {
               }
             })
           }
-        } else {
-          break;
-        }
-      }
-
-      while (isVis) {
-        const lessThanRegExp = /(\w+)<(\d+)/;
-        const lessThanValues = isVis.match(lessThanRegExp);
-        const greaterThanRegExp = /(\w+)>(\d+)/;
-        const greaterThanValues = isVis.match(greaterThanRegExp);
-        const equalToRegExp = /(\w+)==(\d+)/;
-        const equalToValues = isVis.match(equalToRegExp);
-        const notEqualToRegExp = /(\w+)!=(\d+)/;
-        const notEqualToValues = isVis.match(notEqualToRegExp);
-
-        if (lessThanValues) {
+        } else if (lessThanValues && isVis[lessThanValues.index - 1] !== "(" && minIndex === lessThanValues.index) {
           isVis = isVis.replace(lessThanRegExp, '');
           conditionalItem.conditions.push({
             ifValue: items.find(({ name }) => name === lessThanValues[1]),
@@ -184,7 +187,7 @@ export default class Activity {
               val: '<',
             }
           });
-        } else if (greaterThanValues) {
+        } else if (greaterThanValues && isVis[lessThanValues.index - 1] !== "(" && minIndex === greaterThanValues.index) {
           isVis = isVis.replace(greaterThanRegExp, '');
           conditionalItem.conditions.push({
             ifValue: items.find(({ name }) => name === greaterThanValues[1]),
@@ -194,7 +197,7 @@ export default class Activity {
               val: '>',
             }
           });
-        } else if (notEqualToValues) {
+        } else if (notEqualToValues && minIndex === notEqualToValues.index) {
           const itemIndex = items.findIndex(({ name }) => name === notEqualToValues[1]);
           const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == notEqualToValues[2]);
           
@@ -214,7 +217,7 @@ export default class Activity {
               val: '!=',
             }
           });
-        } else if (equalToValues) {
+        } else if (equalToValues && minIndex === equalToValues.index) {
           const item = items.find(({ name }) => name === equalToValues[1]);
 
           isVis = isVis.replace(equalToRegExp, '');
@@ -472,6 +475,7 @@ export default class Activity {
         updated: (field) => {
           const oldOptions = _.get(oldValue, field, []);
           const newOptions = _.get(newValue, field, []);
+          const addedOptions = [];
           const removedOptions = [];
           const insertedOptions = [];
           const updatedOptions = [];
@@ -479,7 +483,9 @@ export default class Activity {
           oldOptions.forEach(option => {
             const property = newOptions.find(newOption => newOption.variableName === option.variableName);
             
-            if (typeof property.isVis === 'boolean' && typeof option.isVis !== 'boolean') {
+            if (!property) {
+              removedOptions.push(option);
+            } else if (typeof property.isVis === 'boolean' && typeof option.isVis !== 'boolean') {
               removedOptions.push(option);
             } else if (typeof property.isVis !== 'boolean' && typeof option.isVis === 'boolean') {
               insertedOptions.push(option);
@@ -488,7 +494,16 @@ export default class Activity {
             }
           });
 
+          newOptions.forEach(option => {
+            const property = oldOptions.find(oldOption => oldOption.variableName === option.variableName);
+
+            if (!property) {
+              addedOptions.push(option);
+            }
+          });
+
           return [
+            ...addedOptions.map(option => `conditional logic for ${option.variableName} was added`),
             ...removedOptions.map(option => `conditional logic for ${option.variableName} was removed`),
             ...insertedOptions.map(option => `conditional logic for ${option.variableName} was set to ${option.isVis.toString()}`),
             ...updatedOptions.map(option => `conditional logic for ${option.variableName} was updated to ${option.isVis.toString()}`)

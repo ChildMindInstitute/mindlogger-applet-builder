@@ -150,6 +150,10 @@ export default class Item {
             info['schema:score'] = Number(choice.score);
           }
 
+          if (this.ref.options.hasResponseAlert) {
+            info['schema:alert'] = choice.alert || '';
+          }
+
           return info;
         })) || []
       }
@@ -822,7 +826,8 @@ export default class Item {
           for (let j = 0; j < options.length; j++) {
             data.push({
               score: _.get(itemOptions[options.length*i + j], ['schema:score', 0, '@value'], ''),
-              value: _.get(itemOptions[options.length*i + j], ['schema:value', 0, '@value'], '')
+              value: _.get(itemOptions[options.length*i + j], ['schema:value', 0, '@value'], ''),
+              alert: _.get(itemOptions[options.length*i + j], ['schema:alert', 0, '@value'], '')
             })
           }
   
@@ -970,7 +975,13 @@ export default class Item {
                   const score = itemListElement["schema:score"];
                   return Array.isArray(score) && score[0] && score[0]['@value']
                 }
-              )
+              ),
+            alerts: itemContent.responseAlert && _.get(slider, ['schema:itemListElement'], []).map(
+              (itemListElement) => {
+                const alert = itemListElement["schema:alert"];
+                return Array.isArray(alert) && alert[0] && alert[0]['@value']
+              }
+            ),
           })),
         };
         itemContent.options.sliderOptions.forEach(slider => {

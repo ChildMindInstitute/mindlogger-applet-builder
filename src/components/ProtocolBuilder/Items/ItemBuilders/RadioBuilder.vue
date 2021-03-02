@@ -81,13 +81,6 @@
               <span>
                 {{ option.name }}
               </span>
-
-              <span
-                v-if="option.description"
-                x-large
-              >
-                ( {{ option.description }} )
-              </span>
             </div>
 
             <v-spacer />
@@ -191,10 +184,9 @@
                 cols="12"
                 sm="12"
               >
-                <v-text-field
+                <MarkDownEditor
                   v-model="option.description"
-                  label="Option Tooltip"
-                  @change="updateOption(option)"
+                  @input="updateOption(option)"
                 />
               </v-col>
             </v-row>
@@ -371,11 +363,13 @@
 <script>
 import Uploader from '../../Uploader.vue';
 import OptionalItemText from '../../Partial/OptionalItemText.vue';
+import MarkDownEditor from '../../MarkDownEditor';
 
 export default {
   components: {
     Uploader,
     OptionalItemText,
+    MarkDownEditor
   },
   props: {
     initialItemData: {

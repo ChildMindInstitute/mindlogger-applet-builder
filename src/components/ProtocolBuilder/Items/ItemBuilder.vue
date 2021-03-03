@@ -212,7 +212,7 @@
         @updateTemplates="onUpdateTemplates"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
-        @updateOptionalText="item.isOptionalText = $event"
+        @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @loading="loading = $event"
         @notify="notify = $event"
@@ -252,7 +252,7 @@
         :initial-is-optional-text="item.isOptionalText"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
-        @updateOptionalText="item.isOptionalText = $event"
+        @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @loading="loading = $event"
         @notify="notify = $event"
@@ -272,7 +272,7 @@
         :key="`${baseKey}-video`"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
-        @updateOptionalText="item.isOptionalText = $event"
+        @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
       />
 
@@ -281,7 +281,7 @@
         :key="`${baseKey}-photo`"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
-        @updateOptionalText="item.isOptionalText = $event"
+        @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
       />
 
@@ -290,7 +290,7 @@
         :key="`${baseKey}-timeRange`"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
-        @updateOptionalText="item.isOptionalText = $event"
+        @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
       />
 
@@ -299,7 +299,7 @@
         :key="`${baseKey}-date`"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
-        @updateOptionalText="item.isOptionalText = $event"
+        @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
       />
 
@@ -311,7 +311,7 @@
         :initial-is-optional-text="item.isOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @updateInputOptions="updateInputOptions"
-        @updateOptionalText="item.isOptionalText = $event"
+        @updateOptionalText="updateOptionalText"
         @loading="loading = $event"
         @notify="notify = $event"
       />
@@ -325,7 +325,7 @@
         :initial-item-response-options="item.responseOptions"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
-        @updateOptionalText="item.isOptionalText = $event"
+        @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
       />
 
@@ -346,7 +346,7 @@
         :key="`${baseKey}-geolocation`"
         :initial-item-response-options="item.responseOptions"
         :initial-is-optional-text="item.isOptionalText"
-        @updateOptionalText="item.isOptionalText = $event"
+        @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @loading="loading = $event"
         @notify="notify = $event"
@@ -707,6 +707,13 @@ export default {
         index: this.itemIndex,
         obj: { allow: allowItem }
       })
+    },
+
+    updateOptionalText(isOptionalText) {
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { isOptionalText }
+      });
     },
 
     updateMedia(newMedia) {

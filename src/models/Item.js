@@ -803,17 +803,28 @@ export default class Item {
           isMultipleChoice: itemContent.multipleChoice || false,
           hasScoreValue: itemContent.scoring || false,
           hasResponseAlert: itemContent.responseAlert || false,
-          responseAlertMessage: itemContent.responseAlertMessage || '',
-          itemList: itemList.map(item => ({
-            name: _.get(item, ['schema:name', 0, '@value'], ''),
-            image: _.get(item, ['schema:image', 0, '@value'], ''),
-            description: _.get(item, ['schema:description', 0, '@value'], '')
-          })),
-          options: options.map(option => ({
-            name: _.get(option, ['schema:name', 0, '@value'], ''),
-            image: _.get(option, ['schema:image', 0, '@value'], ''),
-            description: _.get(option, ['schema:description', 0, '@value'], '')
-          })),
+          itemList: itemList.map(item => {
+            const image = item['schema:image'];
+
+            return {
+              name: _.get(item, ['schema:name', 0, '@value'], ''),
+              image: 
+                typeof image === 'string' && image ||
+                Array.isArray(image) && image[0] && image[0]['@value'].toString(),
+              description: _.get(item, ['schema:description', 0, '@value'], '')
+            }
+          }),
+          options: options.map(option => {
+            const image = option['schema:image'];
+
+            return {
+              name: _.get(option, ['schema:name', 0, '@value'], ''),
+              image: 
+                typeof image === 'string' && image ||
+                Array.isArray(image) && image[0] && image[0]['@value'].toString(),
+              description: _.get(option, ['schema:description', 0, '@value'], '')
+            }
+          }),
           choices: parsedItemOptions
         };
       }

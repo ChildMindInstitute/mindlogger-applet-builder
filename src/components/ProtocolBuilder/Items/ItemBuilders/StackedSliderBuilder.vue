@@ -59,6 +59,8 @@
               <v-text-field
                 v-model="slider.sliderLabel"
                 label="Slider Label"
+                :counter="11"
+                :maxlength="11"
                 :rules="textRules"
                 @input="update"
               />

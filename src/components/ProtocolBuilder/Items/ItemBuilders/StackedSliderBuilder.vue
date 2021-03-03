@@ -384,7 +384,7 @@ export default {
     resetScores () {
       const slider = this.scoreDialog.slider;
       for (let i = slider.minSliderTick; i < slider.maxSliderTick; i++) {
-        slider.scores[i] = i - slider.minSliderTick;
+        this.$set(slider.scores, i - slider.minSliderTick, i - slider.minSliderTick);
       }
     },
 
@@ -488,14 +488,6 @@ export default {
         while (slider.scores.length > tickCount) {
           slider.scores.shift();
         }
-      }
-
-      while (slider.scores.length < (slider.maxSliderTick - slider.minSliderTick + 1)) {
-        slider.scores.push(slider.scores.length + 1);
-      }
-
-      while (slider.scores.length > (slider.maxSliderTick - slider.minSliderTick + 1)) {
-        slider.scores.pop();
       }
 
       this.update();

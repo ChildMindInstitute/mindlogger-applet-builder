@@ -669,7 +669,9 @@ export default class Item {
           _.get(item, ['reprolib:terms/inputType', 0, '@value']),
       },
       allowEdit:
-        _.get(item, ['reprolib:terms/allowEdit', 0, '@value'], true)
+        _.get(item, ['reprolib:terms/allowEdit', 0, '@value'], true),
+      isOptionalText:
+        _.get(item, ['reprolib:terms/isOptionalText', 0, '@value'], false),
     };
 
     let responseOptions = item['reprolib:terms/responseOptions'];
@@ -677,6 +679,11 @@ export default class Item {
     let itemType = itemContent.ui.inputType;
 
     if (responseOptions) {
+      itemContent.responseOptions = {};
+
+      let isOptionalTextRequired =
+        _.get(responseOptions, [0, 'reprolib:terms/isOptionalTextRequired']);
+
       let multipleChoice =
         _.get(responseOptions, [0, 'reprolib:terms/multipleChoice']);
       let valueType = 
@@ -707,6 +714,11 @@ export default class Item {
         _.get(responseOptions, [0, 'reprolib:terms/itemList'], []);
       let options = 
         _.get(responseOptions, [0, 'reprolib:terms/options'], []);
+
+      if (isOptionalTextRequired) {
+        itemContent.responseOptions.isOptionalTextRequired = 
+          _.get(isOptionalTextRequired, [0, '@value']);
+      }
 
       if (multipleChoice) {
         itemContent.multipleChoice = _.get(multipleChoice, [0, '@value']);
@@ -1016,6 +1028,11 @@ export default class Item {
     const requiredValue = responseOptions['reprolib:terms/requiredValue'];
     if(requiredValue)
       modifiedResponseOptions['requiredValue'] = requiredValue[0]['@value'];
+
+    const isOptionalTextRequired = 
+      responseOptions['reprolib:terms/isOptionalTextRequired'];
+    if(isOptionalTextRequired)
+      modifiedResponseOptions['isOptionalTextRequired'] = isOptionalTextRequired[0]['@value'];
 
     return modifiedResponseOptions;
   }

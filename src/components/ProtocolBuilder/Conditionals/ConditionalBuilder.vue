@@ -349,7 +349,7 @@ export default {
       this.valid = this.isValid();
       this.updateConditionalData({
         index: this.conditionalIndex,
-        obj: {
+        updates: {
           conditions,
           operation,
           showValue,

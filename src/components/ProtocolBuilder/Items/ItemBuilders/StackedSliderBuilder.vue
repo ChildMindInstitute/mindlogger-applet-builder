@@ -314,7 +314,7 @@
   }
 
   .slider-list {
-    width: 60%;
+    width: 80%;
   }
 </style>
 

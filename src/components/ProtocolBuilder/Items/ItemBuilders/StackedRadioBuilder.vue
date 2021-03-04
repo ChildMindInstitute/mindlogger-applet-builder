@@ -741,7 +741,7 @@ export default {
         'isSkippableItem': this.isSkippable,
         'options': this.options,
         'itemList': this.itemList,
-        'choices': (this.isTokenValue || this.hasScoreValue) ? choices : [],
+        'choices': (this.isTokenValue || this.hasScoreValue || this.hasResponseAlert) ? choices : [],
       };
       this.$emit('updateOptions', responseOptions);
     },

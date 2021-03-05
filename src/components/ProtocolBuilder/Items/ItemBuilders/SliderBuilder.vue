@@ -437,7 +437,6 @@ export default {
       alerts: this.initialItemData.alerts || false,
       isOptionalText: this.initialIsOptionalText,
       responseOptions: this.initialResponseOptions,
-      alerts: this.initialItemData.alerts || false,
     };
   },
   mounted() {

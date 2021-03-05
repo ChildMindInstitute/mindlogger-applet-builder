@@ -434,9 +434,9 @@ export default {
 
       showTickMarks: this.initialItemData.showTickMarks || false,
       scores: this.initialItemData.scores || false,
+      alerts: this.initialItemData.alerts || false,
       isOptionalText: this.initialIsOptionalText,
       responseOptions: this.initialResponseOptions,
-      alerts: this.initialItemData.alerts || false,
     };
   },
   mounted() {

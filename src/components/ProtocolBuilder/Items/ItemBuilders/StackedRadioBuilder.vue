@@ -139,8 +139,8 @@
                       v-model="option.name"
                       :rules="textRules"
                       label="Option Text"
-                      counter="11"
-                      maxlength="11"
+                      counter="32"
+                      maxlength="32"
                       @change="updateOption(option)"
                     />
                   </v-col>
@@ -298,8 +298,8 @@
                       v-model="item.name"
                       :rules="textRules"
                       label="Item Text"
-                      counter="11"
-                      maxlength="11"
+                      counter="32"
+                      maxlength="32"
                       @change="updateItem(item)"
                     />
                   </v-col>

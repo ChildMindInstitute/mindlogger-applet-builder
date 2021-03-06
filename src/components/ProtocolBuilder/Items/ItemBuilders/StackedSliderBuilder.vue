@@ -456,8 +456,10 @@ export default {
 
     resetAlerts () {
       const slider = this.alertDialog.slider;
-      for (let i = slider.minSliderTick; i < slider.maxSliderTick; i++) {
-        this.$set(slider.alerts, i - slider.minSliderTick, '');
+      if (slider.alerts) {
+        for (let i = slider.minSliderTick; i < slider.maxSliderTick; i++) {
+          this.$set(slider.alerts, i - slider.minSliderTick, '');
+        }
       }
     },
 

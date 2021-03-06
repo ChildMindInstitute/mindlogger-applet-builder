@@ -450,8 +450,10 @@ export default {
     },
 
     resetAlerts () {
-      for (let i = this.minSliderTick; i < this.maxSliderTick; i++) {
-        this.$set(this.alerts, i - this.minSliderTick, '');
+      if (this.alerts) {
+        for (let i = this.minSliderTick; i < this.maxSliderTick; i++) {
+          this.$set(this.alerts, i - this.minSliderTick, '');
+        }
       }
 
       this.alertMinValue = this.minSliderTick;

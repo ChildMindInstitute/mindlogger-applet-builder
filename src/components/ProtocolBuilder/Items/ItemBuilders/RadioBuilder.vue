@@ -591,6 +591,8 @@ export default {
         message: 'Image from URL successfully added to Option.',
         duration: 3000,
       });
+
+      this.update();
     },
 
     async onAddOptionImageFromDevice(option, uploadFunction) {
@@ -602,6 +604,8 @@ export default {
           message: 'Image successfully added to Option.',
           duration: 3000,
         });
+  
+        this.update();
       } catch (error) {
         this.$emit('loading', false);
         this.$emit('notify', {
@@ -618,6 +622,8 @@ export default {
         message: 'Image successfully removed from Option.',
         duration: 3000,
       });
+
+      this.update();
     },
 
   }

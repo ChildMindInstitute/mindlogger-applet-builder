@@ -43,15 +43,6 @@
         label="Activity Description"
         required
       />
-
-      <v-text-field
-        v-model="preamble"
-        :rules="textRules"
-        counter="230"
-        maxlength="230"
-        label="Preamble"
-        required
-      />
       <v-row
         class="align-center"
       >

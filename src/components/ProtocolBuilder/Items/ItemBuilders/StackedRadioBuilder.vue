@@ -139,8 +139,8 @@
                       v-model="option.name"
                       :rules="textRules"
                       label="Option Text"
-                      counter="32"
-                      maxlength="32"
+                      counter="11"
+                      maxlength="11"
                       @change="updateOption(option)"
                     />
                   </v-col>
@@ -168,6 +168,7 @@
               x-small
               color="primary"
               @click="addOption"
+              :disabled="options.length >= 3"
             >
               <v-icon color="white">
                 mdi-plus
@@ -298,8 +299,8 @@
                       v-model="item.name"
                       :rules="textRules"
                       label="Item Text"
-                      counter="32"
-                      maxlength="32"
+                      counter="11"
+                      maxlength="11"
                       @change="updateItem(item)"
                     />
                   </v-col>

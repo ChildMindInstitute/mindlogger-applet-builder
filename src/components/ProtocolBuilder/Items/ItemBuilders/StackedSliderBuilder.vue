@@ -385,8 +385,8 @@ export default {
   methods: {
     resetScores () {
       const slider = this.scoreDialog.slider;
-      for (let i = slider.minSliderTick; i < slider.maxSliderTick; i++) {
-        this.$set(slider.scores, i - slider.minSliderTick, i - slider.minSliderTick);
+      for (let i = Number(slider.minSliderTick); i <= Number(slider.maxSliderTick); i++) {
+        this.$set(slider.scores, i - slider.minSliderTick, i - slider.minSliderTick + 1);
       }
     },
 

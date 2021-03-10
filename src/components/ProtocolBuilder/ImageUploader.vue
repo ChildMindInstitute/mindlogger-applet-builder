@@ -1,9 +1,14 @@
 <template>
   <div>
-
-    <v-alert v-if="typeOfStructure === -1" type="error">
+    <v-alert
+      v-if="typeOfStructure === -1"
+      type="error"
+    >
       <p>Please choice what type of uploader you need!!!</p>
-      <p v-for="(item, index) in typesOfStructure" :key="item">
+      <p
+        v-for="(item, index) in typesOfStructure"
+        :key="item"
+      >
         {{ index + 1 }}.{{ item }}
       </p>
       <p>use :uploadFor="'type'" value</p>
@@ -12,8 +17,10 @@
     <v-tooltip top>
       <template v-slot:activator="{ on }">
         <div v-on="on">
-
-          <v-expansion-panels v-if="typeOfStructure === 0 || typeOfStructure === 3 || typeOfStructure === 4">
+          <v-expansion-panels
+            v-if="typeOfStructure === 0 || typeOfStructure === 3 || typeOfStructure === 4"
+            :disabled="disabled"
+          >
             <v-expansion-panel>
               <v-expansion-panel-header disable-icon-rotate>
                 {{ itemImg ? 'Change' : 'Add' }} {{ getCorrectTitle(typeOfStructure) }}
@@ -25,32 +32,57 @@
                 <div class="upload-from-pc-wrapper">
                   <input 
                     class="file-input" 
+                    ref="fileInput"
                     type="file" 
                     accept="image/jpeg, image/png, image/bmp" 
                     @change="onChangeFile"
                   >
-                  <v-btn>Your computer</v-btn>
+                  <v-btn @click="$refs.fileInput.click()">Your computer</v-btn>
                 </div>
-                <v-btn class="mt-4" @click="isUrlOptionActive = true">From URL</v-btn>
-                <v-btn v-if="itemImg" class="mt-4" color="error" @click="onClickToRemoveImage">Remove image</v-btn>
+                <v-btn
+                  class="mt-4"
+                  @click="isUrlOptionActive = true"
+                >
+                  From URL
+                </v-btn>
+                <v-btn
+                  v-if="itemImg"
+                  class="mt-4"
+                  color="error"
+                  @click="onClickToRemoveImage"
+                >
+                  Remove image
+                </v-btn>
               </v-expansion-panel-content>
             </v-expansion-panel>
           </v-expansion-panels>
 
-          <div class="upload-from-pc-wrapper" v-if="typeOfStructure === 1">
+          <div
+            v-if="typeOfStructure === 1"
+            class="upload-from-pc-wrapper"
+          >
             <input 
               v-if="!itemImg"
+              ref="imageInput" 
               class="file-input" 
               type="file" 
-              accept="image/jpeg, image/png, image/bmp" 
-              ref="imageInput"
+              accept="image/jpeg, image/png, image/bmp"
               @change="onChangeFile"
             >
-            <v-icon v-if="!itemImg" style="font-size: 55px;">mdi-image-search</v-icon>
-            <v-icon v-if="itemImg" style="font-size: 55px;"
-              @click="onClickToRemoveImage">mdi-delete-outline</v-icon>
+            <v-icon
+              v-if="!itemImg"
+              style="font-size: 55px;"
+            >
+              mdi-image-search
+            </v-icon>
+            <v-icon
+              v-if="itemImg"
+              style="font-size: 55px;"
+              @click="onClickToRemoveImage"
+            >
+              mdi-delete-outline
+            </v-icon>
           </div>
-      
         </div>
       </template>
       <span>
@@ -63,36 +95,66 @@
       </span>
     </v-tooltip>
 
-    <v-dialog v-model="isUrlOptionActive" persistent width="800">
+    <v-dialog
+      v-model="isUrlOptionActive"
+      persistent
+      width="800"
+    >
       <v-card>
-        <v-card-title class="headline grey lighten-2" primary-title>
-          <v-icon left>mdi-pencil</v-icon>
+        <v-card-title
+          class="headline grey lighten-2"
+          primary-title
+        >
+          <v-icon left>
+            mdi-pencil
+          </v-icon>
           Upload from URL
         </v-card-title>
         <v-card-text>
-          <v-text-field label="URL" v-model="newUrlValue" />
+          <v-text-field
+            v-model="newUrlValue"
+            label="URL"
+          />
         </v-card-text>
         <v-divider />
         <v-card-actions>
-          <v-btn outlined color="primary" @click="isUrlOptionActive = false">
+          <v-btn
+            outlined
+            color="primary"
+            @click="isUrlOptionActive = false"
+          >
             Close
           </v-btn>
           <v-spacer />
-          <v-btn color="primary" @click="onChangeURL(newUrlValue)">
+          <v-btn
+            color="primary"
+            @click="onChangeURL(newUrlValue)"
+          >
             Add
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="isNotifyState" persistent width="400">
-      <v-alert v-if="successMsg" type="success">{{successMsg}}</v-alert>
-      <v-alert v-if="errorMsg" type="error">
+    <v-dialog
+      v-model="isNotifyState"
+      persistent
+      width="400"
+    >
+      <v-alert
+        v-if="successMsg"
+        type="success"
+      >
+        {{ successMsg }}
+      </v-alert>
+      <v-alert
+        v-if="errorMsg"
+        type="error"
+      >
         <p>{{ itemImg ? 'Image is not changed!!!' : 'Image is not added!!!' }}</p>
         <span>{{ errorMsg }}</span>
       </v-alert>
     </v-dialog>
-
   </div>
 </template>
 
@@ -108,6 +170,16 @@ export default {
     itemImg: {
       type: [String, File],
       default: null
+    },
+    notifyEnabled: {
+      type: Boolean,
+      required: false,
+      default: true
+    },
+    disabled: {
+      type: Boolean,
+      required: false,
+      default: false
     }
   },
   data() {
@@ -170,6 +242,10 @@ export default {
       this.notify('success', 'Image is removed');
     },
     notify(state, text) {
+      if (!this.notifyEnabled) {
+        return ;
+      }
+
       let delay = 4000;
       if(state === 'success') {
         this.successMsg = text;

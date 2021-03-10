@@ -2,13 +2,20 @@
   <v-card>
     <v-simple-table>
       <template v-slot:default>
-
         <thead>
           <tr>
-            <th class="text-left">Token Prizes</th>
-            <th class="text-left">Token Prizes Description</th>
-            <th class="text-left">Add an image</th>
-            <th class="text-left">Update Prize</th>
+            <th class="text-left">
+              Token Prizes
+            </th>
+            <th class="text-left">
+              Token Prizes Description
+            </th>
+            <th class="text-left">
+              Add an image
+            </th>
+            <th class="text-left">
+              Update Prize
+            </th>
           </tr>
         </thead>
 
@@ -27,11 +34,21 @@
                 maxlength="5"
                 min="0"
               />
-              <span v-else class="content">{{item.price}}</span>
+              <span
+                v-else
+                class="content"
+              >{{ item.price }}</span>
             </td>
             <td>
-              <v-text-field v-if="editState[index]" v-model="item.name" placeholder="Name"/>
-              <span v-else class="content">{{item.name}}</span>
+              <v-text-field
+                v-if="editState[index]"
+                v-model="item.name"
+                placeholder="Name"
+              />
+              <span
+                v-else
+                class="content"
+              >{{ item.name }}</span>
             </td>
             <td class="d-flex">
               <template v-if="editState[index]">
@@ -62,19 +79,38 @@
                   </v-tooltip>
                 </template>
               </template>
-              <v-img v-else :src="item.image" max-width="50" />
+              <v-img
+                v-else
+                :src="item.image"
+                max-width="50"
+              />
             </td>
             <td>
               <v-btn
-                @click="editOption(index)"
                 icon
+                @click="editOption(index)"
               >
-                <v-icon v-if="editState[index]" dark >mdi-file-check</v-icon>
-                <v-icon v-else dark >mdi-file-edit</v-icon>
+                <v-icon
+                  v-if="editState[index]"
+                  dark
+                >
+                  mdi-file-check
+                </v-icon>
+                <v-icon
+                  v-else
+                  dark
+                >
+                  mdi-file-edit
+                </v-icon>
               </v-btn>
-              <v-btn icon class="ml-1"
-                @click="deleteOption(index)">
-                <v-icon dark>mdi-file-remove</v-icon>
+              <v-btn
+                icon
+                class="ml-1"
+                @click="deleteOption(index)"
+              >
+                <v-icon dark>
+                  mdi-file-remove
+                </v-icon>
               </v-btn>
             </td>
             <td>
@@ -86,31 +122,57 @@
             </td>
           </tr>
         </tbody>
-        
       </template>
     </v-simple-table>
 
-    <v-btn class="d-flex mx-auto my-5" outlined fab small color="indigo"
-      @click="addOption">
+    <v-btn
+      class="d-flex mx-auto my-5"
+      outlined
+      fab
+      small
+      color="indigo"
+      @click="addOption"
+    >
       <v-icon>mdi-plus</v-icon>
     </v-btn>
 
-    <v-alert v-if="isError" type="error" class="mx-2">{{isError}}</v-alert>
+    <v-alert
+      v-if="isError"
+      type="error"
+      class="mx-2"
+    >
+      {{ isError }}
+    </v-alert>
 
     <v-card-actions>
-      <v-btn outlined color="primary" @click="discardUpdateOptions">
+      <v-btn
+        outlined
+        color="primary"
+        @click="discardUpdateOptions"
+      >
         Discard Changes
       </v-btn>
       <v-spacer />
-      <v-btn color="primary" @click="updateOptions">
+      <v-btn
+        color="primary"
+        @click="updateOptions"
+      >
         Save Prizes
       </v-btn>
     </v-card-actions>
 
-    <v-dialog v-model="isUploadingState" persistent width="400">
+    <v-dialog
+      v-model="isUploadingState"
+      persistent
+      width="400"
+    >
       <v-card class="pt-5 pb-6">
-        <v-progress-circular class="d-block mx-auto mt-2" color="primary" indeterminate :size="50">
-        </v-progress-circular>
+        <v-progress-circular
+          class="d-block mx-auto mt-2"
+          color="primary"
+          indeterminate
+          :size="50"
+        />
       </v-card>
     </v-dialog>
   </v-card>
@@ -145,7 +207,11 @@ export default {
     const imgUpldr = new ImageUpldr();
 
     const localOptions = this.options && this.options.options && this.options.options.length ? this.avoidObjectsReference(this.options.options) : [];
-    localOptions.map((option, index) => option.question = this.items[index + 1].question);
+    localOptions.map((option, index) => {
+      option.question = this.items[index + 1].question.text;
+      option.image = this.items[index + 1].question.image;
+    });
+
     const discardLocalOptions = this.avoidObjectsReference(localOptions);
 
     const responseOptions = {

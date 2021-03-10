@@ -136,12 +136,12 @@ export default class Protocol {
         updated: (field) => `About page was changed}`,
       },
       'skos:prefLabel': {
-        updated: (field) => `Protocol name was changed to ${_.get(newValue, field)}`,
+        updated: (field) => `Applet name was changed to ${_.get(newValue, field)}`,
       },
       'schema:description': {
-        updated: (field) => `Protocol description was changed to ${_.get(newValue, field)}`,
-        removed: (field) => `Protocol description was removed`,
-        inserted: (field) => `Protocol description was added (${_.get(newValue, field)})`
+        updated: (field) => `Applet description was changed to ${_.get(newValue, field)}`,
+        removed: (field) => `Applet description was removed`,
+        inserted: (field) => `Applet description was added (${_.get(newValue, field)})`
       }, 
     }
   }
@@ -277,5 +277,37 @@ export default class Protocol {
       updates,
       removed
     };
+  }
+
+  static async parseJSONLD(applet, protocol) {
+    const prefLabel = applet['http://www.w3.org/2004/02/skos/core#prefLabel'];
+
+    const protocolInfo = {
+      id: protocol._id.split('/')[1],
+      name: _.get(prefLabel, [0, '@value'], 'applet'),
+      description: applet['schema:description'][0]['@value'],
+      protocolVersion: _.get(applet, 'schema:schemaVersion[0].@value', this.protocolVersion)
+    };
+
+    const markdownData = _.get(applet, ["reprolib:terms/landingPage", 0, "@value"], "");
+    if (markdownData) {
+      try {
+        protocolInfo.markdownData = (await axios.get(markdownData)).data;
+      } catch (e) {
+        protocolInfo.markdownData = '';
+      }
+    } else {
+      protocolInfo.markdownData = _.get(applet, ["reprolib:terms/landingPageContent", 0, "@value"], "");
+    }
+
+    return protocolInfo;
+  }
+
+  static checkValidation(protocol) {
+    if (!protocol.name) {
+      return false;
+    }
+
+    return true;
   }
 }

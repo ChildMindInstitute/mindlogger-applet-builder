@@ -6,42 +6,61 @@ export default class Activity {
   }
 
   getActivityBuilderData(initialActivityData) {
-    if (initialActivityData.schema) {
-      initialActivityData.conditionalItems = this.getConditionalItems(initialActivityData.schema, initialActivityData.items);
+    if (initialActivityData.visibilities && initialActivityData.visibilities.length) {
+      initialActivityData.conditionalItems = this.getConditionalItems(initialActivityData, initialActivityData.items);
     }
+
+    const items = (initialActivityData.items || []).map(item => item);
+
+    if (initialActivityData.compute && initialActivityData.compute.length) {
+      const itemModel = new Item();
+
+      const cumulative = itemModel.getItemBuilderData({
+        name: 'cumulatives',
+        ui: {
+          inputType: 'cumulativeScore'
+        },
+        cumulativeScores: initialActivityData.compute.map(compute => {
+          return {
+            compute,
+            messages: initialActivityData.messages.filter(message => message.jsExpression.split(/[<>]=*\s/g)[0].trim() == compute.variableName.trim()),
+            valid: true,
+          }
+        }).filter(cumulative => cumulative.messages.length === 2),
+        valid: true,
+      });
+
+      items.push(cumulative);
+    }
+
     return {
       name: initialActivityData.name || '',
       description: initialActivityData.description || '',
       preamble: initialActivityData.preamble || '',
       shuffleActivityOrder: initialActivityData.shuffle || false,
       isSkippable: initialActivityData.isSkippable || false,
+      items,
       disableBack: initialActivityData.disableBack || false,
       items: initialActivityData.items && initialActivityData.items.map(item => item) || [],
       id: initialActivityData._id || null,
       textRules: [(v) => !!v || 'This field is required'],
-      editItemDialog: false,
-      urlDialog: false,
       error: '',
       componentKey: 0,
-      initialItemData: initialActivityData.isPrize && initialActivityData.items ? initialActivityData.items[0] : { options: {}, },
+      initialItemData: initialActivityData.isPrize && initialActivityData.items ? initialActivityData.items[0] : {},
       isItemEditable: true,
       editIndex: -1,
-      initialConditionalItemData: {},
       visibilities: initialActivityData.visibilities || [],
-      editConditionalItemIndex: -1,
-      conditionalRadioItems: [],
-      conditionalSliderItems: [],
-      ifConditionalAvailable: false,
-      isConditionalEditMode: false,
-      editConditionalItemDialog: false,
-      conditionalItems: initialActivityData.conditionalItems || [],
-      conditionalBuilderType: '',
-      conditionalItemsForBuilder: [],
-      subScales: initialActivityData.subScales && initialActivityData.subScales.map(subScale => subScale) || [],
-      compute: initialActivityData.compute && initialActivityData.compute.map(compute => compute) || [],
-      messages: initialActivityData.messages && initialActivityData.messages.map(message => message) || [],
+      conditionalItems: initialActivityData.conditionalItems && initialActivityData.conditionalItems.map(conditional => ({
+        ...conditional,
+        valid: true,
+      })) || [],
+      subScales: initialActivityData.subScales && initialActivityData.subScales.map(subScale => ({
+        ...subScale,
+        valid: true
+      })) || [],
       allowEdit: true,
-      isPrize: initialActivityData.isPrize || false
+      isPrize: initialActivityData.isPrize || false,
+      valid: initialActivityData.valid !== undefined ? initialActivityData.valid : true,
     };
   }
 
@@ -49,142 +68,200 @@ export default class Activity {
     this.ref = ref;
   }
 
-  getConditionalItems(schema, items) {
-    const addProperties = schema.ui.addProperties;
+  getConditionalItems(activity, items) {
+    const visibilities = activity.visibilities || [];
     const conditionalItems = [];
 
-    addProperties.forEach((property) => {
-      let ifValue, stateValue, answerValue;
-      const showValue = property.variableName;
+    const itemChoices = [];
+
+    for (let i = 0; i < items.length; i += 1) {
+      const itemModel = new Item();
+      itemModel.updateReferenceObject(items[i]);
+
+      const options = itemModel.getResponseOptions();
+      itemChoices.push(options.choices);
+    }
+
+    visibilities.forEach((property) => {
       if (typeof property.isVis === 'boolean') return;
 
-      const isVis = property.isVis.split(' ').join('');
-      const outsideRegExp = /(\w+)<(\d+)\|\|(\w+)>(\d+)/;
-      const outsideValues = isVis.match(outsideRegExp);
-      const insideRegExp = /(\w+)>(\d+)\&\&(\w+)<(\d+)/;
-      const withinValues = isVis.match(insideRegExp);
+      const conditionalItem = {
+        showValue: property.variableName,
+        conditions: [],
+        operation: "ALL",
+        id: Math.round(Date.now() * Math.random()),
+      };
+      let isVis = property.isVis.split(' ').join('');
 
-      const includeRegExp = /(\w+)\.includes\((\w+)\)/;
-      const includeValues = isVis.match(includeRegExp);
-      const excludeRegExp = /!(\w+)\.includes\((\w+)\)/;
-      const excludeValues = isVis.match(excludeRegExp);
-  
-      if (outsideValues) {
-        conditionalItems.push({
-          ifValue: items.find(({ name }) => name === outsideValues[1]),
-          maxValue: outsideValues[4],
-          minValue: outsideValues[2],
-          showValue,
-          stateValue: {
-            name: "OUTSIDE OF",
-            val: "outsideof"
-          }
-        });
-      } else if (withinValues) {
-        conditionalItems.push({
-          ifValue: items.find(({ name }) => name === withinValues[1]),
-          maxValue: withinValues[4],
-          minValue: withinValues[2],
-          showValue,
-          stateValue: {
-            name: "WITHIN",
-            val: "within"
-          }
-        });
-      } else if (excludeValues) {
-        const itemValue = items.find(({ name }) => name === excludeValues[1]);
-        const option = itemValue.responseOptions.choices.find(choice => choice['schema:value'] == excludeValues[2]);
+      while (isVis) {
+        const outsideRegExp = /(\w+)<(\d+)\|\|(\w+)>(\d+)/;
+        const outsideValues = isVis.match(outsideRegExp);
+        const insideRegExp = /(\w+)>(\d+)\&\&(\w+)<(\d+)/;
+        const withinValues = isVis.match(insideRegExp);
+        const includeRegExp = /(\w+)\.includes\((\w+)\)/;
+        const includeValues = isVis.match(includeRegExp);
+        const excludeRegExp = /!(\w+)\.includes\((\w+)\)/;
+        const excludeValues = isVis.match(excludeRegExp);
+        const lessThanRegExp = /(\w+)<(\d+)/;
+        const lessThanValues = isVis.match(lessThanRegExp);
+        const greaterThanRegExp = /(\w+)>(\d+)/;
+        const greaterThanValues = isVis.match(greaterThanRegExp);
+        const equalToRegExp = /(\w+)==(\d+)/;
+        const equalToValues = isVis.match(equalToRegExp);
+        const notEqualToRegExp = /(\w+)!=(\d+)/;
+        const notEqualToValues = isVis.match(notEqualToRegExp);
+        const minIndex = Math.min(
+          outsideValues ? outsideValues.index : isVis.length,
+          withinValues ? withinValues.index : isVis.length,
+          includeValues ? includeValues.index : isVis.length,
+          excludeValues ? excludeValues.index : isVis.length,
+          lessThanValues ? lessThanValues.index : isVis.length,
+          greaterThanValues ? greaterThanValues.index : isVis.length,
+          equalToValues ? equalToValues.index : isVis.length,
+          notEqualToValues ? notEqualToValues.index : isVis.length
+        );
 
-        conditionalItems.push({
-          ifValue: itemValue,
-          showValue,
-          answerValue: {
-            name: option['schema:name'],
-            value: option['schema:value']
-          },
-          stateValue: {
-            name: "Doesn't include",
-            val: "!includes",
-          }
-        })
-      } else if (includeValues) { 
-        const itemValue = items.find(({ name }) => name === includeValues[1]);
-        const option = itemValue.responseOptions.choices.find(choice => choice['schema:value'] == includeValues[2]);
+        if (outsideValues && minIndex === outsideValues.index && outsideValues[1] === outsideValues[3]) {
+          isVis = isVis.replace(outsideRegExp, '');
+          conditionalItem.conditions.push({
+            ifValue: items.find(({ name }) => name === outsideValues[1]),
+            maxValue: outsideValues[4],
+            minValue: outsideValues[2],
+            stateValue: {
+              name: "OUTSIDE OF",
+              val: "outsideof"
+            }
+          });
+        } else if (withinValues && minIndex === withinValues.index && withinValues[1] === withinValues[3]) {
+          isVis = isVis.replace(insideRegExp, '');
+          conditionalItem.conditions.push({
+            ifValue: items.find(({ name }) => name === withinValues[1]),
+            maxValue: withinValues[4],
+            minValue: withinValues[2],
+            stateValue: {
+              name: "WITHIN",
+              val: "within"
+            }
+          });
+        } else if (excludeValues && minIndex === excludeValues.index) {
+          isVis = isVis.replace(excludeRegExp, '');
+          const itemIndex = items.findIndex(({ name }) => name === excludeValues[1]);
+          const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == excludeValues[2]);
 
-        conditionalItems.push({
-          ifValue: itemValue,
-          showValue,
-          answerValue: {
-            name: option['schema:name'],
-            value: option['schema:value']
-          },
-          stateValue: {
-            name: "Includes",
-            val: "includes",
-          }
-        })
-      } else {
-        let values = [], minValue;
-        if (isVis.includes('==')) {
-          values = isVis.split('==');
-          stateValue = {
-            name: 'IS EQUAL TO',
-            val: '==',
-          };
-          ifValue = items.find(({ name }) => name === values[0]);
+          conditionalItem.conditions.push({
+            ifValue: items[itemIndex],
+            answerValue: {
+              name: option['schema:name'],
+              value: option['schema:value']
+            },
+            stateValue: {
+              name: "Doesn't include",
+              val: "!includes",
+            }
+          })
+        } else if (includeValues && minIndex === includeValues.index) {
+          isVis = isVis.replace(includeRegExp, '');
+          const itemIndex = items.findIndex(({ name }) => name === includeValues[1]);
 
-          const option = ifValue.responseOptions.choices.find(choice => choice['schema:value'] == values[1]);
-          answerValue = {
-            name: option['schema:name'],
-            value: option['schema:value']
-          };
-        } else if (isVis.includes('!=')) {
-          values = isVis.split('!=');
-          stateValue = {
-            name: 'IS NOT EQUAL TO',
-            val: '!=',
-          };
-          ifValue = items.find(({ name }) => name === values[0]);
+          if (itemIndex !== -1) {
+            const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == includeValues[2]);
+
+            conditionalItem.conditions.push({
+              ifValue: items[itemIndex],
+              answerValue: {
+                name: option['schema:name'],
+                value: option['schema:value']
+              },
+              stateValue: {
+                name: "Includes",
+                val: "includes",
+              }
+            })
+          }
+        } else if (lessThanValues && isVis[lessThanValues.index - 1] !== "(" && minIndex === lessThanValues.index) {
+          isVis = isVis.replace(lessThanRegExp, '');
+          conditionalItem.conditions.push({
+            ifValue: items.find(({ name }) => name === lessThanValues[1]),
+            minValue: lessThanValues[2],
+            stateValue: {
+              name: 'LESS THAN',
+              val: '<',
+            }
+          });
+        } else if (greaterThanValues && isVis[lessThanValues.index - 1] !== "(" && minIndex === greaterThanValues.index) {
+          isVis = isVis.replace(greaterThanRegExp, '');
+          conditionalItem.conditions.push({
+            ifValue: items.find(({ name }) => name === greaterThanValues[1]),
+            minValue: greaterThanValues[2],
+            stateValue: {
+              name: 'GREATER THAN',
+              val: '>',
+            }
+          });
+        } else if (notEqualToValues && minIndex === notEqualToValues.index) {
+          const itemIndex = items.findIndex(({ name }) => name === notEqualToValues[1]);
+          const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == notEqualToValues[2]);
           
-          const option = ifValue.responseOptions.choices.find(choice => choice['schema:value'] == values[1]);
-          answerValue = {
-            name: option['schema:name'],
-            value: option['schema:value']
-          };
-        } else if (isVis.includes('>')) {
-          values = isVis.split('>');
-          stateValue = {
-            name: 'GREATER THEN',
-            val: '>',
-          };
-          ifValue = items.find(({ name }) => name === values[0]);
-          minValue = values[1];
-        } else if (isVis.includes('<')) {
-          values = isVis.split('<');
-          stateValue = {
-            name: 'LESS THEN',
-            val: '<',
-          };
-          ifValue = items.find(({ name }) => name === values[0]);
-          minValue = values[1];
-        } else if (isVis.includes('=')) {
-          values = isVis.split('=');
-          stateValue = {
-            name: 'EQUAL TO',
-            val: '=',
-          };
-          ifValue = items.find(({ name }) => name === values[0]);
-          minValue = values[1];
-        }
+          isVis = isVis.replace(notEqualToRegExp, '');
+          if (!option) {
+            return;
+          }
 
-        conditionalItems.push({
-          ifValue,
-          stateValue,
-          answerValue,
-          minValue,
-          showValue,
-        });
+          conditionalItem.conditions.push({
+            ifValue: items[itemIndex],
+            answerValue: {
+              name: option['schema:name'],
+              value: option['schema:value']
+            },
+            stateValue: {
+              name: 'IS NOT EQUAL TO',
+              val: '!=',
+            }
+          });
+        } else if (equalToValues && minIndex === equalToValues.index) {
+          const item = items.find(({ name }) => name === equalToValues[1]);
+
+          isVis = isVis.replace(equalToRegExp, '');
+          if (item.inputType === 'radio') {
+            const itemIndex = items.findIndex(({ name }) => name === equalToValues[1]);
+            const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == equalToValues[2]);
+
+            if (!option) {
+              return;
+            }
+
+            conditionalItem.conditions.push({
+              ifValue: item,
+              answerValue: {
+                name: option['schema:name'],
+                value: option['schema:value']
+              },
+              stateValue: {
+                name: 'IS EQUAL TO',
+                val: '==',
+              }
+            });
+          } else {
+            conditionalItem.conditions.push({
+              ifValue: item,
+              minValue: equalToValues[2],
+              stateValue: {
+                name: 'EQUAL TO',
+                val: '==',
+              }
+            });
+          }
+        } else {
+          isVis = isVis.split('()').join('');
+
+          if (isVis[0] === '|') {
+            conditionalItem.operation = 'ANY';
+          }
+          break;
+        }
       }
+
+      conditionalItems.push(conditionalItem);
     });
 
     return conditionalItems;
@@ -192,7 +269,8 @@ export default class Activity {
 
   getItemVisibility() {
     const visibilityObj = {};
-    this.ref.items.forEach(function(item) {
+
+    this.ref.items.forEach(function (item) {
       visibilityObj[item.name] = true;
     });
     return visibilityObj;
@@ -200,33 +278,52 @@ export default class Activity {
 
   getAddProperties(itemOrder) {
     const addProperties = [];
-    itemOrder.forEach((item) => {
-      const conditionalItems = this.ref.conditionalItems.filter((cond) => {
-        return cond.showValue === item;
+
+    if (this.ref.isPrize) {
+      const prizeItem = this.ref.items[0];
+      const propertiesArr = [{
+        "variableName": prizeItem.name,
+        "isAbout": prizeItem.name,
+        "isVis": true
+      }];
+
+      prizeItem.options.options.forEach((option, index) => {
+        const confirmItem = this.ref.items[index + 1];
+
+        propertiesArr.push({
+          "variableName": confirmItem.name,
+          "isAbout": confirmItem.name,
+          "isVis": `${prizeItem.name} == ${option.value}`
+        });
       });
-      
+
+      return propertiesArr;
+    }
+
+    itemOrder.forEach((item) => {
+      const conditionalItem = this.ref.conditionalItems.find((cond) => cond.showValue === item);
       let isVis = true;
-      if (conditionalItems.length) {
-        const visibleItems = conditionalItems.map((cond) => {
+
+      if (conditionalItem) {
+        const operation = conditionalItem.operation === 'ANY' ? ' || ' : ' && ';
+        const visibleItems = conditionalItem.conditions.map((cond) => {
           if (cond.stateValue.val === 'within') {
-            return `${cond.ifValue.name} > ${cond.minValue} && ${cond.ifValue.name} < ${cond.maxValue}`;
+            return `(${cond.ifValue.name} > ${cond.minValue} && ${cond.ifValue.name} < ${cond.maxValue})`;
           } else if (cond.stateValue.val === 'outsideof') {
-            return `${cond.ifValue.name} < ${cond.minValue} || ${cond.ifValue.name} > ${cond.maxValue}`;
+            return `(${cond.ifValue.name} < ${cond.minValue} || ${cond.ifValue.name} > ${cond.maxValue})`;
           } else if (cond.stateValue.val === 'includes') { 
             return `${cond.ifValue.name}.${cond.stateValue.val}(${cond.answerValue.value})`
           } else if (cond.stateValue.val === '!includes') {
             return `!${cond.ifValue.name}.includes(${cond.answerValue.value})`
+          } else if (cond.stateValue.val === '=') {
+            return `${cond.ifValue.name} ${cond.stateValue.val}${cond.stateValue.val} ${cond.minValue}`; 
           } else if (!cond.answerValue) {
             return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.minValue}`;
           } else {
             return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.answerValue.value}`;
           }
         });
-        isVis = visibleItems.join(' && ');
-      }
-      if (this.ref.visibilities && this.ref.visibilities.length) {
-        const visibility = this.ref.visibilities.find(({ variableName }) => variableName === item);
-        isVis = visibility ? visibility.isVis : isVis;
+        isVis = visibleItems.join(operation);
       }
 
       const property = {
@@ -241,36 +338,12 @@ export default class Activity {
 
   getItemOrder() {
     const { items, conditionalItems } = this.ref;
-    const itemNamesArray = [];
 
-    if (!items.length) return itemNamesArray;
-
-    itemNamesArray.push(items[0].name);
-    for (let i = 0; i != itemNamesArray.length;) {
-      i = itemNamesArray.length;
-      itemNamesArray.forEach(name => {
-        conditionalItems.forEach(item => {
-          if (item.ifValue.name === name && !itemNamesArray.includes(item.showValue)) {
-            itemNamesArray.push(item.showValue);
-          }
-        })
-      })
-
-      if (i === itemNamesArray.length) {
-        items.forEach(({ name }) => {
-          const endedItems = conditionalItems.filter(item => item.showValue === name);
-          if (!itemNamesArray.includes(name) && !endedItems.length) {
-            itemNamesArray.push(name);
-          }
-        })
-      }
-    }
-
-    return itemNamesArray;
+    if (!items.length) return [];
+    return items.map(({ name }) => name);
   }
 
   getCompressedSchema() {
-    const visibility = this.getItemVisibility();
     const itemOrder = this.getItemOrder();
     const addProperties = this.getAddProperties(itemOrder);
     const allowed = [];
@@ -300,8 +373,7 @@ export default class Activity {
         allow: allowed,
       },
       subScales: this.ref.subScales,
-      compute: this.ref.compute,
-      messages: this.ref.messages,
+      ...this.parseCumulative(),
     };
   }
 
@@ -336,10 +408,27 @@ export default class Activity {
     };
   }
 
+  parseCumulative () {
+    const item = this.ref.items.find(item => item.ui.inputType === 'cumulativeScore');
+
+    let compute = [], messages = [];
+
+    if (item) {
+      item.cumulativeScores.forEach(cumulative => {
+        compute.push(cumulative.compute);
+        messages.push(...cumulative.messages);
+      })
+    }
+
+    return {
+      compute,
+      messages,
+    }
+  }
+
   getActivityData() {
     const schema = this.getCompressedSchema();
     const context = this.getContext();
-    const items = this.ref.items;
     const conditionalItems = this.ref.conditionalItems;
     return {
       _id: this.ref.id,
@@ -351,11 +440,10 @@ export default class Activity {
       disableBack: this.ref.disableBack,
       schema: schema,
       context: context,
-      items: items,
+      items: this.ref.items.filter(item => item.ui.inputType !== 'cumulativeScore'),
       conditionalItems: conditionalItems,
       subScales: this.ref.subScales,
-      compute: this.ref.compute,
-      messages: this.ref.messages,
+      ...this.parseCumulative(),
       isPrize: this.ref.isPrize,
     };
   }
@@ -384,12 +472,35 @@ export default class Activity {
         updated: (field) => {
           const oldOptions = _.get(oldValue, field, []);
           const newOptions = _.get(newValue, field, []);
-    
-          const removedOptions = oldOptions.filter(option => !newOptions.some(newOption => newOption.variableName == option.variableName));
-          const insertedOptions = newOptions.filter(option => !oldOptions.some(oldOption => oldOption.variableName == option.variableName));
-          const updatedOptions = newOptions.filter(option => !oldOptions.some(oldOption => oldOption.variableName == option.variableName && oldOption.isVis == option.isVis))
+          const addedOptions = [];
+          const removedOptions = [];
+          const insertedOptions = [];
+          const updatedOptions = [];
+
+          oldOptions.forEach(option => {
+            const property = newOptions.find(newOption => newOption.variableName === option.variableName);
+            
+            if (!property) {
+              removedOptions.push(option);
+            } else if (typeof property.isVis === 'boolean' && typeof option.isVis !== 'boolean') {
+              removedOptions.push(option);
+            } else if (typeof property.isVis !== 'boolean' && typeof option.isVis === 'boolean') {
+              insertedOptions.push(option);
+            } else if (typeof property.isVis !== 'boolean' && typeof option.isVis !== 'boolean' && option.isVis !== property.isVis) {
+              updatedOptions.push(option);
+            }
+          });
+
+          newOptions.forEach(option => {
+            const property = oldOptions.find(oldOption => oldOption.variableName === option.variableName);
+
+            if (!property) {
+              addedOptions.push(option);
+            }
+          });
 
           return [
+            ...addedOptions.map(option => `conditional logic for ${option.variableName} was added`),
             ...removedOptions.map(option => `conditional logic for ${option.variableName} was removed`),
             ...insertedOptions.map(option => `conditional logic for ${option.variableName} was set to ${option.isVis.toString()}`),
             ...updatedOptions.map(option => `conditional logic for ${option.variableName} was updated to ${option.isVis.toString()}`)
@@ -629,5 +740,134 @@ export default class Activity {
       updates,
       removed,
     };
+  }
+
+  static parseJSONLD(act) {
+    const activitiesObj = act;
+    const {
+      ['http://www.w3.org/2004/02/skos/core#prefLabel']: name,
+      ['schema:description']: description,
+      ['reprolib:terms/preamble']: activityPreamble,
+      ['reprolib:terms/shuffle']: shuffle,
+      ['reprolib:terms/allow']: allow,
+      ['reprolib:terms/addProperties']: addProperties,
+      ['reprolib:terms/subScales']: subScales,
+      ['reprolib:terms/compute']: compute,
+      ['reprolib:terms/messages']: messages,
+      ['reprolib:terms/isPrize']: isPrize,
+      ['reprolib:terms/order']: orders,
+      ['_id']: id,
+    } = activitiesObj;
+
+    const visibilities = addProperties.map((property) => {
+      const isAbout = _.get(
+        property,
+        'reprolib:terms/isAbout.0.@id',
+        ""
+      );
+      const isVis = _.get(
+        property,
+        'reprolib:terms/isVis.0.@value',
+        ""
+      );
+      const variableName = _.get(
+        property,
+        'reprolib:terms/variableName.0.@value',
+        ""
+      );
+      return {
+        isAbout,
+        isVis,
+        variableName,
+      }
+    });
+
+    const activityInfo = {
+      _id: id && id.split('/')[1],
+      name:
+        name && name[0] && name[0]['@value'],
+      description:
+        description && description[0] && description[0]['@value'],
+      isPrize:
+        isPrize && isPrize[0] && isPrize[0]['@value'],
+      preamble:
+        activityPreamble &&
+        activityPreamble[0] &&
+        activityPreamble[0]['@value'],
+      shuffle: shuffle && shuffle[0] && shuffle[0]['@value'],
+      visibilities,
+      subScales: Array.isArray(subScales) && subScales.map((subScale, index) => {
+        const jsExpression = subScale['reprolib:terms/jsExpression'];
+        const variableName = subScale['reprolib:terms/variableName'];
+        const lookupTable = subScale['reprolib:terms/lookupTable'];
+
+        let subScaleData = {
+          jsExpression: jsExpression[0] && jsExpression[0]['@value'],
+          variableName: variableName[0] && variableName[0]['@value'],
+          subScaleId: index + 1,
+        };
+
+        if (lookupTable && Array.isArray(lookupTable)) {
+          subScaleData['lookupTable'] = lookupTable.map(row => {
+            const age = row['reprolib:terms/age'];
+            const rawScore = row['reprolib:terms/rawScore'];
+            const sex = row['reprolib:terms/sex'];
+            const tScore = row['reprolib:terms/tScore'];
+
+            return {
+              age: age && age[0] && age[0]['@value'] || '',
+              rawScore: rawScore && rawScore[0] && rawScore[0]['@value'] || '',
+              sex: sex && sex[0] && sex[0]['@value'] || '',
+              tScore: tScore && tScore[0] && tScore[0]['@value'] || '',
+            }
+          })
+        }
+
+        return subScaleData;
+      }),
+      compute: Array.isArray(compute) && compute.map((exp) => {
+        const jsExpression = exp['reprolib:terms/jsExpression'];
+        const variableName = exp['reprolib:terms/variableName'];
+
+        return {
+          jsExpression: jsExpression && jsExpression[0] && jsExpression[0]['@value'],
+          variableName: variableName && variableName[0] && variableName[0]['@value'],
+        }
+      }),
+      messages: Array.isArray(messages) && messages.map((msg) => {
+        const jsExpression = msg['reprolib:terms/jsExpression'];
+        const message = msg['reprolib:terms/message'];
+        const outputType = msg['reprolib:terms/outputType']
+
+        return {
+          jsExpression: _.get(jsExpression, [0, '@value']),
+          message: _.get(message, [0, '@value']),
+          outputType: _.get(outputType, [0, '@value'], 'cumulative'),
+        }
+      }),
+      orderList: _.get(orders, '0.@list', []).map(order => order['@id'])
+    };
+
+    let allowList = _.get(allow, [0, '@list'], [])
+      .map(item => item["@id"]);
+
+    if (allowList.some((item) => item.includes('refused_to_answer') || item.includes('dontKnow'))) {
+      activityInfo.isSkippable = true;
+    }
+    if (allowList.some((item) => item.includes('disable_back'))) {
+      activityInfo.disableBack = true;
+    }
+
+    activityInfo.valid = true;
+
+    return activityInfo;
+  }
+
+  static checkValidation (act) {
+    if (!act.name || !act.description) {
+      return false;
+    }
+
+    return true;
   }
 }

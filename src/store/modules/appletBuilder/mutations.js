@@ -101,6 +101,7 @@ const activityMutations = {
         ...item,
         id: null,
       })),
+      conditionalItems: [...activity.conditionalItems],
     });
   },
 

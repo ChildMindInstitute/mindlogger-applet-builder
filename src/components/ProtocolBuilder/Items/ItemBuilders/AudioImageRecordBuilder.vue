@@ -24,7 +24,7 @@
       style="max-width: 300px"
       :initialType="'image'"
       :initialData="responseOptions['schema:image']"
-      :initialTitle="'Geolocation Image'"
+      :initialTitle="'Audio Record Image'"
       @onAddFromUrl="onAddAudioImageFromUrl($event)"
       @onAddFromDevice="$emit('loading', true); onAddAudioImageFromDevice($event);"
       @onRemove="onRemoveAudioImage()"

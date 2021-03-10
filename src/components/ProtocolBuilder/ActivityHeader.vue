@@ -37,11 +37,9 @@
       />
       <v-text-field
         v-model="description"
-        :rules="textRules"
         counter="230"
         maxlength="230"
         label="Activity Description"
-        required
       />
       <v-row
         class="align-center"

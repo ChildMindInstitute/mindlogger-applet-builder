@@ -94,11 +94,15 @@
             </v-col>
 
             <v-col cols="auto">
-              <ImageUploader
-                :uploadFor="'item-radio-option-pc'"
-                :itemImg="slider.imgFirstName"
-                @onAddImg="onUploadImg('first', $event, slider)"
-                @onRemoveImg="onRemoveImg('first', slider)"
+              <Uploader
+                :initialType="'image'"
+                :initialData="slider.imgFirstName"
+                :initialAdditionalType="'small-circle'"
+                :initialTitle="'Slider Min Image'"
+                @onAddFromUrl="onAddSliderImageFromUrl(slider, $event, 'Min');"
+                @onAddFromDevice="onAddSliderImageFromDevice(slider, $event, 'Min');"
+                @onRemove="onRemoveSliderImage(slider, 'Min');"
+                @onNotify="$emit('loading', false); $emit('notify', $event);"
               />
             </v-col>
           </v-row>
@@ -133,11 +137,15 @@
             </v-col>
 
             <v-col cols="auto">
-              <ImageUploader
-                :uploadFor="'item-radio-option-pc'"
-                :itemImg="slider.imgLastName"
-                @onAddImg="onUploadImg('last', $event, slider)"
-                @onRemoveImg="onRemoveImg('last', slider)"
+              <Uploader
+                :initialType="'image'"
+                :initialData="slider.imgLastName"
+                :initialAdditionalType="'small-circle'"
+                :initialTitle="'Slider Max Image'"
+                @onAddFromUrl="onAddSliderImageFromUrl(slider, $event, 'Max');"
+                @onAddFromDevice="onAddSliderImageFromDevice(slider, $event, 'Max');"
+                @onRemove="onRemoveSliderImage(slider, 'Max');"
+                @onNotify="$emit('loading', false); $emit('notify', $event);"
               />
             </v-col>
           </v-row>
@@ -318,11 +326,11 @@
 
 <script>
 import ImageUpldr from '../../../../models/ImageUploader';
-import ImageUploader from '../../ImageUploader.vue';
+import Uploader from '../../Uploader.vue';
 
 export default {
   components: {
-    ImageUploader
+    Uploader
   },
   props: {
     initialItemData: {
@@ -498,27 +506,49 @@ export default {
       this.$emit('updateAllow', allow);
     },
 
-    async onUploadImg(option, data, slider) {
+    onAddSliderImageFromUrl(slider, url, type) {
+      this.$set(slider, (type == 'Min' ? 'imgFirstName' : 'imgLastName'), url );
+      this.update();
+
+      this.$emit('notify', {
+        type: 'success',
+        message: `${type} Image from URL successfully added to Slider.`,
+        duration: 3000,
+      });
+    },
+
+    async onAddSliderImageFromDevice(slider, uploadFunction, type) {
+      this.$emit('loading', true);
+
       try {
-        this.$emit('error', '');
-        setTimeout(() => { this.$emit('uploading', true); }, 2000);
-        const response = await this.imgUpldr.uploadImage(data);
-        if(option === 'first') slider.imgFirstName = response.location;
-        else if(option === 'last') slider.imgLastName = response.location;
-        setTimeout(() => { this.$emit('uploading', false); }, 2100);
+        const uploadedImageUrl = await uploadFunction();
+        this.$set(slider, (type == 'Min' ? 'imgFirstName' : 'imgLastName'), uploadedImageUrl);
+
         this.update();
-      } catch(e) {
-        setTimeout(() => {
-          this.$emit('uploading', false);
-          this.$emit('error', 'Something went wrong with uploading image for "Score Option". Please try to upload image again...');
-        }, 2000);
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'success',
+          message: `${type} Image successfully added to Slider.`,
+          duration: 3000,
+        });
+      } catch (error) {
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'error',
+          message: `Something went wrong with uploading image. Please try to upload again or just save Slider without image changes.`,
+        });
       }
     },
-    onRemoveImg(option, slider) {
-      if(option === 'first') slider.imgFirstName = '';
-      else if(option === 'last') slider.imgLastName = '';
+
+    onRemoveSliderImage(slider, type) {
+      this.$set(slider, (type == 'Min' ? 'imgFirstName' : 'imgLastName'), '');
 
       this.update();
+      this.$emit('notify', {
+        type: 'warning',
+        message: `${type} Image successfully removed from Slider.`,
+        duration: 3000,
+      });
     },
 
     onEditScore(slider) {

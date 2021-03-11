@@ -1,7 +1,7 @@
 
 import config from '../../../config';
 
-const baseImageURL = 'https://raw.githubusercontent.com/jj105/applet-builder-images/master/';
+const baseImageURL = 'https://raw.githubusercontent.com/ChildMindInstitute/mindlogger-applet-builder/master/src/assets/icons/';
 export const initialProtocol = {
   id: '',
   description: '',

@@ -110,7 +110,7 @@
 
             <v-text-field
               v-if="
-                condition.stateValue && (condition.stateValue.name === 'WITHIN' ||
+                condition.stateValue && (condition.stateValue.name === 'BETWEEN' ||
                   condition.stateValue.name === 'OUTSIDE OF')
               "
               class="ds-select-box"
@@ -296,7 +296,7 @@ export default {
         { name: "GREATER THAN", val: ">" },
         { name: "LESS THAN", val: "<" },
         { name: "EQUAL TO", val: "==" },
-        { name: "WITHIN", val: "within" },
+        { name: "BETWEEN", val: "between" },
         { name: "OUTSIDE OF", val: "outsideof" }
       ];
     },
@@ -321,7 +321,7 @@ export default {
       for(const condition of this.conditions) {
         if (!condition.ifValue || !condition.stateValue) return false;
         if (condition.ifValue.inputType === 'slider') {
-          if ( (condition.stateValue.name === 'WITHIN' 
+          if ( (condition.stateValue.name === 'BETWEEN' 
             || condition.stateValue.name === 'OUTSIDE OF') 
             && (!condition.maxValue && condition.maxValue !== 0) ) {
             return false;

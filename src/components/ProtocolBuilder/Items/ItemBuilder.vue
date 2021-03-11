@@ -265,6 +265,8 @@
         :initial-item-data="item.options"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
+        @loading="loading = $event"
+        @notify="notify = $event"
       />
 
       <VideoBuilder

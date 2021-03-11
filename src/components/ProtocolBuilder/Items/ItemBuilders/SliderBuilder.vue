@@ -331,6 +331,7 @@ export default {
       scoreDialog: false,
       showTickMarks: this.initialItemData.showTickMarks || false,
       scores: this.initialItemData.scores || false,
+      alerts: this.initialItemData.alerts || false,
       isOptionalText: this.initialIsOptionalText,
       responseOptions: this.initialResponseOptions,
     };
@@ -340,8 +341,8 @@ export default {
   },
   methods: {
     resetScores () {
-      for (let i = this.minSliderTick; i < this.maxSliderTick; i++) {
-        this.$set(this.scores, i - this.minSliderTick, i);
+      for (let i = Number(this.minSliderTick); i <= Number(this.maxSliderTick); i++) {
+        this.$set(this.scores, i - this.minSliderTick, i - this.minSliderTick + 1);
       }
     },
 

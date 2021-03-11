@@ -8,16 +8,14 @@
       <div
         v-for="(slider, index) in sliders"
         :key="index"
-        class="px-8"
+        class="mx-8"
       >
         <v-row>
-          <v-col>
+          <v-col sm="8">
             <span>
               {{ slider.sliderLabel }}
             </span>
           </v-col>
-
-          <v-spacer />
 
           <div class="d-flex align-center justify-end">
             <v-btn
@@ -314,13 +312,13 @@
   }
 
   .slider-list {
-    width: 80%;
+    width: 90%;
   }
 </style>
 
 <script>
-import ImageUploader from '../../ImageUploader.vue';
 import ImageUpldr from '../../../../models/ImageUploader';
+import ImageUploader from '../../ImageUploader.vue';
 
 export default {
   components: {

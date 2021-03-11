@@ -619,6 +619,7 @@ export default {
 
     onAddOptionImageFromUrl(option, url) {
       option.image = url;
+      this.update();
       this.$emit('notify', {
         type: 'success',
         message: 'Image from URL successfully added to Option.',
@@ -631,6 +632,7 @@ export default {
     async onAddOptionImageFromDevice(option, uploadFunction) {
       try {
         option.image = await uploadFunction();
+        this.update();
         this.$emit('loading', false);
         this.$emit('notify', {
           type: 'success',
@@ -650,6 +652,7 @@ export default {
 
     onRemoveOptionImage(option) {
       option.image = '';
+      this.update();
       this.$emit('notify', {
         type: 'warning',
         message: 'Image successfully removed from Option.',

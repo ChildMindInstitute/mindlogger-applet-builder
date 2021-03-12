@@ -35,10 +35,13 @@ const itemMutations = {
       item.name = `Screen${lastIndex >= 0 ? lastIndex + 1 : state.currentActivity.items.length + 1}`;
     }
 
+    const itemData = model.getItemBuilderData(item);
+    itemData.valid = Item.checkValidation(itemData);
+
     if (lastIndex >= 0) {
-      state.currentActivity.items.splice(lastIndex, 0, model.getItemBuilderData(item));
+      state.currentActivity.items.splice(lastIndex, 0, itemData);
     } else {
-      state.currentActivity.items.push(model.getItemBuilderData(item));
+      state.currentActivity.items.push(itemData);
     }
   },
 

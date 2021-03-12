@@ -110,6 +110,7 @@
           auto-grow
           filled
           rows="1"
+          :error-messages="largeText ? '' : 'Large Text is required.'"
         />
       </template>
 

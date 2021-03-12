@@ -139,8 +139,8 @@ export default class Activity {
             maxValue: withinValues[4],
             minValue: withinValues[2],
             stateValue: {
-              name: "WITHIN",
-              val: "within"
+              name: "BETWEEN",
+              val: "between"
             }
           });
         } else if (excludeValues && minIndex === excludeValues.index) {
@@ -307,7 +307,7 @@ export default class Activity {
       if (conditionalItem) {
         const operation = conditionalItem.operation === 'ANY' ? ' || ' : ' && ';
         const visibleItems = conditionalItem.conditions.map((cond) => {
-          if (cond.stateValue.val === 'within') {
+          if (cond.stateValue.val === 'between') {
             return `(${cond.ifValue.name} > ${cond.minValue} && ${cond.ifValue.name} < ${cond.maxValue})`;
           } else if (cond.stateValue.val === 'outsideof') {
             return `(${cond.ifValue.name} < ${cond.minValue} || ${cond.ifValue.name} > ${cond.maxValue})`;

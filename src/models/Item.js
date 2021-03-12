@@ -1083,7 +1083,7 @@ export default class Item {
   }
 
   static checkValidation (item) {
-    if (!item.name || !item.inputType) {
+    if (!item.name || !item.inputType || item.question && !item.question.text) {
       return false;
     }
 

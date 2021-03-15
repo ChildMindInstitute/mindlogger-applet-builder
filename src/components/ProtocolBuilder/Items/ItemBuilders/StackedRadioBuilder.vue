@@ -139,8 +139,8 @@
                       v-model="option.name"
                       :rules="textRules"
                       label="Option Text"
-                      counter="75"
-                      maxlength="75"
+                      counter="11"
+                      maxlength="11"
                       @change="updateOption(option)"
                     />
                   </v-col>
@@ -168,6 +168,7 @@
               x-small
               color="primary"
               @click="addOption"
+              :disabled="options.length >= 3"
             >
               <v-icon color="white">
                 mdi-plus
@@ -298,8 +299,8 @@
                       v-model="item.name"
                       :rules="textRules"
                       label="Item Text"
-                      counter="75"
-                      maxlength="75"
+                      counter="11"
+                      maxlength="11"
                       @change="updateItem(item)"
                     />
                   </v-col>
@@ -741,7 +742,7 @@ export default {
         'isSkippableItem': this.isSkippable,
         'options': this.options,
         'itemList': this.itemList,
-        'choices': (this.isTokenValue || this.hasScoreValue) ? choices : [],
+        'choices': (this.isTokenValue || this.hasScoreValue || this.hasResponseAlert) ? choices : [],
       };
       this.$emit('updateOptions', responseOptions);
     },

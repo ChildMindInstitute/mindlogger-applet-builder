@@ -81,13 +81,6 @@
               <span>
                 {{ option.name }}
               </span>
-
-              <span
-                v-if="option.description"
-                x-large
-              >
-                ( {{ option.description }} )
-              </span>
             </div>
 
             <v-spacer />
@@ -95,7 +88,6 @@
             <div class="d-flex align-center justify-end">
               <v-btn
                 icon
-                large
                 @click="option.expanded = !option.expanded"
               >
                 <v-icon
@@ -122,7 +114,6 @@
               />
               <v-btn
                 icon
-                large
                 @click="deleteOption(index)"
               >
                 <v-icon color="grey lighten-1">
@@ -191,10 +182,27 @@
                 cols="12"
                 sm="12"
               >
-                <v-text-field
+                <div 
+                  class="ds-tooltip-header d-flex justify-space-between align-center"
+                  :class="isTooltipOpen ? 'ds-tooltip-close' : ''"
+                > 
+                  <div class=""> Tooltip Creator </div>
+                  <v-btn
+                    icon
+                    @click="toggleTooltip()"
+                  >
+                    <v-icon v-if="isTooltipOpen" color="grey lighten-1">
+                      edit
+                    </v-icon>
+                    <v-icon v-else color="white lighten-1">
+                      mdi-chevron-double-up
+                    </v-icon>
+                  </v-btn>
+                </div>
+                <MarkDownEditor
+                  v-if="!isTooltipOpen"
                   v-model="option.description"
-                  label="Option Tooltip"
-                  @change="updateOption(option)"
+                  @input="updateOption(option)"
                 />
               </v-col>
             </v-row>
@@ -364,6 +372,18 @@
       }
     }
   }
+
+  .ds-tooltip-header {
+    background: grey;
+    color: white;
+    padding: 5px 12px;
+  }
+
+  .ds-tooltip-close {
+    background: white;
+    color: black;
+    padding: 5px 12px;
+  }
 </style>
 
 
@@ -371,11 +391,13 @@
 <script>
 import Uploader from '../../Uploader.vue';
 import OptionalItemText from '../../Partial/OptionalItemText.vue';
+import MarkDownEditor from '../../MarkDownEditor';
 
 export default {
   components: {
     Uploader,
     OptionalItemText,
+    MarkDownEditor
   },
   props: {
     initialItemData: {
@@ -450,6 +472,7 @@ export default {
       isSkippable: this.isSkippableItem || false,
       enableNegativeTokens: this.initialItemData.enableNegativeTokens || false,
       responseOptions: this.initialResponseOptions,
+      isTooltipOpen: false,
       isOptionalText: this.initialIsOptionalText,
     };
   },
@@ -494,6 +517,10 @@ export default {
       const updatedItems = items.filter(({ text, value, description }) => text !== item.text || value !== item.value || description !== item.description)
       this.items = [...updatedItems]
       this.$emit('removeTemplate', item);
+    },
+
+    toggleTooltip() {
+      this.isTooltipOpen = !this.isTooltipOpen;
     },
 
     appendTemplate(option) {
@@ -592,22 +619,28 @@ export default {
 
     onAddOptionImageFromUrl(option, url) {
       option.image = url;
+      this.update();
       this.$emit('notify', {
         type: 'success',
         message: 'Image from URL successfully added to Option.',
         duration: 3000,
       });
+
+      this.update();
     },
 
     async onAddOptionImageFromDevice(option, uploadFunction) {
       try {
         option.image = await uploadFunction();
+        this.update();
         this.$emit('loading', false);
         this.$emit('notify', {
           type: 'success',
           message: 'Image successfully added to Option.',
           duration: 3000,
         });
+  
+        this.update();
       } catch (error) {
         this.$emit('loading', false);
         this.$emit('notify', {
@@ -619,11 +652,14 @@ export default {
 
     onRemoveOptionImage(option) {
       option.image = '';
+      this.update();
       this.$emit('notify', {
         type: 'warning',
         message: 'Image successfully removed from Option.',
         duration: 3000,
       });
+
+      this.update();
     },
 
   }

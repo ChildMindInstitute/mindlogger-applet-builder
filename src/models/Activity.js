@@ -89,6 +89,7 @@ export default class Activity {
         showValue: property.variableName,
         conditions: [],
         operation: "ALL",
+        id: Math.round(Date.now() * Math.random()),
       };
       let isVis = property.isVis.split(' ').join('');
 
@@ -138,8 +139,8 @@ export default class Activity {
             maxValue: withinValues[4],
             minValue: withinValues[2],
             stateValue: {
-              name: "WITHIN",
-              val: "within"
+              name: "BETWEEN",
+              val: "between"
             }
           });
         } else if (excludeValues && minIndex === excludeValues.index) {
@@ -303,14 +304,10 @@ export default class Activity {
       const conditionalItem = this.ref.conditionalItems.find((cond) => cond.showValue === item);
       let isVis = true;
 
-      if (this.ref.visibilities && this.ref.visibilities.length) {
-        const visibility = this.ref.visibilities.find(({ variableName }) => variableName === item);
-        isVis = visibility ? visibility.isVis : isVis;
-      }
       if (conditionalItem) {
         const operation = conditionalItem.operation === 'ANY' ? ' || ' : ' && ';
         const visibleItems = conditionalItem.conditions.map((cond) => {
-          if (cond.stateValue.val === 'within') {
+          if (cond.stateValue.val === 'between') {
             return `(${cond.ifValue.name} > ${cond.minValue} && ${cond.ifValue.name} < ${cond.maxValue})`;
           } else if (cond.stateValue.val === 'outsideof') {
             return `(${cond.ifValue.name} < ${cond.minValue} || ${cond.ifValue.name} > ${cond.maxValue})`;

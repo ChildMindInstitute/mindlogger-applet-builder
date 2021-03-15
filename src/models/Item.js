@@ -6,7 +6,7 @@ export default class Item {
 
   static getQuesionInfo(question) {
     const imageRE = new RegExp(/[\r\n]*\!\[.*\]\(.*=.*\)[\r\n]*/i);
-    const imageUrlRE = new RegExp(/\h([^ =]+)/i);
+    const imageUrlRE = new RegExp(/\http([^ =]+)/i);
     const imageMatch = question.match(imageUrlRE);
 
     const questionImage = imageMatch && imageMatch[0] || '';  // The image URL.
@@ -669,7 +669,9 @@ export default class Item {
           _.get(item, ['reprolib:terms/inputType', 0, '@value']),
       },
       allowEdit:
-        _.get(item, ['reprolib:terms/allowEdit', 0, '@value'], true)
+        _.get(item, ['reprolib:terms/allowEdit', 0, '@value'], true),
+      isOptionalText:
+        _.get(item, ['reprolib:terms/isOptionalText', 0, '@value'], false),
     };
 
     let responseOptions = item['reprolib:terms/responseOptions'];
@@ -677,6 +679,11 @@ export default class Item {
     let itemType = itemContent.ui.inputType;
 
     if (responseOptions) {
+      itemContent.responseOptions = {};
+
+      let isOptionalTextRequired =
+        _.get(responseOptions, [0, 'reprolib:terms/isOptionalTextRequired']);
+
       let multipleChoice =
         _.get(responseOptions, [0, 'reprolib:terms/multipleChoice']);
       let valueType = 
@@ -707,6 +714,11 @@ export default class Item {
         _.get(responseOptions, [0, 'reprolib:terms/itemList'], []);
       let options = 
         _.get(responseOptions, [0, 'reprolib:terms/options'], []);
+
+      if (isOptionalTextRequired) {
+        itemContent.responseOptions.isOptionalTextRequired = 
+          _.get(isOptionalTextRequired, [0, '@value']);
+      }
 
       if (multipleChoice) {
         itemContent.multipleChoice = _.get(multipleChoice, [0, '@value']);
@@ -803,17 +815,28 @@ export default class Item {
           isMultipleChoice: itemContent.multipleChoice || false,
           hasScoreValue: itemContent.scoring || false,
           hasResponseAlert: itemContent.responseAlert || false,
-          responseAlertMessage: itemContent.responseAlertMessage || '',
-          itemList: itemList.map(item => ({
-            name: _.get(item, ['schema:name', 0, '@value'], ''),
-            image: _.get(item, ['schema:image', 0, '@value'], ''),
-            description: _.get(item, ['schema:description', 0, '@value'], '')
-          })),
-          options: options.map(option => ({
-            name: _.get(option, ['schema:name', 0, '@value'], ''),
-            image: _.get(option, ['schema:image', 0, '@value'], ''),
-            description: _.get(option, ['schema:description', 0, '@value'], '')
-          })),
+          itemList: itemList.map(item => {
+            const image = item['schema:image'];
+
+            return {
+              name: _.get(item, ['schema:name', 0, '@value'], ''),
+              image: 
+                typeof image === 'string' && image ||
+                Array.isArray(image) && image[0] && image[0]['@value'].toString(),
+              description: _.get(item, ['schema:description', 0, '@value'], '')
+            }
+          }),
+          options: options.map(option => {
+            const image = option['schema:image'];
+
+            return {
+              name: _.get(option, ['schema:name', 0, '@value'], ''),
+              image: 
+                typeof image === 'string' && image ||
+                Array.isArray(image) && image[0] && image[0]['@value'].toString(),
+              description: _.get(option, ['schema:description', 0, '@value'], '')
+            }
+          }),
           choices: parsedItemOptions
         };
       }
@@ -939,43 +962,67 @@ export default class Item {
             _.get(responseOptions, [0, 'schema:minValue', 0, '@value']),
         };
       }
-    }
 
-    // new block start
-    const responseOptions2 = item['reprolib:terms/responseOptions'];
-    if(responseOptions2 && responseOptions2.length > 0) {
-      // delete "itemType === 'audioImageRecord' || itemType === 'drawing' || itemType === 'geolocation'" later !!!!!!! this should works for all items wich contains responseOptions, modification for specific values should be inside "responseOptionsModifier" function
-      if(itemType === 'audioImageRecord' || itemType === 'drawing' || itemType === 'geolocation')
-        itemContent.responseOptions = this.responseOptionsModifier(itemType, responseOptions2);
     }
 
     const inputOptions = item['reprolib:terms/inputs'];
     if(inputOptions && inputOptions.length > 0) {
-      // delete "itemType === 'drawing'" later !!!!!!! this should works for all items wich contains inputOptions, modification for specific values should be inside "inputOptionsModifier" function
-      if(itemType === 'drawing')
-        itemContent.inputOptions = this.inputOptionsModifier(itemType, inputOptions);
+      itemContent.inputOptions = [];
+
+      const NAME = 'schema:name';
+      const VALUE = 'schema:value';
+      const CONTENT_URL = 'schema:contentUrl';
+
+      inputOptions.forEach(option => {
+        const modifiedOption = {};
+
+        const name = _.get(option, [NAME, 0, '@value']);
+        const value = _.get(option, [VALUE, 0, '@value']);
+        const contentUrl = option[CONTENT_URL];
+        
+        if(name)
+          modifiedOption[NAME] = name;
+        
+        if(value)
+          modifiedOption[VALUE] = value;
+          
+        if(contentUrl)
+          modifiedOption[CONTENT_URL] = contentUrl;
+  
+        if(!_.isEmpty(modifiedOption))
+          itemContent.inputOptions.push(modifiedOption);
+      });
+
     }
-    // new block end
 
-    if (itemType === 'audioStimulus') {
-      let mediaObj = Object.entries(
-        item['reprolib:terms/media'] && item['reprolib:terms/media'][0]
-      );
+    const media = item['reprolib:terms/media'];
+    if(media && media.length > 0) {
+      itemContent.media = {};
 
-      if (mediaObj) {
-        let mediaUrl = mediaObj[0][0];
-        let mediaData = mediaObj[0][1];
+      const NAME = 'schema:name';
+      const TRANSCRIPT = 'schema:transcript';
+      const CONTENT_URL = 'schema:contentUrl';
 
-        itemContent.media = {
-          [mediaUrl]: {
-            'schema:contentUrl': [mediaUrl],
-            'schema:name':
-              _.get(mediaData, [0, 'schema:name', 0, '@value']),
-            'schema:transcript':
-              _.get(mediaData, [0, 'schema:transcript', 0, '@value']),
-          },
-        };
-      }
+      media.forEach(obj => {
+        const mediaObj = Object.entries(obj)[0][1];
+        const modifiedmMediaObj = {};
+
+        const name = _.get(mediaObj, [0, NAME, 0, '@value']);
+        const transcript = _.get(mediaObj, [0, TRANSCRIPT, 0, '@value']);
+        const contentUrl = _.get(mediaObj, [0, CONTENT_URL]);
+        
+        if(name)
+          modifiedmMediaObj[NAME] = name;
+        
+        if(transcript)
+          modifiedmMediaObj[TRANSCRIPT] = transcript;
+          
+        if(contentUrl) {
+          modifiedmMediaObj[CONTENT_URL] = contentUrl;
+          itemContent.media[contentUrl] = modifiedmMediaObj;
+        }
+      });
+
     }
 
     if (itemContent.ui.inputType == 'markdown-message') {
@@ -984,11 +1031,21 @@ export default class Item {
 
     itemContent.valid = true;
 
+    // TODO: compare with new structure and delete !!!!!
+    const responseOptions2 = item['reprolib:terms/responseOptions'];
+    if(responseOptions2 && responseOptions2.length > 0) {
+      if(
+        itemType === 'audioImageRecord'
+        || itemType === 'drawing'
+        || itemType === 'geolocation'
+      ) {
+        itemContent.responseOptions = this.responseOptionsModifier(itemType, responseOptions2);
+      }
+    }
+
     return itemContent;
   }
 
-  // Modifiers for data from schema for using data inside app - Start
-  // response options modifier
   static responseOptionsModifier(itemType, options) {
     const responseOptions = options[0];
     const modifiedResponseOptions = {};
@@ -1017,43 +1074,16 @@ export default class Item {
     if(requiredValue)
       modifiedResponseOptions['requiredValue'] = requiredValue[0]['@value'];
 
+    const isOptionalTextRequired = 
+      responseOptions['reprolib:terms/isOptionalTextRequired'];
+    if(isOptionalTextRequired)
+      modifiedResponseOptions['isOptionalTextRequired'] = isOptionalTextRequired[0]['@value'];
+
     return modifiedResponseOptions;
   }
 
-  // input options modifier
-  static inputOptionsModifier(itemType, options) {
-    const modifiedInputOptions = [];
-
-    options.forEach(option => {
-      const modifiedOption = {};
-
-      const type = option['@type'];
-      if(type)
-        modifiedOption['@type'] = 'schema:' + this.getTypeOfActionFromSchemaURL(type[0]);
-      
-      const name = option['schema:name'];
-      if(name)
-        modifiedOption['schema:name'] = name[0]['@value'];
-      
-      const value = option['schema:value'];
-      if(value)
-        modifiedOption['schema:value'] = value[0]['@value'];
-
-      modifiedInputOptions.push(modifiedOption);
-    });
-
-    return modifiedInputOptions;
-  }
-
-  // helper functions for modifiers
-  static getTypeOfActionFromSchemaURL(url) {
-    const index = url.lastIndexOf('/');
-    if(index >= 0 && url.length - 1 > index) return url.slice(index + 1);
-    else return '';
-  }
-
   static checkValidation (item) {
-    if (!item.name || !item.inputType) {
+    if (!item.name || !item.inputType || item.question && !item.question.text) {
       return false;
     }
 

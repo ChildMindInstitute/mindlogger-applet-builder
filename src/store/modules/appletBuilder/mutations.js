@@ -35,10 +35,13 @@ const itemMutations = {
       item.name = `Screen${lastIndex >= 0 ? lastIndex + 1 : state.currentActivity.items.length + 1}`;
     }
 
+    const itemData = model.getItemBuilderData(item);
+    itemData.valid = Item.checkValidation(itemData);
+
     if (lastIndex >= 0) {
-      state.currentActivity.items.splice(lastIndex, 0, model.getItemBuilderData(item));
+      state.currentActivity.items.splice(lastIndex, 0, itemData);
     } else {
-      state.currentActivity.items.push(model.getItemBuilderData(item));
+      state.currentActivity.items.push(itemData);
     }
   },
 
@@ -48,13 +51,13 @@ const itemMutations = {
     const names = state.currentActivity.items.map((item) => item.name);
 
     let suffix = 1;
-    while (names.includes(`${item.name} (${suffix})`)) {
+    while (names.includes(`${item.name}__${suffix}`)) {
       suffix++;
     }
 
     const newItem = {
       ...item,
-      name: `${item.name} (${suffix})`,
+      name: `${item.name}__${suffix}`,
       id: null,
     };
 
@@ -101,6 +104,7 @@ const activityMutations = {
         ...item,
         id: null,
       })),
+      conditionalItems: [...activity.conditionalItems],
     });
   },
 
@@ -171,18 +175,19 @@ const conditionalMutations = {
     }
   },
 
-  updateConditionalData (state, { index, obj }) {
-    state.currentActivity.conditionalItems[index] = obj;
+  updateConditionalData(state, { index, updates }) {
+    const conditional = state.currentActivity.conditionalItems[index];
+    state.currentActivity.conditionalItems[index] = {
+      ...conditional,
+      ...updates
+    };
   },
 
   deleteConditional(state, index) {
-    const conditionalItems = state.currentActivity.conditionalItems;
-    
+    const conditionalItems = [...state.currentActivity.conditionalItems];
+
     conditionalItems.splice(index, 1);
-    state.currentActivity = {
-      ...state.currentActivity,
-      conditionalItems,
-    };
+    state.currentActivity.conditionalItems = [...conditionalItems];
   },
 }
 
@@ -222,7 +227,7 @@ export default {
       image: '',
       name: '',
       protocolVersion: '1.0.0',
-      isValid: false,
+      valid: false,
       prizeActivity: null,
       activities: [],
       tokenPrizeModal: false

@@ -3,13 +3,14 @@
     ref="form"
     v-model="valid"
   >
-    <v-text-field
+    <!-- <v-text-field
       v-model="minValue"
       label="Minimum response length (milliseconds)"
       type="number"
       :rules="minValueRules"
       @change="update"
-    />
+    />  -->
+    <!-- min response length not functional for now  -->
     <v-text-field
       v-model="maxValue"
       label="Maximum response length (milliseconds)"

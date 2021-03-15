@@ -96,7 +96,11 @@ export default {
       this.$emit('update', this.values);
     },
     resetValues() {
-      this.$emit('update', null);
+      for (let i = 0; i < this.items.length; i++) {
+        for (let j = 0; j < this.options.length; j++) {
+          this.$set(this.values[i], j, 0);
+        }
+      }
     }
   }
 }

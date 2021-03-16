@@ -1082,8 +1082,8 @@ export default class Item {
     return modifiedResponseOptions;
   }
 
-  static checkValidation (item) {
-    if (!item.name || !item.inputType || item.question && !item.question.text) {
+  static checkValidation(item) {
+    if (!item.name || !item.inputType || !item.question || (item.inputType !== "markdownMessage" && !item.question.text)) {
       return false;
     }
 

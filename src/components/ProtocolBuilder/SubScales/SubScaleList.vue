@@ -126,9 +126,7 @@ export default {
     },
 
     onDeleteLookupTable (index) {
-      let updatedSubScale = {...this.currentActivity.subScales[index]};
-
-      delete updatedSubScale['lookupTable'];
+      let updatedSubScale = {...this.currentActivity.subScales[index], lookupTable: null};
 
       this.updateSubScaleData({
         index,

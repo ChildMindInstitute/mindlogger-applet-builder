@@ -16,6 +16,7 @@
       <v-spacer />
       <v-card-actions>
         <v-btn
+          v-if="item.allowEdit"
           icon
           @click="duplicateItem(itemIndex)"
         >

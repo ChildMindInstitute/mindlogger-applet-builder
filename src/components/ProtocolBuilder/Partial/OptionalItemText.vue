@@ -1,34 +1,5 @@
 <template>
-  <v-row>
-
-    <v-col
-      :class="colClasses"
-      :cols="cols"
-      :md="md"
-      :sm="sm"
-    >
-      <v-checkbox
-        v-model="isText"
-        label="Text Input Option"
-        @change="$emit('text', isText)"
-      />
-    </v-col>
-
-    <v-col
-      v-if="isText"
-      :class="colClasses"
-      :cols="cols"
-      :md="md"
-      :sm="sm"
-    >
-      <v-checkbox
-        v-model="isRequired"
-        label="Text Input Option Required"
-        @change="$emit('required', isRequired)"
-      />
-    </v-col>
-
-  </v-row>
+  <v-row>  </v-row>
 </template>
 
 <script>

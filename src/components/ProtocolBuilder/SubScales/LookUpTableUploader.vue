@@ -118,6 +118,12 @@ export default {
           align: 'center',
           sortable: false,
           value: 'sex'
+        },
+        {
+          text: 'Optional Text',
+          align: 'center',
+          sortable: false,
+          value: 'outputText',
         }
       ],
       lookupTable,
@@ -141,7 +147,7 @@ export default {
       this.loading = true;
 
       reader.onload = () => {
-        let headers = ['tScore', 'rawScore', 'age', 'sex'];
+        let headers = ['tScore', 'rawScore', 'age', 'sex', 'outputText'];
 
         csv({
           noheader: false,
@@ -150,7 +156,7 @@ export default {
           let parseFailed = false;
 
           lookupTable = lookupTable.map(row => headers.reduce((previousValue, header) => {
-            if (!/^[\d-\sMFmf/]*$/g.test(row[header])) {
+            if (!/^[\d-~\sMFmf/.A-Za-z]*$/g.test(row[header])) {
               parseFailed = true;
             }
 

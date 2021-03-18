@@ -813,12 +813,14 @@ export default class Activity {
             const rawScore = row['reprolib:terms/rawScore'];
             const sex = row['reprolib:terms/sex'];
             const tScore = row['reprolib:terms/tScore'];
+            const outputText = row['reprolib:terms/outputText'];
 
             return {
               age: age && age[0] && age[0]['@value'] || '',
               rawScore: rawScore && rawScore[0] && rawScore[0]['@value'] || '',
               sex: sex && sex[0] && sex[0]['@value'] || '',
               tScore: tScore && tScore[0] && tScore[0]['@value'] || '',
+              outputText: outputText && outputText[0] && outputText[0]['@value']
             }
           })
         }

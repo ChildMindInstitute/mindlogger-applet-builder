@@ -156,7 +156,7 @@ export default {
           let parseFailed = false;
 
           lookupTable = lookupTable.map(row => headers.reduce((previousValue, header) => {
-            if (!/^[\d-~\sMFmf/.A-Za-z]*$/g.test(row[header])) {
+            if (!/^[\d-~\sMFmf/.A-Za-z:]*$/g.test(row[header])) {
               parseFailed = true;
             }
 

@@ -84,6 +84,11 @@ export default {
     subScale: {
       type: Object,
       required: true,
+    },
+    isFinalSubscale: {
+      type: Boolean,
+      required: false,
+      default: false
     }
   },
   data: function () {
@@ -93,39 +98,44 @@ export default {
       lookupTable = this.subScale['lookupTable'];
     }
 
+    let headers = [
+      {
+        text: 'T-Score',
+        align: 'center',
+        sortable: true,
+        value: 'tScore',
+      },
+      {
+        text: 'Raw Score',
+        align: 'center',
+        sortable: true,
+        value: 'rawScore',
+      },
+      {
+        text: 'Age',
+        align: 'center',
+        sortable: true,
+        value: 'age',
+      },
+      {
+        text: 'Sex',
+        align: 'center',
+        sortable: false,
+        value: 'sex'
+      },
+      {
+        text: 'Optional Text',
+        align: 'center',
+        sortable: false,
+        value: 'outputText',
+      }
+    ];
+
+    if (this.isFinalSubscale) {
+      headers = headers.filter(header => header.value == 'rawScore' || header.value == 'outputText');
+    }
     return {
-      headers: [
-        {
-          text: 'T-Score',
-          align: 'center',
-          sortable: true,
-          value: 'tScore',
-        },
-        {
-          text: 'Raw Score',
-          align: 'center',
-          sortable: true,
-          value: 'rawScore',
-        },
-        {
-          text: 'Age',
-          align: 'center',
-          sortable: true,
-          value: 'age',
-        },
-        {
-          text: 'Sex',
-          align: 'center',
-          sortable: false,
-          value: 'sex'
-        },
-        {
-          text: 'Optional Text',
-          align: 'center',
-          sortable: false,
-          value: 'outputText',
-        }
-      ],
+      headers,
       lookupTable,
       loading: false,
       isEditing: !!this.subScale['lookupTable'],
@@ -147,7 +157,7 @@ export default {
       this.loading = true;
 
       reader.onload = () => {
-        let headers = ['tScore', 'rawScore', 'age', 'sex', 'outputText'];
+        let headers = this.headers.map(header => header.value);
 
         csv({
           noheader: false,

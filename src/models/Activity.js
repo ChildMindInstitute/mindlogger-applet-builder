@@ -58,6 +58,11 @@ export default class Activity {
         ...subScale,
         valid: true
       })) || [],
+      finalSubScale: initialActivityData.finalSubScale || {
+        lookupTable: null,
+        variableName: '',
+        isAverageScore: null
+      },
       allowEdit: true,
       isPrize: initialActivityData.isPrize || false,
       valid: initialActivityData.valid !== undefined ? initialActivityData.valid : true,
@@ -373,6 +378,7 @@ export default class Activity {
         allow: allowed,
       },
       subScales: this.ref.subScales,
+      finalSubScale: (this.ref.finalSubScale.variableName ? [this.ref.finalSubScale] : []),
       ...this.parseCumulative(),
     };
   }
@@ -605,6 +611,21 @@ export default class Activity {
           return updates;
         }
       },
+      'finalSubScale': {
+        updated: (field) => {
+          const newSubScale = _.get(newValue, field, []);
+          const oldSubScale = _.get(oldValue, field, []);
+
+          if (newSubScale.length && !oldSubScale.length) {
+            return ['Final SubScale was added'];
+          }
+          if (!newSubScale.length && oldSubScale.length) {
+            return ['Final SubScale was deleted'];
+          }
+
+          return ['Final SubScale was updated'];
+        }
+      }
     };
   }
 
@@ -752,6 +773,7 @@ export default class Activity {
       ['reprolib:terms/allow']: allow,
       ['reprolib:terms/addProperties']: addProperties,
       ['reprolib:terms/subScales']: subScales,
+      ['reprolib:terms/finalSubScale']: finalSubScale,
       ['reprolib:terms/compute']: compute,
       ['reprolib:terms/messages']: messages,
       ['reprolib:terms/isPrize']: isPrize,
@@ -782,6 +804,29 @@ export default class Activity {
       }
     });
 
+    const parseLookupTable = (isFinalSubScale, lookupTable) => lookupTable.map(row => {
+      const age = row['reprolib:terms/age'];
+      const rawScore = row['reprolib:terms/rawScore'];
+      const sex = row['reprolib:terms/sex'];
+      const tScore = row['reprolib:terms/tScore'];
+      const outputText = row['reprolib:terms/outputText'];
+
+      let data = {
+        rawScore: rawScore && rawScore[0] && rawScore[0]['@value'] || '',
+        outputText: outputText && outputText[0] && outputText[0]['@value']
+      }
+
+      if (!isFinalSubScale) {
+        Object.assign(data, {
+          age: age && age[0] && age[0]['@value'] || '',
+          sex: sex && sex[0] && sex[0]['@value'] || '',
+          tScore: tScore && tScore[0] && tScore[0]['@value'] || ''
+        })
+      }
+
+      return data;
+    });
+
     const activityInfo = {
       _id: id && id.split('/')[1],
       name:
@@ -808,25 +853,16 @@ export default class Activity {
         };
 
         if (lookupTable && Array.isArray(lookupTable)) {
-          subScaleData['lookupTable'] = lookupTable.map(row => {
-            const age = row['reprolib:terms/age'];
-            const rawScore = row['reprolib:terms/rawScore'];
-            const sex = row['reprolib:terms/sex'];
-            const tScore = row['reprolib:terms/tScore'];
-            const outputText = row['reprolib:terms/outputText'];
-
-            return {
-              age: age && age[0] && age[0]['@value'] || '',
-              rawScore: rawScore && rawScore[0] && rawScore[0]['@value'] || '',
-              sex: sex && sex[0] && sex[0]['@value'] || '',
-              tScore: tScore && tScore[0] && tScore[0]['@value'] || '',
-              outputText: outputText && outputText[0] && outputText[0]['@value']
-            }
-          })
+          subScaleData['lookupTable'] = parseLookupTable(false, lookupTable);
         }
 
         return subScaleData;
       }),
+      finalSubScale: finalSubScale && finalSubScale[0] && {
+        isAverageScore: _.get(finalSubScale, [0, 'reprolib:terms/isAverageScore', 0, '@value'], false),
+        lookupTable: parseLookupTable(true, _.get(finalSubScale, [0, 'reprolib:terms/lookupTable'], [])),
+        variableName: _.get(finalSubScale, [0, 'reprolib:terms/variableName', 0, '@value'])
+      },
       compute: Array.isArray(compute) && compute.map((exp) => {
         const jsExpression = exp['reprolib:terms/jsExpression'];
         const variableName = exp['reprolib:terms/variableName'];

@@ -223,7 +223,7 @@
         <v-checkbox
           v-model="hasScoreValue"
           label="Option Score"
-          @change="update"
+          @change="onUpdateScoreOption"
         />
       </v-col>
 
@@ -235,7 +235,7 @@
         <v-checkbox
           v-model="hasResponseAlert"
           label="Set Alert"
-          @change="update"
+          @change="onUpdateAlertOption"
         />
       </v-col>
     </v-row>
@@ -539,7 +539,7 @@ export default {
       this.$emit('updateOptions', responseOptions);
     },
 
-    sliderRangeUpdate(ev, type, slider) {
+    sliderRangeUpdate(ev, type, slider, allowUpdate=true) {
       if (Number(slider.maxSliderTick) > 12) {
         return false;
       }
@@ -582,6 +582,22 @@ export default {
         }
       }
 
+      if (this.allowUpdate) {
+        this.update();
+      }
+    },
+
+    onUpdateScoreOption() {
+      for (let slider of this.sliders) {
+        this.sliderRangeUpdate(null, 'min', slider, false);
+      }
+      this.update();
+    },
+
+    onUpdateAlertOption() {
+      for (let slider of this.sliders) {
+        this.sliderRangeUpdate(null, 'min', slider, false);
+      }
       this.update();
     },
 

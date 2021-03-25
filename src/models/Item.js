@@ -1083,10 +1083,14 @@ export default class Item {
   }
 
   static checkValidation(item) {
-    if (!item.name || !item.inputType || !item.question || (item.inputType !== "markdownMessage" && !item.question.text)) {
+    if (!item.name
+      || !item.inputType
+      || !item.question
+      || (item.inputType !== "markdownMessage"
+        && item.inputType !== "cumulativeScore"
+        && !item.question.text)) {
       return false;
     }
-
     if (item.cumulativeScores) {
       for (let i = 0; i < item.cumulativeScores.length; i++) {
         if (!item.cumulativeScores[i].valid) {
@@ -1094,7 +1098,6 @@ export default class Item {
         }
       }
     }
-
     if (item.options && Array.isArray(item.options.options)) {
       for (let option of item.options.options) {
         if (option.valid === false) {

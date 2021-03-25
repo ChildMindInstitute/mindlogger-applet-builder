@@ -188,7 +188,7 @@ export default class Activity {
               val: '<',
             }
           });
-        } else if (greaterThanValues && isVis[lessThanValues.index - 1] !== "(" && minIndex === greaterThanValues.index) {
+        } else if (greaterThanValues && isVis[greaterThanValues.index - 1] !== "(" && minIndex === greaterThanValues.index) {
           isVis = isVis.replace(greaterThanRegExp, '');
           conditionalItem.conditions.push({
             ifValue: items.find(({ name }) => name === greaterThanValues[1]),

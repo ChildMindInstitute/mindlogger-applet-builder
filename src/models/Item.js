@@ -64,7 +64,7 @@ export default class Item {
     this.ref = ref;
   }
 
-  getSliderChoices(slider, hasScoreValue) {
+  getSliderChoices(slider, hasScoreValue, hasResponseAlert) {
     const choices = [];
     for (let i = slider.minSliderTick; i <= slider.maxSliderTick; i++) {
       let obj = {
@@ -72,8 +72,12 @@ export default class Item {
         "schema:value": i
       };
 
-      if (hasScoreValue) {
+      if (hasScoreValue && slider.scores) {
         obj["schema:score"] = slider.scores[i - slider.minSliderTick];
+      }
+
+      if (hasResponseAlert && slider.alerts) {
+        obj["schema:alert"] = slider.alerts[i - slider.minSliderTick];
       }
 
       if (slider.minValueImg && i === 1)
@@ -107,10 +111,14 @@ export default class Item {
             }
 
             if (option.image) {
-                choiceSchema["schema:image"] = option.image;
+              choiceSchema["schema:image"] = option.image;
+            }
+
+            if (this.ref.options.hasResponseAlert) {
+              choiceSchema["schema:alert"] = option.alert || '';
             }
             return choiceSchema;
-            })
+          })
         : [];
     return choices;
   }
@@ -122,11 +130,11 @@ export default class Item {
         "scoring": this.ref.options.hasScoreValue,
         "responseAlert": this.ref.options.hasResponseAlert,
         "multipleChoice": this.ref.options.isMultipleChoice,
-        "responseAlertMessage": this.ref.options.responseAlertMessage,
         "options": this.ref.options.options.map(option => ({
           "schema:description": option.description,
-          "schema:image": option.image,
-          "schema:name": option.name
+          "schema:image": option.image || '',
+          "schema:name": option.name || '',
+          "schema:alert": option.alert || '',
         })),
         "itemList": this.ref.options.itemList && this.ref.options.itemList.map(item => ({
           "schema:description": item.description,
@@ -142,6 +150,10 @@ export default class Item {
             info['schema:score'] = Number(choice.score);
           }
 
+          if (this.ref.options.hasResponseAlert) {
+            info['schema:alert'] = choice.alert || '';
+          }
+
           return info;
         })) || []
       }
@@ -154,7 +166,6 @@ export default class Item {
         "scoring": this.ref.options.hasScoreValue,
         "responseAlert": this.ref.options.hasResponseAlert,
         "multipleChoice": this.ref.options.isMultipleChoice,
-        "responseAlertMessage": this.ref.options.responseAlertMessage,
         "schema:minValue": 1,
         "schema:maxValue": choices.length,
         "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
@@ -168,13 +179,12 @@ export default class Item {
       }
     }
     if (this.ref.inputType === "slider") {
-      const choices = this.getSliderChoices(this.ref.options, this.ref.options.hasScoreValue);
-      return {
+      const choices = this.getSliderChoices(this.ref.options, this.ref.options.hasScoreValue, this.ref.options.hasResponseAlert);
+      let responseOptions = {
         "valueType": "xsd:integer",
         "scoring": this.ref.options.hasScoreValue,
         "responseAlert": this.ref.options.hasResponseAlert,
         "continousSlider": this.ref.options.continousSlider,
-        "responseAlertMessage": this.ref.options.responseAlertMessage,
         "schema:minValue": this.ref.options.minValue,
         "schema:maxValue": this.ref.options.maxValue,
         "schema:minValueImg": this.ref.options.minValueImg,
@@ -183,20 +193,29 @@ export default class Item {
         "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
         choices: choices
       };
+
+      if (this.ref.options.continousSlider && this.ref.options.hasResponseAlert) {
+        Object.assign(responseOptions, {
+          "minAlertValue": this.ref.options.minAlertValue,
+          "maxAlertValue": this.ref.options.maxAlertValue,
+          "responseAlertMessage": this.ref.options.responseAlertMessage,
+        })
+      }
+
+      return responseOptions;
     }
     if (this.ref.inputType === 'stackedSlider') {
       return {
         "valueType": "xsd:integer",
         "scoring": this.ref.options.hasScoreValue,
         "responseAlert": this.ref.options.hasResponseAlert,
-        "responseAlertMessage": this.ref.options.responseAlertMessage,
         "sliderOptions": (this.ref.options.sliderOptions || []).map(slider => ({
           "schema:minValue": slider.minValue,
           "schema:maxValue": slider.maxValue,
           "schema:minValueImg": slider.minValueImg,
           "schema:maxValueImg": slider.maxValueImg,
           "schema:sliderLabel": slider.sliderLabel,
-          "choices": this.getSliderChoices(slider, this.ref.options.hasScoreValue)
+          "choices": this.getSliderChoices(slider, this.ref.options.hasScoreValue, this.ref.options.hasResponseAlert)
         }))
       }
     }
@@ -572,9 +591,6 @@ export default class Item {
       'options.hasResponseAlert': {
         updated: optionUpdate('Response Alert'),
       },
-      'options.responseAlertMessage': {
-        updated: valueUpdate('Alert Message'),
-      },
       'options.continousSlider': {
         updated: valueUpdate('Continous Slider'),
       },
@@ -607,6 +623,18 @@ export default class Item {
       'responseOptions.schema:maxValue': {
         updated: valueUpdate('maxValue'),
         inserted: valueInsert('maxValue'),
+      },
+      'responseOptions.minAlertValue': {
+        updated: valueUpdate('Minimum value for alert range'),
+        inserted: valueUpdate('Minimum value for alert range'),
+      },
+      'responseOptions.maxAlertValue': {
+        updated: valueUpdate('Maximum value for alert range'),
+        inserted: valueUpdate('Maximum value for alert range'),
+      },
+      'responseOptions.responseAlertMessage': {
+        updated: valueUpdate('Response alert message'),
+        inserted: valueUpdate('Response alert message'),
       },
       'responseOptions.schema:image': {
         updated: valueUpdate('Image'),
@@ -704,9 +732,6 @@ export default class Item {
       let responseAlert =
         _.get(responseOptions, [0, 'reprolib:terms/responseAlert']);
 
-      let responseAlertMessage = 
-        _.get(responseOptions, [0, 'reprolib:terms/responseAlertMessage']);
-
       let itemOptions = 
         _.get(responseOptions, [0, 'reprolib:terms/itemOptions'], []);
 
@@ -748,11 +773,6 @@ export default class Item {
           _.get(responseAlert, [0, '@value']);
       }
 
-      if (responseAlertMessage) {
-        itemContent.responseAlertMessage = 
-          responseAlertMessage[0] && responseAlertMessage[0]['@value'];
-      }
-
       if (valueType) {
         itemContent.valueType =
           valueType[0] && valueType[0]['@id'];
@@ -764,7 +784,6 @@ export default class Item {
           enableNegativeTokens: itemContent.enableNegativeTokens || false,
           hasScoreValue: itemContent.scoring || false,
           hasResponseAlert: itemContent.responseAlert || false,
-          responseAlertMessage: itemContent.responseAlertMessage || '',
           options:
             responseOptions[0] &&
             responseOptions[0]['schema:itemListElement'] &&
@@ -774,6 +793,7 @@ export default class Item {
                 const name = itemListElement["schema:name"];
                 const value = itemListElement["schema:value"];
                 const score = itemListElement["schema:score"];
+                const alert = itemListElement["schema:alert"];
                 const description = itemListElement["schema:description"];
 
                 return {
@@ -787,6 +807,8 @@ export default class Item {
                     Array.isArray(value) && value[0] && value[0]['@value'],
                   score:
                     Array.isArray(score) && score[0] && score[0]['@value'],
+                  alert:
+                    Array.isArray(alert) && alert[0] && alert[0]['@value'],
                   description:
                     typeof description == 'string' && description ||
                     Array.isArray(description) && description[0] && description[0]['@value'].toString(),
@@ -804,7 +826,8 @@ export default class Item {
           for (let j = 0; j < options.length; j++) {
             data.push({
               score: _.get(itemOptions[options.length*i + j], ['schema:score', 0, '@value'], ''),
-              value: _.get(itemOptions[options.length*i + j], ['schema:value', 0, '@value'], '')
+              value: _.get(itemOptions[options.length*i + j], ['schema:value', 0, '@value'], ''),
+              alert: _.get(itemOptions[options.length*i + j], ['schema:alert', 0, '@value'], '')
             })
           }
   
@@ -891,7 +914,6 @@ export default class Item {
           hasScoreValue: itemContent.scoring || false,
           hasResponseAlert: itemContent.responseAlert || false,
           continousSlider: itemContent.continousSlider || false,
-          responseAlertMessage: itemContent.responseAlertMessage || '',
           maxValue:
             _.get(responseOptions, [0, 'schema:maxValue', 0, '@value']),
           minValue:
@@ -900,6 +922,12 @@ export default class Item {
             _.get(responseOptions, [0, 'schema:maxValueImg', 0, '@value']),
           minValueImg:
             _.get(responseOptions, [0, 'schema:minValueImg', 0, '@value']),
+          minAlertValue:
+            _.get(responseOptions, [0, 'schema:minAlertValue', 0, '@value']),
+          maxAlertValue:
+            _.get(responseOptions, [0, 'schema:maxAlertValue', 0, '@value']),
+          responseAlertMessage:
+            _.get(responseOptions, [0, 'schema:responseAlertMessage', 0, '@value']),
           maxSliderTick:
             Math.max(..._.get(responseOptions, '0.schema:itemListElement', []).map(item => _.get(item, 'schema:value.0.@value'))),
           minSliderTick:
@@ -912,14 +940,21 @@ export default class Item {
                 const score = itemListElement["schema:score"];
                 return Array.isArray(score) && score[0] && score[0]['@value']
               }
-            )
+            ),
+          alerts: itemContent.scoring && responseOptions[0] && 
+            responseOptions[0]['schema:itemListElement'] &&
+            responseOptions[0]['schema:itemListElement'].map(
+              (itemListElement) => {
+                const alert = itemListElement["schema:alert"];
+                return Array.isArray(alert) && alert[0] && alert[0]['@value']
+              }
+            ),
         };
       }
       if (itemType === 'stackedSlider') {
         itemContent.options = {
           hasScoreValue: itemContent.scoring || false,
           hasResponseAlert: itemContent.responseAlert || false,
-          responseAlertMessage: itemContent.responseAlertMessage || '',
           sliderOptions: _.get(responseOptions, [0, 'reprolib:terms/sliderOptions'], []).map(slider => ({
             sliderLabel: 
               _.get(slider, ['schema:sliderLabel', 0, '@value'], ''),
@@ -940,7 +975,13 @@ export default class Item {
                   const score = itemListElement["schema:score"];
                   return Array.isArray(score) && score[0] && score[0]['@value']
                 }
-              )
+              ),
+            alerts: itemContent.responseAlert && _.get(slider, ['schema:itemListElement'], []).map(
+              (itemListElement) => {
+                const alert = itemListElement["schema:alert"];
+                return Array.isArray(alert) && alert[0] && alert[0]['@value']
+              }
+            ),
           })),
         };
         itemContent.options.sliderOptions.forEach(slider => {
@@ -1083,10 +1124,14 @@ export default class Item {
   }
 
   static checkValidation(item) {
-    if (!item.name || !item.inputType || !item.question || (item.inputType !== "markdownMessage" && !item.question.text)) {
+    if (!item.name
+      || !item.inputType
+      || !item.question
+      || (item.inputType !== "markdownMessage"
+        && item.inputType !== "cumulativeScore"
+        && !item.question.text)) {
       return false;
     }
-
     if (item.cumulativeScores) {
       for (let i = 0; i < item.cumulativeScores.length; i++) {
         if (!item.cumulativeScores[i].valid) {
@@ -1094,7 +1139,6 @@ export default class Item {
         }
       }
     }
-
     if (item.options && Array.isArray(item.options.options)) {
       for (let option of item.options.options) {
         if (option.valid === false) {

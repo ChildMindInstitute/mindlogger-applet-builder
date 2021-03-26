@@ -207,6 +207,24 @@
               </v-col>
             </v-row>
 
+            <v-row
+              v-if="hasResponseAlert"
+            >
+              <v-col
+                class="d-flex align-center"
+                cols="12"
+                sm="12"
+              >
+                <v-text-field
+                  v-model="option.alert"
+                  label="Alert Message"
+                  :rules="alertTextRules"
+                  required
+                  @change="updateOption(option)"
+                />
+              </v-col>
+            </v-row>
+
             <v-row>
               <v-col 
                 v-if="isTokenValue"
@@ -236,24 +254,6 @@
           </v-icon>
         </v-btn>
       </div>
-
-      <v-row
-        v-if="hasResponseAlert"
-      >
-        <v-col
-          class="d-flex align-center"
-          cols="12"
-          sm="12"
-        >
-          <v-text-field
-            v-model="responseAlertMessage"
-            label="Alert Message"
-            :rules="alertTextRules"
-            required
-            @change="update"
-          />
-        </v-col>
-      </v-row>
 
       <v-divider
         class="mt-4"
@@ -450,6 +450,7 @@ export default {
         score: option.score || 0,
         image: option.image || '',
         description: option.description || '',
+        alert: option.alert || '',
         expanded: false,
         valid: true
       })),
@@ -468,7 +469,6 @@ export default {
       isTokenValue,
       hasScoreValue: this.initialItemData.hasScoreValue || false,
       hasResponseAlert: this.initialItemData.hasResponseAlert || false,
-      responseAlertMessage: this.initialItemData.responseAlertMessage || '',
       isSkippable: this.isSkippableItem || false,
       enableNegativeTokens: this.initialItemData.enableNegativeTokens || false,
       responseOptions: this.initialResponseOptions,
@@ -495,6 +495,7 @@ export default {
         'description': '',
         'expanded': false,
         'image': '',
+        'alert': '',
         'valid': true,
       };
 
@@ -541,6 +542,7 @@ export default {
         'image': '',
         'score': 0,
         'description': item.description,
+        'alert': '',
         'expanded': false,
         'valid': false
       };
@@ -563,7 +565,6 @@ export default {
       const responseOptions = {
         'hasScoreValue': this.hasScoreValue,
         'hasResponseAlert': this.hasResponseAlert,
-        'responseAlertMessage': this.responseAlertMessage,
         'isTokenValue': this.isTokenValue,
         'enableNegativeTokens': this.enableNegativeTokens,
         'isMultipleChoice': this.isMultipleChoice,

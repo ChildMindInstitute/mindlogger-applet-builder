@@ -326,7 +326,7 @@
             <v-btn
               fab
               x-small
-              color="deep-purple"
+              color="primary"
               @click="addItem"
             >
               <v-icon color="white">
@@ -367,23 +367,20 @@
             Edit Scores
           </v-btn>
         </v-col>
-      </v-row>
 
-      <v-row
-        v-if="hasResponseAlert"
-      >
-        <v-col
+        <v-col 
+          v-if="hasResponseAlert"
           class="d-flex align-center"
-          cols="12"
-          sm="12"
+          cols="auto"
         >
-          <v-text-field
-            v-model="responseAlertMessage"
-            label="Alert Message"
-            :rules="alertTextRules"
-            required
-            @change="update"
-          />
+          <v-btn
+            class="deep-orange"
+            color="primary"
+            dark
+            @click="onEditAlerts"
+          >
+            Edit Alerts
+          </v-btn>
         </v-col>
       </v-row>
 
@@ -519,6 +516,21 @@
         @update="updateScores"
       />
     </v-dialog>
+
+    <v-dialog
+      v-model="alertEditDialog.visible"
+      width="600"
+      persistent
+    >
+      <TableEditor
+        :options="options"
+        :items="itemList"
+        :initial="alerts"
+        input-type="text"
+        title="Edit Alerts"
+        @update="updateAlerts"
+      />
+    </v-dialog>
   </div>
 </template>
 
@@ -578,17 +590,19 @@ export default {
 
     const isTokenValue = (this.responseOptions.valueType && this.responseOptions.valueType.includes("token")) || false;
 
-    let values = [], scores = [];
+    let values = [], scores = [], alerts = [];
     if (Array.isArray(this.initialItemData.choices)) {
       for (let i = 0; i < this.initialItemData.choices.length; i++) {
         values.push([]);
         scores.push([]);
+        alerts.push([]);
 
         const choices = this.initialItemData.choices[i];
 
         for (let j = 0; j < choices.length; j++) {
-          values[i].push(choices[j].value);
-          scores[i].push(choices[j].score);
+          values[i].push(choices[j].value || 0);
+          scores[i].push(choices[j].score || 0);
+          alerts[i].push(choices[j].alert || '');
         }
       }
     }
@@ -625,6 +639,10 @@ export default {
         visible: false,
         key: 0
       },
+      alertEditDialog: {
+        visible: false,
+        key: 0
+      },
       textRules: [
         v => !!v || 'Radio options cannot be empty',
       ],
@@ -638,11 +656,11 @@ export default {
       isTokenValue,
       hasScoreValue: this.initialItemData.hasScoreValue || false,
       hasResponseAlert: this.initialItemData.hasResponseAlert || false,
-      responseAlertMessage: this.initialItemData.responseAlertMessage || '',
       imgUploader,
       isSkippable: this.isSkippableItem || false,
       values,
       scores,
+      alerts,
       valueDialog: false,
       scoreDialog: false,
     };
@@ -675,6 +693,7 @@ export default {
       for (let i = 0; i < this.itemList.length; i++) {
         this.values[i].push(0);
         this.scores[i].push(0);
+        this.alerts[i].push('');
       }
       this.options.push(nextOption);
 
@@ -691,10 +710,12 @@ export default {
 
       this.values.push([]);
       this.scores.push([]);
+      this.alerts.push([]);
 
       for (let i = 0; i < this.options.length; i++) {
         this.values[this.values.length-1].push(0);
         this.scores[this.scores.length-1].push(0);
+        this.alerts[this.alerts.length-1].push('');
       }
 
       this.itemList.push(nextItem);
@@ -706,6 +727,7 @@ export default {
       for (let i = 0; i < this.itemList.length; i++) {
         this.values[i].splice(index, 1);
         this.scores[i].splice(index, 1);
+        this.alerts[i].splice(index, 1);
       }
       this.options.splice(index, 1);
       this.update();
@@ -715,6 +737,7 @@ export default {
       this.itemList.splice(index, 1);
       this.values.splice(index, 1);
       this.scores.splice(index, 1);
+      this.alerts.splice(index, 1);
       this.update();
     },
 
@@ -726,7 +749,8 @@ export default {
         for (let j = 0; j < this.options.length; j++) {
           const choice = {
             score: this.scores[i] && this.scores[i][j] || 0,
-            value: this.values[i] && this.values[i][j] || 0
+            value: this.values[i] && this.values[i][j] || 0,
+            alert: this.alerts[i] && this.alerts[i][j] || '',
           };
 
           choices[i].push(choice);
@@ -736,7 +760,6 @@ export default {
       const responseOptions = {
         'hasScoreValue': this.hasScoreValue,
         'hasResponseAlert': this.hasResponseAlert,
-        'responseAlertMessage': this.responseAlertMessage,
         'isTokenValue': this.isTokenValue,
         'isMultipleChoice': this.isMultipleChoice,
         'isSkippableItem': this.isSkippable,
@@ -830,6 +853,15 @@ export default {
       this.update();
     },
 
+    updateAlerts(alerts) {
+      if (alerts) {
+        this.alerts = alerts;
+      }
+
+      this.alertEditDialog.visible = false;
+      this.update();
+    },
+
     onEditValues() {
       this.valueEditDialog.visible = true;
       this.valueEditDialog.key++;
@@ -838,6 +870,11 @@ export default {
     onEditScores() {
       this.scoreEditDialog.visible = true;
       this.scoreEditDialog.key++;
+    },
+
+    onEditAlerts() {
+      this.alertEditDialog.visible = true;
+      this.alertEditDialog.key++;
     }
   }
 }

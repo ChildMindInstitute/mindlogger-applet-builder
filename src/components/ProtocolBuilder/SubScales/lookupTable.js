@@ -3,19 +3,22 @@ export const sampleLookupTable = [
     "tScore": 10,
     "rawScore": "10",
     "age": "15",
-    "sex": "M"
+    "sex": "M",
+    "outputText": "https://gist.githubusercontent.com/benbalter/3914310/raw/f757a33411082da23f0ad4a124b45fcdacc1b43f/Example--text.txt"
   },
   {
     "tScore": 15,
     "rawScore": "20",
     "age": "",
-    "sex": "F"
+    "sex": "F",
+    "outputText": "https://gist.githubusercontent.com/benbalter/3914310/raw/f757a33411082da23f0ad4a124b45fcdacc1b43f/Example--text.txt"
   },
   {
     "tScore": 12,
     "rawScore": "25",
     "age": "15",
-    "sex": ""
+    "sex": "",
+    "outputText": "Markdown Text Here"
   },
   {
     "tScore": 1,

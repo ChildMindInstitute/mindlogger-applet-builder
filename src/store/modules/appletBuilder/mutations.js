@@ -165,6 +165,10 @@ const subScaleMutations = {
 
   deleteSubScale (state, index) {
     state.currentActivity.subScales.splice(index, 1);
+  },
+
+  updateFinalSubScale(state, obj) {
+    Object.assign(state.currentActivity.finalSubScale, obj);
   }
 };
 

@@ -218,6 +218,11 @@ export default {
     subScale: {
       type: Object,
       required: true
+    },
+    hasLookupTable: {
+      type: Boolean,
+      required: false,
+      default: false
     }
   },
   data: function () {
@@ -235,8 +240,7 @@ export default {
         v => !this.subScales.some((subScale, id) => subScale && subScale.variableName === v && id != this.subScaleIndex) || 'cannot use existing subscale name',
       ],
       valid: false,
-      isExpanded: !this.subScale.variableName || !this.subScale.variableName.length,
-      hasLookupTable: !!this.subScale.lookupTable
+      isExpanded: !this.subScale.variableName || !this.subScale.variableName.length
     };
   },
   computed: {
@@ -252,14 +256,6 @@ export default {
       }
 
       return itemCount;
-    }
-  },
-  watch: {
-    subScale: {
-      deep: true,
-      handler() {
-        this.hasLookupTable = !!this.subScale.lookupTable;
-      }
     }
   },
   created() {

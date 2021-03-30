@@ -155,7 +155,9 @@ const activityMutations = {
 const subScaleMutations = {
   addSubScale (state) {
     if (state.currentActivity) {
-      state.currentActivity.subScales.push({});
+      state.currentActivity.subScales.push({
+        lookupTable: null
+      });
     }
   },
 

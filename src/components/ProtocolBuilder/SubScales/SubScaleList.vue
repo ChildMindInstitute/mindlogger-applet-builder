@@ -12,6 +12,7 @@
         :sub-scale="subScale"
         :sub-scales="currentActivity.subScales"
         :items="currentActivity.items"
+        :has-lookup-table="!!subScale.lookupTable"
         class="ma-4"
         @onCreateLookupTable="onCreateLookupTable"
         @onDeleteLookupTable="onDeleteLookupTable"

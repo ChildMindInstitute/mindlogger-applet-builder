@@ -51,7 +51,7 @@
         <v-btn
           v-if="item.allowEdit"
           icon
-          @click="onDeleteItem"
+          @click="onDeleteItem(item)"
         >
           <v-icon color="grey lighten-1">
             mdi-delete
@@ -400,6 +400,60 @@
     <Notify :notify="notify" />
     <Loading :loading="loading" />
 
+    <v-dialog
+      v-model="removeDialog"
+      persistent
+      max-width="720"
+    >
+      <v-card>
+        <v-card-title class="headline">
+          Delete Item
+        </v-card-title>
+        <v-card-text>
+          Are you sure you want to delete this item? It will also remove the below condition
+          <v-list>
+            <v-list-group
+              v-for="conditional in itemConditionals"
+              :key="conditional.id"
+              no-action
+            >
+              <template v-slot:activator>
+                <v-list-item-content>
+                  <v-list-item-title v-text="'If ' + conditional.operation + ' of the `IF` rules are matched, show ' + conditional.showValue" />
+                </v-list-item-content>
+              </template>
+
+              <v-list-item
+                v-for="condition in conditional.conditions"
+                :key="conditional.id + condition.ifValue.name"
+              >
+                <v-list-item-content>
+                  <v-list-item-title v-text="condition.ifValue.name + ' ' + condition.stateValue.name + ' is ' + condition.answerValue.name" />
+                </v-list-item-content>
+              </v-list-item>
+            </v-list-group>
+          </v-list>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="primary"
+            text
+            @click="removeDialog = false"
+          >
+            No
+          </v-btn>
+          <v-btn
+            color="primary"
+            text
+            @click="removeConditionals()"
+          >
+            Yes
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </v-card>
 </template>
 
@@ -507,7 +561,6 @@ import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
 import StackedSliderBuilder from "./ItemBuilders/StackedSliderBuilder";
 
 import MarkDownEditor from "../MarkDownEditor";
-
 import Item from '../../../models/Item';
 
 import Notify from '../Additional/Notify.vue';
@@ -553,7 +606,9 @@ export default {
           /^[a-zA-Z0-9-_]+$/.test(v) ||
           "Item name must be contain only alphanumeric symbols or underscore"
       ],
+      itemConditionals: [],
       hasScoringItem: false,
+      removeDialog: false,
       valid: false,
       largeText: '',
       headerImage: '',
@@ -577,6 +632,10 @@ export default {
         'prizeActivity'
       ]
     ),
+
+    conditionals () {
+      return this.currentActivity.conditionalItems;
+    },
 
     hasPrizeActivity () {
       return !!this.prizeActivity;
@@ -619,6 +678,7 @@ export default {
       [
         'updateItemMetaInfo',
         'duplicateItem',
+        'deleteConditional',
         'deleteItem',
         'updateItemInputType',
         'setTokenPrizeModalStatus',
@@ -626,7 +686,7 @@ export default {
       ],
     ),
 
-    setItemName() {
+    setItemName () {
       if(!this.item.name) this.onUpdateName(`Screen${this.itemIndex + 1}`);
     },
 
@@ -635,7 +695,29 @@ export default {
     },
 
     onDeleteItem () {
+      this.itemConditionals = [];
+      this.conditionals.forEach(conditional => {
+        if (conditional.showValue === this.item.name) {
+          this.itemConditionals.push(conditional);
+        } else if(conditional.conditions.find(({ ifValue }) => ifValue.name === this.item.name)) {
+          this.itemConditionals.push(conditional);
+        }
+      });
+
+      this.removeDialog = true;
+    },
+
+    removeConditionals () {
       this.deleteItem(this.itemIndex);
+      this.itemConditionals.forEach((conditional) => {
+        const index = this.conditionals.findIndex(({ id }) => id === conditional.id);
+
+        if (index !== -1) {
+          this.deleteConditional(index);
+        }
+      })
+
+      this.removeDialog = false;
     },
 
     nameKeydown (e) {

@@ -39,11 +39,6 @@
       label="Skippable Item"
       @change="onUpdateSkipOption"
     />
-    <v-checkbox
-      v-model="responseOptions['requiredValue']"
-      label="Response required"
-      @change="onUpdateResponseOptions"
-    />
   </v-form>
 </template>
 
@@ -69,7 +64,6 @@ export default {
     let responseOptions = {
       "schema:minValue": 1,
       "schema:maxValue": 3000,
-      "requiredValue": false,
       "schema:image": '',
     };
     responseOptions = Object.assign(responseOptions, this.initialItemResponseOptions);

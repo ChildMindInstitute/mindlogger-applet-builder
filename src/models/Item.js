@@ -941,7 +941,7 @@ export default class Item {
                 return Array.isArray(score) && score[0] && score[0]['@value']
               }
             ),
-          alerts: itemContent.scoring && responseOptions[0] && 
+          alerts: itemContent.responseAlert && responseOptions[0] && 
             responseOptions[0]['schema:itemListElement'] &&
             responseOptions[0]['schema:itemListElement'].map(
               (itemListElement) => {

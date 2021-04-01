@@ -184,23 +184,29 @@
               >
                 <div 
                   class="ds-tooltip-header d-flex justify-space-between align-center"
-                  :class="isTooltipOpen ? 'ds-tooltip-close' : ''"
+                  :class="!isTooltipOpen ? 'ds-tooltip-close' : ''"
                 > 
-                  <div class=""> Tooltip Creator </div>
+                  <span>Tooltip Creator</span>
                   <v-btn
                     icon
-                    @click="toggleTooltip()"
+                    @click="isTooltipOpen = !isTooltipOpen"
                   >
-                    <v-icon v-if="isTooltipOpen" color="grey lighten-1">
-                      edit
-                    </v-icon>
-                    <v-icon v-else color="white lighten-1">
+                    <v-icon
+                      v-if="isTooltipOpen"
+                      color="white lighten-1"
+                    >
                       mdi-chevron-double-up
+                    </v-icon>
+                    <v-icon
+                      v-else
+                      color="grey lighten-1"
+                    >
+                      edit
                     </v-icon>
                   </v-btn>
                 </div>
                 <MarkDownEditor
-                  v-if="!isTooltipOpen"
+                  v-if="isTooltipOpen"
                   v-model="option.description"
                   @input="updateOption(option)"
                 />
@@ -518,10 +524,6 @@ export default {
       const updatedItems = items.filter(({ text, value, description }) => text !== item.text || value !== item.value || description !== item.description)
       this.items = [...updatedItems]
       this.$emit('removeTemplate', item);
-    },
-
-    toggleTooltip() {
-      this.isTooltipOpen = !this.isTooltipOpen;
     },
 
     appendTemplate(option) {

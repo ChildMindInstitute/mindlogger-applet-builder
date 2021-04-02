@@ -1,10 +1,10 @@
 <template>
   <v-card>
-    <v-card-title 
-      class="headline grey lighten-2" 
+    <v-card-title
+      class="headline grey lighten-2"
       primary-title
     >
-      <v-icon 
+      <v-icon
         left
       >
         {{ isEditing ? "mdi-pencil" : "mdi-upload" }}
@@ -166,7 +166,7 @@ export default {
           let parseFailed = false;
 
           lookupTable = lookupTable.map(row => headers.reduce((previousValue, header) => {
-            if (!/^[\d-~\sMFmf/.A-Za-z:]*$/g.test(row[header])) {
+            if (header !== 'outputText' && !/^[\d-~\sMFmf.]*$/g.test(row[header])) {
               parseFailed = true;
             }
 

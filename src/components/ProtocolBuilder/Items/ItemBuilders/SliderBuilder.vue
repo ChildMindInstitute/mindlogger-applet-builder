@@ -147,7 +147,7 @@
         <v-checkbox
           v-model="hasResponseAlert"
           label="Set Alert"
-          @change="update"
+          @change="sliderRangeUpdate($event, 'max')"
         />
       </v-col>
 
@@ -433,8 +433,8 @@ export default {
       alertMaxValue: Number(this.initialItemData.maxAlertValue || this.initialItemData.maxSliderTick || 0),
 
       showTickMarks: this.initialItemData.showTickMarks || false,
-      scores: this.initialItemData.scores || false,
-      alerts: this.initialItemData.alerts || false,
+      scores: this.initialItemData.scores || [],
+      alerts: this.initialItemData.alerts || [],
       isOptionalText: this.initialIsOptionalText,
       responseOptions: this.initialResponseOptions,
     };

@@ -61,7 +61,8 @@ export const ageScreen = {
 		"inputType": "text"
 	},
 	"options": {
-		"requiredValue": true
+    "requiredValue": true,
+    "valueType": "xsd:integer"
   },
   "allowEdit": false
 };

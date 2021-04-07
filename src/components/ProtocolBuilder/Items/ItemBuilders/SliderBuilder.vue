@@ -2,7 +2,7 @@
   <v-form>
     <div class="slider-meta">
       <v-row>
-        <v-col 
+        <v-col
           class="d-flex align-center"
           cols="12"
           sm="3"
@@ -44,7 +44,7 @@
       </v-row>
 
       <v-row>
-        <v-col 
+        <v-col
           class="d-flex align-center"
           cols="12"
           sm="3"
@@ -115,7 +115,7 @@
     />
 
     <v-row>
-      <v-col 
+      <v-col
         class="d-flex align-center"
         cols="12"
         sm="3"
@@ -123,11 +123,11 @@
         <v-checkbox
           v-model="isSkippable"
           label="Skippable Item"
-          @change="updateAllow"
+          :disabled="isSkippableItem == 2"
         />
       </v-col>
 
-      <v-col 
+      <v-col
         class="d-flex align-center"
         cols="12"
         sm="3"
@@ -390,8 +390,8 @@ export default {
       required: true
     },
     isSkippableItem: {
-      type: Boolean,
-      default: false,
+      type: Number,
+      default: 0,
     },
     initialResponseOptions: {
       type: Object,
@@ -410,7 +410,6 @@ export default {
       minValueImg: this.initialItemData.minValueImg || '',
       maxValue: this.initialItemData.maxValue || '',
       maxValueImg: this.initialItemData.maxValueImg || '',
-      isSkippable: this.isSkippableItem || false,
       valid: true,
       textRules: [
         v => !!v || 'Radio options cannot be empty',
@@ -439,6 +438,18 @@ export default {
       responseOptions: this.initialResponseOptions,
     };
   },
+
+  computed: {
+    isSkippable: {
+      get() {
+        return this.isSkippableItem || false;
+      },
+      set(value) {
+        this.$emit('updateAllow', value);
+      }
+    }
+  },
+
   mounted() {
     this.update();
   },
@@ -554,11 +565,6 @@ export default {
       }
 
       this.update();
-    },
-
-    updateAllow() {
-      const allow = this.isSkippable
-      this.$emit('updateAllow', allow);
     },
 
     onUpdateResponseOptions() {

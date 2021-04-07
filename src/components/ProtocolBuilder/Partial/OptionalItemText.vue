@@ -1,6 +1,5 @@
 <template>
   <v-row>
-
     <v-col
       :class="colClasses"
       :cols="cols"
@@ -27,7 +26,6 @@
         @change="$emit('required', isRequired)"
       />
     </v-col>
-
   </v-row>
 </template>
 
@@ -36,7 +34,7 @@ export default {
   props: {
     colClasses: {
       type: String,
-      defeault: '',
+      default: '',
     },
     cols: {
       type: Number,

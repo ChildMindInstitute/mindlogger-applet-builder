@@ -1,6 +1,11 @@
 <template>
   <div>
     <p>Users will be prompted to take a video.</p>
+    <v-checkbox
+      v-model="isSkippable"
+      label="Skippable Item"
+      :disabled="isSkippableItem == 2"
+    />
     <OptionalItemText
       :colClasses="'d-flex align-center'"
       :cols="12"
@@ -30,6 +35,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    isSkippableItem: {
+      type: Number,
+      default: 0,
+    },
   },
   data() {
     return {
@@ -37,6 +46,18 @@ export default {
       isOptionalText: this.initialIsOptionalText,
     }
   },
+
+  computed: {
+    isSkippable: {
+      get() {
+        return this.isSkippableItem || false;
+      },
+      set(value) {
+        this.$emit('updateAllow', value);
+      }
+    }
+  },
+
   methods: {
     onUpdateResponseOptions() {
       this.$emit('updateResponseOptions', this.responseOptions);

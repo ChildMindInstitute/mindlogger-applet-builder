@@ -30,6 +30,12 @@
     <!-- Audio Uploader -->
 
     <v-checkbox
+      v-model="isSkippable"
+      label="Skippable Item"
+      :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
+    />
+
+    <v-checkbox
       v-model="replayInputOption['schema:value']"
       label="Media Replay Allowed"
       @change="onUpdateInputOptions"
@@ -170,7 +176,7 @@ export default {
   computed: {
     isSkippable: {
       get() {
-        return this.isSkippableItem || false;
+        return this.isSkippableItem === 1 || false;
       },
       set(value) {
         this.$emit('updateAllow', value);

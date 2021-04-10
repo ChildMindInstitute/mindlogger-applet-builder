@@ -107,7 +107,7 @@ export default {
   computed: {
     isSkippable: {
       get() {
-        return this.isSkippableItem || false;
+        return this.isSkippableItem === 1 || false;
       },
       set(value) {
         this.$emit('updateAllow', value);

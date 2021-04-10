@@ -286,7 +286,7 @@
           <v-checkbox
             v-model="isSkippable"
             label="Skippable Item"
-            :disabled="isSkippableItem == 2"
+            :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
           />
         </v-col>
         <v-col
@@ -486,7 +486,7 @@ export default {
   computed: {
     isSkippable: {
       get() {
-        return this.isSkippableItem || false;
+        return this.isSkippableItem === 1 || false;
       },
       set(value) {
         this.$emit('updateAllow', value);

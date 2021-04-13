@@ -263,6 +263,8 @@ export default class Item {
         ui: {
           inputType: this.ref.inputType,
         },
+        baseAppletId: this.ref.baseAppletId,
+        baseItemId: this.ref.baseItemId,
     };
     if (Object.keys(responseOptions).length !== 0) {
       schema["responseOptions"] = responseOptions;

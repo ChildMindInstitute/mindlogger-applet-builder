@@ -61,6 +61,11 @@ const itemMutations = {
       id: null,
     };
 
+    if (state.protocol.id && item.id) {
+      newItem.baseAppletId = state.protocol.appletId;
+      newItem.baseItemId = item.id;
+    }
+
     let lastIndex = state.currentActivity.items.findIndex(item => !item.allowEdit || item.inputType == 'cumulativeScore');
 
     if (lastIndex >= 0) {
@@ -96,7 +101,7 @@ const activityMutations = {
       suffix++;
     }
 
-    activities.push({
+    const newActivity = {
       ...activity,
       id: null,
       name: `${activity.name} (${suffix})`,
@@ -105,7 +110,14 @@ const activityMutations = {
         id: null,
       })),
       conditionalItems: [...activity.conditionalItems],
-    });
+    };
+
+    if (state.protocol.id && activity.id) {
+      newActivity.baseAppletId = state.protocol.appletId
+      newActivity.baseActivityId = activity.id
+    }
+
+    activities.push(newActivity);
   },
 
   deleteActivity (state, index) {
@@ -227,7 +239,7 @@ export default {
 
   resetProtocol (state) {
     state.protocol = {
-      id: '',
+      id: null,
       description: '',
       markdownData: '',
       image: '',

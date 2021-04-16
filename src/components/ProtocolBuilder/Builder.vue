@@ -82,7 +82,12 @@ export default {
       type: Function,
       required: false,
       default: null,
-    }
+    },
+    cacheData: {
+      type: Object,
+      required: false,
+      default: null,
+    },
   },
   computed: {
     ...mapGetters(config.MODULE_NAME, [
@@ -122,7 +127,10 @@ export default {
     this.setCurrentScreen(config.PROTOCOL_SCREEN);
     this.setCurrentActivity(-1);
 
-    if (this.initialData) {
+    if (this.cacheData) {
+      const newStoreData = await this.mergeCacheStoreWithBasketData()
+      this.restoreCacheData(newStoreData)
+    } else if (this.initialData) {
       if (!this.versions.length) {
         this.$emit('setLoading', true);
       }
@@ -166,6 +174,7 @@ export default {
       'updateTemplateRequestStatus',
       'setVersions',
       'resetProtocol',
+      'restoreCacheData',
     ]),
     ...mapGetters(config.MODULE_NAME, [
       'formattedProtocol'
@@ -200,6 +209,45 @@ export default {
 
       initialStoreData.prizeActivity = initialStoreData.activities.find(activity => activity.isPrize);
       this.initProtocolData(initialStoreData);
+    },
+
+    async mergeCacheStoreWithBasketData () {
+      const { appletBuilder, basketData } = this.cacheData;
+
+      const activityModel = new Activity();
+      const itemModel = new Item();
+
+      Object.entries(basketData).map(([appletId, appletData]) => {
+        const { applet, activities, items, protocol } = appletData;
+
+        Object.values(activities).forEach((act) => {
+          if (act.isPrize) {
+            return;
+          }
+
+          const activityInfo = Activity.parseJSONLD(act)
+          const activityItems = activityInfo.orderList.filter(key => items[key]).map((key) => {
+            const itemData = itemModel.getItemBuilderData(Item.parseJSONLD(items[key]));
+            itemData.baseAppletId = appletId;
+            itemData.baseItemId = itemData.id;
+            itemData.id = null;
+            return itemData;
+          });
+
+          const activityBuilderData = activityModel.getActivityBuilderData({
+            ...activityInfo,
+            items: activityItems,
+          });
+          activityBuilderData.index = appletBuilder.activities.length;
+          activityBuilderData.baseAppletId = appletId;
+          activityBuilderData.baseActivityId = activityBuilderData.id;
+          activityBuilderData.id = null;
+
+          appletBuilder.activities.push(activityBuilderData);
+        });
+      });
+
+      return appletBuilder;
     },
 
     onClosePrizeActivityModal (response) {

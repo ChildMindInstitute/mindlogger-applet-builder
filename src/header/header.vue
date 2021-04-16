@@ -177,6 +177,22 @@
         </template>
         <span>View History</span>
       </v-tooltip>
+      <v-tooltip
+        bottom
+      >
+        <template v-slot:activator="{ on }">
+          <v-btn
+            class="mx-1"
+            @click="importLibrary"
+            v-on="on"
+          >
+            <v-icon>
+              mdi-database-import
+            </v-icon>
+          </v-btn>
+        </template>
+        <span>Import from Library</span>
+      </v-tooltip>
     </v-row>
 
     <v-dialog
@@ -471,6 +487,10 @@ export default {
         }
       );
     },
+
+    importLibrary () {
+      this.$emit("switchToLibrary", this.$store.state.appletBuilder);
+    }
   }
 }
 </script>

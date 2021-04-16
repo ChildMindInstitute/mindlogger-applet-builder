@@ -61,10 +61,10 @@ const itemMutations = {
       id: null,
     };
 
-    if (state.protocol.id && item.id) {
-      newItem.baseAppletId = state.protocol.appletId;
-      newItem.baseItemId = item.id;
-    }
+    // if (state.protocol.id && item.id) {
+    //   newItem.baseAppletId = state.protocol.appletId;
+    //   newItem.baseItemId = item.id;
+    // }
 
     let lastIndex = state.currentActivity.items.findIndex(item => !item.allowEdit || item.inputType == 'cumulativeScore');
 
@@ -112,10 +112,10 @@ const activityMutations = {
       conditionalItems: [...activity.conditionalItems],
     };
 
-    if (state.protocol.id && activity.id) {
-      newActivity.baseAppletId = state.protocol.appletId
-      newActivity.baseActivityId = activity.id
-    }
+    // if (state.protocol.id && activity.id) {
+    //   newActivity.baseAppletId = state.protocol.appletId
+    //   newActivity.baseActivityId = activity.id
+    // }
 
     activities.push(newActivity);
   },
@@ -272,5 +272,9 @@ export default {
 
   setVersions (state, versions) {
     state.versions = versions;
+  },
+
+  restoreCacheData (state, data) {
+    state = data;
   }
 }

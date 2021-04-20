@@ -198,11 +198,11 @@ correctAnswer| Indicates (by string) a correct answer in a free text item. In or
 
 ### SubScaleScoring
 
-The results of the subscale scores in an activity and applet
+Represents list of sub scales in an activity and applet
 
 **Name**|**Description**|**URI**
 -----|-----|-----
-lookupTable|  |http://schema.repronim.org/lookupTable
+lookupTable| Array of objects which contains tScore, rawScore, age and sex. |http://schema.repronim.org/lookupTable
 tScore|  |
 rawScore|  |
 age|  |
@@ -210,20 +210,18 @@ sex|  |
 
 ### TokenPrize
 
-
-
 **Name**|**Description**|**URI**
 -----|-----|-----
-isPrize|  |http://schema.repronim.org/isPrize
-enableNegativeTokens|  |
+isPrize| Indicates (by bool) if it is a TokenPrize Activity. |http://schema.repronim.org/isPrize
+enableNegativeTokens| Indicates (by bool) if it is enabled to use negative tokens. |
 
 ### StackedItem
 
 
 **Name**|**Description**|**URI**
 -----|-----|-----
-sliderOptions|  |http://schema.repronim.org/isPrize
-itemList|  |
+itemOptions| Represents the value, score and alert texts for stacked item. |http://schema.repronim.org/isPrize
+itemList| A list of items (value, score, and alert) |
 scores|  |
 
 ### OptionalText

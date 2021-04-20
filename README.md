@@ -203,10 +203,10 @@ Represents list of sub scales in an activity and applet
 **Name**|**Description**|**URI**
 -----|-----|-----
 lookupTable| Array of objects which contains tScore, rawScore, age and sex. |http://schema.repronim.org/lookupTable
-tScore|  |
-rawScore|  |
-age|  |
-sex|  |
+tScore| A score which replaces rawScore if a name and sex in table are the same with user's |
+rawScore| A score that is calculated by adding scores for items within cumulative scoring |
+age| Expected user's age in table |
+sex| Expected user's sex in table |
 
 ### TokenPrize
 
@@ -222,7 +222,7 @@ enableNegativeTokens| Indicates (by bool) if it is enabled to use negative token
 -----|-----|-----
 itemOptions| Represents the value, score and alert texts for stacked item. |http://schema.repronim.org/isPrize
 itemList| A list of items (value, score, and alert) |
-scores|  |
+scores| An array which evaluates raw scores of each subscales |
 
 ### OptionalText
 

@@ -2,7 +2,7 @@
 import config from '../../../config';
 
 const baseImageURL = 'https://raw.githubusercontent.com/ChildMindInstitute/mindlogger-applet-builder/master/src/assets/icons/';
-export const initialProtocol = {
+export const getInitialProtocol = () => ({
   id: null,
   description: '',
   markdownData: '',
@@ -13,10 +13,10 @@ export const initialProtocol = {
   prizeActivity: null,
   activities: [],
   tokenPrizeModal: false
-};
+});
 
 export default {
-  protocol: initialProtocol,
+  protocol: getInitialProtocol(),
   baseImageURL,
   templateUpdateRequest: {
     pending: false

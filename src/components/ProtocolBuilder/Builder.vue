@@ -6,6 +6,7 @@
         @uploadProtocol="uploadProtocol"
         @updateProtocol="updateProtocol"
         @onUploadError="onUploadError"
+        @switchToLibrary="onSwitchToLibrary"
       />
       <ProtocolBuilder
         v-if="currentScreen == config.PROTOCOL_SCREEN"
@@ -128,7 +129,7 @@ export default {
     this.setCurrentActivity(-1);
 
     if (this.cacheData) {
-      const newStoreData = await this.mergeCacheStoreWithBasketData()
+      const newStoreData = await this.mergeCacheStoreWithBasketApplets()
       this.restoreCacheData(newStoreData)
     } else if (this.initialData) {
       if (!this.versions.length) {
@@ -211,13 +212,13 @@ export default {
       this.initProtocolData(initialStoreData);
     },
 
-    async mergeCacheStoreWithBasketData () {
-      const { appletBuilder, basketData } = this.cacheData;
+    async mergeCacheStoreWithBasketApplets () {
+      const { appletBuilder, basketApplets } = this.cacheData;
 
       const activityModel = new Activity();
       const itemModel = new Item();
 
-      Object.entries(basketData).map(([appletId, appletData]) => {
+      Object.entries(basketApplets).map(([appletId, appletData]) => {
         const { applet, activities, items, protocol } = appletData;
 
         Object.values(activities).forEach((act) => {
@@ -282,6 +283,10 @@ export default {
 
     onUploadError (msg) {
       this.$emit("onUploadError", msg);
+    },
+
+    onSwitchToLibrary () {
+      this.$emit("switchToLibrary", this.$store.state.appletBuilder);
     }
   }
 }

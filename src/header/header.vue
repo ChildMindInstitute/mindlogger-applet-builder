@@ -183,7 +183,7 @@
         <template v-slot:activator="{ on }">
           <v-btn
             class="mx-1"
-            @click="importLibrary"
+            @click="$emit('switchToLibrary')"
             v-on="on"
           >
             <v-icon>
@@ -486,10 +486,6 @@ export default {
           this.historyComponentKey++;
         }
       );
-    },
-
-    importLibrary () {
-      this.$emit("switchToLibrary", this.$store.state.appletBuilder);
     }
   }
 }

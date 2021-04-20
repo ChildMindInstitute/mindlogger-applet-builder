@@ -1,6 +1,7 @@
 import Protocol from '../../../models/Protocol';
 import Activity from '../../../models/Activity';
 import Item from '../../../models/Item';
+import { getInitialProtocol } from './state';
 
 const itemMutations = {
   updateItemMetaInfo (state, { index, obj }) {
@@ -238,19 +239,7 @@ export default {
   },
 
   resetProtocol (state) {
-    state.protocol = {
-      id: null,
-      description: '',
-      markdownData: '',
-      image: '',
-      name: '',
-      protocolVersion: '1.0.0',
-      valid: false,
-      prizeActivity: null,
-      activities: [],
-      tokenPrizeModal: false
-    };
-
+    state.protocol = getInitialProtocol()
     state.original = null;
   },
 

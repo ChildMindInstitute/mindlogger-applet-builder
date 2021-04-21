@@ -264,6 +264,7 @@ export default {
   },
 
   restoreCacheData (state, data) {
-    state = data;
-  }
+    state.protocol = data.protocol
+    state.original = data.original;
+ }
 }

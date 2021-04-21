@@ -239,12 +239,12 @@ export default {
             ...activityInfo,
             items: activityItems,
           });
-          activityBuilderData.index = appletBuilder.activities.length;
+          activityBuilderData.index = appletBuilder.protocol.activities.length;
           activityBuilderData.baseAppletId = appletId;
           activityBuilderData.baseActivityId = activityBuilderData.id;
           activityBuilderData.id = null;
 
-          appletBuilder.activities.push(activityBuilderData);
+          appletBuilder.protocol.activities.push(activityBuilderData);
         });
       });
 
@@ -286,7 +286,7 @@ export default {
     },
 
     onSwitchToLibrary () {
-      this.$emit("switchToLibrary", this.$store.state.appletBuilder);
+      this.$emit("switchToLibrary", JSON.parse(JSON.stringify(this.$store.state.appletBuilder)));
     }
   }
 }

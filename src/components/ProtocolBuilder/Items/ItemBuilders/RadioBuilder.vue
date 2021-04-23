@@ -286,7 +286,7 @@
           <v-checkbox
             v-model="isSkippable"
             label="Skippable Item"
-            @change="updateAllow"
+            :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
           />
         </v-col>
         <v-col
@@ -424,11 +424,12 @@ export default {
       required: true
     },
     isSkippableItem: {
-      type: Boolean,
-      default: false,
+      type: Number,
+      default: 0,
     },
     initialResponseOptions: {
       type: Object,
+      required: true
     },
     itemTemplates: {
       type: Array,
@@ -488,13 +489,23 @@ export default {
       isTokenValue,
       hasScoreValue: this.initialItemData.hasScoreValue || false,
       hasResponseAlert: this.initialItemData.hasResponseAlert || false,
-      isSkippable: this.isSkippableItem || false,
       enableNegativeTokens: this.initialItemData.enableNegativeTokens || false,
       responseOptions: this.initialResponseOptions,
       isTooltipOpen: false,
       isOptionalText: this.initialIsOptionalText,
       randomizeOptions: this.initialItemData.randomizeOptions,
     };
+  },
+
+  computed: {
+    isSkippable: {
+      get() {
+        return this.isSkippableItem === 1 || false;
+      },
+      set(value) {
+        this.$emit('updateAllow', value);
+      }
+    }
   },
 
   beforeMount() {
@@ -624,11 +635,6 @@ export default {
       }
 
       return true;
-    },
-
-    updateAllow() {
-      const allow = this.isSkippable
-      this.$emit('updateAllow', allow);
     },
 
     onUpdateResponseOptions() {

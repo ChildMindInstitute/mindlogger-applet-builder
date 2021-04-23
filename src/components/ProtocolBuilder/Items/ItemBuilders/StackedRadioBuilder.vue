@@ -91,10 +91,10 @@
                           <div
                             class="upload-from-pc"
                           >
-                            <input 
-                              class="file-input" 
-                              type="file" 
-                              accept="image/jpeg, image/png, image/bmp" 
+                            <input
+                              class="file-input"
+                              type="file"
+                              accept="image/jpeg, image/png, image/bmp"
                               @change="onChangeFile($event, option)"
                             >
                             Upload From Your computer
@@ -130,7 +130,7 @@
                 class="px-8"
               >
                 <v-row>
-                  <v-col 
+                  <v-col
                     cols="12"
                     sm="5"
                     md="4"
@@ -147,7 +147,7 @@
                 </v-row>
 
                 <v-row>
-                  <v-col 
+                  <v-col
                     cols="12"
                     sm="12"
                   >
@@ -167,8 +167,8 @@
               fab
               x-small
               color="primary"
-              @click="addOption"
               :disabled="options.length >= 3"
+              @click="addOption"
             >
               <v-icon color="white">
                 mdi-plus
@@ -251,10 +251,10 @@
                           <div
                             class="upload-from-pc"
                           >
-                            <input 
-                              class="file-input" 
-                              type="file" 
-                              accept="image/jpeg, image/png, image/bmp" 
+                            <input
+                              class="file-input"
+                              type="file"
+                              accept="image/jpeg, image/png, image/bmp"
                               @change="onChangeFile($event, item)"
                             >
                             Upload From Your computer
@@ -290,7 +290,7 @@
                 class="px-8"
               >
                 <v-row>
-                  <v-col 
+                  <v-col
                     cols="12"
                     sm="5"
                     md="4"
@@ -307,7 +307,7 @@
                 </v-row>
 
                 <v-row>
-                  <v-col 
+                  <v-col
                     cols="12"
                     sm="12"
                   >
@@ -338,7 +338,7 @@
       </v-row>
 
       <v-row>
-        <v-col 
+        <v-col
           v-if="isTokenValue"
           class="d-flex align-center"
           cols="auto"
@@ -353,7 +353,7 @@
           </v-btn>
         </v-col>
 
-        <v-col 
+        <v-col
           v-if="hasScoreValue"
           class="d-flex align-center"
           cols="auto"
@@ -368,7 +368,7 @@
           </v-btn>
         </v-col>
 
-        <v-col 
+        <v-col
           v-if="hasResponseAlert"
           class="d-flex align-center"
           cols="auto"
@@ -388,7 +388,7 @@
         class="mt-4"
       />
       <v-row>
-        <v-col 
+        <v-col
           class="d-flex align-center"
           cols="12"
           md="3"
@@ -400,7 +400,7 @@
             @change="update"
           />
         </v-col>
-        <v-col 
+        <v-col
           class="d-flex align-center"
           cols="12"
           md="3"
@@ -409,10 +409,10 @@
           <v-checkbox
             v-model="isSkippable"
             label="Skippable Item"
-            @change="updateAllow"
+            :disabled="isSkippableItem == 2"
           />
         </v-col>
-        <v-col 
+        <v-col
           class="d-flex align-center"
           cols="12"
           md="3"
@@ -563,8 +563,8 @@ export default {
       required: true
     },
     isSkippableItem: {
-      type: Boolean,
-      default: false,
+      type: Number,
+      default: 0,
     },
     responseOptions: {
       type: Object,
@@ -657,13 +657,23 @@ export default {
       hasScoreValue: this.initialItemData.hasScoreValue || false,
       hasResponseAlert: this.initialItemData.hasResponseAlert || false,
       imgUploader,
-      isSkippable: this.isSkippableItem || false,
       values,
       scores,
       alerts,
       valueDialog: false,
       scoreDialog: false,
     };
+  },
+
+  computed: {
+    isSkippable: {
+      get() {
+        return this.isSkippableItem === 1 || false;
+      },
+      set(value) {
+        this.$emit('updateAllow', value);
+      }
+    }
   },
 
   beforeMount() {
@@ -790,11 +800,6 @@ export default {
       }
 
       return true;
-    },
-
-    updateAllow() {
-      const allow = this.isSkippable
-      this.$emit('updateAllow', allow);
     },
 
     onAddImageUrl(option) {

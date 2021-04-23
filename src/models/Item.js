@@ -82,13 +82,13 @@ export default class Item {
 
       if (slider.minValueImg && i === 1)
         obj["schema:image"] = slider.minValueImg;
-      
+
       if(slider.maxValueImg && i == slider.maxSliderTick)
         obj["schema:image"] = slider.maxValueImg;
 
       choices.push(obj);
     }
-    
+
     return choices;
   }
 
@@ -165,6 +165,7 @@ export default class Item {
         "enableNegativeTokens": this.ref.options.enableNegativeTokens,
         "scoring": this.ref.options.hasScoreValue,
         "responseAlert": this.ref.options.hasResponseAlert,
+        "randomizeOptions": this.ref.options.randomizeOptions,
         "multipleChoice": this.ref.options.isMultipleChoice,
         "schema:minValue": 1,
         "schema:maxValue": choices.length,
@@ -324,7 +325,7 @@ export default class Item {
     const schema = this.getCompressedSchema()
     const itemObj = {
       name: this.ref.name,
-      question: 
+      question:
         this.ref.inputType !== 'markdownMessage'
         ? this.ref.question.image ? `\r\n\r\n![''](${this.ref.question.image} =250x250)\r\n\r\n${this.ref.question.text}` : this.ref.question.text
         : this.ref.markdownText,
@@ -465,7 +466,7 @@ export default class Item {
       return updates;
     }
 
-    const optionUpdate = name => field => 
+    const optionUpdate = name => field =>
           `${name} was ${_.get(newValue, field) ? 'enabled' : 'disabled'}`;
     const valueUpdate = name => field =>
           `${name} was updated to ${_.get(newValue, field)}`
@@ -510,31 +511,31 @@ export default class Item {
         updated: (field) => `Item description was changed to ${_.get(newValue, field)}`,
         removed: (field) => `Item description was removed`,
         inserted: (field) => `Item description was set (${_.get(newValue, field)})`
-      }, 
+      },
       'question': {
-        updated: (field) => 
+        updated: (field) =>
           _.get(newValue, 'ui.inputType') !== 'markdownMessage'
             ? `Item Question was changed to ${this.getQuesionInfo(_.get(newValue, field)).text}`
             : `Markdown message was updated`,
         removed: (field) => `Item Question was removed`,
-        inserted: (field) => 
+        inserted: (field) =>
           _.get(newValue, 'ui.inputType') !== 'markdownMessage'
             ? `Item Question was set to ${this.getQuesionInfo(_.get(newValue, field)).text}`
             : `Markdown message was inserted`,
       },
       'correctAnswer': {
         updated: (field) => `Correct answer was changed`
-      }, 
+      },
       'isOptionalText': {
         updated: optionUpdate('Optional text option'),
-      }, 
+      },
       'ui.inputType': {
         updated: valueUpdate('Input type'),
         inserted: valueInsert('Input type'),
       },
       'ui.allow': {
         updated: allowListUpdate,
-      },    
+      },
       'options.isMultipleChoice': {
         updated: optionUpdate('Multiple choice option'),
       },
@@ -661,7 +662,7 @@ export default class Item {
       } else {
         logs = logTemplates[key]['updated'](key);
       }
-      
+
       if (!Array.isArray(logs)) {
         logs = [logs];
       }
@@ -714,14 +715,16 @@ export default class Item {
 
       let multipleChoice =
         _.get(responseOptions, [0, 'reprolib:terms/multipleChoice']);
-      let valueType = 
+      let valueType =
         _.get(responseOptions, [0, 'reprolib:terms/valueType']);
 
-      let enableNegativeTokens = 
+      let enableNegativeTokens =
         _.get(responseOptions, [0, 'reprolib:terms/enableNegativeTokens']);
 
-      let scoring = 
+      let scoring =
         _.get(responseOptions, [0, 'reprolib:terms/scoring']);
+      let randomizeOptions =
+        _.get(responseOptions, [0, 'reprolib:terms/randomizeOptions']);
 
       let continousSlider =
         _.get(responseOptions, [0, 'reprolib:terms/continousSlider']);
@@ -732,16 +735,16 @@ export default class Item {
       let responseAlert =
         _.get(responseOptions, [0, 'reprolib:terms/responseAlert']);
 
-      let itemOptions = 
+      let itemOptions =
         _.get(responseOptions, [0, 'reprolib:terms/itemOptions'], []);
 
-      let itemList = 
+      let itemList =
         _.get(responseOptions, [0, 'reprolib:terms/itemList'], []);
-      let options = 
+      let options =
         _.get(responseOptions, [0, 'reprolib:terms/options'], []);
 
       if (isOptionalTextRequired) {
-        itemContent.responseOptions.isOptionalTextRequired = 
+        itemContent.responseOptions.isOptionalTextRequired =
           _.get(isOptionalTextRequired, [0, '@value']);
       }
 
@@ -754,22 +757,27 @@ export default class Item {
       }
 
       if (scoring) {
-        itemContent.scoring = 
+        itemContent.scoring =
           _.get(scoring, [0, '@value']);
       }
 
+      if (randomizeOptions) {
+        itemContent.randomizeOptions =
+          _.get(randomizeOptions, [0, '@value']);
+      }
+
       if (continousSlider) {
-        itemContent.continousSlider = 
+        itemContent.continousSlider =
           continousSlider[0] && continousSlider[0]['@value'];
       }
 
       if (showTickMarks) {
-        itemContent.showTickMarks = 
+        itemContent.showTickMarks =
           showTickMarks[0] && showTickMarks[0]['@value'];
       }
 
       if (responseAlert) {
-        itemContent.responseAlert = 
+        itemContent.responseAlert =
           _.get(responseAlert, [0, '@value']);
       }
 
@@ -784,6 +792,7 @@ export default class Item {
           enableNegativeTokens: itemContent.enableNegativeTokens || false,
           hasScoreValue: itemContent.scoring || false,
           hasResponseAlert: itemContent.responseAlert || false,
+          randomizeOptions: itemContent.randomizeOptions || false,
           options:
             responseOptions[0] &&
             responseOptions[0]['schema:itemListElement'] &&
@@ -797,7 +806,7 @@ export default class Item {
                 const description = itemListElement["schema:description"];
 
                 return {
-                  image: 
+                  image:
                     typeof image === 'string' && image ||
                     Array.isArray(image) && image[0] && image[0]['@value'].toString(),
                   name:
@@ -822,7 +831,7 @@ export default class Item {
         let parsedItemOptions = [];
         for (let i = 0; i < itemList.length; i++) {
           const data = [];
-  
+
           for (let j = 0; j < options.length; j++) {
             data.push({
               score: _.get(itemOptions[options.length*i + j], ['schema:score', 0, '@value'], ''),
@@ -830,7 +839,7 @@ export default class Item {
               alert: _.get(itemOptions[options.length*i + j], ['schema:alert', 0, '@value'], '')
             })
           }
-  
+
           parsedItemOptions.push(data);
         }
 
@@ -843,7 +852,7 @@ export default class Item {
 
             return {
               name: _.get(item, ['schema:name', 0, '@value'], ''),
-              image: 
+              image:
                 typeof image === 'string' && image ||
                 Array.isArray(image) && image[0] && image[0]['@value'].toString(),
               description: _.get(item, ['schema:description', 0, '@value'], '')
@@ -854,7 +863,7 @@ export default class Item {
 
             return {
               name: _.get(option, ['schema:name', 0, '@value'], ''),
-              image: 
+              image:
                 typeof image === 'string' && image ||
                 Array.isArray(image) && image[0] && image[0]['@value'].toString(),
               description: _.get(option, ['schema:description', 0, '@value'], '')
@@ -941,7 +950,7 @@ export default class Item {
                 return Array.isArray(score) && score[0] && score[0]['@value']
               }
             ),
-          alerts: itemContent.responseAlert && responseOptions[0] && 
+          alerts: itemContent.responseAlert && responseOptions[0] &&
             responseOptions[0]['schema:itemListElement'] &&
             responseOptions[0]['schema:itemListElement'].map(
               (itemListElement) => {
@@ -956,7 +965,7 @@ export default class Item {
           hasScoreValue: itemContent.scoring || false,
           hasResponseAlert: itemContent.responseAlert || false,
           sliderOptions: _.get(responseOptions, [0, 'reprolib:terms/sliderOptions'], []).map(slider => ({
-            sliderLabel: 
+            sliderLabel:
               _.get(slider, ['schema:sliderLabel', 0, '@value'], ''),
             maxValue:
               _.get(slider, ['schema:maxValue', 0, '@value']),
@@ -1020,16 +1029,16 @@ export default class Item {
         const name = _.get(option, [NAME, 0, '@value']);
         const value = _.get(option, [VALUE, 0, '@value']);
         const contentUrl = option[CONTENT_URL];
-        
+
         if(name)
           modifiedOption[NAME] = name;
-        
+
         if(value)
           modifiedOption[VALUE] = value;
-          
+
         if(contentUrl)
           modifiedOption[CONTENT_URL] = contentUrl;
-  
+
         if(!_.isEmpty(modifiedOption))
           itemContent.inputOptions.push(modifiedOption);
       });
@@ -1051,13 +1060,13 @@ export default class Item {
         const name = _.get(mediaObj, [0, NAME, 0, '@value']);
         const transcript = _.get(mediaObj, [0, TRANSCRIPT, 0, '@value']);
         const contentUrl = _.get(mediaObj, [0, CONTENT_URL]);
-        
+
         if(name)
           modifiedmMediaObj[NAME] = name;
-        
+
         if(transcript)
           modifiedmMediaObj[TRANSCRIPT] = transcript;
-          
+
         if(contentUrl) {
           modifiedmMediaObj[CONTENT_URL] = contentUrl;
           itemContent.media[contentUrl] = modifiedmMediaObj;
@@ -1115,7 +1124,7 @@ export default class Item {
     if(requiredValue)
       modifiedResponseOptions['requiredValue'] = requiredValue[0]['@value'];
 
-    const isOptionalTextRequired = 
+    const isOptionalTextRequired =
       responseOptions['reprolib:terms/isOptionalTextRequired'];
     if(isOptionalTextRequired)
       modifiedResponseOptions['isOptionalTextRequired'] = isOptionalTextRequired[0]['@value'];

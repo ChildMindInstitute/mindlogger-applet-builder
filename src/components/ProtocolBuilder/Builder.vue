@@ -134,21 +134,18 @@ export default {
     this.setCurrentScreen(config.PROTOCOL_SCREEN);
     this.setCurrentActivity(-1);
 
-    if (this.initialData || this.cacheData) {
+    let initialStoreData = await this.fillStoreWithAppletData();
+    if (this.basketApplets) {
+      await this.mergeStoreDataWithBasketApplets(initialStoreData, this.basketApplets);
+    }
+    this.initProtocolData(initialStoreData);
+
+    if (this.initialData || (this.cacheData && this.cacheData.original)) {
       if (!this.versions.length) {
         this.$emit('setLoading', true);
       }
 
-      const initialStoreData = await this.fillStoreWithAppletData();
-
-      if (this.basketApplets) {
-        await this.mergeStoreDataWithBasketApplets(initialStoreData, this.basketApplets);
-      }
-
-      this.initProtocolData(initialStoreData);
-
-      const original = this.cacheData ?
-        this.cacheData.original : await this.formattedProtocol();
+      const original = this.initialData ? await this.formattedProtocol() : this.cacheData.original;
 
       if (!this.versions.length) {
         /** upload first version */
@@ -165,12 +162,6 @@ export default {
       }
 
       this.setFormattedOriginalProtocol(JSON.parse(JSON.stringify(original)));
-    } else {
-      const initialStoreData = getInitialProtocol();
-      if (this.basketApplets) {
-        await this.mergeStoreDataWithBasketApplets(initialStoreData, this.basketApplets);
-      }
-      this.initProtocolData(initialStoreData);
     }
 
     this.$emit("setLoading", false);
@@ -194,7 +185,7 @@ export default {
       'formattedProtocol'
     ]),
     async fillStoreWithAppletData () {
-      let initialStoreData;
+      let initialStoreData = null;
 
       if (this.initialData) {
         const { applet, activities, items, protocol } = this.initialData;
@@ -229,6 +220,9 @@ export default {
         initialStoreData = JSON.parse(JSON.stringify(this.cacheData.protocol));
       }
 
+      if (!initialStoreData) {
+        return getInitialProtocol();
+      }
       return initialStoreData;
     },
 

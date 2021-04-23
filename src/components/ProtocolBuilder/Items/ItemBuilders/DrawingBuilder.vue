@@ -23,6 +23,12 @@
       @onRemove="onRemoveDrawImage('Background')"
       @onNotify="$emit('loading', false); $emit('notify', $event);"
     />
+
+    <v-checkbox
+      v-model="isSkippable"
+      label="Skippable Item"
+      :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
+    />
     <OptionalItemText
       :colClasses="'d-flex align-center'"
       :cols="12"
@@ -58,6 +64,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    isSkippableItem: {
+      type: Number,
+      default: 0,
+    },
   },
   data: function () {
 
@@ -82,12 +92,22 @@ export default {
       isOptionalText: this.initialIsOptionalText,
     }
   },
+  computed: {
+    isSkippable: {
+      get() {
+        return this.isSkippableItem === 1 || false;
+      },
+      set(value) {
+        this.$emit('updateAllow', value);
+      }
+    }
+  },
   methods: {
 
     onUpdateResponseOptions() {
       this.$emit('updateResponseOptions', this.responseOptions);
     },
-    
+
     onUpdateInputOptions() {
       this.$emit('updateInputOptions', this.inputOptions);
     },

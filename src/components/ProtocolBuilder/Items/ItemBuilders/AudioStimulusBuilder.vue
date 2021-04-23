@@ -1,6 +1,5 @@
 <template>
   <v-form ref="form">
-
     <v-text-field
       v-model="mediaObj['schema:transcript']"
       label="Media transcript"
@@ -33,7 +32,7 @@
     <v-checkbox
       v-model="isSkippable"
       label="Skippable Item"
-      @change="onUpdateAllow"
+      :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
     />
 
     <v-checkbox
@@ -48,8 +47,16 @@
       width="420"
     >
       <v-card>
-        <v-card-title class="headline grey lighten-2" primary-title>
-          <v-icon left large>mdi-record-circle-outline</v-icon>
+        <v-card-title
+          class="headline grey lighten-2"
+          primary-title
+        >
+          <v-icon
+            left
+            large
+          >
+            mdi-record-circle-outline
+          </v-icon>
           Record Audio
         </v-card-title>
         <v-card-text :style="{ 'opacity': isRecordProcessVisible ? '1' : '0' }">
@@ -62,12 +69,12 @@
           <AudioPlayer
             v-if="recordedAudioData"
             class="audio-player"
-            :src="recordedAudioData.url" 
+            :src="recordedAudioData.url"
           />
         </v-card-text>
         <v-divider />
         <v-card-actions>
-          <v-btn 
+          <v-btn
             outlined
             color="primary"
             @click="isRecordProcess = false"
@@ -75,7 +82,7 @@
             Cancel
           </v-btn>
           <v-spacer />
-          <v-btn 
+          <v-btn
             color="primary"
             :disabled="!recordedAudioData"
             @click="isRecordProcess = false; onUploadRecordedAudio();"
@@ -86,7 +93,6 @@
       </v-card>
     </v-dialog>
     <!-- Audio Record Popup -->
-    
   </v-form>
 </template>
 
@@ -112,16 +118,16 @@ export default {
       type: Object,
       default: new Object(),
     },
-    isItemSkippable: {
-      type: Boolean,
-      default: false,
+    isSkippableItem: {
+      type: Number,
+      default: 0,
     },
   },
   data: function() {
 
     const inputOptions = this.initialItemInputOptions;
     const media = this.initialItemMedia;
-    
+
     let asInputOption = {
       '@type': "schema:URL",
       'schema:name': 'stimulus',
@@ -156,18 +162,26 @@ export default {
       replayInputOption,
 
       mediaObj,
-      
+
       audio: asInputOption['schema:value'],
 
       isRecordProcess: false,
       isRecordProcessVisible: false,
       recordedAudioData: null,
 
-      isSkippable: this.isSkippableItem,
-
       loading: false,
       notify: {},
     };
+  },
+  computed: {
+    isSkippable: {
+      get() {
+        return this.isSkippableItem === 1 || false;
+      },
+      set(value) {
+        this.$emit('updateAllow', value);
+      }
+    }
   },
   mounted() {
     this.onValidate();
@@ -192,10 +206,6 @@ export default {
       else return mediaSchema;
     },
 
-    onUpdateAllow() {
-      this.$emit('updateAllow', this.isSkippable);
-    },
-
     onUpdateInputOptions() {
       this.$emit('updateInputOptions', this.inputOptions);
     },
@@ -218,7 +228,7 @@ export default {
       this.asInputOption['schema:value'] = url;
       this.asInputOption['schema:contentUrl'] = url;
       this.audio = url;
-      
+
       this.$emit('notify', {
         type: 'success',
         message: 'Audio from URL successfully added to AudioStimulus Item.',
@@ -243,7 +253,7 @@ export default {
           message: 'Audio successfully added to AudioStimulus Item.',
           duration: 3000,
         });
-        
+
         this.onUpdateInputOptions();
         this.onUpdateMedia();
         this.onValidate();
@@ -260,7 +270,7 @@ export default {
       // this function for plugin customization
       this.isRecordProcess = true;
 
-      setTimeout(() => { 
+      setTimeout(() => {
         this.isRecordProcessVisible = true;
 
         const audioRecorderEl = document.querySelector('.audio-recorder');

@@ -704,7 +704,11 @@ export default {
         }
       });
 
-      this.removeDialog = true;
+      if (this.itemConditionals.length) {
+        this.removeDialog = true;
+      } else {
+        this.removeConditionals();
+      }
     },
 
     removeConditionals () {

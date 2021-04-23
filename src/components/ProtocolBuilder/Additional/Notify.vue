@@ -12,7 +12,7 @@
       :type="notify.type"
       elevation="2"
     >
-      <h3>{{notify.message}}</h3>
+      <h3>{{ notify.message }}</h3>
     </v-alert>
   </v-dialog>
 </template>

@@ -37,7 +37,7 @@
     <v-checkbox
       v-model="isSkippable"
       label="Skippable Item"
-      @change="onUpdateSkipOption"
+      :disabled="isSkippableItem == 2"
     />
   </v-form>
 </template>
@@ -55,12 +55,11 @@ export default {
       required: true,
     },
     isSkippableItem: {
-      type: Boolean,
-      default: false,
+      type: Number,
+      default: 0,
     },
   },
   data: function () {
-    
     let responseOptions = {
       "schema:minValue": 1,
       "schema:maxValue": 3000,
@@ -74,7 +73,6 @@ export default {
 
     return {
       responseOptions,
-      isSkippable: this.isSkippableItem || false,
       valid: true,
       minValueRules: [
         v => (v > 0 && v % 1 === 0) || 'Min response length must be a positive integer',
@@ -84,15 +82,20 @@ export default {
       ],
     };
   },
+  computed: {
+    isSkippable: {
+      get() {
+        return this.isSkippableItem === 1 || false;
+      },
+      set(value) {
+        this.$emit('updateAllow', value);
+      }
+    }
+  },
   methods: {
-
     onUpdateResponseOptions() {
       this.$emit('checkValidation', this.valid);
       this.$emit('updateResponseOptions', this.responseOptions);
-    },
-
-    onUpdateSkipOption() {
-      this.$emit('updateAllow', this.isSkippable);
     },
 
     onAddAudioImageFromUrl(url) {

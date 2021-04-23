@@ -16,7 +16,7 @@
         <span
           :class="current.valid ? 'blue--text' : 'yellow-text'"
         >
-          OF THE "IF" RULES ARE MATCHED, SHOW 
+          OF THE "IF" RULES ARE MATCHED, SHOW
         </span>
         <span class="font-weight-bold">{{ showValue || 'XXX' }} </span>
       </span>
@@ -72,14 +72,14 @@
         ref="form"
         lazy-validation
       >
-        <div 
-          class="d-flex align-baseline"
+        <div
           v-for="(condition, index) in conditions"
           :key="index"
+          class="d-flex align-baseline"
         >
           <v-select
-            class="ds-select-box mb-3"
             v-model="condition.ifValue"
+            class="ds-select-box mb-3"
             item-text="name"
             :items="filteredItems"
             return-object
@@ -87,8 +87,8 @@
             @change="onUpdate"
           />
           <v-select
-            class="ds-select-box"
             v-model="condition.stateValue"
+            class="ds-select-box"
             name="name"
             :items="stateItems(condition.ifValue)"
             item-text="name"
@@ -99,8 +99,8 @@
 
           <template v-if="condition.ifValue && condition.ifValue.inputType === 'slider'">
             <v-text-field
-              class="ds-select-box"
               v-model="condition.minValue"
+              class="ds-select-box"
               label="Min value"
               :min="minSliderTick(condition.ifValue)"
               :max="maxSliderTick(condition.ifValue)"
@@ -113,8 +113,8 @@
                 condition.stateValue && (condition.stateValue.name === 'BETWEEN' ||
                   condition.stateValue.name === 'OUTSIDE OF')
               "
-              class="ds-select-box"
               v-model="condition.maxValue"
+              class="ds-select-box"
               label="Max value"
               :min="minSliderTick(condition.ifValue)"
               :max="maxSliderTick(condition.ifValue)"
@@ -124,8 +124,8 @@
           </template>
           <template v-else>
             <v-select
-              class="ds-select-box"
               v-model="condition.answerValue"
+              class="ds-select-box"
               item-text="name"
               :items="answerItems(condition.ifValue)"
               label="Answer"
@@ -146,11 +146,11 @@
         <v-row no-gutters>
           <v-col class="d-flex ds-panel align-self-center align-baseline justify-center mt-3">
             <div class="text-uppercase h6">
-              If 
+              If
             </div>
             <v-select
-              class="ds-opers ds-select-box"
               v-model="operation"
+              class="ds-opers ds-select-box"
               :items="['ALL', 'ANY']"
               outlined
               dense
@@ -161,8 +161,8 @@
             </div>
 
             <v-select
-              class="ds-select-box ds-show-value"
               v-model="showValue"
+              class="ds-select-box ds-show-value"
               item-text="name"
               :items="items"
               dense
@@ -195,7 +195,7 @@
   .ds-show-value {
     max-width: 200px;
   }
-  
+
   .ds-opers {
     max-width: 120px;
   }
@@ -206,7 +206,7 @@
     color: white;
     letter-spacing: 1px;
   }
-  
+
 </style>
 
 <script>
@@ -245,11 +245,6 @@ export default {
       }
     }
   },
-  beforeMount () {
-    if (!this.conditions.length) {
-      this.conditions.push({ ...this.initialCondition });
-    }
-  },
   computed: {
     config () {
       return config;
@@ -265,10 +260,15 @@ export default {
     },
 
     filteredItems () {
-      return this.items.filter(item => 
+      return this.items.filter(item =>
         (item.inputType == 'radio' || item.inputType == 'checkbox' || item.inputType == 'slider' || item.inputType == 'prize') && item.allowEdit
       );
     },
+  },
+  beforeMount () {
+    if (!this.conditions.length) {
+      this.conditions.push({ ...this.initialCondition });
+    }
   },
   methods: {
     ...mapMutations(config.MODULE_NAME,
@@ -321,8 +321,8 @@ export default {
       for(const condition of this.conditions) {
         if (!condition.ifValue || !condition.stateValue) return false;
         if (condition.ifValue.inputType === 'slider') {
-          if ( (condition.stateValue.name === 'BETWEEN' 
-            || condition.stateValue.name === 'OUTSIDE OF') 
+          if ( (condition.stateValue.name === 'BETWEEN'
+            || condition.stateValue.name === 'OUTSIDE OF')
             && (!condition.maxValue && condition.maxValue !== 0) ) {
             return false;
           }

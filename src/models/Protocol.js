@@ -288,6 +288,7 @@ export default class Protocol {
     const protocolInfo = {
       id: protocol._id.split('/')[1],
       name: _.get(prefLabel, [0, '@value'], 'applet'),
+      appletId: applet['_id'].split("/").pop(),
       image: applet['schema:image'],
       description: applet['schema:description'][0]['@value'],
       protocolVersion: _.get(applet, 'schema:schemaVersion[0].@value', this.protocolVersion)

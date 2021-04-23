@@ -371,6 +371,8 @@ export default class Activity {
       scoringLogic: {},
       'repronim:timeUnit': 'yearmonthdate',
       isPrize: this.ref.isPrize,
+      baseAppletId: this.ref.baseAppletId,
+      baseActivityId: this.ref.baseActivityId,
       ui: {
         order: itemOrder,
         shuffle: this.ref.shuffleActivityOrder,

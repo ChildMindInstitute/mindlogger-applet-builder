@@ -31,13 +31,15 @@
               <v-expansion-panel-content>
                 <div class="upload-from-pc-wrapper">
                   <input 
-                    class="file-input" 
-                    ref="fileInput"
+                    ref="fileInput" 
+                    class="file-input"
                     type="file" 
                     accept="image/jpeg, image/png, image/bmp" 
                     @change="onChangeFile"
                   >
-                  <v-btn @click="$refs.fileInput.click()">Your computer</v-btn>
+                  <v-btn @click="$refs.fileInput.click()">
+                    Your computer
+                  </v-btn>
                 </div>
                 <v-btn
                   class="mt-4"

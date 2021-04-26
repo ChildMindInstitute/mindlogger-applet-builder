@@ -203,7 +203,7 @@
         v-if="item.inputType === 'radio' || item.inputType === 'checkbox'"
         :key="`${baseKey}-radio`"
         :is-multiple-choice="item.inputType === 'checkbox'"
-        :is-skippable-item="item.allow"
+        :is-skippable-item="skippable"
         :initial-response-options="item.responseOptions"
         :initial-item-data="item.options"
         :item-templates="itemTemplates"
@@ -224,7 +224,7 @@
         v-if="item.inputType === 'stackedRadio' || item.inputType === 'stackedCheckbox'"
         :key="`${baseKey}-stackedRadio`"
         :is-multiple-choice="item.inputType === 'stackedCheckbox'"
-        :is-skippable-item="item.allow"
+        :is-skippable-item="skippable"
         :response-options="item.responseOptions"
         :initial-item-data="item.options"
         :item-templates="itemTemplates"
@@ -236,7 +236,7 @@
       <TextBuilder
         v-if="item.inputType === 'text'"
         :key="`${baseKey}-text`"
-        :is-skippable-item="item.allow"
+        :is-skippable-item="skippable"
         :initial-item-data="item.options"
         :response-option="item.responseOptions"
         :initial-answer="item.correctAnswer"
@@ -248,7 +248,7 @@
       <SliderBuilder
         v-if="item.inputType === 'slider'"
         :key="`${baseKey}-slider`"
-        :is-skippable-item="item.allow"
+        :is-skippable-item="skippable"
         :initial-item-data="item.options"
         :initial-response-options="item.responseOptions"
         :initial-is-optional-text="item.isOptionalText"
@@ -263,7 +263,7 @@
       <StackedSliderBuilder
         v-if="item.inputType === 'stackedSlider'"
         :key="`${baseKey}-stackedSlider`"
-        :is-skippable-item="item.allow"
+        :is-skippable-item="skippable"
         :initial-item-data="item.options"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
@@ -276,8 +276,10 @@
         :key="`${baseKey}-video`"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
+        :is-skippable-item="skippable"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
+        @updateAllow="updateAllow"
       />
 
       <PhotoBuilder
@@ -285,8 +287,10 @@
         :key="`${baseKey}-photo`"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
+        :is-skippable-item="skippable"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
+        @updateAllow="updateAllow"
       />
 
       <TimeRangeBuilder
@@ -294,8 +298,10 @@
         :key="`${baseKey}-timeRange`"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
+        :is-skippable-item="skippable"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
+        @updateAllow="updateAllow"
       />
 
       <DateBuilder
@@ -303,8 +309,10 @@
         :key="`${baseKey}-date`"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
+        :is-skippable-item="skippable"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
+        @updateAllow="updateAllow"
       />
 
       <DrawingBuilder
@@ -313,9 +321,11 @@
         :initial-item-response-options="item.responseOptions"
         :initial-item-input-options="item.inputOptions"
         :initial-is-optional-text="item.isOptionalText"
+        :is-skippable-item="skippable"
         @updateResponseOptions="updateResponseOptions"
         @updateInputOptions="updateInputOptions"
         @updateOptionalText="updateOptionalText"
+        @updateAllow="updateAllow"
         @loading="loading = $event"
         @notify="notify = $event"
       />
@@ -323,7 +333,7 @@
       <AudioRecordBuilder
         v-if="item.inputType === 'audioRecord'"
         :key="`${baseKey}-audioRecord`"
-        :is-skippable-item="item.allow"
+        :is-skippable-item="skippable"
         :initial-item-data="item.options"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
@@ -338,7 +348,7 @@
         :key="`${baseKey}-audioImageRecord`"
         :initial-item-data="item.options"
         :initial-item-response-options="item.responseOptions"
-        :is-skippable-item="item.allow"
+        :is-skippable-item="skippable"
         @checkValidation="valid = $event"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
@@ -351,16 +361,18 @@
         :key="`${baseKey}-geolocation`"
         :initial-item-response-options="item.responseOptions"
         :initial-is-optional-text="item.isOptionalText"
+        :is-skippable-item="skippable"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @loading="loading = $event"
         @notify="notify = $event"
+        @updateAllow="updateAllow"
       />
 
       <AudioStimulusBuilder
         v-if="item.inputType === 'audioStimulus'"
         :key="`${baseKey}-audioStimulus`"
-        :is-skippable-item="item.allow"
+        :is-skippable-item="skippable"
         :initial-item-input-options="item.inputOptions"
         :initial-item-media="item.media"
         :initial-item-data="item.options"
@@ -379,19 +391,18 @@
         :initial-item-data="item"
         @updateCumulativeScore="updateCumulativeScore"
       />
-      
     </v-form>
 
     <div class="px-2">
       <div class="item-quiz">
         <img
           width="15"
-          :src="itemInputTypes.find(({ text }) => text === item.inputType).icon" 
+          :src="itemInputTypes.find(({ text }) => text === item.inputType).icon"
         >
-        
-        <span 
-          class="ml-2"
+
+        <span
           v-if="item.inputType !== 'cumulativeScore' && item.inputType !== 'markdownMessage'"
+          class="ml-2"
         >
           {{ largeText }}
         </span>
@@ -436,7 +447,7 @@
           </v-list>
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
+          <v-spacer />
           <v-btn
             color="primary"
             text
@@ -454,7 +465,6 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-
   </v-card>
 </template>
 
@@ -644,6 +654,13 @@ export default {
 
     item () {
       return this.currentActivity.items[this.itemIndex];
+    },
+    skippable() {
+      if (this.currentActivity.isSkippable) {
+        return 2;
+      }
+
+      return Number(this.item.allow);
     }
   },
   watch: {
@@ -705,7 +722,11 @@ export default {
         }
       });
 
-      this.removeDialog = true;
+      if (this.itemConditionals.length) {
+        this.removeDialog = true;
+      } else {
+        this.removeConditionals();
+      }
     },
 
     removeConditionals () {

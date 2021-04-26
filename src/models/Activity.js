@@ -369,6 +369,8 @@ export default class Activity {
       scoringLogic: {},
       'repronim:timeUnit': 'yearmonthdate',
       isPrize: this.ref.isPrize,
+      baseAppletId: this.ref.baseAppletId,
+      baseActivityId: this.ref.baseActivityId,
       ui: {
         order: itemOrder,
         shuffle: this.ref.shuffleActivityOrder,
@@ -412,8 +414,9 @@ export default class Activity {
     };
   }
 
-  parseCumulative () {
-    const item = this.ref.items.find(item => item.ui.inputType === 'cumulativeScore');
+  parseCumulative() {
+    console.log('item--------', this.ref.items);
+    const item = this.ref.items.find(item => item.inputType === 'cumulativeScore');
 
     let compute = [], messages = [];
 

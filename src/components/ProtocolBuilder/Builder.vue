@@ -6,6 +6,7 @@
         @uploadProtocol="uploadProtocol"
         @updateProtocol="updateProtocol"
         @onUploadError="onUploadError"
+        @switchToLibrary="onSwitchToLibrary"
       />
       <ProtocolBuilder
         v-if="currentScreen == config.PROTOCOL_SCREEN"
@@ -82,7 +83,12 @@ export default {
       type: Function,
       required: false,
       default: null,
-    }
+    },
+    cacheData: {
+      type: Object,
+      required: false,
+      default: null,
+    },
   },
   computed: {
     ...mapGetters(config.MODULE_NAME, [
@@ -122,7 +128,10 @@ export default {
     this.setCurrentScreen(config.PROTOCOL_SCREEN);
     this.setCurrentActivity(-1);
 
-    if (this.initialData) {
+    if (this.cacheData) {
+      const newStoreData = await this.mergeCacheStoreWithBasketApplets()
+      this.restoreCacheData(newStoreData)
+    } else if (this.initialData) {
       if (!this.versions.length) {
         this.$emit('setLoading', true);
       }
@@ -166,6 +175,7 @@ export default {
       'updateTemplateRequestStatus',
       'setVersions',
       'resetProtocol',
+      'restoreCacheData',
     ]),
     ...mapGetters(config.MODULE_NAME, [
       'formattedProtocol'
@@ -202,6 +212,45 @@ export default {
       this.initProtocolData(initialStoreData);
     },
 
+    async mergeCacheStoreWithBasketApplets () {
+      const { appletBuilder, basketApplets } = this.cacheData;
+
+      const activityModel = new Activity();
+      const itemModel = new Item();
+
+      Object.entries(basketApplets).map(([appletId, appletData]) => {
+        const { applet, activities, items, protocol } = appletData;
+
+        Object.values(activities).forEach((act) => {
+          if (act.isPrize) {
+            return;
+          }
+
+          const activityInfo = Activity.parseJSONLD(act)
+          const activityItems = activityInfo.orderList.filter(key => items[key]).map((key) => {
+            const itemData = itemModel.getItemBuilderData(Item.parseJSONLD(items[key]));
+            itemData.baseAppletId = appletId;
+            itemData.baseItemId = itemData.id;
+            itemData.id = null;
+            return itemData;
+          });
+
+          const activityBuilderData = activityModel.getActivityBuilderData({
+            ...activityInfo,
+            items: activityItems,
+          });
+          activityBuilderData.index = appletBuilder.protocol.activities.length;
+          activityBuilderData.baseAppletId = appletId;
+          activityBuilderData.baseActivityId = activityBuilderData.id;
+          activityBuilderData.id = null;
+
+          appletBuilder.protocol.activities.push(activityBuilderData);
+        });
+      });
+
+      return appletBuilder;
+    },
+
     onClosePrizeActivityModal (response) {
       const prizeIndex = this.activities.findIndex(activity => activity.isPrize);
 
@@ -234,6 +283,10 @@ export default {
 
     onUploadError (msg) {
       this.$emit("onUploadError", msg);
+    },
+
+    onSwitchToLibrary () {
+      this.$emit("switchToLibrary", JSON.parse(JSON.stringify(this.$store.state.appletBuilder)));
     }
   }
 }

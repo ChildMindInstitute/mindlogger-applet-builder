@@ -1,12 +1,27 @@
 <template>
-  <v-dialog v-model="show" persistent width="800">
+  <v-dialog
+    v-model="show"
+    persistent
+    width="800"
+  >
     <v-card>
-      <v-card-title class="headline grey lighten-2" primary-title>
-        <v-icon left large>mdi-link-variant-plus</v-icon>
+      <v-card-title
+        class="headline grey lighten-2"
+        primary-title
+      >
+        <v-icon
+          left
+          large
+        >
+          mdi-link-variant-plus
+        </v-icon>
         Add from URL
       </v-card-title>
       <v-card-text>
-        <v-text-field label="URL" v-model="url" />
+        <v-text-field
+          v-model="url"
+          label="URL"
+        />
       </v-card-text>
       <v-divider />
       <v-card-actions>

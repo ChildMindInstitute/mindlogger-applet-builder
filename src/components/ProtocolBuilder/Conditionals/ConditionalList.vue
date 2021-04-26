@@ -7,8 +7,8 @@
     <div>
       <ConditionalBuilder
         v-for="(conditional) in conditionals"
-        class="ma-4"
         :key="conditional.id"
+        class="ma-4"
         :conditional-index="conditionals.findIndex(({ id }) => id === conditional.id)"
         :current="conditional"
       />

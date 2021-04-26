@@ -336,6 +336,7 @@
       <AudioImageRecordBuilder
         v-if="item.inputType === 'audioImageRecord'"
         :key="`${baseKey}-audioImageRecord`"
+        :initial-item-data="item.options"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="item.allow"
         @checkValidation="valid = $event"

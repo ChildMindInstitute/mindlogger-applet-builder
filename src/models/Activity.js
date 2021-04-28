@@ -14,7 +14,6 @@ export default class Activity {
 
     if (initialActivityData.compute && initialActivityData.compute.length) {
       const itemModel = new Item();
-
       const cumulative = itemModel.getItemBuilderData({
         name: 'cumulatives',
         ui: {
@@ -39,9 +38,8 @@ export default class Activity {
       preamble: initialActivityData.preamble || '',
       shuffleActivityOrder: initialActivityData.shuffle || false,
       isSkippable: initialActivityData.isSkippable || false,
-      items,
+      items: items || [],
       disableBack: initialActivityData.disableBack || false,
-      items: initialActivityData.items && initialActivityData.items.map(item => item) || [],
       id: initialActivityData._id || null,
       textRules: [(v) => !!v || 'This field is required'],
       error: '',

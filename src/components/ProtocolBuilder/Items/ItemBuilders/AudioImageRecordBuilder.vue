@@ -50,6 +50,10 @@ export default {
     Uploader,
   },
   props: {
+    initialItemData: {
+      type: Object,
+      required: true
+    },
     initialItemResponseOptions: {
       type: Object,
       required: true,
@@ -60,12 +64,11 @@ export default {
     },
   },
   data: function () {
-    let responseOptions = {
-      "schema:minValue": 1,
-      "schema:maxValue": 3000,
-      "schema:image": '',
-    };
-    responseOptions = Object.assign(responseOptions, this.initialItemResponseOptions);
+    let responseOptions = { ...this.initialItemResponseOptions };
+
+    responseOptions['schema:minValue'] = this.initialItemData['schema:minValue'] || 1;
+    responseOptions['schema:maxValue'] = this.initialItemData['schema:maxValue'] || 3000;
+    responseOptions['schema:image'] = this.initialItemData['schema:image'] || '';
     responseOptions['valueType'] = 'audioImageRecord';
     responseOptions['multipleChoice'] = false;
 

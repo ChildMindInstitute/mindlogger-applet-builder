@@ -48,6 +48,7 @@ import Activity from '../../models/Activity';
 import Item from '../../models/Item';
 import PrizeActivityBuilder from './PrizeActivity/PrizeActivityBuilder.vue';
 import util from '../../utilities/util';
+import { getInitialProtocol } from '../../store/modules/appletBuilder/state';
 
 import { mapMutations, mapGetters } from 'vuex';
 
@@ -85,6 +86,11 @@ export default {
       default: null,
     },
     cacheData: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    basketApplets: {
       type: Object,
       required: false,
       default: null,
@@ -128,17 +134,18 @@ export default {
     this.setCurrentScreen(config.PROTOCOL_SCREEN);
     this.setCurrentActivity(-1);
 
-    if (this.cacheData) {
-      const newStoreData = await this.mergeCacheStoreWithBasketApplets()
-      this.restoreCacheData(newStoreData)
-    } else if (this.initialData) {
+    let initialStoreData = await this.fillStoreWithAppletData();
+    if (this.basketApplets) {
+      await this.mergeStoreDataWithBasketApplets(initialStoreData, this.basketApplets);
+    }
+    this.initProtocolData(initialStoreData);
+
+    if (this.initialData || (this.cacheData && this.cacheData.original)) {
       if (!this.versions.length) {
         this.$emit('setLoading', true);
       }
 
-      await this.fillStoreWithAppletData();
-
-      const original = await this.formattedProtocol();
+      const original = this.initialData ? await this.formattedProtocol() : this.cacheData.original;
 
       if (!this.versions.length) {
         /** upload first version */
@@ -155,8 +162,6 @@ export default {
       }
 
       this.setFormattedOriginalProtocol(JSON.parse(JSON.stringify(original)));
-    } else {
-      this.resetProtocol();
     }
 
     this.$emit("setLoading", false);
@@ -175,46 +180,53 @@ export default {
       'updateTemplateRequestStatus',
       'setVersions',
       'resetProtocol',
-      'restoreCacheData',
     ]),
     ...mapGetters(config.MODULE_NAME, [
       'formattedProtocol'
     ]),
     async fillStoreWithAppletData () {
-      const { applet, activities, items, protocol } = this.initialData;
+      let initialStoreData = null;
 
-      const initialStoreData = {
-        ... await Protocol.parseJSONLD(applet, protocol),
-        valid: true,
-        activities: [],
-        tokenPrizeModal: false,
-      };
+      if (this.initialData) {
+        const { applet, activities, items, protocol } = this.initialData;
 
-      const activityModel = new Activity();
-      const itemModel = new Item();
+        initialStoreData = {
+          ... await Protocol.parseJSONLD(applet, protocol),
+          valid: true,
+          activities: [],
+          tokenPrizeModal: false,
+        };
 
-      Object.values(activities).forEach((act) => {
-        const activityInfo = Activity.parseJSONLD(act)
-        const activityItems = activityInfo.orderList.filter(key => items[key]).map((key) => {
-          return itemModel.getItemBuilderData(Item.parseJSONLD(items[key]));
+        const activityModel = new Activity();
+        const itemModel = new Item();
+
+        Object.values(activities).forEach((act) => {
+          const activityInfo = Activity.parseJSONLD(act)
+          const activityItems = activityInfo.orderList.filter(key => items[key]).map((key) => {
+            return itemModel.getItemBuilderData(Item.parseJSONLD(items[key]));
+          });
+
+          const builderData = activityModel.getActivityBuilderData({
+            ...activityInfo,
+            items: activityItems,
+          });
+          builderData.index = initialStoreData.activities.length;
+
+          initialStoreData.activities.push(builderData);
         });
 
-        const builderData = activityModel.getActivityBuilderData({
-          ...activityInfo,
-          items: activityItems,
-        });
-        builderData.index = initialStoreData.activities.length;
+        initialStoreData.prizeActivity = initialStoreData.activities.find(activity => activity.isPrize);
+      } else if (this.cacheData) {
+        initialStoreData = JSON.parse(JSON.stringify(this.cacheData.protocol));
+      }
 
-        initialStoreData.activities.push(builderData);
-      });
-
-      initialStoreData.prizeActivity = initialStoreData.activities.find(activity => activity.isPrize);
-      this.initProtocolData(initialStoreData);
+      if (!initialStoreData) {
+        return getInitialProtocol();
+      }
+      return initialStoreData;
     },
 
-    async mergeCacheStoreWithBasketApplets () {
-      const { appletBuilder, basketApplets } = this.cacheData;
-
+    async mergeStoreDataWithBasketApplets(storeData, basketApplets) {
       const activityModel = new Activity();
       const itemModel = new Item();
 
@@ -239,16 +251,15 @@ export default {
             ...activityInfo,
             items: activityItems,
           });
-          activityBuilderData.index = appletBuilder.protocol.activities.length;
+        activityBuilderData.index = storeData.activities.length;
           activityBuilderData.baseAppletId = appletId;
           activityBuilderData.baseActivityId = activityBuilderData.id;
           activityBuilderData.id = null;
 
-          appletBuilder.protocol.activities.push(activityBuilderData);
+          storeData.activities.push(activityBuilderData);
         });
       });
-
-      return appletBuilder;
+      return storeData;
     },
 
     onClosePrizeActivityModal (response) {

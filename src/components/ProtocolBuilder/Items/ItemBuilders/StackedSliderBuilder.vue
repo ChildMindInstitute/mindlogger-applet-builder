@@ -65,7 +65,7 @@
             </v-col>
           </v-row>
           <v-row>
-            <v-col 
+            <v-col
               class="d-flex align-center"
               cols="12"
               sm="3"
@@ -108,7 +108,7 @@
           </v-row>
 
           <v-row>
-            <v-col 
+            <v-col
               class="d-flex align-center"
               cols="12"
               sm="3"
@@ -151,7 +151,7 @@
           </v-row>
 
           <v-row>
-            <v-col 
+            <v-col
               v-if="hasScoreValue"
               class="d-flex align-center"
               cols="auto"
@@ -166,7 +166,7 @@
               </v-btn>
             </v-col>
 
-            <v-col 
+            <v-col
               v-if="hasResponseAlert"
               class="d-flex align-center"
               cols="auto"
@@ -203,7 +203,7 @@
     />
 
     <v-row>
-      <v-col 
+      <v-col
         class="d-flex align-center"
         cols="12"
         sm="3"
@@ -211,11 +211,11 @@
         <v-checkbox
           v-model="isSkippable"
           label="Skippable Item"
-          @change="updateAllow"
+          :disabled="isSkippableItem == 2"
         />
       </v-col>
 
-      <v-col 
+      <v-col
         class="d-flex align-center"
         cols="12"
         sm="3"
@@ -392,13 +392,13 @@ export default {
       required: true
     },
     isSkippableItem: {
-      type: Boolean,
-      default: false,
+      type: Number,
+      default: 0,
     },
   },
   data: function () {
     const imgUpldr = new ImageUpldr();
-    
+
     return {
       sliders: (this.initialItemData.sliderOptions || []).map(slider => ({
         sliderLabel: slider.sliderLabel || '',
@@ -417,7 +417,6 @@ export default {
 
         expanded: false,
       })),
-      isSkippable: this.isSkippableItem || false,
       valid: true,
       textRules: [
         v => !!v || 'Slider Label cannot be empty',
@@ -443,6 +442,18 @@ export default {
       imgUpldr,
     };
   },
+
+  computed: {
+    isSkippable: {
+      get() {
+        return this.isSkippableItem === 1 || false;
+      },
+      set(value) {
+        this.$emit('updateAllow', value);
+      }
+    }
+  },
+
   beforeMount() {
     if (!this.sliders.length) {
       this.addNewSlider();
@@ -599,11 +610,6 @@ export default {
         this.sliderRangeUpdate(null, 'min', slider, false);
       }
       this.update();
-    },
-
-    updateAllow() {
-      const allow = this.isSkippable
-      this.$emit('updateAllow', allow);
     },
 
     onAddSliderImageFromUrl(slider, url, type) {

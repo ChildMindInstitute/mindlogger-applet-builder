@@ -100,7 +100,7 @@ export default {
 
     let headers = [
       {
-        text: 'T-Score',
+        text: 'Score',
         align: 'center',
         sortable: true,
         value: 'tScore',

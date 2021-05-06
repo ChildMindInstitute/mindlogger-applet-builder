@@ -128,7 +128,7 @@
             class="px-8"
           >
             <v-row>
-              <v-col 
+              <v-col
                 cols="12"
                 sm="5"
                 md="4"
@@ -142,7 +142,7 @@
                   @change="updateOption(option)"
                 />
               </v-col>
-              <v-col 
+              <v-col
                 v-if="isTokenValue"
                 cols="12"
                 sm="5"
@@ -178,14 +178,14 @@
             </v-row>
 
             <v-row>
-              <v-col 
+              <v-col
                 cols="12"
                 sm="12"
               >
-                <div 
+                <div
                   class="ds-tooltip-header d-flex justify-space-between align-center"
                   :class="!isTooltipOpen ? 'ds-tooltip-close' : ''"
-                > 
+                >
                   <span>Tooltip Creator</span>
                   <v-btn
                     icon
@@ -232,7 +232,7 @@
             </v-row>
 
             <v-row>
-              <v-col 
+              <v-col
                 v-if="isTokenValue"
                 cols="auto"
               >
@@ -265,7 +265,7 @@
         class="mt-4"
       />
       <v-row>
-        <v-col 
+        <v-col
           class="d-flex align-center"
           cols="12"
           md="3"
@@ -277,7 +277,7 @@
             @change="updateTokenOption"
           />
         </v-col>
-        <v-col 
+        <v-col
           class="d-flex align-center"
           cols="12"
           md="3"
@@ -286,10 +286,10 @@
           <v-checkbox
             v-model="isSkippable"
             label="Skippable Item"
-            @change="updateAllow"
+            :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
           />
         </v-col>
-        <v-col 
+        <v-col
           class="d-flex align-center"
           cols="12"
           md="3"
@@ -310,6 +310,19 @@
           <v-checkbox
             v-model="hasScoreValue"
             label="Option Score"
+            @change="update"
+          />
+        </v-col>
+
+        <v-col
+          class="d-flex align-center"
+          cols="12"
+          md="3"
+          sm="6"
+        >
+          <v-checkbox
+            v-model="randomizeOptions"
+            label="Randomize response options"
             @change="update"
           />
         </v-col>
@@ -411,11 +424,12 @@ export default {
       required: true
     },
     isSkippableItem: {
-      type: Boolean,
-      default: false,
+      type: Number,
+      default: 0,
     },
     initialResponseOptions: {
       type: Object,
+      required: true
     },
     itemTemplates: {
       type: Array,
@@ -475,12 +489,23 @@ export default {
       isTokenValue,
       hasScoreValue: this.initialItemData.hasScoreValue || false,
       hasResponseAlert: this.initialItemData.hasResponseAlert || false,
-      isSkippable: this.isSkippableItem || false,
       enableNegativeTokens: this.initialItemData.enableNegativeTokens || false,
       responseOptions: this.initialResponseOptions,
       isTooltipOpen: false,
       isOptionalText: this.initialIsOptionalText,
+      randomizeOptions: this.initialItemData.randomizeOptions,
     };
+  },
+
+  computed: {
+    isSkippable: {
+      get() {
+        return this.isSkippableItem === 1 || false;
+      },
+      set(value) {
+        this.$emit('updateAllow', value);
+      }
+    }
   },
 
   beforeMount() {
@@ -571,6 +596,7 @@ export default {
         'enableNegativeTokens': this.enableNegativeTokens,
         'isMultipleChoice': this.isMultipleChoice,
         'isSkippableItem': this.isSkippable,
+        'randomizeOptions': this.randomizeOptions,
         'options': this.options.map(option => ({
           ...option,
           value: Number(option.value),
@@ -611,11 +637,6 @@ export default {
       return true;
     },
 
-    updateAllow() {
-      const allow = this.isSkippable
-      this.$emit('updateAllow', allow);
-    },
-
     onUpdateResponseOptions() {
       this.$emit('updateResponseOptions', this.responseOptions);
     },
@@ -642,7 +663,7 @@ export default {
           message: 'Image successfully added to Option.',
           duration: 3000,
         });
-  
+
         this.update();
       } catch (error) {
         this.$emit('loading', false);

@@ -14,7 +14,6 @@ export default class Activity {
 
     if (initialActivityData.compute && initialActivityData.compute.length) {
       const itemModel = new Item();
-
       const cumulative = itemModel.getItemBuilderData({
         name: 'cumulatives',
         ui: {
@@ -39,7 +38,7 @@ export default class Activity {
       preamble: initialActivityData.preamble || '',
       shuffleActivityOrder: initialActivityData.shuffle || false,
       isSkippable: initialActivityData.isSkippable || false,
-      items,
+      items: items || [],
       disableBack: initialActivityData.disableBack || false,
       id: initialActivityData._id || null,
       textRules: [(v) => !!v || 'This field is required'],
@@ -370,6 +369,8 @@ export default class Activity {
       scoringLogic: {},
       'repronim:timeUnit': 'yearmonthdate',
       isPrize: this.ref.isPrize,
+      baseAppletId: this.ref.baseAppletId,
+      baseActivityId: this.ref.baseActivityId,
       ui: {
         order: itemOrder,
         shuffle: this.ref.shuffleActivityOrder,
@@ -413,8 +414,9 @@ export default class Activity {
     };
   }
 
-  parseCumulative () {
-    const item = this.ref.items.find(item => item.ui.inputType === 'cumulativeScore');
+  parseCumulative() {
+    console.log('item--------', this.ref.items);
+    const item = this.ref.items.find(item => item.inputType === 'cumulativeScore');
 
     let compute = [], messages = [];
 

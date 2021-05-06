@@ -2,7 +2,7 @@
   <v-form
     ref="form"
     v-model="valid"
-  > 
+  >
     <v-text-field
       v-model="maxLength"
       label="Maximum response length"
@@ -17,7 +17,7 @@
       @change="updateAnswer"
     />
     <v-row>
-      <v-col 
+      <v-col
         class="d-flex align-center"
         cols="12"
         sm="3"
@@ -28,7 +28,7 @@
           @change="updateAnswer"
         />
       </v-col>
-      <v-col 
+      <v-col
         class="d-flex align-center"
         cols="12"
         sm="3"
@@ -36,10 +36,10 @@
         <v-checkbox
           v-model="isSkippable"
           label="Skippable Item"
-          @change="updateAllow"
+          :disabled="isSkippableItem == 2"
         />
       </v-col>
-      <v-col 
+      <v-col
         class="d-flex align-center"
         cols="12"
         sm="3"
@@ -50,7 +50,7 @@
           @change="update"
         />
       </v-col>
-      <v-col 
+      <v-col
         class="d-flex align-center"
         cols="12"
         sm="3"
@@ -68,7 +68,7 @@
 <script>
 export default {
   props: {
-    initialItemData: { 
+    initialItemData: {
       type: Object,
       required: true
     },
@@ -77,8 +77,8 @@ export default {
       required: true,
     },
     isSkippableItem: {
-      type: Boolean,
-      default: false,
+      type: Number,
+      default: 0,
     },
     initialAnswer: {
       type: String,
@@ -91,9 +91,8 @@ export default {
       maxLength: this.initialItemData.maxLength || 50,
       requiredValue: this.initialItemData.requiredValue || false,
       requiredAnswer: this.initialAnswer ? true : false,
-      isSkippable: this.isSkippableItem || false,
-      isNumerical: ((this.responseOption.valueType && this.responseOption.valueType.includes('integer')) 
-        || (this.initialItemData.valueType && this.initialItemData.valueType.includes('integer'))) 
+      isNumerical: ((this.responseOption.valueType && this.responseOption.valueType.includes('integer'))
+        || (this.initialItemData.valueType && this.initialItemData.valueType.includes('integer')))
       || false,
       valid: true,
       textRules: [
@@ -104,6 +103,18 @@ export default {
       ],
     };
   },
+
+  computed: {
+    isSkippable: {
+      get() {
+        return this.isSkippableItem === 1 || false;
+      },
+      set(value) {
+        this.$emit('updateAllow', value);
+      }
+    }
+  },
+
   methods: {
     update () {
       const responseOptions = {
@@ -121,10 +132,6 @@ export default {
         this.$emit('updateAnswer', correctAnswer);
       }
     },
-    updateAllow() {
-      const allow = this.isSkippable
-      this.$emit('updateAllow', allow);
-    }
   }
 }
 </script>

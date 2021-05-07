@@ -447,7 +447,7 @@ export default class Activity {
       disableBack: this.ref.disableBack,
       schema: schema,
       context: context,
-      items: this.ref.items,
+      items: this.ref.items.filter(item => item.ui.inputType !== 'cumulativeScore'),
       conditionalItems: conditionalItems,
       subScales: this.ref.subScales,
       ...this.parseCumulative(),

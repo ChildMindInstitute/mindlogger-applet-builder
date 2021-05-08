@@ -204,7 +204,7 @@ export default class Activity {
         } else if (notEqualToValues && minIndex === notEqualToValues.index) {
           const itemIndex = items.findIndex(({ name }) => name === notEqualToValues[1]);
           const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == notEqualToValues[2]);
-          
+
           isVis = isVis.replace(notEqualToRegExp, '');
           if (!option) {
             return;
@@ -314,12 +314,12 @@ export default class Activity {
             return `(${cond.ifValue.name} > ${cond.minValue} && ${cond.ifValue.name} < ${cond.maxValue})`;
           } else if (cond.stateValue.val === 'outsideof') {
             return `(${cond.ifValue.name} < ${cond.minValue} || ${cond.ifValue.name} > ${cond.maxValue})`;
-          } else if (cond.stateValue.val === 'includes') { 
+          } else if (cond.stateValue.val === 'includes') {
             return `${cond.ifValue.name}.${cond.stateValue.val}(${cond.answerValue.value})`
           } else if (cond.stateValue.val === '!includes') {
             return `!${cond.ifValue.name}.includes(${cond.answerValue.value})`
           } else if (cond.stateValue.val === '=') {
-            return `${cond.ifValue.name} ${cond.stateValue.val}${cond.stateValue.val} ${cond.minValue}`; 
+            return `${cond.ifValue.name} ${cond.stateValue.val}${cond.stateValue.val} ${cond.minValue}`;
           } else if (!cond.answerValue) {
             return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.minValue}`;
           } else {
@@ -486,7 +486,7 @@ export default class Activity {
 
           oldOptions.forEach(option => {
             const property = newOptions.find(newOption => newOption.variableName === option.variableName);
-            
+
             if (!property) {
               removedOptions.push(option);
             } else if (typeof property.isVis === 'boolean' && typeof option.isVis !== 'boolean') {
@@ -553,7 +553,7 @@ export default class Activity {
               let oldSubScale = oldSubScales.find(old => old.subScaleId == newSubScale.subScaleId);
 
               if (
-                oldSubScale.variableName != newSubScale.variableName || 
+                oldSubScale.variableName != newSubScale.variableName ||
                 oldSubScale.jsExpression != newSubScale.jsExpression
               ) {
                 updates.push(`subscale (${oldSubScale.variableName} | ${oldSubScale.jsExpression.replaceAll(' + ', ', ')}) was updated to ${newSubScale.variableName} | ${newSubScale.jsExpression.replaceAll(' + ', ', ')}`);
@@ -903,7 +903,7 @@ export default class Activity {
   }
 
   static checkValidation (act) {
-    if (!act.name || !act.description) {
+    if (!act.name) {
       return false;
     }
 

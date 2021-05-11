@@ -415,8 +415,7 @@ export default class Activity {
   }
 
   parseCumulative() {
-    console.log('item--------', this.ref.items);
-    const item = this.ref.items.find(item => item.inputType === 'cumulativeScore');
+    const item = this.ref.items.find(item => item.ui.inputType === 'cumulativeScore');
 
     let compute = [], messages = [];
 

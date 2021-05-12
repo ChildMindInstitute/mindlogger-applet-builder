@@ -368,14 +368,14 @@ export default class Protocol {
   }
 
   static async getBuilderFormat(applet, upgradeVersion=false) {
-    const protocol = await this.parseApplet(applet)
-    const builderData = this.formattedProtocol(protocol);
+    const protocol = await Protocol.parseApplet(applet)
+    const builderData = await Protocol.formattedProtocol(protocol);
 
     if (upgradeVersion) {
       builderData.protocol.data[
         'schema:schemaVersion'
-      ] = original.protocol.data['schema:version'] = util.upgradeVersion(
-        original.protocol.data['schema:version'],
+      ] = builderData.protocol.data['schema:version'] = util.upgradeVersion(
+        builderData.protocol.data['schema:version'],
         '0.0.1'
       );
     }

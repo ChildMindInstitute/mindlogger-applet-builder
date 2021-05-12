@@ -136,7 +136,7 @@ export default {
 
     let initialStoreData = await this.fillStoreWithAppletData();
     if (this.basketApplets) {
-      await this.mergeStoreDataWithBasketApplets(initialStoreData, this.basketApplets);
+      initialStoreData = await this.mergeStoreDataWithBasketApplets(initialStoreData, this.basketApplets);
     }
     this.initProtocolData(initialStoreData);
 
@@ -221,7 +221,7 @@ export default {
       }
 
       if (!initialStoreData) {
-        return getInitialProtocol();
+        initialStoreData = getInitialProtocol();
       }
       return initialStoreData;
     },
@@ -229,6 +229,18 @@ export default {
     async mergeStoreDataWithBasketApplets(storeData, basketApplets) {
       const activityModel = new Activity();
       const itemModel = new Item();
+
+      if (!storeData.id) {
+        if (Object.entries(basketApplets).length === 1) {
+          const [appletData] = Object.values(basketApplets)
+          storeData = {
+            ... await Protocol.parseJSONLD(appletData.applet, appletData.protocol),
+            valid: true,
+            activities: [],
+            tokenPrizeModal: false,
+          };
+        }
+      }
 
       Object.entries(basketApplets).map(([appletId, appletData]) => {
         const { applet, activities, items, protocol } = appletData;

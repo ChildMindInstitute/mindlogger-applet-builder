@@ -188,34 +188,7 @@ export default {
       let initialStoreData = null;
 
       if (this.initialData) {
-        const { applet, activities, items, protocol } = this.initialData;
-
-        initialStoreData = {
-          ... await Protocol.parseJSONLD(applet, protocol),
-          valid: true,
-          activities: [],
-          tokenPrizeModal: false,
-        };
-
-        const activityModel = new Activity();
-        const itemModel = new Item();
-
-        Object.values(activities).forEach((act) => {
-          const activityInfo = Activity.parseJSONLD(act)
-          const activityItems = activityInfo.orderList.filter(key => items[key]).map((key) => {
-            return itemModel.getItemBuilderData(Item.parseJSONLD(items[key]));
-          });
-
-          const builderData = activityModel.getActivityBuilderData({
-            ...activityInfo,
-            items: activityItems,
-          });
-          builderData.index = initialStoreData.activities.length;
-
-          initialStoreData.activities.push(builderData);
-        });
-
-        initialStoreData.prizeActivity = initialStoreData.activities.find(activity => activity.isPrize);
+        initialStoreData = await Protocol.parseApplet(this.initialData);
       } else if (this.cacheData) {
         initialStoreData = JSON.parse(JSON.stringify(this.cacheData.protocol));
       }

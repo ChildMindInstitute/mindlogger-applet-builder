@@ -409,8 +409,8 @@ export default {
 
       for (let activity of this.protocol.activities) {
         const valid = !(
-          !activity.valid 
-            || activity.items.some(item => !item.valid) 
+          !activity.valid
+            || activity.items.some(item => !item.valid)
             || activity.subScales.some(subScale => !subScale.valid)
             || activity.conditionalItems.some(conditional => !conditional.valid)
             || (activity.items.length === 0)

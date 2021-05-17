@@ -619,11 +619,16 @@ export default class Activity {
           if (newSubScale.length && !oldSubScale.length) {
             return ['Final SubScale was added'];
           }
+
           if (!newSubScale.length && oldSubScale.length) {
             return ['Final SubScale was deleted'];
           }
 
-          return ['Final SubScale was updated'];
+          if (JSON.stringify(newSubScale) != JSON.stringify(oldSubScale)) {
+            return ['Final SubScale was updated'];
+          }
+
+          return [];
         }
       }
     };

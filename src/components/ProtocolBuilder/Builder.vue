@@ -136,7 +136,7 @@ export default {
 
     let initialStoreData = await this.fillStoreWithAppletData();
     if (this.basketApplets) {
-      await this.mergeStoreDataWithBasketApplets(initialStoreData, this.basketApplets);
+      initialStoreData = await this.mergeStoreDataWithBasketApplets(initialStoreData, this.basketApplets);
     }
     this.initProtocolData(initialStoreData);
 
@@ -188,40 +188,13 @@ export default {
       let initialStoreData = null;
 
       if (this.initialData) {
-        const { applet, activities, items, protocol } = this.initialData;
-
-        initialStoreData = {
-          ... await Protocol.parseJSONLD(applet, protocol),
-          valid: true,
-          activities: [],
-          tokenPrizeModal: false,
-        };
-
-        const activityModel = new Activity();
-        const itemModel = new Item();
-
-        Object.values(activities).forEach((act) => {
-          const activityInfo = Activity.parseJSONLD(act)
-          const activityItems = activityInfo.orderList.filter(key => items[key]).map((key) => {
-            return itemModel.getItemBuilderData(Item.parseJSONLD(items[key]));
-          });
-
-          const builderData = activityModel.getActivityBuilderData({
-            ...activityInfo,
-            items: activityItems,
-          });
-          builderData.index = initialStoreData.activities.length;
-
-          initialStoreData.activities.push(builderData);
-        });
-
-        initialStoreData.prizeActivity = initialStoreData.activities.find(activity => activity.isPrize);
+        initialStoreData = await Protocol.parseApplet(this.initialData);
       } else if (this.cacheData) {
         initialStoreData = JSON.parse(JSON.stringify(this.cacheData.protocol));
       }
 
       if (!initialStoreData) {
-        return getInitialProtocol();
+        initialStoreData = getInitialProtocol();
       }
       return initialStoreData;
     },
@@ -229,6 +202,18 @@ export default {
     async mergeStoreDataWithBasketApplets(storeData, basketApplets) {
       const activityModel = new Activity();
       const itemModel = new Item();
+
+      if (!storeData.id) {
+        if (Object.entries(basketApplets).length === 1) {
+          const [appletData] = Object.values(basketApplets)
+          storeData = {
+            ... await Protocol.parseJSONLD(appletData.applet, appletData.protocol),
+            valid: true,
+            activities: [],
+            tokenPrizeModal: false,
+          };
+        }
+      }
 
       Object.entries(basketApplets).map(([appletId, appletData]) => {
         const { applet, activities, items, protocol } = appletData;

@@ -204,7 +204,7 @@ export default class Activity {
         } else if (notEqualToValues && minIndex === notEqualToValues.index) {
           const itemIndex = items.findIndex(({ name }) => name === notEqualToValues[1]);
           const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == notEqualToValues[2]);
-          
+
           isVis = isVis.replace(notEqualToRegExp, '');
           if (!option) {
             return;
@@ -489,7 +489,7 @@ export default class Activity {
 
           oldOptions.forEach(option => {
             const property = newOptions.find(newOption => newOption.variableName === option.variableName);
-            
+
             if (!property) {
               removedOptions.push(option);
             } else if (typeof property.isVis === 'boolean' && typeof option.isVis !== 'boolean') {
@@ -556,7 +556,7 @@ export default class Activity {
               let oldSubScale = oldSubScales.find(old => old.subScaleId == newSubScale.subScaleId);
 
               if (
-                oldSubScale.variableName != newSubScale.variableName || 
+                oldSubScale.variableName != newSubScale.variableName ||
                 oldSubScale.jsExpression != newSubScale.jsExpression
               ) {
                 updates.push(`subscale (${oldSubScale.variableName} | ${oldSubScale.jsExpression.replaceAll(' + ', ', ')}) was updated to ${newSubScale.variableName} | ${newSubScale.jsExpression.replaceAll(' + ', ', ')}`);
@@ -623,11 +623,16 @@ export default class Activity {
           if (newSubScale.length && !oldSubScale.length) {
             return ['Final SubScale was added'];
           }
+
           if (!newSubScale.length && oldSubScale.length) {
             return ['Final SubScale was deleted'];
           }
 
-          return ['Final SubScale was updated'];
+          if (JSON.stringify(newSubScale) != JSON.stringify(oldSubScale)) {
+            return ['Final SubScale was updated'];
+          }
+
+          return [];
         }
       }
     };
@@ -906,7 +911,7 @@ export default class Activity {
   }
 
   static checkValidation (act) {
-    if (!act.name || !act.description) {
+    if (!act.name) {
       return false;
     }
 

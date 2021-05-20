@@ -304,37 +304,41 @@ export default class Activity {
     }
 
     itemOrder.forEach((item) => {
-      const conditionalItem = this.ref.conditionalItems.find((cond) => cond.showValue === item);
-      let isVis = true;
+      const currentItem = this.ref.items.find(({ name }) => name === item);
 
-      if (conditionalItem) {
-        const operation = conditionalItem.operation === 'ANY' ? ' || ' : ' && ';
-        const visibleItems = conditionalItem.conditions.map((cond) => {
-          if (cond.stateValue.val === 'between') {
-            return `(${cond.ifValue.name} > ${cond.minValue} && ${cond.ifValue.name} < ${cond.maxValue})`;
-          } else if (cond.stateValue.val === 'outsideof') {
-            return `(${cond.ifValue.name} < ${cond.minValue} || ${cond.ifValue.name} > ${cond.maxValue})`;
-          } else if (cond.stateValue.val === 'includes') {
-            return `${cond.ifValue.name}.${cond.stateValue.val}(${cond.answerValue.value})`
-          } else if (cond.stateValue.val === '!includes') {
-            return `!${cond.ifValue.name}.includes(${cond.answerValue.value})`
-          } else if (cond.stateValue.val === '=') {
-            return `${cond.ifValue.name} ${cond.stateValue.val}${cond.stateValue.val} ${cond.minValue}`;
-          } else if (!cond.answerValue) {
-            return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.minValue}`;
-          } else {
-            return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.answerValue.value}`;
-          }
-        });
-        isVis = visibleItems.join(operation);
+      if (currentItem.ui.inputType !== "cumulativeScore") {
+        const conditionalItem = this.ref.conditionalItems.find((cond) => cond.showValue === item);
+        let isVis = true;
+
+        if (conditionalItem) {
+          const operation = conditionalItem.operation === 'ANY' ? ' || ' : ' && ';
+          const visibleItems = conditionalItem.conditions.map((cond) => {
+            if (cond.stateValue.val === 'between') {
+              return `(${cond.ifValue.name} > ${cond.minValue} && ${cond.ifValue.name} < ${cond.maxValue})`;
+            } else if (cond.stateValue.val === 'outsideof') {
+              return `(${cond.ifValue.name} < ${cond.minValue} || ${cond.ifValue.name} > ${cond.maxValue})`;
+            } else if (cond.stateValue.val === 'includes') {
+              return `${cond.ifValue.name}.${cond.stateValue.val}(${cond.answerValue.value})`
+            } else if (cond.stateValue.val === '!includes') {
+              return `!${cond.ifValue.name}.includes(${cond.answerValue.value})`
+            } else if (cond.stateValue.val === '=') {
+              return `${cond.ifValue.name} ${cond.stateValue.val}${cond.stateValue.val} ${cond.minValue}`;
+            } else if (!cond.answerValue) {
+              return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.minValue}`;
+            } else {
+              return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.answerValue.value}`;
+            }
+          });
+          isVis = visibleItems.join(operation);
+        }
+
+        const property = {
+          variableName: item,
+          isAbout: item,
+          isVis,
+        };
+        addProperties.push(property);
       }
-
-      const property = {
-        variableName: item,
-        isAbout: item,
-        isVis,
-      };
-      addProperties.push(property);
     });
     return addProperties;
   }
@@ -343,7 +347,7 @@ export default class Activity {
     const { items, conditionalItems } = this.ref;
 
     if (!items.length) return [];
-    return items.map(({ name }) => name);
+    return items.filter(({ ui }) => ui.inputType !== "cumulativeScore").map(({ name }) => name);
   }
 
   getCompressedSchema() {

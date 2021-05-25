@@ -130,15 +130,14 @@
             <v-row>
               <v-col
                 cols="12"
-                sm="5"
-                md="4"
+                sm="6"
+                md="5"
               >
                 <v-text-field
                   v-model="option.name"
                   :rules="textRules"
                   label="Option Text"
                   counter="75"
-                  maxlength="75"
                   @change="updateOption(option)"
                 />
               </v-col>
@@ -476,6 +475,7 @@ export default {
       })),
       textRules: [
         v => !!v || 'Radio options cannot be empty',
+        v => v.length <= 75 || '75 maximum character is suggested',
       ],
       numberRules: [
         v => !isNaN(parseInt(v)) || 'Please enter a numerical value',

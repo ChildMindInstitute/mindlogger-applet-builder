@@ -148,9 +148,32 @@
           @input="saveSubScale"
         />
 
-        <v-card
+        <v-card width="100%">
+          <v-list subheader>
+            <v-subheader>Sub-scale Scoring</v-subheader>
+            <v-radio-group
+              v-model="scoringType"
+              class="d-flex" 
+              color="primary"
+              @change="saveSubScale"
+            >
+              <v-radio
+                class="mx-4"
+                value="sum"
+                label="Sum Of Item Scores"
+              />
+              <v-radio
+                class="mx-4"
+                value="average"
+                label="Average of Item Scores"
+              />
+            </v-radio-group>
+          </v-list>
+        </v-card>
+
+        <v-card 
+          class="mt-4"
           width="100%"
-          class="items"
         >
           <v-list subheader>
             <v-subheader>Items within sub-scale</v-subheader>
@@ -240,6 +263,7 @@ export default {
         v => !this.subScales.some((subScale, id) => subScale && subScale.variableName === v && id != this.subScaleIndex) || 'cannot use existing subscale name',
       ],
       valid: false,
+      scoringType: "sum",
       isExpanded: !this.subScale.variableName || !this.subScale.variableName.length
     };
   },
@@ -294,6 +318,7 @@ export default {
           ).map(
             item => item.name
           ).join(' + '),
+        isAverageScore: this.scoringType === "sum" ? false : true,
         valid: this.valid && this.selectedItemCount >= 2
       };
 

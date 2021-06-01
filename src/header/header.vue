@@ -317,8 +317,8 @@ export default {
           this.$emit("uploadProtocol", data);
         } else {
           let { upgrade, updates, removed } = Protocol.getChangeInfo(this.formattedOriginalProtocol, data, true);
-
           let newVersion = util.upgradeVersion(this.protocol.protocolVersion, upgrade);
+
           if (newVersion != this.protocol.protocolVersion) {
             updates.data['schema:schemaVersion'] = updates.data['schema:version'] = newVersion;
 

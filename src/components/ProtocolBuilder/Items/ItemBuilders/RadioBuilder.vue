@@ -475,7 +475,7 @@ export default {
       })),
       textRules: [
         v => !!v || 'Radio options cannot be empty',
-        v => v.length <= 75 || '75 maximum character is suggested',
+        v => v.length <= 75 || 'Visibility decreases over 75 characters',
       ],
       numberRules: [
         v => !isNaN(parseInt(v)) || 'Please enter a numerical value',

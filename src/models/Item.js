@@ -1024,10 +1024,12 @@ export default class Item {
       const NAME = 'schema:name';
       const VALUE = 'schema:value';
       const CONTENT_URL = 'schema:contentUrl';
+      const TYPE = '@type';
 
       inputOptions.forEach(option => {
         const modifiedOption = {};
 
+        const type = _.get(option, [TYPE, 0]);
         const name = _.get(option, [NAME, 0, '@value']);
         const value = _.get(option, [VALUE, 0, '@value']);
         const contentUrl = option[CONTENT_URL];
@@ -1040,6 +1042,9 @@ export default class Item {
 
         if(contentUrl)
           modifiedOption[CONTENT_URL] = contentUrl;
+
+        if (type)
+          modifiedOption[TYPE] = type;
 
         if(!_.isEmpty(modifiedOption))
           itemContent.inputOptions.push(modifiedOption);

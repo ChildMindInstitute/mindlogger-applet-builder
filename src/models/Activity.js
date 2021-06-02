@@ -126,42 +126,55 @@ export default class Activity {
 
         if (outsideValues && minIndex === outsideValues.index && outsideValues[1] === outsideValues[3]) {
           isVis = isVis.replace(outsideRegExp, '');
-          conditionalItem.conditions.push({
-            ifValue: items.find(({ name }) => name === outsideValues[1]),
-            maxValue: outsideValues[4],
-            minValue: outsideValues[2],
-            stateValue: {
-              name: "OUTSIDE OF",
-              val: "outsideof"
-            }
-          });
+          const itemIndex = items.findIndex(({ name }) => name === outsideValues[1]);
+
+          if (itemIndex !== -1) {
+            conditionalItem.conditions.push({
+              ifValue: items[itemIndex],
+              maxValue: outsideValues[4],
+              minValue: outsideValues[2],
+              stateValue: {
+                name: "OUTSIDE OF",
+                val: "outsideof"
+              }
+            });
+          }
         } else if (withinValues && minIndex === withinValues.index && withinValues[1] === withinValues[3]) {
           isVis = isVis.replace(insideRegExp, '');
-          conditionalItem.conditions.push({
-            ifValue: items.find(({ name }) => name === withinValues[1]),
-            maxValue: withinValues[4],
-            minValue: withinValues[2],
-            stateValue: {
-              name: "BETWEEN",
-              val: "between"
-            }
-          });
+          const itemIndex = items.findIndex(({ name }) => name === withinValues[1]);
+
+          if (itemIndex !== -1) {
+            conditionalItem.conditions.push({
+              ifValue: items[itemIndex],
+              maxValue: withinValues[4],
+              minValue: withinValues[2],
+              stateValue: {
+                name: "BETWEEN",
+                val: "between"
+              }
+            });
+          }
         } else if (excludeValues && minIndex === excludeValues.index) {
           isVis = isVis.replace(excludeRegExp, '');
           const itemIndex = items.findIndex(({ name }) => name === excludeValues[1]);
-          const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == excludeValues[2]);
 
-          conditionalItem.conditions.push({
-            ifValue: items[itemIndex],
-            answerValue: {
-              name: option['schema:name'],
-              value: option['schema:value']
-            },
-            stateValue: {
-              name: "Doesn't include",
-              val: "!includes",
+          if (itemIndex !== -1) {
+            const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == excludeValues[2]);
+
+            if (option) {
+              conditionalItem.conditions.push({
+                ifValue: items[itemIndex],
+                answerValue: {
+                  name: option['schema:name'],
+                  value: option['schema:value']
+                },
+                stateValue: {
+                  name: "Doesn't include",
+                  val: "!includes",
+                }
+              })
             }
-          })
+          }
         } else if (includeValues && minIndex === includeValues.index) {
           isVis = isVis.replace(includeRegExp, '');
           const itemIndex = items.findIndex(({ name }) => name === includeValues[1]);
@@ -169,90 +182,102 @@ export default class Activity {
           if (itemIndex !== -1) {
             const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == includeValues[2]);
 
-            conditionalItem.conditions.push({
-              ifValue: items[itemIndex],
-              answerValue: {
-                name: option['schema:name'],
-                value: option['schema:value']
-              },
-              stateValue: {
-                name: "Includes",
-                val: "includes",
-              }
-            })
+            if (option) {
+              conditionalItem.conditions.push({
+                ifValue: items[itemIndex],
+                answerValue: {
+                  name: option['schema:name'],
+                  value: option['schema:value']
+                },
+                stateValue: {
+                  name: "Includes",
+                  val: "includes",
+                }
+              })
+            }
           }
         } else if (lessThanValues && isVis[lessThanValues.index - 1] !== "(" && minIndex === lessThanValues.index) {
           isVis = isVis.replace(lessThanRegExp, '');
-          conditionalItem.conditions.push({
-            ifValue: items.find(({ name }) => name === lessThanValues[1]),
-            minValue: lessThanValues[2],
-            stateValue: {
-              name: 'LESS THAN',
-              val: '<',
-            }
-          });
+          const itemIndex = items.findIndex(({ name }) => name === lessThanValues[1]);
+
+          if (itemIndex !== -1) {
+            conditionalItem.conditions.push({
+              ifValue: items[itemIndex],
+              minValue: lessThanValues[2],
+              stateValue: {
+                name: 'LESS THAN',
+                val: '<',
+              }
+            });
+          }
         } else if (greaterThanValues && isVis[greaterThanValues.index - 1] !== "(" && minIndex === greaterThanValues.index) {
           isVis = isVis.replace(greaterThanRegExp, '');
-          conditionalItem.conditions.push({
-            ifValue: items.find(({ name }) => name === greaterThanValues[1]),
-            minValue: greaterThanValues[2],
-            stateValue: {
-              name: 'GREATER THAN',
-              val: '>',
-            }
-          });
-        } else if (notEqualToValues && minIndex === notEqualToValues.index) {
-          const itemIndex = items.findIndex(({ name }) => name === notEqualToValues[1]);
-          const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == notEqualToValues[2]);
+          const itemIndex = items.findIndex(({ name }) => name === greaterThanValues[1]);
 
-          isVis = isVis.replace(notEqualToRegExp, '');
-          if (!option) {
-            return;
+          if (itemIndex !== -1) {
+            conditionalItem.conditions.push({
+              ifValue: items[itemIndex],
+              minValue: greaterThanValues[2],
+              stateValue: {
+                name: 'GREATER THAN',
+                val: '>',
+              }
+            });
           }
+        } else if (notEqualToValues && minIndex === notEqualToValues.index) {
+          isVis = isVis.replace(notEqualToRegExp, '');
+          const itemIndex = items.findIndex(({ name }) => name === notEqualToValues[1]);
 
-          conditionalItem.conditions.push({
-            ifValue: items[itemIndex],
-            answerValue: {
-              name: option['schema:name'],
-              value: option['schema:value']
-            },
-            stateValue: {
-              name: 'IS NOT EQUAL TO',
-              val: '!=',
+          if (itemIndex !== -1) {
+            const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == notEqualToValues[2]);
+
+            if (option) {
+              conditionalItem.conditions.push({
+                ifValue: items[itemIndex],
+                answerValue: {
+                  name: option['schema:name'],
+                  value: option['schema:value']
+                },
+                stateValue: {
+                  name: 'IS NOT EQUAL TO',
+                  val: '!=',
+                }
+              });
             }
-          });
+          }
         } else if (equalToValues && minIndex === equalToValues.index) {
-          const item = items.find(({ name }) => name === equalToValues[1]);
-
           isVis = isVis.replace(equalToRegExp, '');
-          if (item.inputType === 'radio') {
-            const itemIndex = items.findIndex(({ name }) => name === equalToValues[1]);
-            const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == equalToValues[2]);
+          const itemIndex = items.findIndex(({ name }) => name === equalToValues[1]);
 
-            if (!option) {
-              return;
+          if (itemIndex !== -1) {
+            const item = items[itemIndex];
+
+            if (item.inputType === 'radio') {
+              const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == equalToValues[2]);
+
+              if (option) {
+                conditionalItem.conditions.push({
+                  ifValue: item,
+                  answerValue: {
+                    name: option['schema:name'],
+                    value: option['schema:value']
+                  },
+                  stateValue: {
+                    name: 'IS EQUAL TO',
+                    val: '==',
+                  }
+                });
+              }
+            } else {
+              conditionalItem.conditions.push({
+                ifValue: item,
+                minValue: equalToValues[2],
+                stateValue: {
+                  name: 'EQUAL TO',
+                  val: '==',
+                }
+              });
             }
-
-            conditionalItem.conditions.push({
-              ifValue: item,
-              answerValue: {
-                name: option['schema:name'],
-                value: option['schema:value']
-              },
-              stateValue: {
-                name: 'IS EQUAL TO',
-                val: '==',
-              }
-            });
-          } else {
-            conditionalItem.conditions.push({
-              ifValue: item,
-              minValue: equalToValues[2],
-              stateValue: {
-                name: 'EQUAL TO',
-                val: '==',
-              }
-            });
           }
         } else {
           isVis = isVis.split('()').join('');

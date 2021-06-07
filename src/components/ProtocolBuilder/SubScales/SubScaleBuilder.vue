@@ -80,7 +80,7 @@
       v-if="isExpanded"
     >
       <v-row>
-        <v-col 
+        <v-col
           class="d-flex align-center"
           cols="12"
           sm="6"
@@ -106,7 +106,7 @@
           </v-card>
         </v-col>
 
-        <v-col 
+        <v-col
           class="d-flex align-center"
           cols="12"
           sm="6"
@@ -144,13 +144,37 @@
         <v-text-field
           v-model="currentSubScale.variableName"
           label="Sub-Scale Name"
-          :rules="nameRules"
+          :error="nameError.exists"
+          :error-messages="nameError.message"
           @input="saveSubScale"
         />
 
+        <v-card width="100%">
+          <v-list subheader>
+            <v-subheader>Sub-scale Scoring</v-subheader>
+            <v-radio-group
+              v-model="scoringType"
+              class="d-flex"
+              color="primary"
+              @change="saveSubScale"
+            >
+              <v-radio
+                class="mx-4"
+                value="sum"
+                label="Sum Of Item Scores"
+              />
+              <v-radio
+                class="mx-4"
+                value="average"
+                label="Average of Item Scores"
+              />
+            </v-radio-group>
+          </v-list>
+        </v-card>
+
         <v-card
+          class="mt-4"
           width="100%"
-          class="items"
         >
           <v-list subheader>
             <v-subheader>Items within sub-scale</v-subheader>
@@ -218,6 +242,11 @@ export default {
     subScale: {
       type: Object,
       required: true
+    },
+    hasLookupTable: {
+      type: Boolean,
+      required: false,
+      default: false
     }
   },
   data: function () {
@@ -235,8 +264,12 @@ export default {
         v => !this.subScales.some((subScale, id) => subScale && subScale.variableName === v && id != this.subScaleIndex) || 'cannot use existing subscale name',
       ],
       valid: false,
+      scoringType: "sum",
       isExpanded: !this.subScale.variableName || !this.subScale.variableName.length,
-      hasLookupTable: !!this.subScale.lookupTable
+      nameError: {
+        exists: false,
+        message: ''
+      },
     };
   },
   computed: {
@@ -252,14 +285,6 @@ export default {
       }
 
       return itemCount;
-    }
-  },
-  watch: {
-    subScale: {
-      deep: true,
-      handler() {
-        this.hasLookupTable = !!this.subScale.lookupTable;
-      }
     }
   },
   created() {
@@ -282,15 +307,43 @@ export default {
   },
   beforeMount() {
     this.itemsFormatted = this.formattedItems();
+
+    const message = this.getNameError();
+    this.$set(this, 'nameError', {
+      exists: message.length > 0,
+      message
+    });
   },
   methods: {
-    ...mapMutations(config.MODULE_NAME, 
+    ...mapMutations(config.MODULE_NAME,
       [
         'updateSubScaleData',
         'deleteSubScale',
       ]
     ),
+    getNameError() {
+      if (!this.currentSubScale.variableName) {
+        return 'Please enter the name of sub-scale.'
+      }
+      if (
+        this.subScales.some((subScale, id) =>
+          subScale &&
+          subScale.variableName === this.currentSubScale.variableName &&
+          id != this.subScaleIndex
+        )
+      ) {
+        return 'Cannot use existing subscale name.'
+      }
+
+      return '';
+    },
     saveSubScale () {
+      const message = this.getNameError();
+      this.$set(this, 'nameError', {
+        exists: message.length > 0,
+        message
+      });
+
       let subScale = {
         variableName: this.currentSubScale.variableName,
         jsExpression: this.itemsFormatted.filter(
@@ -298,6 +351,7 @@ export default {
           ).map(
             item => item.name
           ).join(' + '),
+        isAverageScore: this.scoringType === "sum" ? false : true,
         valid: this.valid && this.selectedItemCount >= 2
       };
 
@@ -332,7 +386,7 @@ export default {
         let item = this.items[i];
 
         if (
-          (item.inputType == 'radio' || item.inputType == 'prize' || item.inputType == 'slider' || item.inputType == 'checkbox') && 
+          (item.inputType == 'radio' || item.inputType == 'prize' || item.inputType == 'slider' || item.inputType == 'checkbox') &&
           item.options.hasScoreValue
         ) {
           const relatedSubScales = subScales.filter(subScale => subScale.items.includes(item.name));
@@ -365,12 +419,12 @@ export default {
 
         for (let i = start; i <= end; i++) {
           const status0 =
-            i >= start && i <= this.startRow || 
+            i >= start && i <= this.startRow ||
             i <= start && i >= this.startRow
           ;
 
           const status1 =
-            i >= end && i <= this.startRow || 
+            i >= end && i <= this.startRow ||
             i <= end && i >= this.startRow
           ;
 

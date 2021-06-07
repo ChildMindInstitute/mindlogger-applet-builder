@@ -14,7 +14,6 @@ export default class Activity {
 
     if (initialActivityData.compute && initialActivityData.compute.length) {
       const itemModel = new Item();
-
       const cumulative = itemModel.getItemBuilderData({
         name: 'cumulatives',
         ui: {
@@ -39,9 +38,8 @@ export default class Activity {
       preamble: initialActivityData.preamble || '',
       shuffleActivityOrder: initialActivityData.shuffle || false,
       isSkippable: initialActivityData.isSkippable || false,
-      items,
+      items: items || [],
       disableBack: initialActivityData.disableBack || false,
-      items: initialActivityData.items && initialActivityData.items.map(item => item) || [],
       id: initialActivityData._id || null,
       textRules: [(v) => !!v || 'This field is required'],
       error: '',
@@ -58,6 +56,11 @@ export default class Activity {
         ...subScale,
         valid: true
       })) || [],
+      finalSubScale: initialActivityData.finalSubScale || {
+        lookupTable: null,
+        variableName: '',
+        isAverageScore: null
+      },
       allowEdit: true,
       isPrize: initialActivityData.isPrize || false,
       valid: initialActivityData.valid !== undefined ? initialActivityData.valid : true,
@@ -123,42 +126,55 @@ export default class Activity {
 
         if (outsideValues && minIndex === outsideValues.index && outsideValues[1] === outsideValues[3]) {
           isVis = isVis.replace(outsideRegExp, '');
-          conditionalItem.conditions.push({
-            ifValue: items.find(({ name }) => name === outsideValues[1]),
-            maxValue: outsideValues[4],
-            minValue: outsideValues[2],
-            stateValue: {
-              name: "OUTSIDE OF",
-              val: "outsideof"
-            }
-          });
+          const itemIndex = items.findIndex(({ name }) => name === outsideValues[1]);
+
+          if (itemIndex !== -1) {
+            conditionalItem.conditions.push({
+              ifValue: items[itemIndex],
+              maxValue: outsideValues[4],
+              minValue: outsideValues[2],
+              stateValue: {
+                name: "OUTSIDE OF",
+                val: "outsideof"
+              }
+            });
+          }
         } else if (withinValues && minIndex === withinValues.index && withinValues[1] === withinValues[3]) {
           isVis = isVis.replace(insideRegExp, '');
-          conditionalItem.conditions.push({
-            ifValue: items.find(({ name }) => name === withinValues[1]),
-            maxValue: withinValues[4],
-            minValue: withinValues[2],
-            stateValue: {
-              name: "WITHIN",
-              val: "within"
-            }
-          });
+          const itemIndex = items.findIndex(({ name }) => name === withinValues[1]);
+
+          if (itemIndex !== -1) {
+            conditionalItem.conditions.push({
+              ifValue: items[itemIndex],
+              maxValue: withinValues[4],
+              minValue: withinValues[2],
+              stateValue: {
+                name: "BETWEEN",
+                val: "between"
+              }
+            });
+          }
         } else if (excludeValues && minIndex === excludeValues.index) {
           isVis = isVis.replace(excludeRegExp, '');
           const itemIndex = items.findIndex(({ name }) => name === excludeValues[1]);
-          const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == excludeValues[2]);
 
-          conditionalItem.conditions.push({
-            ifValue: items[itemIndex],
-            answerValue: {
-              name: option['schema:name'],
-              value: option['schema:value']
-            },
-            stateValue: {
-              name: "Doesn't include",
-              val: "!includes",
+          if (itemIndex !== -1) {
+            const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == excludeValues[2]);
+
+            if (option) {
+              conditionalItem.conditions.push({
+                ifValue: items[itemIndex],
+                answerValue: {
+                  name: option['schema:name'],
+                  value: option['schema:value']
+                },
+                stateValue: {
+                  name: "Doesn't include",
+                  val: "!includes",
+                }
+              })
             }
-          })
+          }
         } else if (includeValues && minIndex === includeValues.index) {
           isVis = isVis.replace(includeRegExp, '');
           const itemIndex = items.findIndex(({ name }) => name === includeValues[1]);
@@ -166,90 +182,102 @@ export default class Activity {
           if (itemIndex !== -1) {
             const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == includeValues[2]);
 
-            conditionalItem.conditions.push({
-              ifValue: items[itemIndex],
-              answerValue: {
-                name: option['schema:name'],
-                value: option['schema:value']
-              },
-              stateValue: {
-                name: "Includes",
-                val: "includes",
-              }
-            })
+            if (option) {
+              conditionalItem.conditions.push({
+                ifValue: items[itemIndex],
+                answerValue: {
+                  name: option['schema:name'],
+                  value: option['schema:value']
+                },
+                stateValue: {
+                  name: "Includes",
+                  val: "includes",
+                }
+              })
+            }
           }
         } else if (lessThanValues && isVis[lessThanValues.index - 1] !== "(" && minIndex === lessThanValues.index) {
           isVis = isVis.replace(lessThanRegExp, '');
-          conditionalItem.conditions.push({
-            ifValue: items.find(({ name }) => name === lessThanValues[1]),
-            minValue: lessThanValues[2],
-            stateValue: {
-              name: 'LESS THAN',
-              val: '<',
-            }
-          });
-        } else if (greaterThanValues && isVis[lessThanValues.index - 1] !== "(" && minIndex === greaterThanValues.index) {
-          isVis = isVis.replace(greaterThanRegExp, '');
-          conditionalItem.conditions.push({
-            ifValue: items.find(({ name }) => name === greaterThanValues[1]),
-            minValue: greaterThanValues[2],
-            stateValue: {
-              name: 'GREATER THAN',
-              val: '>',
-            }
-          });
-        } else if (notEqualToValues && minIndex === notEqualToValues.index) {
-          const itemIndex = items.findIndex(({ name }) => name === notEqualToValues[1]);
-          const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == notEqualToValues[2]);
-          
-          isVis = isVis.replace(notEqualToRegExp, '');
-          if (!option) {
-            return;
+          const itemIndex = items.findIndex(({ name }) => name === lessThanValues[1]);
+
+          if (itemIndex !== -1) {
+            conditionalItem.conditions.push({
+              ifValue: items[itemIndex],
+              minValue: lessThanValues[2],
+              stateValue: {
+                name: 'LESS THAN',
+                val: '<',
+              }
+            });
           }
+        } else if (greaterThanValues && isVis[greaterThanValues.index - 1] !== "(" && minIndex === greaterThanValues.index) {
+          isVis = isVis.replace(greaterThanRegExp, '');
+          const itemIndex = items.findIndex(({ name }) => name === greaterThanValues[1]);
 
-          conditionalItem.conditions.push({
-            ifValue: items[itemIndex],
-            answerValue: {
-              name: option['schema:name'],
-              value: option['schema:value']
-            },
-            stateValue: {
-              name: 'IS NOT EQUAL TO',
-              val: '!=',
+          if (itemIndex !== -1) {
+            conditionalItem.conditions.push({
+              ifValue: items[itemIndex],
+              minValue: greaterThanValues[2],
+              stateValue: {
+                name: 'GREATER THAN',
+                val: '>',
+              }
+            });
+          }
+        } else if (notEqualToValues && minIndex === notEqualToValues.index) {
+          isVis = isVis.replace(notEqualToRegExp, '');
+          const itemIndex = items.findIndex(({ name }) => name === notEqualToValues[1]);
+
+          if (itemIndex !== -1) {
+            const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == notEqualToValues[2]);
+
+            if (option) {
+              conditionalItem.conditions.push({
+                ifValue: items[itemIndex],
+                answerValue: {
+                  name: option['schema:name'],
+                  value: option['schema:value']
+                },
+                stateValue: {
+                  name: 'IS NOT EQUAL TO',
+                  val: '!=',
+                }
+              });
             }
-          });
+          }
         } else if (equalToValues && minIndex === equalToValues.index) {
-          const item = items.find(({ name }) => name === equalToValues[1]);
-
           isVis = isVis.replace(equalToRegExp, '');
-          if (item.inputType === 'radio') {
-            const itemIndex = items.findIndex(({ name }) => name === equalToValues[1]);
-            const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == equalToValues[2]);
+          const itemIndex = items.findIndex(({ name }) => name === equalToValues[1]);
 
-            if (!option) {
-              return;
+          if (itemIndex !== -1) {
+            const item = items[itemIndex];
+
+            if (item.inputType === 'radio') {
+              const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == equalToValues[2]);
+
+              if (option) {
+                conditionalItem.conditions.push({
+                  ifValue: item,
+                  answerValue: {
+                    name: option['schema:name'],
+                    value: option['schema:value']
+                  },
+                  stateValue: {
+                    name: 'IS EQUAL TO',
+                    val: '==',
+                  }
+                });
+              }
+            } else {
+              conditionalItem.conditions.push({
+                ifValue: item,
+                minValue: equalToValues[2],
+                stateValue: {
+                  name: 'EQUAL TO',
+                  val: '==',
+                }
+              });
             }
-
-            conditionalItem.conditions.push({
-              ifValue: item,
-              answerValue: {
-                name: option['schema:name'],
-                value: option['schema:value']
-              },
-              stateValue: {
-                name: 'IS EQUAL TO',
-                val: '==',
-              }
-            });
-          } else {
-            conditionalItem.conditions.push({
-              ifValue: item,
-              minValue: equalToValues[2],
-              stateValue: {
-                name: 'EQUAL TO',
-                val: '==',
-              }
-            });
           }
         } else {
           isVis = isVis.split('()').join('');
@@ -301,37 +329,41 @@ export default class Activity {
     }
 
     itemOrder.forEach((item) => {
-      const conditionalItem = this.ref.conditionalItems.find((cond) => cond.showValue === item);
-      let isVis = true;
+      const currentItem = this.ref.items.find(({ name }) => name === item);
 
-      if (conditionalItem) {
-        const operation = conditionalItem.operation === 'ANY' ? ' || ' : ' && ';
-        const visibleItems = conditionalItem.conditions.map((cond) => {
-          if (cond.stateValue.val === 'within') {
-            return `(${cond.ifValue.name} > ${cond.minValue} && ${cond.ifValue.name} < ${cond.maxValue})`;
-          } else if (cond.stateValue.val === 'outsideof') {
-            return `(${cond.ifValue.name} < ${cond.minValue} || ${cond.ifValue.name} > ${cond.maxValue})`;
-          } else if (cond.stateValue.val === 'includes') { 
-            return `${cond.ifValue.name}.${cond.stateValue.val}(${cond.answerValue.value})`
-          } else if (cond.stateValue.val === '!includes') {
-            return `!${cond.ifValue.name}.includes(${cond.answerValue.value})`
-          } else if (cond.stateValue.val === '=') {
-            return `${cond.ifValue.name} ${cond.stateValue.val}${cond.stateValue.val} ${cond.minValue}`; 
-          } else if (!cond.answerValue) {
-            return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.minValue}`;
-          } else {
-            return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.answerValue.value}`;
-          }
-        });
-        isVis = visibleItems.join(operation);
+      if (currentItem.ui.inputType !== "cumulativeScore") {
+        const conditionalItem = this.ref.conditionalItems.find((cond) => cond.showValue === item);
+        let isVis = true;
+
+        if (conditionalItem) {
+          const operation = conditionalItem.operation === 'ANY' ? ' || ' : ' && ';
+          const visibleItems = conditionalItem.conditions.map((cond) => {
+            if (cond.stateValue.val === 'between') {
+              return `(${cond.ifValue.name} > ${cond.minValue} && ${cond.ifValue.name} < ${cond.maxValue})`;
+            } else if (cond.stateValue.val === 'outsideof') {
+              return `(${cond.ifValue.name} < ${cond.minValue} || ${cond.ifValue.name} > ${cond.maxValue})`;
+            } else if (cond.stateValue.val === 'includes') {
+              return `${cond.ifValue.name}.${cond.stateValue.val}(${cond.answerValue.value})`
+            } else if (cond.stateValue.val === '!includes') {
+              return `!${cond.ifValue.name}.includes(${cond.answerValue.value})`
+            } else if (cond.stateValue.val === '=') {
+              return `${cond.ifValue.name} ${cond.stateValue.val}${cond.stateValue.val} ${cond.minValue}`;
+            } else if (!cond.answerValue) {
+              return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.minValue}`;
+            } else {
+              return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.answerValue.value}`;
+            }
+          });
+          isVis = visibleItems.join(operation);
+        }
+
+        const property = {
+          variableName: item,
+          isAbout: item,
+          isVis,
+        };
+        addProperties.push(property);
       }
-
-      const property = {
-        variableName: item,
-        isAbout: item,
-        isVis,
-      };
-      addProperties.push(property);
     });
     return addProperties;
   }
@@ -340,7 +372,7 @@ export default class Activity {
     const { items, conditionalItems } = this.ref;
 
     if (!items.length) return [];
-    return items.map(({ name }) => name);
+    return items.filter(({ ui }) => ui.inputType !== "cumulativeScore").map(({ name }) => name);
   }
 
   getCompressedSchema() {
@@ -366,6 +398,8 @@ export default class Activity {
       scoringLogic: {},
       'repronim:timeUnit': 'yearmonthdate',
       isPrize: this.ref.isPrize,
+      baseAppletId: this.ref.baseAppletId,
+      baseActivityId: this.ref.baseActivityId,
       ui: {
         order: itemOrder,
         shuffle: this.ref.shuffleActivityOrder,
@@ -373,6 +407,7 @@ export default class Activity {
         allow: allowed,
       },
       subScales: this.ref.subScales,
+      finalSubScale: (this.ref.finalSubScale.variableName ? [this.ref.finalSubScale] : []),
       ...this.parseCumulative(),
     };
   }
@@ -408,7 +443,7 @@ export default class Activity {
     };
   }
 
-  parseCumulative () {
+  parseCumulative() {
     const item = this.ref.items.find(item => item.ui.inputType === 'cumulativeScore');
 
     let compute = [], messages = [];
@@ -479,7 +514,7 @@ export default class Activity {
 
           oldOptions.forEach(option => {
             const property = newOptions.find(newOption => newOption.variableName === option.variableName);
-            
+
             if (!property) {
               removedOptions.push(option);
             } else if (typeof property.isVis === 'boolean' && typeof option.isVis !== 'boolean') {
@@ -546,7 +581,7 @@ export default class Activity {
               let oldSubScale = oldSubScales.find(old => old.subScaleId == newSubScale.subScaleId);
 
               if (
-                oldSubScale.variableName != newSubScale.variableName || 
+                oldSubScale.variableName != newSubScale.variableName ||
                 oldSubScale.jsExpression != newSubScale.jsExpression
               ) {
                 updates.push(`subscale (${oldSubScale.variableName} | ${oldSubScale.jsExpression.replaceAll(' + ', ', ')}) was updated to ${newSubScale.variableName} | ${newSubScale.jsExpression.replaceAll(' + ', ', ')}`);
@@ -605,6 +640,26 @@ export default class Activity {
           return updates;
         }
       },
+      'finalSubScale': {
+        updated: (field) => {
+          const newSubScale = _.get(newValue, field, []);
+          const oldSubScale = _.get(oldValue, field, []);
+
+          if (newSubScale.length && !oldSubScale.length) {
+            return ['Final SubScale was added'];
+          }
+
+          if (!newSubScale.length && oldSubScale.length) {
+            return ['Final SubScale was deleted'];
+          }
+
+          if (JSON.stringify(newSubScale) != JSON.stringify(oldSubScale)) {
+            return ['Final SubScale was updated'];
+          }
+
+          return [];
+        }
+      }
     };
   }
 
@@ -752,6 +807,7 @@ export default class Activity {
       ['reprolib:terms/allow']: allow,
       ['reprolib:terms/addProperties']: addProperties,
       ['reprolib:terms/subScales']: subScales,
+      ['reprolib:terms/finalSubScale']: finalSubScale,
       ['reprolib:terms/compute']: compute,
       ['reprolib:terms/messages']: messages,
       ['reprolib:terms/isPrize']: isPrize,
@@ -782,6 +838,29 @@ export default class Activity {
       }
     });
 
+    const parseLookupTable = (isFinalSubScale, lookupTable) => lookupTable.map(row => {
+      const age = row['reprolib:terms/age'];
+      const rawScore = row['reprolib:terms/rawScore'];
+      const sex = row['reprolib:terms/sex'];
+      const tScore = row['reprolib:terms/tScore'];
+      const outputText = row['reprolib:terms/outputText'];
+
+      let data = {
+        rawScore: rawScore && rawScore[0] && rawScore[0]['@value'] || '',
+        outputText: outputText && outputText[0] && outputText[0]['@value']
+      }
+
+      if (!isFinalSubScale) {
+        Object.assign(data, {
+          age: age && age[0] && age[0]['@value'] || '',
+          sex: sex && sex[0] && sex[0]['@value'] || '',
+          tScore: tScore && tScore[0] && tScore[0]['@value'] || ''
+        })
+      }
+
+      return data;
+    });
+
     const activityInfo = {
       _id: id && id.split('/')[1],
       name:
@@ -808,23 +887,16 @@ export default class Activity {
         };
 
         if (lookupTable && Array.isArray(lookupTable)) {
-          subScaleData['lookupTable'] = lookupTable.map(row => {
-            const age = row['reprolib:terms/age'];
-            const rawScore = row['reprolib:terms/rawScore'];
-            const sex = row['reprolib:terms/sex'];
-            const tScore = row['reprolib:terms/tScore'];
-
-            return {
-              age: age && age[0] && age[0]['@value'] || '',
-              rawScore: rawScore && rawScore[0] && rawScore[0]['@value'] || '',
-              sex: sex && sex[0] && sex[0]['@value'] || '',
-              tScore: tScore && tScore[0] && tScore[0]['@value'] || '',
-            }
-          })
+          subScaleData['lookupTable'] = parseLookupTable(false, lookupTable);
         }
 
         return subScaleData;
       }),
+      finalSubScale: finalSubScale && finalSubScale[0] && {
+        isAverageScore: _.get(finalSubScale, [0, 'reprolib:terms/isAverageScore', 0, '@value'], false),
+        lookupTable: parseLookupTable(true, _.get(finalSubScale, [0, 'reprolib:terms/lookupTable'], [])),
+        variableName: _.get(finalSubScale, [0, 'reprolib:terms/variableName', 0, '@value'])
+      },
       compute: Array.isArray(compute) && compute.map((exp) => {
         const jsExpression = exp['reprolib:terms/jsExpression'];
         const variableName = exp['reprolib:terms/variableName'];
@@ -864,7 +936,7 @@ export default class Activity {
   }
 
   static checkValidation (act) {
-    if (!act.name || !act.description) {
+    if (!act.name) {
       return false;
     }
 

@@ -10,8 +10,7 @@
         color="primary"
         indeterminate
         :size="50"
-      >
-      </v-progress-circular>
+      />
     </v-card>
   </v-dialog>
 </template>

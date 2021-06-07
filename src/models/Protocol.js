@@ -1,8 +1,8 @@
 import api from '../utilities/api';
 import util from '../utilities/util';
 import Activity from './Activity';
+import Item from './Item';
 import _ from 'lodash';
-import { version } from 'core-js';
 
 export default class Protocol {
   constructor() {
@@ -48,9 +48,7 @@ export default class Protocol {
 
   getCompressedSchema() {
     const variableMap = this.getVariableMap();
-    const activityDisplayNames = this.getActivityDisplayNames();
     const activityOrder = this.getActivityOrder();
-    const activityVisibility = this.getActivityVisibility();
     const schema = {
       "@context": [
         "https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json",
@@ -61,6 +59,7 @@ export default class Protocol {
       "@id": `${this.ref.name}_schema`,
       "skos:prefLabel": this.ref.name,
       "schema:description": this.ref.description,
+      "schema:image": this.ref.image,
       "schema:schemaVersion": this.ref.protocolVersion,
       "schema:version": this.ref.protocolVersion,
       landingPageContent: this.ref.markdownData, //point to the readme of protocol
@@ -138,11 +137,16 @@ export default class Protocol {
       'skos:prefLabel': {
         updated: (field) => `Applet name was changed to ${_.get(newValue, field)}`,
       },
+      'schema:image': {
+        updated: (field) => `Applet image was changed to ${_.get(newValue, field)}`,
+        removed: (field) => `Applet image was removed`,
+        inserted: (field) => `Applet image was added (${_.get(newValue, field)})`
+      },
       'schema:description': {
         updated: (field) => `Applet description was changed to ${_.get(newValue, field)}`,
         removed: (field) => `Applet description was removed`,
         inserted: (field) => `Applet description was added (${_.get(newValue, field)})`
-      }, 
+      },
     }
   }
 
@@ -153,7 +157,7 @@ export default class Protocol {
     } = old.protocol;
 
     const {
-      "data": currentData, 
+      "data": currentData,
       "activities": currentActivities
     } = current.protocol;
 
@@ -161,7 +165,7 @@ export default class Protocol {
     let versionUpgrade = '0.0.0';
     let updates = { activities: {} };
     let removed = {activities: [], items: []};
-  
+
     const metaInfoChanges = util.compareValues(oldData, currentData, Object.keys(logTemplates));
     const activityChanges = util.compareIDs(oldActivities, currentActivities, 'data._id');
 
@@ -281,10 +285,11 @@ export default class Protocol {
 
   static async parseJSONLD(applet, protocol) {
     const prefLabel = applet['http://www.w3.org/2004/02/skos/core#prefLabel'];
-
     const protocolInfo = {
       id: protocol._id.split('/')[1],
       name: _.get(prefLabel, [0, '@value'], 'applet'),
+      appletId: applet['_id'].split("/").pop(),
+      image: applet['schema:image'],
       description: applet['schema:description'][0]['@value'],
       protocolVersion: _.get(applet, 'schema:schemaVersion[0].@value', this.protocolVersion)
     };
@@ -301,6 +306,81 @@ export default class Protocol {
     }
 
     return protocolInfo;
+  }
+
+  static async parseApplet(data) {
+    const { applet, activities, items, protocol } = data;
+
+    let initialStoreData = {
+      ... await Protocol.parseJSONLD(applet, protocol),
+      valid: true,
+      activities: [],
+      tokenPrizeModal: false,
+    };
+
+    const activityModel = new Activity();
+    const itemModel = new Item();
+
+    Object.values(activities).forEach((act) => {
+      const activityInfo = Activity.parseJSONLD(act)
+      const activityItems = activityInfo.orderList.filter(key => items[key]).map((key) => {
+        return itemModel.getItemBuilderData(Item.parseJSONLD(items[key]));
+      });
+
+      const builderData = activityModel.getActivityBuilderData({
+        ...activityInfo,
+        items: activityItems,
+      });
+      builderData.index = initialStoreData.activities.length;
+
+      initialStoreData.activities.push(builderData);
+    });
+
+    initialStoreData.prizeActivity = initialStoreData.activities.find(activity => activity.isPrize);
+
+    return initialStoreData;
+  }
+
+  static formattedProtocol(protocol) {
+    const protocolModel = new Protocol();
+    const activities = protocol.activities.map(activity => {
+      const activityModel = new Activity();
+
+      activityModel.updateReferenceObject({
+        ...activity,
+        items: activity.items.map(item => {
+          const itemModel = new Item();
+
+          itemModel.updateReferenceObject(item);
+          return itemModel.getItemData()
+        })
+      });
+
+      return activityModel.getActivityData();
+    })
+
+    protocolModel.updateReferenceObject({
+      ...protocol,
+      activities
+    });
+
+    return protocolModel.getProtocolData();
+  }
+
+  static async getBuilderFormat(applet, upgradeVersion=false) {
+    const protocol = await Protocol.parseApplet(applet)
+    const builderData = await Protocol.formattedProtocol(protocol);
+
+    if (upgradeVersion) {
+      builderData.protocol.data[
+        'schema:schemaVersion'
+      ] = builderData.protocol.data['schema:version'] = util.upgradeVersion(
+        builderData.protocol.data['schema:version'],
+        '0.0.1'
+      );
+    }
+
+    return builderData;
   }
 
   static checkValidation(protocol) {

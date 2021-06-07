@@ -177,6 +177,22 @@
         </template>
         <span>View History</span>
       </v-tooltip>
+      <v-tooltip
+        bottom
+      >
+        <template v-slot:activator="{ on }">
+          <v-btn
+            class="mx-1"
+            @click="$emit('switchToLibrary')"
+            v-on="on"
+          >
+            <v-icon>
+              mdi-database-import
+            </v-icon>
+          </v-btn>
+        </template>
+        <span>Import from Library</span>
+      </v-tooltip>
     </v-row>
 
     <v-dialog
@@ -301,8 +317,8 @@ export default {
           this.$emit("uploadProtocol", data);
         } else {
           let { upgrade, updates, removed } = Protocol.getChangeInfo(this.formattedOriginalProtocol, data, true);
-
           let newVersion = util.upgradeVersion(this.protocol.protocolVersion, upgrade);
+
           if (newVersion != this.protocol.protocolVersion) {
             updates.data['schema:schemaVersion'] = updates.data['schema:version'] = newVersion;
 
@@ -393,8 +409,8 @@ export default {
 
       for (let activity of this.protocol.activities) {
         const valid = !(
-          !activity.valid 
-            || activity.items.some(item => !item.valid) 
+          !activity.valid
+            || activity.items.some(item => !item.valid)
             || activity.subScales.some(subScale => !subScale.valid)
             || activity.conditionalItems.some(conditional => !conditional.valid)
             || (activity.items.length === 0)
@@ -470,7 +486,7 @@ export default {
           this.historyComponentKey++;
         }
       );
-    },
+    }
   }
 }
 </script>

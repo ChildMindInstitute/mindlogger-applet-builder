@@ -12,9 +12,15 @@
         :sub-scale="subScale"
         :sub-scales="currentActivity.subScales"
         :items="currentActivity.items"
+        :has-lookup-table="!!subScale.lookupTable"
         class="ma-4"
         @onCreateLookupTable="onCreateLookupTable"
         @onDeleteLookupTable="onDeleteLookupTable"
+      />
+      <FinalSubScaleBuilder
+        :sub-scale="currentActivity.finalSubScale"
+        @onCreateLookupTable="onCreateLookupTable(-1)"
+        @onDeleteLookupTable="onDeleteLookupTable(-1)"
       />
     </div>
     <v-btn
@@ -46,7 +52,8 @@
     >
       <LookUpTableUploader
         :key="`lookup-table-${lookupTableUploadDlgKey}`"
-        :sub-scale="currentActivity.subScales[subScaleEditIndex]"
+        :sub-scale="subScaleEditIndex >= 0 ? currentActivity.subScales[subScaleEditIndex] : currentActivity.finalSubScale"
+        :is-final-subscale="subScaleEditIndex < 0"
         @closeLookupTableModal="onCloseLookUpTableModal"
       />
     </v-dialog>
@@ -59,11 +66,13 @@ import config from '../../../config';
 import SubScaleBuilder from './SubScaleBuilder';
 import { ageScreen, genderScreen } from './lookupTable';
 import LookUpTableUploader from './LookUpTableUploader';
+import FinalSubScaleBuilder from './FinalSubScaleBuilder';
 
 export default {
   components: {
     SubScaleBuilder,
     LookUpTableUploader,
+    FinalSubScaleBuilder,
   },
   data () {
     return {
@@ -92,6 +101,7 @@ export default {
       [
         'addSubScale',
         'updateSubScaleData',
+        'updateFinalSubScale',
         'deleteItem',
         'addItem'
       ]
@@ -126,16 +136,23 @@ export default {
     },
 
     onDeleteLookupTable (index) {
-      let updatedSubScale = {...this.currentActivity.subScales[index]};
+      if (index < 0) {
+        this.updateFinalSubScale({
+          ...this.currentActivity.finalSubScale,
+          lookupTable: null
+        });
 
-      delete updatedSubScale['lookupTable'];
+        return ;
+      }
+
+      let updatedSubScale = {...this.currentActivity.subScales[index], lookupTable: null};
 
       this.updateSubScaleData({
         index,
         obj: updatedSubScale
       });
 
-      if (this.currentActivity.subScales.find((subScale) => !!subScale['lookupTable'])) {
+      if (this.currentActivity.subScales.every((subScale) => !subScale['lookupTable'])) {
         const itemCount = this.currentActivity.items.length;
 
         for (let i = itemCount - 1; i >= 0; i--) {
@@ -149,21 +166,33 @@ export default {
     onCloseLookUpTableModal(lookupTable) {
       this.lookupTableDialog = false;
 
-      if (lookupTable) {
-        if (!this.currentActivity.subScales.find((subScale) => !!subScale['lookupTable'])) {
-          for (let screen of [ageScreen, genderScreen]) {
-            this.addItem(screen);
-          }
-        }
-
-        this.updateSubScaleData({
-          index: this.subScaleEditIndex,
-          obj: {
-            ...this.currentActivity.subScales[this.subScaleEditIndex],
-            lookupTable
-          }
-        })
+      if (!lookupTable) {
+        return ;
       }
+
+      if (this.subScaleEditIndex == -1) {
+        this.updateFinalSubScale({
+          ...this.currentActivity.finalSubScale,
+          lookupTable
+        });
+
+        return;
+      }
+
+
+      if (!this.currentActivity.subScales.find((subScale) => !!subScale['lookupTable'])) {
+        for (let screen of [ageScreen, genderScreen]) {
+          this.addItem(screen);
+        }
+      }
+
+      this.updateSubScaleData({
+        index: this.subScaleEditIndex,
+        obj: {
+          ...this.currentActivity.subScales[this.subScaleEditIndex],
+          lookupTable
+        }
+      })
     },
   }
 }

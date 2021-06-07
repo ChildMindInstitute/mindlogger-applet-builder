@@ -23,10 +23,10 @@
         />
         <div class="d-flex flex-row mt-6">
           <v-subheader class="ml-2">
-            Edit About Page
+            About Page
           </v-subheader>
           <v-btn
-            class="ml-10"
+            class="ml-2"
             fab
             small
             @click="onEditAboutPage"
@@ -35,6 +35,21 @@
               mdi-pencil
             </v-icon>
           </v-btn>
+
+          <v-subheader class="ml-10">
+            Applet Image
+          </v-subheader>
+
+          <Uploader
+            :initialType="'image'"
+            :initialData="appletImage"
+            :initialAdditionalType="'small-circle'"
+            :initialTitle="'Applet Image'"
+            @onAddFromUrl="onAddImageFromUrl($event)"
+            @onAddFromDevice="onAddImageFromDevice($event)"
+            @onRemove="onRemoveImage()"
+            @onNotify="onEventNotify($event)"
+          />
         </div>
       </v-card>
 
@@ -131,6 +146,7 @@
 
 <script>
 import LandingPageEditor from './LandingPageEditor';
+import Uploader from './Uploader.vue'; 
 import Protocol from '../../models/Protocol';
 import Activity from '../../models/Protocol';
 import Item from '../../models/Protocol';
@@ -141,6 +157,7 @@ import { mapMutations, mapGetters } from 'vuex';
 export default {
   components: {
     LandingPageEditor,
+    Uploader,
   },
   data () {
     return {
@@ -178,6 +195,15 @@ export default {
       }
     },
 
+    appletImage: {
+      get: function () {
+        return this.protocol.image
+      },
+      set: function (appletImage) {
+        this.updateProtocolMetaInfo({ image: appletImage })
+      }
+    },
+
     withoutPrize () {
       return this.activities.filter(activity => Boolean(activity['isPrize']) === false);
     },
@@ -203,6 +229,46 @@ export default {
         'setCurrentScreen',
       ]
     ),
+    onAddImageFromUrl (event) {
+      this.appletImage = event;
+      this.$emit('notify', {
+        type: 'success',
+        message: `Applet image from URL is successfully added.`,
+        duration: 3000,
+      });
+    },
+    async onAddImageFromDevice (uploadFunction) {
+      this.$emit('loading', true); 
+
+      try {
+        this.appletImage = await uploadFunction();
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'success',
+          message: `Applet image is successfully added.`,
+          duration: 3000,
+        });
+      } catch (error) {
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'error',
+          message: `Something went wrong with uploading applet image.`,
+        });
+      }
+    },
+    onRemoveImage () {
+      this.appletImage = '';
+      // this.update();
+      this.$emit('notify', {
+        type: 'warning',
+        message: `Applet image is successfully removed.`,
+        duration: 3000,
+      });
+    },
+    onEventNotify (event) {
+      this.$emit('loading', false); 
+      this.$emit('notify', event);
+    },
     onSubmitEditor (markdownData) {
       this.markdownData = markdownData;
       this.onCloseEditor();

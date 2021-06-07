@@ -1,6 +1,7 @@
 import Protocol from '../../../models/Protocol';
 import Activity from '../../../models/Activity';
 import Item from '../../../models/Item';
+import { getInitialProtocol } from './state';
 
 const itemMutations = {
   updateItemMetaInfo (state, { index, obj }) {
@@ -35,10 +36,13 @@ const itemMutations = {
       item.name = `Screen${lastIndex >= 0 ? lastIndex + 1 : state.currentActivity.items.length + 1}`;
     }
 
+    const itemData = model.getItemBuilderData(item);
+    itemData.valid = Item.checkValidation(itemData);
+
     if (lastIndex >= 0) {
-      state.currentActivity.items.splice(lastIndex, 0, model.getItemBuilderData(item));
+      state.currentActivity.items.splice(lastIndex, 0, itemData);
     } else {
-      state.currentActivity.items.push(model.getItemBuilderData(item));
+      state.currentActivity.items.push(itemData);
     }
   },
 
@@ -57,6 +61,11 @@ const itemMutations = {
       name: `${item.name}__${suffix}`,
       id: null,
     };
+
+    // if (state.protocol.id && item.id) {
+    //   newItem.baseAppletId = state.protocol.appletId;
+    //   newItem.baseItemId = item.id;
+    // }
 
     let lastIndex = state.currentActivity.items.findIndex(item => !item.allowEdit || item.inputType == 'cumulativeScore');
 
@@ -93,7 +102,7 @@ const activityMutations = {
       suffix++;
     }
 
-    activities.push({
+    const newActivity = {
       ...activity,
       id: null,
       name: `${activity.name} (${suffix})`,
@@ -102,7 +111,14 @@ const activityMutations = {
         id: null,
       })),
       conditionalItems: [...activity.conditionalItems],
-    });
+    };
+
+    // if (state.protocol.id && activity.id) {
+    //   newActivity.baseAppletId = state.protocol.appletId
+    //   newActivity.baseActivityId = activity.id
+    // }
+
+    activities.push(newActivity);
   },
 
   deleteActivity (state, index) {
@@ -152,7 +168,9 @@ const activityMutations = {
 const subScaleMutations = {
   addSubScale (state) {
     if (state.currentActivity) {
-      state.currentActivity.subScales.push({});
+      state.currentActivity.subScales.push({
+        lookupTable: null
+      });
     }
   },
 
@@ -162,6 +180,10 @@ const subScaleMutations = {
 
   deleteSubScale (state, index) {
     state.currentActivity.subScales.splice(index, 1);
+  },
+
+  updateFinalSubScale(state, obj) {
+    Object.assign(state.currentActivity.finalSubScale, obj);
   }
 };
 
@@ -217,18 +239,7 @@ export default {
   },
 
   resetProtocol (state) {
-    state.protocol = {
-      id: '',
-      description: '',
-      markdownData: '',
-      name: '',
-      protocolVersion: '1.0.0',
-      valid: false,
-      prizeActivity: null,
-      activities: [],
-      tokenPrizeModal: false
-    };
-
+    state.protocol = getInitialProtocol()
     state.original = null;
   },
 
@@ -250,5 +261,5 @@ export default {
 
   setVersions (state, versions) {
     state.versions = versions;
-  }
+  },
 }

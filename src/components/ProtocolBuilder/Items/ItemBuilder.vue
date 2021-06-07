@@ -16,6 +16,7 @@
       <v-spacer />
       <v-card-actions>
         <v-btn
+          v-if="item.allowEdit"
           icon
           @click="duplicateItem(itemIndex)"
         >
@@ -50,7 +51,7 @@
         <v-btn
           v-if="item.allowEdit"
           icon
-          @click="onDeleteItem"
+          @click="onDeleteItem(item)"
         >
           <v-icon color="grey lighten-1">
             mdi-delete
@@ -110,6 +111,7 @@
           auto-grow
           filled
           rows="1"
+          :error-messages="largeText ? '' : 'Large Text is required.'"
         />
       </template>
 
@@ -201,7 +203,7 @@
         v-if="item.inputType === 'radio' || item.inputType === 'checkbox'"
         :key="`${baseKey}-radio`"
         :is-multiple-choice="item.inputType === 'checkbox'"
-        :is-skippable-item="item.allow"
+        :is-skippable-item="skippable"
         :initial-response-options="item.responseOptions"
         :initial-item-data="item.options"
         :item-templates="itemTemplates"
@@ -222,7 +224,7 @@
         v-if="item.inputType === 'stackedRadio' || item.inputType === 'stackedCheckbox'"
         :key="`${baseKey}-stackedRadio`"
         :is-multiple-choice="item.inputType === 'stackedCheckbox'"
-        :is-skippable-item="item.allow"
+        :is-skippable-item="skippable"
         :response-options="item.responseOptions"
         :initial-item-data="item.options"
         :item-templates="itemTemplates"
@@ -234,7 +236,7 @@
       <TextBuilder
         v-if="item.inputType === 'text'"
         :key="`${baseKey}-text`"
-        :is-skippable-item="item.allow"
+        :is-skippable-item="skippable"
         :initial-item-data="item.options"
         :response-option="item.responseOptions"
         :initial-answer="item.correctAnswer"
@@ -246,7 +248,7 @@
       <SliderBuilder
         v-if="item.inputType === 'slider'"
         :key="`${baseKey}-slider`"
-        :is-skippable-item="item.allow"
+        :is-skippable-item="skippable"
         :initial-item-data="item.options"
         :initial-response-options="item.responseOptions"
         :initial-is-optional-text="item.isOptionalText"
@@ -261,10 +263,12 @@
       <StackedSliderBuilder
         v-if="item.inputType === 'stackedSlider'"
         :key="`${baseKey}-stackedSlider`"
-        :is-skippable-item="item.allow"
+        :is-skippable-item="skippable"
         :initial-item-data="item.options"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
+        @loading="loading = $event"
+        @notify="notify = $event"
       />
 
       <VideoBuilder
@@ -272,8 +276,10 @@
         :key="`${baseKey}-video`"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
+        :is-skippable-item="skippable"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
+        @updateAllow="updateAllow"
       />
 
       <PhotoBuilder
@@ -281,8 +287,10 @@
         :key="`${baseKey}-photo`"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
+        :is-skippable-item="skippable"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
+        @updateAllow="updateAllow"
       />
 
       <TimeRangeBuilder
@@ -290,8 +298,10 @@
         :key="`${baseKey}-timeRange`"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
+        :is-skippable-item="skippable"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
+        @updateAllow="updateAllow"
       />
 
       <DateBuilder
@@ -299,8 +309,10 @@
         :key="`${baseKey}-date`"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
+        :is-skippable-item="skippable"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
+        @updateAllow="updateAllow"
       />
 
       <DrawingBuilder
@@ -309,9 +321,11 @@
         :initial-item-response-options="item.responseOptions"
         :initial-item-input-options="item.inputOptions"
         :initial-is-optional-text="item.isOptionalText"
+        :is-skippable-item="skippable"
         @updateResponseOptions="updateResponseOptions"
         @updateInputOptions="updateInputOptions"
         @updateOptionalText="updateOptionalText"
+        @updateAllow="updateAllow"
         @loading="loading = $event"
         @notify="notify = $event"
       />
@@ -319,7 +333,7 @@
       <AudioRecordBuilder
         v-if="item.inputType === 'audioRecord'"
         :key="`${baseKey}-audioRecord`"
-        :is-skippable-item="item.allow"
+        :is-skippable-item="skippable"
         :initial-item-data="item.options"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
@@ -332,8 +346,9 @@
       <AudioImageRecordBuilder
         v-if="item.inputType === 'audioImageRecord'"
         :key="`${baseKey}-audioImageRecord`"
+        :initial-item-data="item.options"
         :initial-item-response-options="item.responseOptions"
-        :is-skippable-item="item.allow"
+        :is-skippable-item="skippable"
         @checkValidation="valid = $event"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
@@ -346,16 +361,18 @@
         :key="`${baseKey}-geolocation`"
         :initial-item-response-options="item.responseOptions"
         :initial-is-optional-text="item.isOptionalText"
+        :is-skippable-item="skippable"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @loading="loading = $event"
         @notify="notify = $event"
+        @updateAllow="updateAllow"
       />
 
       <AudioStimulusBuilder
         v-if="item.inputType === 'audioStimulus'"
         :key="`${baseKey}-audioStimulus`"
-        :is-skippable-item="item.allow"
+        :is-skippable-item="skippable"
         :initial-item-input-options="item.inputOptions"
         :initial-item-media="item.media"
         :initial-item-data="item.options"
@@ -374,19 +391,18 @@
         :initial-item-data="item"
         @updateCumulativeScore="updateCumulativeScore"
       />
-      
     </v-form>
 
     <div class="px-2">
       <div class="item-quiz">
         <img
           width="15"
-          :src="itemInputTypes.find(({ text }) => text === item.inputType).icon" 
+          :src="itemInputTypes.find(({ text }) => text === item.inputType).icon"
         >
-        
-        <span 
-          class="ml-2"
+
+        <span
           v-if="item.inputType !== 'cumulativeScore' && item.inputType !== 'markdownMessage'"
+          class="ml-2"
         >
           {{ largeText }}
         </span>
@@ -396,6 +412,59 @@
     <Notify :notify="notify" />
     <Loading :loading="loading" />
 
+    <v-dialog
+      v-model="removeDialog"
+      persistent
+      max-width="720"
+    >
+      <v-card>
+        <v-card-title class="headline">
+          Delete Item
+        </v-card-title>
+        <v-card-text>
+          Are you sure you want to delete this item? It will also remove the below condition
+          <v-list>
+            <v-list-group
+              v-for="conditional in itemConditionals"
+              :key="conditional.id"
+              no-action
+            >
+              <template v-slot:activator>
+                <v-list-item-content>
+                  <v-list-item-title v-text="'If ' + conditional.operation + ' of the `IF` rules are matched, show ' + conditional.showValue" />
+                </v-list-item-content>
+              </template>
+
+              <v-list-item
+                v-for="condition in conditional.conditions"
+                :key="conditional.id + condition.ifValue.name"
+              >
+                <v-list-item-content>
+                  <v-list-item-title v-text="condition.ifValue.name + ' ' + condition.stateValue.name + ' is ' + condition.answerValue.name" />
+                </v-list-item-content>
+              </v-list-item>
+            </v-list-group>
+          </v-list>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="primary"
+            text
+            @click="removeDialog = false"
+          >
+            No
+          </v-btn>
+          <v-btn
+            color="primary"
+            text
+            @click="removeConditionals()"
+          >
+            Yes
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-card>
 </template>
 
@@ -503,7 +572,6 @@ import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
 import StackedSliderBuilder from "./ItemBuilders/StackedSliderBuilder";
 
 import MarkDownEditor from "../MarkDownEditor";
-
 import Item from '../../../models/Item';
 
 import Notify from '../Additional/Notify.vue';
@@ -549,7 +617,9 @@ export default {
           /^[a-zA-Z0-9-_]+$/.test(v) ||
           "Item name must be contain only alphanumeric symbols or underscore"
       ],
+      itemConditionals: [],
       hasScoringItem: false,
+      removeDialog: false,
       valid: false,
       largeText: '',
       headerImage: '',
@@ -574,12 +644,23 @@ export default {
       ]
     ),
 
+    conditionals () {
+      return this.currentActivity.conditionalItems;
+    },
+
     hasPrizeActivity () {
       return !!this.prizeActivity;
     },
 
     item () {
       return this.currentActivity.items[this.itemIndex];
+    },
+    skippable() {
+      if (this.currentActivity.isSkippable) {
+        return 2;
+      }
+
+      return Number(this.item.allow);
     }
   },
   watch: {
@@ -615,6 +696,7 @@ export default {
       [
         'updateItemMetaInfo',
         'duplicateItem',
+        'deleteConditional',
         'deleteItem',
         'updateItemInputType',
         'setTokenPrizeModalStatus',
@@ -622,7 +704,7 @@ export default {
       ],
     ),
 
-    setItemName() {
+    setItemName () {
       if(!this.item.name) this.onUpdateName(`Screen${this.itemIndex + 1}`);
     },
 
@@ -631,7 +713,33 @@ export default {
     },
 
     onDeleteItem () {
+      this.itemConditionals = [];
+      this.conditionals.forEach(conditional => {
+        if (conditional.showValue === this.item.name) {
+          this.itemConditionals.push(conditional);
+        } else if(conditional.conditions.find(({ ifValue }) => ifValue.name === this.item.name)) {
+          this.itemConditionals.push(conditional);
+        }
+      });
+
+      if (this.itemConditionals.length) {
+        this.removeDialog = true;
+      } else {
+        this.removeConditionals();
+      }
+    },
+
+    removeConditionals () {
       this.deleteItem(this.itemIndex);
+      this.itemConditionals.forEach((conditional) => {
+        const index = this.conditionals.findIndex(({ id }) => id === conditional.id);
+
+        if (index !== -1) {
+          this.deleteConditional(index);
+        }
+      })
+
+      this.removeDialog = false;
     },
 
     nameKeydown (e) {

@@ -88,7 +88,6 @@
             <div class="d-flex align-center justify-end">
               <v-btn
                 icon
-                large
                 @click="option.expanded = !option.expanded"
               >
                 <v-icon
@@ -115,7 +114,6 @@
               />
               <v-btn
                 icon
-                large
                 @click="deleteOption(index)"
               >
                 <v-icon color="grey lighten-1">
@@ -130,21 +128,20 @@
             class="px-8"
           >
             <v-row>
-              <v-col 
+              <v-col
                 cols="12"
-                sm="5"
-                md="4"
+                sm="6"
+                md="5"
               >
                 <v-text-field
                   v-model="option.name"
                   :rules="textRules"
                   label="Option Text"
                   counter="75"
-                  maxlength="75"
                   @change="updateOption(option)"
                 />
               </v-col>
-              <v-col 
+              <v-col
                 v-if="isTokenValue"
                 cols="12"
                 sm="5"
@@ -180,19 +177,61 @@
             </v-row>
 
             <v-row>
-              <v-col 
+              <v-col
                 cols="12"
                 sm="12"
               >
+                <div
+                  class="ds-tooltip-header d-flex justify-space-between align-center"
+                  :class="!isTooltipOpen ? 'ds-tooltip-close' : ''"
+                >
+                  <span>Tooltip Creator</span>
+                  <v-btn
+                    icon
+                    @click="isTooltipOpen = !isTooltipOpen"
+                  >
+                    <v-icon
+                      v-if="isTooltipOpen"
+                      color="white lighten-1"
+                    >
+                      mdi-chevron-double-up
+                    </v-icon>
+                    <v-icon
+                      v-else
+                      color="grey lighten-1"
+                    >
+                      edit
+                    </v-icon>
+                  </v-btn>
+                </div>
                 <MarkDownEditor
+                  v-if="isTooltipOpen"
                   v-model="option.description"
                   @input="updateOption(option)"
                 />
               </v-col>
             </v-row>
 
+            <v-row
+              v-if="hasResponseAlert"
+            >
+              <v-col
+                class="d-flex align-center"
+                cols="12"
+                sm="12"
+              >
+                <v-text-field
+                  v-model="option.alert"
+                  label="Alert Message"
+                  :rules="alertTextRules"
+                  required
+                  @change="updateOption(option)"
+                />
+              </v-col>
+            </v-row>
+
             <v-row>
-              <v-col 
+              <v-col
                 v-if="isTokenValue"
                 cols="auto"
               >
@@ -221,29 +260,11 @@
         </v-btn>
       </div>
 
-      <v-row
-        v-if="hasResponseAlert"
-      >
-        <v-col
-          class="d-flex align-center"
-          cols="12"
-          sm="12"
-        >
-          <v-text-field
-            v-model="responseAlertMessage"
-            label="Alert Message"
-            :rules="alertTextRules"
-            required
-            @change="update"
-          />
-        </v-col>
-      </v-row>
-
       <v-divider
         class="mt-4"
       />
       <v-row>
-        <v-col 
+        <v-col
           class="d-flex align-center"
           cols="12"
           md="3"
@@ -255,7 +276,7 @@
             @change="updateTokenOption"
           />
         </v-col>
-        <v-col 
+        <v-col
           class="d-flex align-center"
           cols="12"
           md="3"
@@ -264,10 +285,10 @@
           <v-checkbox
             v-model="isSkippable"
             label="Skippable Item"
-            @change="updateAllow"
+            :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
           />
         </v-col>
-        <v-col 
+        <v-col
           class="d-flex align-center"
           cols="12"
           md="3"
@@ -288,6 +309,19 @@
           <v-checkbox
             v-model="hasScoreValue"
             label="Option Score"
+            @change="update"
+          />
+        </v-col>
+
+        <v-col
+          class="d-flex align-center"
+          cols="12"
+          md="3"
+          sm="6"
+        >
+          <v-checkbox
+            v-model="randomizeOptions"
+            label="Randomize response options"
             @change="update"
           />
         </v-col>
@@ -356,6 +390,18 @@
       }
     }
   }
+
+  .ds-tooltip-header {
+    background: grey;
+    color: white;
+    padding: 5px 12px;
+  }
+
+  .ds-tooltip-close {
+    background: white;
+    color: black;
+    padding: 5px 12px;
+  }
 </style>
 
 
@@ -377,11 +423,12 @@ export default {
       required: true
     },
     isSkippableItem: {
-      type: Boolean,
-      default: false,
+      type: Number,
+      default: 0,
     },
     initialResponseOptions: {
       type: Object,
+      required: true
     },
     itemTemplates: {
       type: Array,
@@ -422,11 +469,13 @@ export default {
         score: option.score || 0,
         image: option.image || '',
         description: option.description || '',
+        alert: option.alert || '',
         expanded: false,
         valid: true
       })),
       textRules: [
         v => !!v || 'Radio options cannot be empty',
+        v => v.length <= 75 || 'Visibility decreases over 75 characters',
       ],
       numberRules: [
         v => !isNaN(parseInt(v)) || 'Please enter a numerical value',
@@ -440,12 +489,23 @@ export default {
       isTokenValue,
       hasScoreValue: this.initialItemData.hasScoreValue || false,
       hasResponseAlert: this.initialItemData.hasResponseAlert || false,
-      responseAlertMessage: this.initialItemData.responseAlertMessage || '',
-      isSkippable: this.isSkippableItem || false,
       enableNegativeTokens: this.initialItemData.enableNegativeTokens || false,
       responseOptions: this.initialResponseOptions,
+      isTooltipOpen: false,
       isOptionalText: this.initialIsOptionalText,
+      randomizeOptions: this.initialItemData.randomizeOptions,
     };
+  },
+
+  computed: {
+    isSkippable: {
+      get() {
+        return this.isSkippableItem === 1 || false;
+      },
+      set(value) {
+        this.$emit('updateAllow', value);
+      }
+    }
   },
 
   beforeMount() {
@@ -466,6 +526,7 @@ export default {
         'description': '',
         'expanded': false,
         'image': '',
+        'alert': '',
         'valid': true,
       };
 
@@ -508,6 +569,7 @@ export default {
         'image': '',
         'score': 0,
         'description': item.description,
+        'alert': '',
         'expanded': false,
         'valid': false
       };
@@ -530,11 +592,11 @@ export default {
       const responseOptions = {
         'hasScoreValue': this.hasScoreValue,
         'hasResponseAlert': this.hasResponseAlert,
-        'responseAlertMessage': this.responseAlertMessage,
         'isTokenValue': this.isTokenValue,
         'enableNegativeTokens': this.enableNegativeTokens,
         'isMultipleChoice': this.isMultipleChoice,
         'isSkippableItem': this.isSkippable,
+        'randomizeOptions': this.randomizeOptions,
         'options': this.options.map(option => ({
           ...option,
           value: Number(option.value),
@@ -575,17 +637,13 @@ export default {
       return true;
     },
 
-    updateAllow() {
-      const allow = this.isSkippable
-      this.$emit('updateAllow', allow);
-    },
-
     onUpdateResponseOptions() {
       this.$emit('updateResponseOptions', this.responseOptions);
     },
 
     onAddOptionImageFromUrl(option, url) {
       option.image = url;
+      this.update();
       this.$emit('notify', {
         type: 'success',
         message: 'Image from URL successfully added to Option.',
@@ -598,13 +656,14 @@ export default {
     async onAddOptionImageFromDevice(option, uploadFunction) {
       try {
         option.image = await uploadFunction();
+        this.update();
         this.$emit('loading', false);
         this.$emit('notify', {
           type: 'success',
           message: 'Image successfully added to Option.',
           duration: 3000,
         });
-  
+
         this.update();
       } catch (error) {
         this.$emit('loading', false);
@@ -617,6 +676,7 @@ export default {
 
     onRemoveOptionImage(option) {
       option.image = '';
+      this.update();
       this.$emit('notify', {
         type: 'warning',
         message: 'Image successfully removed from Option.',

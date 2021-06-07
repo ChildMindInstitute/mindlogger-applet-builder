@@ -21,12 +21,7 @@
     <v-checkbox
       v-model="isSkippable"
       label="Skippable Item"
-      @change="updateAllow"
-    />
-    <v-checkbox
-      v-model="requiredValue"
-      label="Response required"
-      @change="update"
+      :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
     />
 
     <OptionalItemText
@@ -39,7 +34,6 @@
       @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
       @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
     />
-
   </v-form>
 </template>
 
@@ -56,8 +50,8 @@ export default {
       required: true
     },
     isSkippableItem: {
-      type: Boolean,
-      default: false,
+      type: Number,
+      default: 0,
     },
     initialItemResponseOptions: {
       type: Object,
@@ -72,8 +66,6 @@ export default {
     return {
       minValue: this.initialItemData['schema:minValue'] || 0,
       maxValue: this.initialItemData['schema:maxValue'] || 3000,
-      isSkippable: this.isSkippableItem || false,
-      requiredValue: this.initialItemData.requiredValue != null ? this.initialItemData.requiredValue : true,
       valid: true,
       minValueRules: [
         v => (v > 0 && v % 1 === 0) || 'Min response length must be a positive integer',
@@ -85,18 +77,23 @@ export default {
       isOptionalText: this.initialIsOptionalText,
     };
   },
+  computed: {
+    isSkippable: {
+      get() {
+        return this.isSkippableItem === 1 || false;
+      },
+      set(value) {
+        this.$emit('updateAllow', value);
+      }
+    }
+  },
   methods: {
     update () {
       const responseOptions = {
         'schema:minValue': this.minValue,
         'schema:maxValue': this.maxValue,
-        'requiredValue': this.requiredValue,
       };
       this.$emit('updateOptions', responseOptions);
-    },
-    updateAllow() {
-      const allow = this.isSkippable
-      this.$emit('updateAllow', allow);
     },
     onUpdateResponseOptions() {
       this.$emit('updateResponseOptions', this.responseOptions);

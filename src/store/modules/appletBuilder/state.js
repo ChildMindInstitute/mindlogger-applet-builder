@@ -1,21 +1,22 @@
 
 import config from '../../../config';
 
-const baseImageURL = 'https://raw.githubusercontent.com/jj105/applet-builder-images/master/';
-export const initialProtocol = {
-  id: '',
+const baseImageURL = 'https://raw.githubusercontent.com/ChildMindInstitute/mindlogger-applet-builder/master/src/assets/icons/';
+export const getInitialProtocol = () => ({
+  id: null,
   description: '',
   markdownData: '',
+  image: '',
   name: '',
   protocolVersion: '1.0.0',
   valid: false,
   prizeActivity: null,
   activities: [],
   tokenPrizeModal: false
-};
+});
 
 export default {
-  protocol: initialProtocol,
+  protocol: getInitialProtocol(),
   baseImageURL,
   templateUpdateRequest: {
     pending: false

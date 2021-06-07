@@ -8,16 +8,14 @@
       <div
         v-for="(slider, index) in sliders"
         :key="index"
-        class="px-8"
+        class="mx-8"
       >
         <v-row>
-          <v-col>
+          <v-col sm="8">
             <span>
               {{ slider.sliderLabel }}
             </span>
           </v-col>
-
-          <v-spacer />
 
           <div class="d-flex align-center justify-end">
             <v-btn
@@ -67,7 +65,7 @@
             </v-col>
           </v-row>
           <v-row>
-            <v-col 
+            <v-col
               class="d-flex align-center"
               cols="12"
               sm="3"
@@ -96,17 +94,21 @@
             </v-col>
 
             <v-col cols="auto">
-              <ImageUploader
-                :uploadFor="'item-radio-option-pc'"
-                :itemImg="slider.imgFirstName"
-                @onAddImg="onUploadImg('first', $event, slider)"
-                @onRemoveImg="onRemoveImg('first', slider)"
+              <Uploader
+                :initialType="'image'"
+                :initialData="slider.imgFirstName"
+                :initialAdditionalType="'small-circle'"
+                :initialTitle="'Slider Min Image'"
+                @onAddFromUrl="onAddSliderImageFromUrl(slider, $event, 'Min');"
+                @onAddFromDevice="onAddSliderImageFromDevice(slider, $event, 'Min');"
+                @onRemove="onRemoveSliderImage(slider, 'Min');"
+                @onNotify="$emit('loading', false); $emit('notify', $event);"
               />
             </v-col>
           </v-row>
 
           <v-row>
-            <v-col 
+            <v-col
               class="d-flex align-center"
               cols="12"
               sm="3"
@@ -135,22 +137,24 @@
             </v-col>
 
             <v-col cols="auto">
-              <ImageUploader
-                :uploadFor="'item-radio-option-pc'"
-                :itemImg="slider.imgLastName"
-                @onAddImg="onUploadImg('last', $event, slider)"
-                @onRemoveImg="onRemoveImg('last', slider)"
+              <Uploader
+                :initialType="'image'"
+                :initialData="slider.imgLastName"
+                :initialAdditionalType="'small-circle'"
+                :initialTitle="'Slider Max Image'"
+                @onAddFromUrl="onAddSliderImageFromUrl(slider, $event, 'Max');"
+                @onAddFromDevice="onAddSliderImageFromDevice(slider, $event, 'Max');"
+                @onRemove="onRemoveSliderImage(slider, 'Max');"
+                @onNotify="$emit('loading', false); $emit('notify', $event);"
               />
             </v-col>
           </v-row>
 
-          <v-row
-            v-if="hasScoreValue"
-          >
-            <v-col 
+          <v-row>
+            <v-col
+              v-if="hasScoreValue"
               class="d-flex align-center"
-              cols="12"
-              sm="12"
+              cols="auto"
             >
               <v-btn
                 class="deep-orange"
@@ -159,6 +163,21 @@
                 @click="onEditScore(slider)"
               >
                 Edit Score
+              </v-btn>
+            </v-col>
+
+            <v-col
+              v-if="hasResponseAlert"
+              class="d-flex align-center"
+              cols="auto"
+            >
+              <v-btn
+                class="deep-orange"
+                color="primary"
+                dark
+                @click="onEditAlerts(slider)"
+              >
+                Edit Alerts
               </v-btn>
             </v-col>
           </v-row>
@@ -179,29 +198,12 @@
       </div>
     </div>
 
-    <v-row
-      v-if="hasResponseAlert"
-    >
-      <v-col 
-        class="d-flex align-center"
-        cols="12"
-        sm="12"
-      >
-        <v-text-field
-          v-model="responseAlertMessage"
-          label="Alert Message"
-          :rules="alertTextRules"
-          required
-          @input="update"
-        />
-      </v-col>
-    </v-row>
     <v-divider
       class="mt-4"
     />
 
     <v-row>
-      <v-col 
+      <v-col
         class="d-flex align-center"
         cols="12"
         sm="3"
@@ -209,11 +211,11 @@
         <v-checkbox
           v-model="isSkippable"
           label="Skippable Item"
-          @change="updateAllow"
+          :disabled="isSkippableItem == 2"
         />
       </v-col>
 
-      <v-col 
+      <v-col
         class="d-flex align-center"
         cols="12"
         sm="3"
@@ -221,7 +223,7 @@
         <v-checkbox
           v-model="hasScoreValue"
           label="Option Score"
-          @change="update"
+          @change="onUpdateScoreOption"
         />
       </v-col>
 
@@ -233,7 +235,7 @@
         <v-checkbox
           v-model="hasResponseAlert"
           label="Set Alert"
-          @change="update"
+          @change="onUpdateAlertOption"
         />
       </v-col>
     </v-row>
@@ -296,6 +298,57 @@
         </v-form>
       </v-card>
     </v-dialog>
+
+    <v-dialog
+      v-model="alertDialog.visible"
+      max-width="600"
+      persistent
+    >
+      <v-card
+        v-if="alertDialog.slider.alerts"
+        class="pa-4 alert-dialog"
+      >
+        <v-card>
+          <div class="d-flex">
+            <div class="option-value">
+              Value
+            </div>
+            <div class="option-alert">
+              Alert
+            </div>
+          </div>
+        </v-card>
+        <v-card class="options">
+          <div
+            v-for="(alert, i) in alertDialog.slider.alerts"
+            :key="i"
+            class="d-flex"
+          >
+            <div class="option-value pt-2">
+              {{ i + Number(alertDialog.slider.minSliderTick) }}
+            </div>
+            <v-text-field
+              v-model="alertDialog.slider.alerts[i]"
+              class="option-alert mt-0 pt-0"
+            />
+          </div>
+        </v-card>
+
+        <v-card-actions class="d-flex justify-space-around">
+          <v-btn
+            color="primary"
+            @click="saveAlerts"
+          >
+            Save
+          </v-btn>
+          <v-btn
+            @click="resetAlerts"
+          >
+            Reset
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-form>
 </template>
 
@@ -308,23 +361,30 @@
     line-height: 20px;
   }
 
+  .alert-dialog .option-alert {
+    width: 80%;
+  }
+  .alert-dialog .option-value {
+    width: 20%;
+  }
+
   .options {
     max-height: 400px;
     overflow-y: scroll;
   }
 
   .slider-list {
-    width: 80%;
+    width: 90%;
   }
 </style>
 
 <script>
-import ImageUploader from '../../ImageUploader.vue';
 import ImageUpldr from '../../../../models/ImageUploader';
+import Uploader from '../../Uploader.vue';
 
 export default {
   components: {
-    ImageUploader
+    Uploader
   },
   props: {
     initialItemData: {
@@ -332,13 +392,13 @@ export default {
       required: true
     },
     isSkippableItem: {
-      type: Boolean,
-      default: false,
+      type: Number,
+      default: 0,
     },
   },
   data: function () {
     const imgUpldr = new ImageUpldr();
-    
+
     return {
       sliders: (this.initialItemData.sliderOptions || []).map(slider => ({
         sliderLabel: slider.sliderLabel || '',
@@ -349,9 +409,14 @@ export default {
         imgFirstName: slider.minValueImg || '',
         imgLastName: slider.maxValueImg || '',
         scores: slider.scores || [],
+        alerts: slider.alerts || [],
+
+        alertMessage: slider.responseAlertMessage || '',
+        alertMinValue: Number(slider.minAlertValue || slider.minSliderTick || 0),
+        alertMaxValue: Number(slider.maxAlertValue || slider.maxSliderTick || 0),
+
         expanded: false,
       })),
-      isSkippable: this.isSkippableItem || false,
       valid: true,
       textRules: [
         v => !!v || 'Slider Label cannot be empty',
@@ -364,8 +429,12 @@ export default {
       ],
       hasScoreValue: this.initialItemData.hasScoreValue || false,
       hasResponseAlert: this.initialItemData.hasResponseAlert || false,
-      responseAlertMessage: this.initialItemData.responseAlertMessage || '',
       scoreDialog: {
+        visible: false,
+        key: 0,
+        slider: {}
+      },
+      alertDialog: {
         visible: false,
         key: 0,
         slider: {}
@@ -373,6 +442,18 @@ export default {
       imgUpldr,
     };
   },
+
+  computed: {
+    isSkippable: {
+      get() {
+        return this.isSkippableItem === 1 || false;
+      },
+      set(value) {
+        this.$emit('updateAllow', value);
+      }
+    }
+  },
+
   beforeMount() {
     if (!this.sliders.length) {
       this.addNewSlider();
@@ -385,8 +466,17 @@ export default {
   methods: {
     resetScores () {
       const slider = this.scoreDialog.slider;
-      for (let i = slider.minSliderTick; i < slider.maxSliderTick; i++) {
-        this.$set(slider.scores, i - slider.minSliderTick, i - slider.minSliderTick);
+      for (let i = Number(slider.minSliderTick); i <= Number(slider.maxSliderTick); i++) {
+        this.$set(slider.scores, i - slider.minSliderTick, i - slider.minSliderTick + 1);
+      }
+    },
+
+    resetAlerts () {
+      const slider = this.alertDialog.slider;
+      if (slider.alerts) {
+        for (let i = slider.minSliderTick; i < slider.maxSliderTick; i++) {
+          this.$set(slider.alerts, i - slider.minSliderTick, '');
+        }
       }
     },
 
@@ -402,6 +492,11 @@ export default {
       this.update();
     },
 
+    saveAlerts () {
+      this.alertDialog.visible = false;
+      this.update();
+    },
+
     addNewSlider () {
       const newSlider = {
         sliderLabel: `Slider ${this.sliders.length + 1}`,
@@ -412,6 +507,7 @@ export default {
         imgFirstName: '',
         imgLastName: '',
         scores: [1,2,3,4,5],
+        alerts: ['','','','',''],
         expanded: false,
         valid: true,
       };
@@ -438,7 +534,6 @@ export default {
       const responseOptions = {
         'hasScoreValue': this.hasScoreValue,
         'hasResponseAlert': this.hasResponseAlert,
-        'responseAlertMessage': this.responseAlertMessage,
         'sliderOptions': this.sliders.map(slider => ({
           'minSliderTick': slider.minSliderTick,
           'maxSliderTick': slider.maxSliderTick,
@@ -447,14 +542,15 @@ export default {
           'maxValue': slider.maxValue || "Max",
           'maxValueImg': slider.imgLastName,
           'sliderLabel': slider.sliderLabel,
-          'scores': this.hasScoreValue ? slider.scores : false
+          'scores': this.hasScoreValue ? slider.scores : false,
+          'alerts': this.hasResponseAlert ? slider.alerts : false,
         }))
       };
 
       this.$emit('updateOptions', responseOptions);
     },
 
-    sliderRangeUpdate(ev, type, slider) {
+    sliderRangeUpdate(ev, type, slider, allowUpdate=true) {
       if (Number(slider.maxSliderTick) > 12) {
         return false;
       }
@@ -468,6 +564,7 @@ export default {
       }
 
       slider.scores = slider.scores || [];
+      slider.alerts = slider.alerts || [];
 
       const tickCount = slider.maxSliderTick - slider.minSliderTick + 1;
       if (tickCount <= 0) {
@@ -477,56 +574,99 @@ export default {
       if (type == 'max') {
         while (slider.scores.length < tickCount) {
           slider.scores.push(Number(slider.minSliderTick) + slider.scores.length);
+          slider.alerts.push('');
         }
 
         while (slider.scores.length > tickCount) {
           slider.scores.pop();
+          slider.alerts.pop();
         }
       } else {
         while (slider.scores.length < tickCount) {
           slider.scores.unshift(Number(slider.minSliderTick) + (tickCount - slider.scores.length - 1));
+          slider.alerts.unshift('');
         }
 
         while (slider.scores.length > tickCount) {
           slider.scores.shift();
+          slider.alerts.shift();
         }
       }
 
-      this.update();
-    },
-
-    updateAllow() {
-      const allow = this.isSkippable
-      this.$emit('updateAllow', allow);
-    },
-
-    async onUploadImg(option, data, slider) {
-      try {
-        this.$emit('error', '');
-        setTimeout(() => { this.$emit('uploading', true); }, 2000);
-        const response = await this.imgUpldr.uploadImage(data);
-        if(option === 'first') slider.imgFirstName = response.location;
-        else if(option === 'last') slider.imgLastName = response.location;
-        setTimeout(() => { this.$emit('uploading', false); }, 2100);
+      if (this.allowUpdate) {
         this.update();
-      } catch(e) {
-        setTimeout(() => {
-          this.$emit('uploading', false);
-          this.$emit('error', 'Something went wrong with uploading image for "Score Option". Please try to upload image again...');
-        }, 2000);
       }
     },
-    onRemoveImg(option, slider) {
-      if(option === 'first') slider.imgFirstName = '';
-      else if(option === 'last') slider.imgLastName = '';
+
+    onUpdateScoreOption() {
+      for (let slider of this.sliders) {
+        this.sliderRangeUpdate(null, 'min', slider, false);
+      }
+      this.update();
+    },
+
+    onUpdateAlertOption() {
+      for (let slider of this.sliders) {
+        this.sliderRangeUpdate(null, 'min', slider, false);
+      }
+      this.update();
+    },
+
+    onAddSliderImageFromUrl(slider, url, type) {
+      this.$set(slider, (type == 'Min' ? 'imgFirstName' : 'imgLastName'), url );
+      this.update();
+
+      this.$emit('notify', {
+        type: 'success',
+        message: `${type} Image from URL successfully added to Slider.`,
+        duration: 3000,
+      });
+    },
+
+    async onAddSliderImageFromDevice(slider, uploadFunction, type) {
+      this.$emit('loading', true);
+
+      try {
+        const uploadedImageUrl = await uploadFunction();
+        this.$set(slider, (type == 'Min' ? 'imgFirstName' : 'imgLastName'), uploadedImageUrl);
+
+        this.update();
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'success',
+          message: `${type} Image successfully added to Slider.`,
+          duration: 3000,
+        });
+      } catch (error) {
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'error',
+          message: `Something went wrong with uploading image. Please try to upload again or just save Slider without image changes.`,
+        });
+      }
+    },
+
+    onRemoveSliderImage(slider, type) {
+      this.$set(slider, (type == 'Min' ? 'imgFirstName' : 'imgLastName'), '');
 
       this.update();
+      this.$emit('notify', {
+        type: 'warning',
+        message: `${type} Image successfully removed from Slider.`,
+        duration: 3000,
+      });
     },
 
     onEditScore(slider) {
       this.scoreDialog.slider = slider;
       this.scoreDialog.visible = true;
       this.scoreDialog.key++;
+    },
+
+    onEditAlerts(slider) {
+      this.alertDialog.slider = slider;
+      this.alertDialog.visible = true;
+      this.alertDialog.key++;
     }
   }
 }

@@ -2,7 +2,7 @@
   <v-form>
     <div class="slider-meta">
       <v-row>
-        <v-col 
+        <v-col
           class="d-flex align-center"
           cols="12"
           sm="3"
@@ -44,7 +44,7 @@
       </v-row>
 
       <v-row>
-        <v-col 
+        <v-col
           class="d-flex align-center"
           cols="12"
           sm="3"
@@ -86,48 +86,36 @@
       </v-row>
 
       <v-row
-        v-if="hasResponseAlert"
+        v-if="hasScoreValue || hasResponseAlert"
       >
-        <v-col 
-          class="d-flex align-center"
-          cols="12"
-          sm="12"
+        <v-btn
+          v-if="hasScoreValue"
+          class="deep-orange mx-2"
+          color="primary"
+          dark
+          @click="scoreDialog = true"
         >
-          <v-text-field
-            v-model="responseAlertMessage"
-            label="Alert Message"
-            :rules="alertTextRules"
-            required
-            @change="update"
-          />
-        </v-col>
-      </v-row>
+          Edit Score
+        </v-btn>
 
-      <v-row
-        v-if="hasScoreValue"
-      >
-        <v-col 
-          class="d-flex align-center"
-          cols="12"
-          sm="12"
+        <v-btn
+          v-if="hasResponseAlert"
+          class="deep-orange mx-2"
+          color="primary"
+          dark
+          @click="alertDialog = true"
         >
-          <v-btn
-            class="deep-orange"
-            color="primary"
-            dark
-            @click="scoreDialog = true"
-          >
-            Edit Score
-          </v-btn>
-        </v-col>
+          Edit Alert
+        </v-btn>
       </v-row>
     </div>
+
     <v-divider
       class="mt-4"
     />
 
     <v-row>
-      <v-col 
+      <v-col
         class="d-flex align-center"
         cols="12"
         sm="3"
@@ -135,11 +123,11 @@
         <v-checkbox
           v-model="isSkippable"
           label="Skippable Item"
-          @change="updateAllow"
+          :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
         />
       </v-col>
 
-      <v-col 
+      <v-col
         class="d-flex align-center"
         cols="12"
         sm="3"
@@ -159,7 +147,7 @@
         <v-checkbox
           v-model="hasResponseAlert"
           label="Set Alert"
-          @change="update"
+          @change="sliderRangeUpdate($event, 'max')"
         />
       </v-col>
 
@@ -206,7 +194,7 @@
     >
       <v-card
         v-if="scores"
-        class="pa-4"
+        class="pa-4 score-dialog"
       >
         <v-form
           ref="form"
@@ -257,6 +245,102 @@
         </v-form>
       </v-card>
     </v-dialog>
+
+    <v-dialog
+      v-model="alertDialog"
+      max-width="600"
+      persistent
+    >
+      <v-card
+        v-if="alerts && !continousSlider"
+        class="pa-4 alert-dialog"
+      >
+        <v-card>
+          <div class="d-flex">
+            <div class="option-value">
+              Value
+            </div>
+            <div class="option-alert">
+              Alert
+            </div>
+          </div>
+        </v-card>
+        <v-card class="options">
+          <div
+            v-for="(alert, i) in alerts"
+            :key="i"
+            class="d-flex"
+          >
+            <div class="option-value pt-2">
+              {{ i + Number(minSliderTick) }}
+            </div>
+            <v-text-field
+              v-model="alerts[i]"
+              class="option-alert mt-0 pt-0"
+            />
+          </div>
+        </v-card>
+
+        <v-card-actions class="d-flex justify-space-around">
+          <v-btn
+            color="primary"
+            @click="saveAlerts"
+          >
+            Save
+          </v-btn>
+          <v-btn
+            @click="resetAlerts"
+          >
+            Reset
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+
+      <v-card
+        v-if="continousSlider"
+        class="pa-4 alert-dialog"
+      >
+        <div class="dialog-title">
+          Edit Alert
+        </div>
+
+        <v-text-field
+          v-model="alertMinValue"
+          type="number"
+          label="Min Value"
+          :min="minSliderTick"
+          :rules="numberRules"
+        />
+
+        <v-text-field
+          v-model="alertMaxValue"
+          type="number"
+          label="Max Value"
+          :max="maxSliderTick"
+          :rules="numberRules"
+        />
+
+        <v-text-field
+          v-model="alertMessage"
+          label="Alert Message"
+          :rules="alertTextRules"
+        />
+
+        <v-card-actions class="d-flex justify-space-around">
+          <v-btn
+            color="primary"
+            @click="saveAlerts"
+          >
+            Save
+          </v-btn>
+          <v-btn
+            @click="resetAlerts"
+          >
+            Reset
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-form>
 </template>
 
@@ -264,9 +348,16 @@
   .slider-meta {
     width: 80%;
   }
-  .option-score, .option-value {
+  .score-dialog .option-score, .score-dialog .option-value {
     width: 50%;
   }
+  .alert-dialog .option-alert {
+    width: 80%;
+  }
+  .alert-dialog .option-value {
+    width: 20%;
+  }
+
   .option-value {
     text-align: center;
     line-height: 20px;
@@ -275,6 +366,12 @@
   .options {
     max-height: 400px;
     overflow-y: scroll;
+  }
+
+
+  .dialog-title {
+    text-align: center;
+    font-size: 25px;
   }
 </style>
 
@@ -293,8 +390,8 @@ export default {
       required: true
     },
     isSkippableItem: {
-      type: Boolean,
-      default: false,
+      type: Number,
+      default: 0,
     },
     initialResponseOptions: {
       type: Object,
@@ -313,36 +410,66 @@ export default {
       minValueImg: this.initialItemData.minValueImg || '',
       maxValue: this.initialItemData.maxValue || '',
       maxValueImg: this.initialItemData.maxValueImg || '',
-      isSkippable: this.isSkippableItem || false,
       valid: true,
       textRules: [
         v => !!v || 'Radio options cannot be empty',
       ],
+      alertTextRules: [
+        v => !!v || 'Alert message cannot be empty',
+      ],
       numberRules: [
         v => !isNaN(parseInt(v)) || 'Please enter a numerical value',
-      ],
-      alertTextRules: [
-        v => !!v || 'Alert Message cannot be empty',
       ],
       continousSlider: this.initialItemData.continousSlider || false,
       hasScoreValue: this.initialItemData.hasScoreValue || false,
       hasResponseAlert: this.initialItemData.hasResponseAlert || false,
-      responseAlertMessage: this.initialItemData.responseAlertMessage || '',
       scoreDialog: false,
+      alertDialog: false,
+
+      /** continuous slider */
+      alertMessage: this.initialItemData.responseAlertMessage || '',
+      alertMinValue: Number(this.initialItemData.minAlertValue || this.initialItemData.minSliderTick || 0),
+      alertMaxValue: Number(this.initialItemData.maxAlertValue || this.initialItemData.maxSliderTick || 0),
+
       showTickMarks: this.initialItemData.showTickMarks || false,
-      scores: this.initialItemData.scores || false,
+      scores: this.initialItemData.scores || [],
+      alerts: this.initialItemData.alerts || [],
       isOptionalText: this.initialIsOptionalText,
       responseOptions: this.initialResponseOptions,
     };
   },
+
+  computed: {
+    isSkippable: {
+      get() {
+        return this.isSkippableItem === 1 || false;
+      },
+      set(value) {
+        this.$emit('updateAllow', value);
+      }
+    }
+  },
+
   mounted() {
     this.update();
   },
   methods: {
     resetScores () {
-      for (let i = this.minSliderTick; i < this.maxSliderTick; i++) {
-        this.$set(this.scores, i - this.minSliderTick, i);
+      for (let i = Number(this.minSliderTick); i <= Number(this.maxSliderTick); i++) {
+        this.$set(this.scores, i - this.minSliderTick, i - this.minSliderTick + 1);
       }
+    },
+
+    resetAlerts () {
+      if (this.alerts) {
+        for (let i = this.minSliderTick; i < this.maxSliderTick; i++) {
+          this.$set(this.alerts, i - this.minSliderTick, '');
+        }
+      }
+
+      this.alertMinValue = this.minSliderTick;
+      this.alertMaxValue = this.maxSliderTick;
+      this.alertMessage = '';
     },
 
     saveScores () {
@@ -355,6 +482,11 @@ export default {
       this.update();
     },
 
+    saveAlerts () {
+      this.alertDialog = false;
+      this.update();
+    },
+
     update () {
       if (this.maxSliderTick > 12) {
         this.maxSliderTick = 12;
@@ -362,7 +494,7 @@ export default {
         this.minSliderTick = 1;
       }
 
-      const responseOptions = {
+      let responseOptions = {
         'minSliderTick': this.minSliderTick,
         'maxSliderTick': this.maxSliderTick,
         'minValue': this.minValue || "Min",
@@ -372,10 +504,22 @@ export default {
         'hasScoreValue': this.hasScoreValue,
         'hasResponseAlert': this.hasResponseAlert,
         'continousSlider': this.continousSlider,
-        'responseAlertMessage': this.responseAlertMessage,
         'showTickMarks': this.showTickMarks,
-        'scores': this.hasScoreValue ? this.scores : false
+        'scores': this.hasScoreValue ? this.scores : false,
       };
+
+      if (this.hasResponseAlert) {
+        if (this.continousSlider) {
+          Object.assign(responseOptions, {
+            'minAlertValue': this.alertMinValue,
+            'maxAlertValue': this.alertMaxValue,
+            'responseAlertMessage': this.alertMessage,
+          })
+        } else {
+          responseOptions.alerts = this.alerts;
+        }
+      }
+
       this.$emit('updateOptions', responseOptions);
     },
 
@@ -391,6 +535,7 @@ export default {
       }
 
       this.scores = this.scores || [];
+      this.alerts = this.alerts || [];
 
       const tickCount = this.maxSliderTick - this.minSliderTick + 1;
       if (tickCount < 0) {
@@ -400,34 +545,26 @@ export default {
       if (type == 'max') {
         while (this.scores.length < tickCount) {
           this.scores.push(Number(this.minSliderTick) + this.scores.length);
+          this.alerts.push('');
         }
 
         while (this.scores.length > tickCount) {
           this.scores.pop();
+          this.alerts.pop();
         }
       } else {
         while (this.scores.length < tickCount) {
           this.scores.unshift(Number(this.minSliderTick) + (tickCount - this.scores.length - 1));
+          this.alerts.unshift('');
         }
 
         while (this.scores.length > tickCount) {
           this.scores.shift();
+          this.alerts.shift();
         }
       }
 
-      while (this.scores.length < (this.maxSliderTick - this.minSliderTick + 1)) {
-        this.scores.push(this.scores.length + 1);
-      }
-
-      while (this.scores.length > (this.maxSliderTick - this.minSliderTick + 1)) {
-        this.scores.pop();
-      }
       this.update();
-    },
-
-    updateAllow() {
-      const allow = this.isSkippable
-      this.$emit('updateAllow', allow);
     },
 
     onUpdateResponseOptions() {

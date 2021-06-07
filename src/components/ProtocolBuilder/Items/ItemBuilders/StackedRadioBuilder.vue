@@ -91,10 +91,10 @@
                           <div
                             class="upload-from-pc"
                           >
-                            <input 
-                              class="file-input" 
-                              type="file" 
-                              accept="image/jpeg, image/png, image/bmp" 
+                            <input
+                              class="file-input"
+                              type="file"
+                              accept="image/jpeg, image/png, image/bmp"
                               @change="onChangeFile($event, option)"
                             >
                             Upload From Your computer
@@ -130,7 +130,7 @@
                 class="px-8"
               >
                 <v-row>
-                  <v-col 
+                  <v-col
                     cols="12"
                     sm="5"
                     md="4"
@@ -139,15 +139,15 @@
                       v-model="option.name"
                       :rules="textRules"
                       label="Option Text"
-                      counter="32"
-                      maxlength="32"
+                      counter="11"
+                      maxlength="11"
                       @change="updateOption(option)"
                     />
                   </v-col>
                 </v-row>
 
                 <v-row>
-                  <v-col 
+                  <v-col
                     cols="12"
                     sm="12"
                   >
@@ -167,6 +167,7 @@
               fab
               x-small
               color="primary"
+              :disabled="options.length >= 3"
               @click="addOption"
             >
               <v-icon color="white">
@@ -250,10 +251,10 @@
                           <div
                             class="upload-from-pc"
                           >
-                            <input 
-                              class="file-input" 
-                              type="file" 
-                              accept="image/jpeg, image/png, image/bmp" 
+                            <input
+                              class="file-input"
+                              type="file"
+                              accept="image/jpeg, image/png, image/bmp"
                               @change="onChangeFile($event, item)"
                             >
                             Upload From Your computer
@@ -289,7 +290,7 @@
                 class="px-8"
               >
                 <v-row>
-                  <v-col 
+                  <v-col
                     cols="12"
                     sm="5"
                     md="4"
@@ -298,15 +299,15 @@
                       v-model="item.name"
                       :rules="textRules"
                       label="Item Text"
-                      counter="32"
-                      maxlength="32"
+                      counter="11"
+                      maxlength="11"
                       @change="updateItem(item)"
                     />
                   </v-col>
                 </v-row>
 
                 <v-row>
-                  <v-col 
+                  <v-col
                     cols="12"
                     sm="12"
                   >
@@ -325,7 +326,7 @@
             <v-btn
               fab
               x-small
-              color="deep-purple"
+              color="primary"
               @click="addItem"
             >
               <v-icon color="white">
@@ -337,7 +338,7 @@
       </v-row>
 
       <v-row>
-        <v-col 
+        <v-col
           v-if="isTokenValue"
           class="d-flex align-center"
           cols="auto"
@@ -352,7 +353,7 @@
           </v-btn>
         </v-col>
 
-        <v-col 
+        <v-col
           v-if="hasScoreValue"
           class="d-flex align-center"
           cols="auto"
@@ -366,23 +367,20 @@
             Edit Scores
           </v-btn>
         </v-col>
-      </v-row>
 
-      <v-row
-        v-if="hasResponseAlert"
-      >
         <v-col
+          v-if="hasResponseAlert"
           class="d-flex align-center"
-          cols="12"
-          sm="12"
+          cols="auto"
         >
-          <v-text-field
-            v-model="responseAlertMessage"
-            label="Alert Message"
-            :rules="alertTextRules"
-            required
-            @change="update"
-          />
+          <v-btn
+            class="deep-orange"
+            color="primary"
+            dark
+            @click="onEditAlerts"
+          >
+            Edit Alerts
+          </v-btn>
         </v-col>
       </v-row>
 
@@ -390,7 +388,7 @@
         class="mt-4"
       />
       <v-row>
-        <v-col 
+        <v-col
           class="d-flex align-center"
           cols="12"
           md="3"
@@ -402,7 +400,7 @@
             @change="update"
           />
         </v-col>
-        <v-col 
+        <v-col
           class="d-flex align-center"
           cols="12"
           md="3"
@@ -411,10 +409,10 @@
           <v-checkbox
             v-model="isSkippable"
             label="Skippable Item"
-            @change="updateAllow"
+            :disabled="isSkippableItem == 2"
           />
         </v-col>
-        <v-col 
+        <v-col
           class="d-flex align-center"
           cols="12"
           md="3"
@@ -518,6 +516,21 @@
         @update="updateScores"
       />
     </v-dialog>
+
+    <v-dialog
+      v-model="alertEditDialog.visible"
+      width="600"
+      persistent
+    >
+      <TableEditor
+        :options="options"
+        :items="itemList"
+        :initial="alerts"
+        input-type="text"
+        title="Edit Alerts"
+        @update="updateAlerts"
+      />
+    </v-dialog>
   </div>
 </template>
 
@@ -550,8 +563,8 @@ export default {
       required: true
     },
     isSkippableItem: {
-      type: Boolean,
-      default: false,
+      type: Number,
+      default: 0,
     },
     responseOptions: {
       type: Object,
@@ -577,17 +590,19 @@ export default {
 
     const isTokenValue = (this.responseOptions.valueType && this.responseOptions.valueType.includes("token")) || false;
 
-    let values = [], scores = [];
+    let values = [], scores = [], alerts = [];
     if (Array.isArray(this.initialItemData.choices)) {
       for (let i = 0; i < this.initialItemData.choices.length; i++) {
         values.push([]);
         scores.push([]);
+        alerts.push([]);
 
         const choices = this.initialItemData.choices[i];
 
         for (let j = 0; j < choices.length; j++) {
-          values[i].push(choices[j].value);
-          scores[i].push(choices[j].score);
+          values[i].push(choices[j].value || 0);
+          scores[i].push(choices[j].score || 0);
+          alerts[i].push(choices[j].alert || '');
         }
       }
     }
@@ -624,6 +639,10 @@ export default {
         visible: false,
         key: 0
       },
+      alertEditDialog: {
+        visible: false,
+        key: 0
+      },
       textRules: [
         v => !!v || 'Radio options cannot be empty',
       ],
@@ -637,14 +656,24 @@ export default {
       isTokenValue,
       hasScoreValue: this.initialItemData.hasScoreValue || false,
       hasResponseAlert: this.initialItemData.hasResponseAlert || false,
-      responseAlertMessage: this.initialItemData.responseAlertMessage || '',
       imgUploader,
-      isSkippable: this.isSkippableItem || false,
       values,
       scores,
+      alerts,
       valueDialog: false,
       scoreDialog: false,
     };
+  },
+
+  computed: {
+    isSkippable: {
+      get() {
+        return this.isSkippableItem === 1 || false;
+      },
+      set(value) {
+        this.$emit('updateAllow', value);
+      }
+    }
   },
 
   beforeMount() {
@@ -674,6 +703,7 @@ export default {
       for (let i = 0; i < this.itemList.length; i++) {
         this.values[i].push(0);
         this.scores[i].push(0);
+        this.alerts[i].push('');
       }
       this.options.push(nextOption);
 
@@ -690,10 +720,12 @@ export default {
 
       this.values.push([]);
       this.scores.push([]);
+      this.alerts.push([]);
 
       for (let i = 0; i < this.options.length; i++) {
         this.values[this.values.length-1].push(0);
         this.scores[this.scores.length-1].push(0);
+        this.alerts[this.alerts.length-1].push('');
       }
 
       this.itemList.push(nextItem);
@@ -705,6 +737,7 @@ export default {
       for (let i = 0; i < this.itemList.length; i++) {
         this.values[i].splice(index, 1);
         this.scores[i].splice(index, 1);
+        this.alerts[i].splice(index, 1);
       }
       this.options.splice(index, 1);
       this.update();
@@ -714,6 +747,7 @@ export default {
       this.itemList.splice(index, 1);
       this.values.splice(index, 1);
       this.scores.splice(index, 1);
+      this.alerts.splice(index, 1);
       this.update();
     },
 
@@ -725,7 +759,8 @@ export default {
         for (let j = 0; j < this.options.length; j++) {
           const choice = {
             score: this.scores[i] && this.scores[i][j] || 0,
-            value: this.values[i] && this.values[i][j] || 0
+            value: this.values[i] && this.values[i][j] || 0,
+            alert: this.alerts[i] && this.alerts[i][j] || '',
           };
 
           choices[i].push(choice);
@@ -735,13 +770,12 @@ export default {
       const responseOptions = {
         'hasScoreValue': this.hasScoreValue,
         'hasResponseAlert': this.hasResponseAlert,
-        'responseAlertMessage': this.responseAlertMessage,
         'isTokenValue': this.isTokenValue,
         'isMultipleChoice': this.isMultipleChoice,
         'isSkippableItem': this.isSkippable,
         'options': this.options,
         'itemList': this.itemList,
-        'choices': (this.isTokenValue || this.hasScoreValue) ? choices : [],
+        'choices': (this.isTokenValue || this.hasScoreValue || this.hasResponseAlert) ? choices : [],
       };
       this.$emit('updateOptions', responseOptions);
     },
@@ -766,11 +800,6 @@ export default {
       }
 
       return true;
-    },
-
-    updateAllow() {
-      const allow = this.isSkippable
-      this.$emit('updateAllow', allow);
     },
 
     onAddImageUrl(option) {
@@ -829,6 +858,15 @@ export default {
       this.update();
     },
 
+    updateAlerts(alerts) {
+      if (alerts) {
+        this.alerts = alerts;
+      }
+
+      this.alertEditDialog.visible = false;
+      this.update();
+    },
+
     onEditValues() {
       this.valueEditDialog.visible = true;
       this.valueEditDialog.key++;
@@ -837,6 +875,11 @@ export default {
     onEditScores() {
       this.scoreEditDialog.visible = true;
       this.scoreEditDialog.key++;
+    },
+
+    onEditAlerts() {
+      this.alertEditDialog.visible = true;
+      this.alertEditDialog.key++;
     }
   }
 }

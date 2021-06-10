@@ -264,7 +264,7 @@ export default {
         v => !this.subScales.some((subScale, id) => subScale && subScale.variableName === v && id != this.subScaleIndex) || 'cannot use existing subscale name',
       ],
       valid: false,
-      scoringType: "sum",
+      scoringType: this.subScale.isAverageScore ? "average" : "sum",
       isExpanded: !this.subScale.variableName || !this.subScale.variableName.length,
       nameError: {
         exists: false,

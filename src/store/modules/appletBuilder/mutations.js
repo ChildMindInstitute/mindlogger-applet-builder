@@ -25,7 +25,7 @@ const itemMutations = {
         ]
       }
     };
-  
+
     if (obj) {
       item = obj;
     }
@@ -175,7 +175,18 @@ const subScaleMutations = {
   },
 
   updateSubScaleData (state, { index, obj }) {
+    const name = state.currentActivity.subScales[index].variableName;
+
     Object.assign(state.currentActivity.subScales[index], obj);
+
+    if (name && obj.variableName && name != obj.variableName)
+    {
+      for (const subScale of state.currentActivity.subScales)
+      {
+        subScale.jsExpression =
+          subScale.jsExpression.replace(`(${name})`, `(${obj.variableName})`);
+      }
+    }
   },
 
   deleteSubScale (state, index) {

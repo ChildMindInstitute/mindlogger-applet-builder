@@ -2,7 +2,7 @@
   <v-card>
     <v-card-title
       class="px-2 py-0"
-      :class="subScale.valid ? '' : 'invalid'"
+      :class="valid && selectedItemCount >= 1 ? '' : 'invalid'"
     >
       <span class="item-name">
         (<v-icon
@@ -352,7 +352,7 @@ export default {
             item => item.name
           ).join(' + '),
         isAverageScore: this.scoringType === "sum" ? false : true,
-        valid: this.valid && this.selectedItemCount >= 2
+        valid: this.valid && this.selectedItemCount >= 1
       };
 
       if (this.subScales[this.subScaleIndex].subScaleId) {

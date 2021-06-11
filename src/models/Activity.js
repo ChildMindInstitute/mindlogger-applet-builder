@@ -571,15 +571,15 @@ export default class Activity {
           let oldSubScales = _.get(oldValue, field, []);
 
           newSubScales.forEach(newSubScale => {
-            if (newSubScale.subScaleId === undefined) {
+            let oldSubScale = oldSubScales.find(old => old.subScaleId == newSubScale.subScaleId);
+
+            if (newSubScale.subScaleId === undefined || !oldSubScale) {
               updates.push(`subscale (${newSubScale.variableName} | ${newSubScale.jsExpression.replaceAll(' + ', ', ')}) was added`)
 
               if (newSubScale.lookupTable) {
                 updates.push(`lookup table for subscale (${newSubScale.variableName}) was set`);
               }
             } else {
-              let oldSubScale = oldSubScales.find(old => old.subScaleId == newSubScale.subScaleId);
-
               if (
                 oldSubScale.variableName != newSubScale.variableName ||
                 oldSubScale.jsExpression != newSubScale.jsExpression

@@ -452,6 +452,13 @@ export default {
       }
     },
   },
+  watch: {
+    valid: {
+      handler () {
+        this.saveSubScale ();
+      }
+    }
+  },
 };
 </script>
 

@@ -354,6 +354,8 @@ export default {
     this.itemsFormatted = this.mergeList(this.formattedItems(), this.formattedSubScales());
 
     const message = this.getNameError();
+    this.valid = (message.length === 0);
+
     this.$set(this, 'nameError', {
       exists: message.length > 0,
       message

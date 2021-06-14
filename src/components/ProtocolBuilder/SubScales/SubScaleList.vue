@@ -119,14 +119,14 @@ export default {
       let itemsWithScoring = 0;
 
       for (let item of this.items) {
-        if (item.inputType == 'radio' || item.inputType == 'checkbox' || item.inputType == 'prize' || item.inputType == 'slider') {
+        if (item.inputType === 'radio' || item.inputType === 'checkbox' || item.inputType === 'prize' || item.inputType === 'slider') {
           if (item.options.hasScoreValue) {
-            itemsWithScoring++;
+            itemsWithScoring =+ 1;
           }
         }
       }
 
-      return itemsWithScoring >= 2;
+      return itemsWithScoring >= 1;
     },
 
     onCreateLookupTable (index) {

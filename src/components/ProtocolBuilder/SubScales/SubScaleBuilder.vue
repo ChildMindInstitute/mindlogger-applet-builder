@@ -95,11 +95,21 @@
               <template v-for="(item, index) in itemsFormatted">
                 <v-list-item
                   v-if="item.subScales.length == 0"
-                  :key="index"
+                  :key="`item-${index}`"
                 >
-                  <v-list-item-content>
+                  <v-list-item-content
+                    v-if="!item.isSubScale"
+                  >
                     {{ item.name }}
                   </v-list-item-content>
+
+                  <v-list-item-content
+                    v-else
+                    class="subscale-name"
+                  >
+                    * {{ item.name }} *
+                  </v-list-item-content>
+
                 </v-list-item>
               </template>
             </v-list>
@@ -125,8 +135,17 @@
                 >
                   <v-list-item-content>
                     <div class="item-with-subscale d-flex">
-                      <div class="item-name">
+                      <div
+                        v-if="!item.isSubScale"
+                        class="item-name"
+                      >
                         {{ item.name }}
+                      </div>
+                      <div
+                        v-else
+                        class="item-name subscale-name"
+                      >
+                        * {{ item.name }} *
                       </div>
                       <div class="subscales">
                         {{ item.subScales.map(subScale => subScale.variableName).join(', ') }}
@@ -194,7 +213,29 @@
                   />
                 </v-list-item-action>
                 <v-list-item-content>
-                  <v-list-item-title v-text="item.name" />
+                  <div
+                  >
+                    <span
+                      :class="item.isSubScale ? 'subscale-name' : ''"
+                    >{{ item.name }}</span>
+                    <template
+                      v-if="item.isSubScale"
+                    >
+                    (
+                      <span
+                        v-for="(subItem, index) in item.items"
+                        :key="index"
+                      >
+                        <span
+                          :class="subItem.includes(')') ? 'subscale-name' : ''"
+                        >
+                          {{ subItem.replace(/[()]/g, ' * ') }}
+                        </span>
+                        <span>{{ index != item.items.length - 1 ? ',' : '' }}</span>
+                      </span>
+                    )
+                    </template>
+                  </div>
                 </v-list-item-content>
               </v-list-item>
             </v-list-item-group>
@@ -218,6 +259,10 @@
 
   .invalid {
     background-color: #d44c4c;
+  }
+
+  .subscale-name {
+    color: red !important;
   }
 </style>
 
@@ -264,7 +309,7 @@ export default {
         v => !this.subScales.some((subScale, id) => subScale && subScale.variableName === v && id != this.subScaleIndex) || 'cannot use existing subscale name',
       ],
       valid: false,
-      scoringType: "sum",
+      scoringType: this.subScale.isAverageScore ? "average" : "sum",
       isExpanded: !this.subScale.variableName || !this.subScale.variableName.length,
       nameError: {
         exists: false,
@@ -306,13 +351,35 @@ export default {
     }
   },
   beforeMount() {
-    this.itemsFormatted = this.formattedItems();
+    this.itemsFormatted = this.mergeList(this.formattedItems(), this.formattedSubScales());
 
     const message = this.getNameError();
     this.$set(this, 'nameError', {
       exists: message.length > 0,
       message
     });
+  },
+  watch: {
+    subScales: {
+      deep: true,
+      handler() {
+        if (this.isExpanded) {
+          this.$set(this, 'itemsFormatted', this.mergeList(
+            this.itemsFormatted.filter(item => !item.isSubScale),
+            this.formattedSubScales()
+          ));
+        }
+      }
+    },
+
+    isExpanded() {
+      if (this.isExpanded) {
+        this.$set(this, 'itemsFormatted', this.mergeList(
+          this.itemsFormatted.filter(item => !item.isSubScale),
+          this.formattedSubScales()
+        ));
+      }
+    }
   },
   methods: {
     ...mapMutations(config.MODULE_NAME,
@@ -321,6 +388,25 @@ export default {
         'deleteSubScale',
       ]
     ),
+
+    mergeList(items, subScales) {
+      for (const subScale of subScales) {
+        if (
+          !subScale.current
+          && !subScale.items.includes(`(${this.currentSubScale.variableName})`)
+        ) {
+          items.push({
+            ...subScale,
+            name: subScale.variableName,
+            isSubScale: true,
+            id: items.length
+          });
+        }
+      }
+
+      return items;
+    },
+
     getNameError() {
       if (!this.currentSubScale.variableName) {
         return 'Please enter the name of sub-scale.'
@@ -349,7 +435,7 @@ export default {
         jsExpression: this.itemsFormatted.filter(
             item => item.selected
           ).map(
-            item => item.name
+            item => item.isSubScale ? `(${item.name})` : item.name
           ).join(' + '),
         isAverageScore: this.scoringType === "sum" ? false : true,
         valid: this.valid && this.selectedItemCount >= 1
@@ -368,6 +454,11 @@ export default {
     getItemNames (subScale) {
       let expression = subScale.jsExpression || '';
       return expression.split('+').map(itemName => itemName.trim())
+    },
+
+    getSubScaleNames (subScale) {
+      const items = this.getItemNames(subScale);
+      return items.filter(name => name.match(/^\(.*\)$/i)).map(name => name.substr(1, name.length-2));
     },
 
     formattedItems () {
@@ -406,6 +497,48 @@ export default {
       }
 
       return items;
+    },
+
+    formattedSubScales () {
+      let subScales = [];
+
+      for (let i = 0; i < this.subScales.length; i++)
+      {
+        subScales.push(
+          {
+            ...this.subScales[i],
+            subScales: [],
+            items: this.getItemNames(this.subScales[i]),
+            selected: false,
+            current: i == this.subScaleIndex
+          }
+        );
+      }
+
+      for (let i = 0; i < this.subScales.length; i++)
+      {
+        const names = this.getSubScaleNames(this.subScales[i]);
+        const relatedSubScales = names.map(
+          name => subScales.find(
+            subScale => subScale.variableName == name
+          )
+        ).filter(subScale => subScale);
+
+        for (const subScale of relatedSubScales)
+        {
+          if (i == this.subScaleIndex)
+          {
+            subScale.selected = true;
+            subScale.subScales.push(this.currentSubScale);
+          }
+          else
+          {
+            subScale.subScales.push(this.subScale[i]);
+          }
+        }
+      }
+
+      return subScales;
     },
 
     rowClicked (item) {

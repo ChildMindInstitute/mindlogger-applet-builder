@@ -588,6 +588,12 @@ export default class Activity {
               }
 
               if (
+                oldSubScale.isAverageScore != newSubScale.isAverageScore
+              ) {
+                updates.push(`subscale scoring for ${oldSubScale.variableName} was updated to ${newSubScale.isAverageScore ? 'average' : 'sum'}`);
+              }
+
+              if (
                 JSON.stringify(oldSubScale.lookupTable) !== JSON.stringify(newSubScale.lookupTable)
               ) {
                 updates.push(`lookup table for subscale (${oldSubScale.variableName}) was updated`);
@@ -879,8 +885,10 @@ export default class Activity {
         const jsExpression = subScale['reprolib:terms/jsExpression'];
         const variableName = subScale['reprolib:terms/variableName'];
         const lookupTable = subScale['reprolib:terms/lookupTable'];
+        const isAverageScore = subScale['reprolib:terms/isAverageScore'];
 
         let subScaleData = {
+          isAverageScore: isAverageScore[0] && isAverageScore[0]['@value'],
           jsExpression: jsExpression[0] && jsExpression[0]['@value'],
           variableName: variableName[0] && variableName[0]['@value'],
           subScaleId: index + 1,

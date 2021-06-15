@@ -104,6 +104,14 @@
           @onRemove="onRemoveHeaderImage()"
           @onNotify="loading = false; notify = $event;"
         />
+
+        <div
+          v-if="item.inputType == 'text' && item.options && item.options.isResponseIdentifier"
+          class="my-2"
+        >
+          {{ responseIdentifierMessage }}
+        </div>
+
         <v-textarea
           v-if="item.inputType !== 'cumulativeScore'"
           v-model="largeText"
@@ -628,6 +636,7 @@ export default {
       baseKey: 0,
       loading: false,
       notify: {},
+      responseIdentifierMessage: 'By using this option, the user will be required to enter response data identifier text into the field. The text entered will identify the response data collected at that point in time. The identifier used will be filterable on the user\'s data visualization tab.'
     }
   },
   computed: {

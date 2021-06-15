@@ -177,6 +177,7 @@ export default class Item {
       return {
         'valueType': this.ref.options.valueType || this.ref.valueType,
         'requiredValue': this.ref.options.requiredValue,
+        'isResponseIdentifier': this.ref.options.isResponseIdentifier
       }
     }
     if (this.ref.inputType === "slider") {
@@ -604,6 +605,10 @@ export default class Item {
         updated: valueUpdate('maxLength'),
         inserted: valueInsert('maxLength'),
       },
+      'options.isResponseIdentifier': {
+        updated: optionUpdate('Response data identifier'),
+        inserted: optionUpdate('Response data identifier')
+      },
       'options.isTokenValue': {
         updated: optionUpdate('Token Value option'),
       },
@@ -912,6 +917,8 @@ export default class Item {
         itemContent.options = {
           requiredValue:
             _.get(responseOptions, [0, 'reprolib:terms/requiredValue', 0, '@value']),
+          isResponseIdentifier:
+            _.get(responseOptions, [0, 'reprolib:terms/isResponseIdentifier', 0, '@value'])
           // TODO: add 'maximum response length' value which is absent for now
         };
         if (item['schema:correctAnswer'] &&

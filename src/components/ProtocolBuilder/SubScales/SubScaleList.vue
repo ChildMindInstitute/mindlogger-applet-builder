@@ -10,7 +10,6 @@
         :key="index"
         :sub-scale-index="index"
         :sub-scale="subScale"
-        :sub-scales="currentActivity.subScales"
         :items="currentActivity.items"
         :has-lookup-table="!!subScale.lookupTable"
         class="ma-4"
@@ -96,6 +95,7 @@ export default {
       return this.currentActivity && this.currentActivity.items;
     }
   },
+
   methods: {
     ...mapMutations(config.MODULE_NAME,
       [

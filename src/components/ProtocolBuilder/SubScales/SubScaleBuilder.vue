@@ -267,7 +267,7 @@
 </style>
 
 <script>
-import { mapMutations } from 'vuex';
+import { mapMutations, mapGetters } from 'vuex';
 import config from '../../../config';
 
 export default {
@@ -275,10 +275,6 @@ export default {
     items: {
       type: Array,
       required: true,
-    },
-    subScales: {
-      type: Array,
-      required: true
     },
     subScaleIndex: {
       type: Number,
@@ -306,7 +302,7 @@ export default {
       previousRow: -1,
       nameRules: [
         v => !!v || 'name cannot be empty',
-        v => !this.subScales.some((subScale, id) => subScale && subScale.variableName === v && id != this.subScaleIndex) || 'cannot use existing subscale name',
+        v => !this.currentActivity.subScales.some((subScale, id) => subScale && subScale.variableName === v && id != this.subScaleIndex) || 'cannot use existing subscale name',
       ],
       valid: false,
       scoringType: this.subScale.isAverageScore ? "average" : "sum",
@@ -321,6 +317,11 @@ export default {
     config () {
       return config;
     },
+    ...mapGetters(config.MODULE_NAME,
+      [
+        'currentActivity'
+      ]
+    ),
     selectedItemCount () {
       let itemCount = 0;
       for (let item of this.itemsFormatted) {
@@ -362,9 +363,11 @@ export default {
     });
   },
   watch: {
-    subScales: {
+    currentActivity: {
       deep: true,
       handler() {
+        this.itemsFormatted = this.mergeList(this.formattedItems(), this.formattedSubScales());
+
         if (this.isExpanded) {
           this.$set(this, 'itemsFormatted', this.mergeList(
             this.itemsFormatted.filter(item => !item.isSubScale),
@@ -373,7 +376,11 @@ export default {
         }
       }
     },
-
+    valid: {
+      handler () {
+        this.saveSubScale ();
+      }
+    },
     isExpanded() {
       if (this.isExpanded) {
         this.$set(this, 'itemsFormatted', this.mergeList(
@@ -381,7 +388,7 @@ export default {
           this.formattedSubScales()
         ));
       }
-    }
+    },
   },
   methods: {
     ...mapMutations(config.MODULE_NAME,
@@ -414,7 +421,7 @@ export default {
         return 'Please enter the name of sub-scale.'
       }
       if (
-        this.subScales.some((subScale, id) =>
+        this.currentActivity.subScales.some((subScale, id) =>
           subScale &&
           subScale.variableName === this.currentSubScale.variableName &&
           id != this.subScaleIndex
@@ -443,8 +450,8 @@ export default {
         valid: this.valid && this.selectedItemCount >= 1
       };
 
-      if (this.subScales[this.subScaleIndex].subScaleId) {
-        subScale.subScaleId = this.subScales[this.subScaleIndex].subScaleId;
+      if (this.currentActivity.subScales[this.subScaleIndex].subScaleId) {
+        subScale.subScaleId = this.currentActivity.subScales[this.subScaleIndex].subScaleId;
       }
 
       this.updateSubScaleData({
@@ -467,10 +474,10 @@ export default {
       let items = [];
       let subScales = [];
 
-      for (let i = 0; i < this.subScales.length; i++) {
+      for (let i = 0; i < this.currentActivity.subScales.length; i++) {
         subScales.push({
-          ...this.subScales[i],
-          items: this.getItemNames(this.subScales[i]),
+          ...this.currentActivity.subScales[i],
+          items: this.getItemNames(this.currentActivity.subScales[i]),
           index: i
         });
       }
@@ -504,22 +511,22 @@ export default {
     formattedSubScales () {
       let subScales = [];
 
-      for (let i = 0; i < this.subScales.length; i++)
+      for (let i = 0; i < this.currentActivity.subScales.length; i++)
       {
         subScales.push(
           {
-            ...this.subScales[i],
+            ...this.currentActivity.subScales[i],
             subScales: [],
-            items: this.getItemNames(this.subScales[i]),
+            items: this.getItemNames(this.currentActivity.subScales[i]),
             selected: false,
             current: i == this.subScaleIndex
           }
         );
       }
 
-      for (let i = 0; i < this.subScales.length; i++)
+      for (let i = 0; i < this.currentActivity.subScales.length; i++)
       {
-        const names = this.getSubScaleNames(this.subScales[i]);
+        const names = this.getSubScaleNames(this.currentActivity.subScales[i]);
         const relatedSubScales = names.map(
           name => subScales.find(
             subScale => subScale.variableName == name
@@ -586,13 +593,6 @@ export default {
         );
       }
     },
-  },
-  watch: {
-    valid: {
-      handler () {
-        this.saveSubScale ();
-      }
-    }
   },
 };
 </script>

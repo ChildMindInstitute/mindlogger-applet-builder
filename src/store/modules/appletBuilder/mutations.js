@@ -176,8 +176,10 @@ const subScaleMutations = {
 
   updateSubScaleData (state, { index, obj }) {
     const name = state.currentActivity.subScales[index].variableName;
+    const currentActivity = state.currentActivity;
 
-    Object.assign(state.currentActivity.subScales[index], obj);
+    currentActivity.subScales[index] = { ...obj };
+    state.currentActivity = { ...currentActivity };
 
     if (name && obj.variableName && name != obj.variableName)
     {

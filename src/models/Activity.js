@@ -748,6 +748,7 @@ export default class Activity {
         itemLogs.push({
           name: `item ${currentItems[entry[1]]['skos:prefLabel']} was updated`,
           type: 'updated',
+          itemId: currentItems[entry[1]] && currentItems[entry[1]]._id,
           children: changeLog.log,
         });
 
@@ -763,8 +764,9 @@ export default class Activity {
       const changeLog = Item.getChangeInfo({}, currentItems[id]);
 
       itemLogs.push({
-        name: `item ${currentItems[id]['skos:prefLabel']} was inserted`,
+        name: `item ${currentItems[id]['skos:prefLabel']} was added`,
         type: 'inserted',
+        itemId: currentItems[id] && currentItems[id]._id,
         children: changeLog.log,
       });
 

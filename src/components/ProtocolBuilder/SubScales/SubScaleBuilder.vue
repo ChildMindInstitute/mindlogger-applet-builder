@@ -107,7 +107,7 @@
                     v-else
                     class="subscale-name"
                   >
-                    * {{ item.name }} *
+                    {{ item.name }}
                   </v-list-item-content>
 
                 </v-list-item>
@@ -145,7 +145,7 @@
                         v-else
                         class="item-name subscale-name"
                       >
-                        * {{ item.name }} *
+                        {{ item.name }}
                       </div>
                       <div class="subscales">
                         {{ item.subScales.map(subScale => subScale.variableName).join(', ') }}
@@ -229,7 +229,7 @@
                         <span
                           :class="subItem.includes(')') ? 'subscale-name' : ''"
                         >
-                          {{ subItem.replace(/[()]/g, ' * ') }}
+                          {{ subItem.replace(/[()]/g, ' ') }}
                         </span>
                         <span>{{ index != item.items.length - 1 ? ',' : '' }}</span>
                       </span>

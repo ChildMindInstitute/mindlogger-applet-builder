@@ -844,7 +844,7 @@ export default class Activity {
       }
     });
 
-    const parseLookupTable = (isFinalSubScale, lookupTable) => lookupTable.map(row => {
+    const parseLookupTable = (isFinalSubScale, lookupTable) => (Array.isArray(lookupTable) && lookupTable.map(row => {
       const age = row['reprolib:terms/age'];
       const rawScore = row['reprolib:terms/rawScore'];
       const sex = row['reprolib:terms/sex'];
@@ -865,7 +865,7 @@ export default class Activity {
       }
 
       return data;
-    });
+    }) || null);
 
     const activityInfo = {
       _id: id && id.split('/')[1],
@@ -902,7 +902,7 @@ export default class Activity {
       }),
       finalSubScale: finalSubScale && finalSubScale[0] && {
         isAverageScore: _.get(finalSubScale, [0, 'reprolib:terms/isAverageScore', 0, '@value'], false),
-        lookupTable: parseLookupTable(true, _.get(finalSubScale, [0, 'reprolib:terms/lookupTable'], [])),
+        lookupTable: parseLookupTable(true, _.get(finalSubScale, [0, 'reprolib:terms/lookupTable'], null)),
         variableName: _.get(finalSubScale, [0, 'reprolib:terms/variableName', 0, '@value'])
       },
       compute: Array.isArray(compute) && compute.map((exp) => {

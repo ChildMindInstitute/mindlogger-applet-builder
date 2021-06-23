@@ -403,12 +403,13 @@ export default {
     ),
 
     mergeList(items, subScales) {
+      const list = [];
       for (const subScale of subScales) {
         if (
           !subScale.current
           && !subScale.items.includes(`(${this.currentSubScale.variableName})`)
         ) {
-          items.push({
+          list.push({
             ...subScale,
             name: subScale.variableName,
             isSubScale: true,
@@ -417,7 +418,7 @@ export default {
         }
       }
 
-      return items;
+      return list.concat(items);
     },
 
     getNameError() {

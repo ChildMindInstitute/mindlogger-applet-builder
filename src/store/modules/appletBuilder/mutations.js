@@ -169,7 +169,10 @@ const subScaleMutations = {
   addSubScale (state) {
     if (state.currentActivity) {
       state.currentActivity.subScales.push({
-        lookupTable: null
+        lookupTable: null,
+        variableName: '',
+        jsExpression: '',
+        valid: false
       });
     }
   },

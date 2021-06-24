@@ -107,7 +107,7 @@
                     v-else
                     class="subscale-name"
                   >
-                    * {{ item.name }} *
+                    {{ item.name }}
                   </v-list-item-content>
 
                 </v-list-item>
@@ -145,7 +145,7 @@
                         v-else
                         class="item-name subscale-name"
                       >
-                        * {{ item.name }} *
+                        {{ item.name }}
                       </div>
                       <div class="subscales">
                         {{ item.subScales.map(subScale => subScale.variableName).join(', ') }}
@@ -200,44 +200,48 @@
             <v-list-item-group
               color="primary"
             >
-              <v-list-item
+              <template
                 v-for="(item, index) in itemsFormatted"
-                :key="index"
-                @click="rowClicked(item)"
               >
-                <v-list-item-action>
-                  <v-checkbox
-                    v-model="item.selected"
-                    color="primary"
-                    disabled
-                  />
-                </v-list-item-action>
-                <v-list-item-content>
-                  <div
-                  >
-                    <span
-                      :class="item.isSubScale ? 'subscale-name' : ''"
-                    >{{ item.name }}</span>
-                    <template
-                      v-if="item.isSubScale"
+                <v-list-item
+                  v-if="item.name"
+                  :key="index"
+                  @click="rowClicked(item)"
+                >
+                  <v-list-item-action>
+                    <v-checkbox
+                      v-model="item.selected"
+                      color="primary"
+                      disabled
+                    />
+                  </v-list-item-action>
+                  <v-list-item-content>
+                    <div
                     >
-                    (
                       <span
-                        v-for="(subItem, index) in item.items"
-                        :key="index"
+                        :class="item.isSubScale ? 'subscale-name' : ''"
+                      >{{ item.name }}</span>
+                      <template
+                        v-if="item.isSubScale"
                       >
+                      (
                         <span
-                          :class="subItem.includes(')') ? 'subscale-name' : ''"
+                          v-for="(subItem, index) in item.items"
+                          :key="index"
                         >
-                          {{ subItem.replace(/[()]/g, ' * ') }}
+                          <span
+                            :class="subItem.includes(')') ? 'subscale-name' : ''"
+                          >
+                            {{ subItem.replace(/[()]/g, ' ') }}
+                          </span>
+                          <span>{{ index != item.items.length - 1 ? ',' : '' }}</span>
                         </span>
-                        <span>{{ index != item.items.length - 1 ? ',' : '' }}</span>
-                      </span>
-                    )
-                    </template>
-                  </div>
-                </v-list-item-content>
-              </v-list-item>
+                      )
+                      </template>
+                    </div>
+                  </v-list-item-content>
+                </v-list-item>
+              </template>
             </v-list-item-group>
           </v-list>
         </v-card>
@@ -399,12 +403,13 @@ export default {
     ),
 
     mergeList(items, subScales) {
+      const list = [];
       for (const subScale of subScales) {
         if (
           !subScale.current
           && !subScale.items.includes(`(${this.currentSubScale.variableName})`)
         ) {
-          items.push({
+          list.push({
             ...subScale,
             name: subScale.variableName,
             isSubScale: true,
@@ -413,7 +418,7 @@ export default {
         }
       }
 
-      return items;
+      return list.concat(items);
     },
 
     getNameError() {
@@ -462,7 +467,7 @@ export default {
 
     getItemNames (subScale) {
       let expression = subScale.jsExpression || '';
-      return expression.split('+').map(itemName => itemName.trim())
+      return expression.split('+').map(itemName => itemName.trim()).filter(itemName => itemName.length)
     },
 
     getSubScaleNames (subScale) {
@@ -542,7 +547,7 @@ export default {
           }
           else
           {
-            subScale.subScales.push(this.subScale[i]);
+            subScale.subScales.push(this.currentActivity.subScales[i]);
           }
         }
       }

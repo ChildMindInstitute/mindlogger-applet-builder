@@ -40,6 +40,7 @@ export default class Activity {
       isSkippable: initialActivityData.isSkippable || false,
       items: items || [],
       disableBack: initialActivityData.disableBack || false,
+      allowSummary: initialActivityData.allowSummary !== undefined ? initialActivityData.allowSummary : true,
       id: initialActivityData._id || null,
       textRules: [(v) => !!v || 'This field is required'],
       error: '',
@@ -381,6 +382,7 @@ export default class Activity {
     const allowed = [];
     this.ref.isSkippable && allowed.push('skipped');
     this.ref.disableBack && allowed.push('disableBack');
+    !this.ref.allowSummary && allowed.push('disableSummary');
 
     return {
       '@context': [
@@ -473,6 +475,7 @@ export default class Activity {
       shuffle: this.ref.shuffleActivityOrder,
       isSkippable: this.ref.isSkippable,
       disableBack: this.ref.disableBack,
+      allowSummary: this.ref.allowSummary,
       schema: schema,
       context: context,
       items: this.ref.items.filter(item => item.ui.inputType !== 'cumulativeScore'),
@@ -939,6 +942,7 @@ export default class Activity {
     if (allowList.some((item) => item.includes('disable_back'))) {
       activityInfo.disableBack = true;
     }
+    activityInfo.allowSummary = !allowList.some((item) => item.includes('disable_summary'))
 
     activityInfo.valid = true;
 

@@ -271,6 +271,7 @@
       />
       <v-row>
         <v-col
+          v-if="!isReviewerActivity"
           class="d-flex align-center"
           cols="12"
           md="3"
@@ -295,6 +296,7 @@
           />
         </v-col>
         <v-col
+          v-if="!isReviewerActivity"
           class="d-flex align-center"
           cols="12"
           md="3"
@@ -307,6 +309,7 @@
           />
         </v-col>
         <v-col
+          v-if="!isReviewerActivity"
           class="d-flex align-center"
           cols="12"
           md="3"
@@ -590,6 +593,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    isReviewerActivity: {
+      type: Boolean,
+      default: false
+    }
   },
   data: function () {
 

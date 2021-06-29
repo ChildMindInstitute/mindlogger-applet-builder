@@ -168,7 +168,7 @@
           <v-select
             class="mt-4"
             :value="item.inputType"
-            :items="itemInputTypes"
+            :items="inputTypes"
             label="Input Type"
             outlined
             hide-details
@@ -265,6 +265,7 @@
         :initial-item-data="item.options"
         :item-templates="itemTemplates"
         :has-prize-activity="hasPrizeActivity"
+        :is-reviewer-activity="isReviewerActivity"
         :initial-is-optional-text="item.isOptionalText"
         @openPrize="setTokenPrizeModalStatus(true)"
         @removeTemplate="onRemoveTemplate"
@@ -309,6 +310,7 @@
         :initial-item-data="item.options"
         :initial-response-options="item.responseOptions"
         :initial-is-optional-text="item.isOptionalText"
+        :is-reviewer-activity="isReviewerActivity"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
         @updateOptionalText="updateOptionalText"
@@ -697,6 +699,20 @@ export default {
         'prizeActivity'
       ]
     ),
+
+    isReviewerActivity () {
+      return this.currentActivity.isReviewerActivity;
+    },
+
+    inputTypes () {
+      if (this.isReviewerActivity) {
+        return this.itemInputTypes.filter(
+          type => type.text == 'radio' || type.text == 'checkbox' || type.text == 'slider'
+        )
+      }
+
+      return this.itemInputTypes;
+    },
 
     conditionals () {
       return this.currentActivity.conditionalItems;

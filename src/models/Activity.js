@@ -399,6 +399,7 @@ export default class Activity {
       'schema:schemaVersion': '0.0.1',
       'schema:version': '0.0.1',
       preamble: this.ref.preamble,
+      isReviewerActivity: this.ref.isReviewerActivity,
       scoringLogic: {},
       'repronim:timeUnit': 'yearmonthdate',
       isPrize: this.ref.isPrize,
@@ -476,6 +477,7 @@ export default class Activity {
       description: this.ref.description,
       splash: this.ref.splash,
       preamble: this.ref.preamble,
+      isReviewerActivity: this.ref.isReviewerActivity,
       shuffle: this.ref.shuffleActivityOrder,
       isSkippable: this.ref.isSkippable,
       disableBack: this.ref.disableBack,
@@ -826,6 +828,7 @@ export default class Activity {
       ['schema:description']: description,
       ['schema:splash']: splash,
       ['reprolib:terms/preamble']: activityPreamble,
+      ['reprolib:terms/isReviewerActivity']: isReviewerActivity,
       ['reprolib:terms/shuffle']: shuffle,
       ['reprolib:terms/allow']: allow,
       ['reprolib:terms/addProperties']: addProperties,
@@ -898,6 +901,10 @@ export default class Activity {
         activityPreamble &&
         activityPreamble[0] &&
         activityPreamble[0]['@value'],
+      isReviewerActivity:
+        isReviewerActivity &&
+        isReviewerActivity[0] &&
+        isReviewerActivity[0]['@value'],
       shuffle: shuffle && shuffle[0] && shuffle[0]['@value'],
       visibilities,
       subScales: Array.isArray(subScales) && subScales.map((subScale, index) => {

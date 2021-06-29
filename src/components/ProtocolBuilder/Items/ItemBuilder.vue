@@ -186,6 +186,11 @@
             </template>
           </v-select>
         </v-col>
+        <v-checkbox
+          v-if="item.inputType === 'cumulativeScore'"
+          v-model="currentActivity.allowSummary"
+          label="Allow the user to see results"
+        />
       </v-row>
 
       <div

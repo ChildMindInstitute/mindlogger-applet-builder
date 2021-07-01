@@ -244,6 +244,10 @@ export default {
     state.templates = templates;
   },
 
+  setThemes (state, themes) {
+    state.themes = themes;
+  },
+
   setCurrentScreen (state, screen) {
     state.currentScreen = screen;
   },

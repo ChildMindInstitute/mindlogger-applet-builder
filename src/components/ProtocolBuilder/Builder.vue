@@ -75,6 +75,11 @@ export default {
       required: false,
       default: null,
     },
+    themes: {
+      type: Array,
+      required: false,
+      default: null,
+    },
     versions: {
       type: Array,
       required: false,
@@ -130,6 +135,7 @@ export default {
   },
   async beforeMount() {
     this.setTemplates(this.templates);
+    this.setThemes(this.themes);
     this.setVersions(this.versions);
     this.setCurrentScreen(config.PROTOCOL_SCREEN);
     this.setCurrentActivity(-1);
@@ -170,6 +176,7 @@ export default {
     ...mapMutations(config.MODULE_NAME, [
       'initProtocolData',
       'setTemplates',
+      'setThemes',
       'setCurrentScreen',
       'setFormattedOriginalProtocol',
       'setPrizeActivity',

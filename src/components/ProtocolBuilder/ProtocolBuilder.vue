@@ -51,11 +51,11 @@
             @onNotify="onEventNotify($event)"
           />
 
-          <v-subheader class="ml-10">
+          <v-subheader class="ml-10" v-if="themes">
             Theme
           </v-subheader>
 
-          <v-select
+          <v-select v-if="themes"
               v-model="theme"
               :items="themes"
               :label="'Select theme'"
@@ -66,22 +66,6 @@
               outlined
               dense
           />
-
-          <v-menu>
-            <v-list>
-              <v-list-item>
-                <v-list-item-title>MindLogger</v-list-item-title>
-              </v-list-item>
-
-              <v-list-item>
-                <v-list-item-title>ETH Zürich</v-list-item-title>
-              </v-list-item>
-
-              <v-list-item>
-                <v-list-item-title>CRI</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
         </div>
       </v-card>
 
@@ -198,7 +182,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(config.MODULE_NAME, ['protocol', 'activities']),
+    ...mapGetters(config.MODULE_NAME, ['protocol', 'activities', 'themes']),
     config() {
       return config;
     },
@@ -233,23 +217,6 @@ export default {
       set: function (theme) {
         this.updateProtocolMetaInfo({ theme })
       }
-    },
-    themes() {
-      // TODO: load list from API
-      return [
-        {
-          label: 'MindLogger',
-          value: "mindlogger",
-        },
-        {
-          label: 'ETH Zürich',
-          value: "eth",
-        },
-        {
-          label: 'CRI',
-          value: "cri",
-        }
-      ]
     },
 
     appletImage: {

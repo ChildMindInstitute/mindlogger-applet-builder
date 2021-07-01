@@ -44,6 +44,10 @@ export default {
     return state.templates;
   },
 
+  themes (state) {
+    return state.themes;
+  },
+
   currentScreen (state) {
     return state.currentScreen;
   },

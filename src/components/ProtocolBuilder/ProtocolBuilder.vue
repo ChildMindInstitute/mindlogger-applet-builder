@@ -51,16 +51,16 @@
             @onNotify="onEventNotify($event)"
           />
 
-          <v-subheader class="ml-10" v-if="themes">
+          <v-subheader class="ml-10" v-if="themes && themes.length">
             Theme
           </v-subheader>
 
-          <v-select v-if="themes"
+          <v-select v-if="themes && themes.length"
               v-model="theme"
               :items="themes"
               :label="'Select theme'"
-              item-text="label"
-              item-value="value"
+              item-text="name"
+              item-value="themeId"
               hide-details
               single-line
               outlined
@@ -182,7 +182,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(config.MODULE_NAME, ['protocol', 'activities', 'themes']),
+    ...mapGetters(config.MODULE_NAME, ['protocol', 'activities', 'themes', 'themeId']),
     config() {
       return config;
     },
@@ -210,21 +210,21 @@ export default {
         this.updateProtocolMetaInfo({ markdownData })
       }
     },
-    theme: {
-      get: function () {
-        return this.protocol.theme
-      },
-      set: function (theme) {
-        this.updateProtocolMetaInfo({ theme })
-      }
-    },
-
     appletImage: {
       get: function () {
         return this.protocol.image
       },
       set: function (appletImage) {
         this.updateProtocolMetaInfo({ image: appletImage })
+      }
+    },
+
+    theme: {
+      get: function () {
+        return this.themeId
+      },
+      set: function (themeId) {
+        this.updateThemeId(themeId)
       }
     },
 
@@ -251,6 +251,7 @@ export default {
         'addActivity',
         'setCurrentActivity',
         'setCurrentScreen',
+        'updateThemeId'
       ]
     ),
     onAddImageFromUrl (event) {

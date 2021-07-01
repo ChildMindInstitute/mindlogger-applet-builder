@@ -21,6 +21,10 @@ const activityGetters = {
 
   tokenPrizeModal (state) {
     return state.protocol.tokenPrizeModal;
+  },
+
+  themeId (state) {
+    return state.themeId;
   }
 };
 

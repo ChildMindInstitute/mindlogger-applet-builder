@@ -244,8 +244,11 @@ export default {
     state.templates = templates;
   },
 
-  setThemes (state, themes) {
+  initThemes (state, themes) {
     state.themes = themes;
+
+    const theme = themes ? themes.find(theme => theme.name === 'mindlogger') : null;
+    state.themeId = theme ? theme.themeId : null;
   },
 
   setCurrentScreen (state, screen) {
@@ -256,6 +259,10 @@ export default {
   updateProtocolMetaInfo (state, obj) {
     Object.assign(state.protocol, obj);
     state.protocol.valid = Protocol.checkValidation(state.protocol);
+  },
+
+  updateThemeId (state, themeId) {
+      state.themeId = themeId;
   },
 
   resetProtocol (state) {

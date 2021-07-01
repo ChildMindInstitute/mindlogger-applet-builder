@@ -108,6 +108,7 @@ export default {
       'activities',
       'prizeActivity',
       'templateUpdateRequest',
+      'themeId'
     ]),
     config() {
       return config;
@@ -135,7 +136,7 @@ export default {
   },
   async beforeMount() {
     this.setTemplates(this.templates);
-    this.setThemes(this.themes);
+    this.initThemes(this.themes);
     this.setVersions(this.versions);
     this.setCurrentScreen(config.PROTOCOL_SCREEN);
     this.setCurrentActivity(-1);
@@ -176,7 +177,7 @@ export default {
     ...mapMutations(config.MODULE_NAME, [
       'initProtocolData',
       'setTemplates',
-      'setThemes',
+      'initThemes',
       'setCurrentScreen',
       'setFormattedOriginalProtocol',
       'setPrizeActivity',
@@ -277,11 +278,17 @@ export default {
     },
 
     uploadProtocol (data) {
-      this.$emit("uploadProtocol", data);
+      this.$emit("uploadProtocol", {
+        applet: data,
+        themeId: this.themeId
+      });
     },
 
     updateProtocol (data) {
-      this.$emit("updateProtocol", data);
+      this.$emit("updateProtocol", {
+        protocol: data,
+        themeId: this.themeId
+      });
     },
 
     onUploadError (msg) {

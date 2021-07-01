@@ -8,6 +8,7 @@ export const getInitialProtocol = () => ({
   markdownData: '',
   image: '',
   name: '',
+  theme: 'mindlogger',
   protocolVersion: '1.0.0',
   valid: false,
   prizeActivity: null,

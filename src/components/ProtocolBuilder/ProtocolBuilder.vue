@@ -50,6 +50,38 @@
             @onRemove="onRemoveImage()"
             @onNotify="onEventNotify($event)"
           />
+
+          <v-subheader class="ml-10">
+            Theme
+          </v-subheader>
+
+          <v-select
+              v-model="theme"
+              :items="themes"
+              :label="'Select theme'"
+              item-text="label"
+              item-value="value"
+              hide-details
+              single-line
+              outlined
+              dense
+          />
+
+          <v-menu>
+            <v-list>
+              <v-list-item>
+                <v-list-item-title>MindLogger</v-list-item-title>
+              </v-list-item>
+
+              <v-list-item>
+                <v-list-item-title>ETH Zürich</v-list-item-title>
+              </v-list-item>
+
+              <v-list-item>
+                <v-list-item-title>CRI</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
         </div>
       </v-card>
 
@@ -121,8 +153,8 @@
       </v-card>
     </v-form>
 
-    <LandingPageEditor 
-      :visibility="markdownDialog" 
+    <LandingPageEditor
+      :visibility="markdownDialog"
       :markdownText="markdownData"
       @close="onCloseEditor"
       @submit="onSubmitEditor"
@@ -146,7 +178,7 @@
 
 <script>
 import LandingPageEditor from './LandingPageEditor';
-import Uploader from './Uploader.vue'; 
+import Uploader from './Uploader.vue';
 import Protocol from '../../models/Protocol';
 import Activity from '../../models/Protocol';
 import Item from '../../models/Protocol';
@@ -162,7 +194,7 @@ export default {
   data () {
     return {
       markdownDialog: false,
-      textRules: [(v) => !!v || "This field is required"],
+      textRules: [(v) => !!v || "This field is required"]
     }
   },
   computed: {
@@ -194,6 +226,31 @@ export default {
         this.updateProtocolMetaInfo({ markdownData })
       }
     },
+    theme: {
+      get: function () {
+        return this.protocol.theme
+      },
+      set: function (theme) {
+        this.updateProtocolMetaInfo({ theme })
+      }
+    },
+    themes() {
+      // TODO: load list from API
+      return [
+        {
+          label: 'MindLogger',
+          value: "mindlogger",
+        },
+        {
+          label: 'ETH Zürich',
+          value: "eth",
+        },
+        {
+          label: 'CRI',
+          value: "cri",
+        }
+      ]
+    },
 
     appletImage: {
       get: function () {
@@ -210,8 +267,8 @@ export default {
 
     activityStatus () {
       return this.withoutPrize.map(activity => !(
-        !activity.valid 
-          || activity.items.some(item => !item.valid) 
+        !activity.valid
+          || activity.items.some(item => !item.valid)
           || activity.items.length === 0
           || activity.subScales.some(subScale => !subScale.valid)
           || activity.conditionalItems.some(conditional => !conditional.valid)
@@ -219,13 +276,13 @@ export default {
     },
   },
   methods: {
-    ...mapMutations(config.MODULE_NAME, 
+    ...mapMutations(config.MODULE_NAME,
       [
-        'updateProtocolMetaInfo', 
-        'duplicateActivity', 
-        'deleteActivity', 
-        'addActivity', 
-        'setCurrentActivity', 
+        'updateProtocolMetaInfo',
+        'duplicateActivity',
+        'deleteActivity',
+        'addActivity',
+        'setCurrentActivity',
         'setCurrentScreen',
       ]
     ),
@@ -238,7 +295,7 @@ export default {
       });
     },
     async onAddImageFromDevice (uploadFunction) {
-      this.$emit('loading', true); 
+      this.$emit('loading', true);
 
       try {
         this.appletImage = await uploadFunction();
@@ -266,7 +323,7 @@ export default {
       });
     },
     onEventNotify (event) {
-      this.$emit('loading', false); 
+      this.$emit('loading', false);
       this.$emit('notify', event);
     },
     onSubmitEditor (markdownData) {
@@ -290,7 +347,7 @@ export default {
 
       this.addActivity();
       this.editActivity(activityCount);
-    },
+    }
   }
 }
 </script>

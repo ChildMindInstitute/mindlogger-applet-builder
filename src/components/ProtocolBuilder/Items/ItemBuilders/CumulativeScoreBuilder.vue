@@ -92,23 +92,21 @@
             @change="onUpdateRule(rule)"
           />
 
-          <div>
-            Message {{rule.operator.text}}
-            <MarkDownEditor
-              v-model="rule.messageInRange"
-              :rules="textRules"
-              @input="onUpdateRule(rule)"
-            />
-          </div>
+          <v-text-field
+            v-model="rule.messageInRange"
+            :label="`Message ${rule.operator.text}`"
+            type="text"
+            :rules="textRules"
+            @input="onUpdateRule(rule)"
+          />
 
-          <div>
-            Message out of range
-            <MarkDownEditor
-              v-model="rule.messageOutRange"
-              :rules="textRules"
-              @input="onUpdateRule(rule)"
-            />
-          </div>
+          <v-text-field
+            v-model="rule.messageOutRange"
+            label="Message out of range"
+            type="text"
+            :rules="textRules"
+            @input="onUpdateRule(rule)"
+          />
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
@@ -152,12 +150,7 @@
 </style>
 
 <script>
-import MarkDownEditor from '../../MarkDownEditor';
-
 export default {
-  components: {
-    MarkDownEditor
-  },
   props: {
     initialItemData: {
       type: Object,

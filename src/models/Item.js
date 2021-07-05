@@ -100,6 +100,7 @@ export default class Item {
                 "@type": "schema:option",
                 "schema:name": option.name,
                 "schema:value": option.value,
+                "schema:color": option.color,
                 "schema:description": option.description,
             };
 
@@ -132,12 +133,14 @@ export default class Item {
         "multipleChoice": this.ref.options.isMultipleChoice,
         "options": this.ref.options.options.map(option => ({
           "schema:description": option.description,
+          "schema:color": option.color,
           "schema:image": option.image || '',
           "schema:name": option.name || '',
           "schema:alert": option.alert || '',
         })),
         "itemList": this.ref.options.itemList && this.ref.options.itemList.map(item => ({
           "schema:description": item.description,
+          "schema:color": item.color,
           "schema:image": item.image,
           "schema:name": item.name
         })) || [],
@@ -166,6 +169,7 @@ export default class Item {
         "scoring": this.ref.options.hasScoreValue,
         "responseAlert": this.ref.options.hasResponseAlert,
         "randomizeOptions": this.ref.options.randomizeOptions,
+        "colorPalette": this.ref.options.colorPalette,
         "multipleChoice": this.ref.options.isMultipleChoice,
         "schema:minValue": 1,
         "schema:maxValue": choices.length,
@@ -594,6 +598,9 @@ export default class Item {
       'options.hasResponseAlert': {
         updated: optionUpdate('Response Alert'),
       },
+      'options.colorPalette': {
+        updated: optionUpdate('Color Palette'),
+      },
       'options.continousSlider': {
         updated: valueUpdate('Continous Slider'),
       },
@@ -736,6 +743,9 @@ export default class Item {
 
       let responseAlert =
         _.get(responseOptions, [0, 'reprolib:terms/responseAlert']);
+      
+      let colorPalette =
+        _.get(responseOptions, [0, 'reprolib:terms/colorPalette']);
 
       let itemOptions =
         _.get(responseOptions, [0, 'reprolib:terms/itemOptions'], []);
@@ -783,6 +793,11 @@ export default class Item {
           _.get(responseAlert, [0, '@value']);
       }
 
+      if (colorPalette) {
+        itemContent.colorPalette =
+          _.get(colorPalette, [0, '@value']);
+      }
+
       if (valueType) {
         itemContent.valueType =
           valueType[0] && valueType[0]['@id'];
@@ -794,6 +809,7 @@ export default class Item {
           enableNegativeTokens: itemContent.enableNegativeTokens || false,
           hasScoreValue: itemContent.scoring || false,
           hasResponseAlert: itemContent.responseAlert || false,
+          colorPalette: itemContent.colorPalette || false,
           randomizeOptions: itemContent.randomizeOptions || false,
           options:
             responseOptions[0] &&
@@ -803,6 +819,7 @@ export default class Item {
                 const image = itemListElement['schema:image'];
                 const name = itemListElement["schema:name"];
                 const value = itemListElement["schema:value"];
+                const color = itemListElement["schema:color"];
                 const score = itemListElement["schema:score"];
                 const alert = itemListElement["schema:alert"];
                 const description = itemListElement["schema:description"];
@@ -814,6 +831,9 @@ export default class Item {
                   name:
                     typeof name == "string" && name ||
                     Array.isArray(name) && name[0] && name[0]['@value'].toString(),
+                  color:
+                    typeof color == "string" && color ||
+                    Array.isArray(color) && color[0] && color[0]['@value'].toString(),
                   value:
                     Array.isArray(value) && value[0] && value[0]['@value'],
                   score:

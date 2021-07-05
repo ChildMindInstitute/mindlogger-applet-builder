@@ -42,6 +42,7 @@ export default class Activity {
       items: items || [],
       disableBack: initialActivityData.disableBack || false,
       allowSummary: initialActivityData.allowSummary !== undefined ? initialActivityData.allowSummary : true,
+      isReviewerActivity: initialActivityData.isReviewerActivity || false,
       id: initialActivityData._id || null,
       textRules: [(v) => !!v || 'This field is required'],
       error: '',
@@ -579,6 +580,10 @@ export default class Activity {
             ...insertedOptions.map((option) => `${option} option was enabled`),
           ];
         },
+      },
+      'isReviewerActivity': {
+        updated: (field) =>
+          `Reviewer activity option was ${_.get(newValue, field) ? 'enabled' : 'disabled'}`,
       },
       'subScales': {
         updated: (field) => {

@@ -469,6 +469,7 @@ export default {
             item => item.isSubScale ? `(${item.name})` : item.name
           ).join(' + '),
         isAverageScore: this.scoringType === "sum" ? false : true,
+        lookupTable: this.subScale && this.subScale.lookupTable,
         valid: this.valid && this.selectedItemCount >= 1
       };
 

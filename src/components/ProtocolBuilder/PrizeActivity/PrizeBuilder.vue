@@ -50,39 +50,19 @@
                 class="content"
               >{{ item.name }}</span>
             </td>
-            <td class="d-flex">
-              <template v-if="editState[index]">
-                <ImageUploader
-                  :uploadFor="'item-radio-option-pc'"
-                  :itemImg="item.imageFile"
-                  @onAddImg="onAddImg(index, $event)"
-                  @onRemoveImg="onRemoveImg(index)"
-                />
-                <template v-if="!item.imageFile">
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <div v-on="on">
-                        <v-text-field
-                          v-model="item.image"
-                          label="Option Image URL"
-                        />
-                      </div>
-                    </template>
-                    <span>
-                      <p>Image Requirements</p>
-                      <ul>
-                        <li>Size: less than 8MB</li>
-                        <li>Width: between 100px and 1920px</li>
-                        <li>Height: between 100px and 1920px</li>
-                      </ul>
-                    </span>
-                  </v-tooltip>
-                </template>
-              </template>
-              <v-img
-                v-else
-                :src="item.image"
-                max-width="50"
+            <td 
+              v-if="editState[index]" 
+              class="d-flex align-end"
+            >
+              <Uploader
+                :initialType="'image'"
+                :initialData="item.image"
+                :initialAdditionalType="'small-circle'"
+                :initialTitle="'Applet Image'"
+                @onAddFromUrl="onAddImageFromUrl(index, $event)"
+                @onAddFromDevice="onAddImageFromDevice(index, $event)"
+                @onRemove="onRemoveImage(index)"
+                @onNotify="onEventNotify($event)"
               />
             </td>
             <td>
@@ -183,11 +163,12 @@
 import PrizeItemConfirmBuilder from './PrizeItemConfirmBuilder.vue';
 import ImageUploader from '../ImageUploader.vue';
 import ImageUpldr from '../../../models/ImageUploader';
+import Uploader from '../Uploader.vue'; 
 
 export default {
   components: {
     PrizeItemConfirmBuilder,
-    ImageUploader
+    Uploader
   },
   props: {
     options: {
@@ -253,6 +234,49 @@ export default {
       const length = this.localOptions.length;
       if(length < 1) return 0
       else return (this.localOptions[length - 1]['value'] + 1);
+    },
+
+    onAddImageFromUrl (index, event) {
+      this.localOptions[index].image = event;
+      this.$emit('notify', {
+        type: 'success',
+        message: `Applet image from URL is successfully added.`,
+        duration: 3000,
+      });
+    },
+    async onAddImageFromDevice (index, uploadFunction) {
+      this.$emit('loading', true); 
+
+      try {
+        this.localOptions[index].image = await uploadFunction();
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'success',
+          message: `Applet image is successfully added.`,
+          duration: 3000,
+        });
+      } catch (error) {
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'error',
+          message: `Something went wrong with uploading applet image.`,
+        });
+      }
+    },
+
+    onRemoveImage (index) {
+      this.localOptions[index].image = '';
+      // this.update();
+      this.$emit('notify', {
+        type: 'warning',
+        message: `Applet image is successfully removed.`,
+        duration: 3000,
+      });
+    },
+
+    onEventNotify (event) {
+      this.$emit('loading', false); 
+      this.$emit('notify', event);
     },
 
     addOption() {

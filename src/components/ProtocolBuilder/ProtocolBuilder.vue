@@ -56,7 +56,7 @@
           </v-subheader>
 
           <v-select v-if="themes && themes.length"
-              v-model="theme"
+              v-model="selectedTheme"
               :items="themes"
               :label="'Select theme'"
               item-text="name"
@@ -219,7 +219,7 @@ export default {
       }
     },
 
-    theme: {
+    selectedTheme: {
       get: function () {
         return this.themeId
       },

@@ -279,7 +279,9 @@ export default {
       'activities',
       'currentActivity',
       'formattedOriginalProtocol',
-      'versions'
+      'versions',
+      'themeId',
+      'originalThemeId'
     ]),
     itemStatus () {
       return this.currentActivity && this.currentActivity.items.every(item => item.valid);
@@ -314,8 +316,13 @@ export default {
 
       this.formattedProtocol().then((data) => {
         if (!this.formattedOriginalProtocol) {
-          this.$emit("uploadProtocol", data);
+          this.$emit("uploadProtocol", {
+            applet: data,
+            themeId: this.themeId
+          });
         } else {
+          const updateTheme = this.themeId !== undefined && (this.originalThemeId === undefined || this.originalThemeId !== this.themeId);
+
           let { upgrade, updates, removed } = Protocol.getChangeInfo(this.formattedOriginalProtocol, data, true);
           let newVersion = util.upgradeVersion(this.protocol.protocolVersion, upgrade);
 
@@ -326,7 +333,12 @@ export default {
             data.removed = removed;
             data.baseVersion = this.protocol.protocolVersion;
 
-            this.$emit("updateProtocol", data);
+            this.$emit("updateProtocol", {
+              protocol: data,
+              ...(updateTheme && {themeId: this.themeId})
+            });
+          } else if (updateTheme) {
+            this.$emit("updateProtocol", {themeId: this.themeId});
           } else {
             this.$emit("onUploadError", 'Please make changes to update applet');
           }

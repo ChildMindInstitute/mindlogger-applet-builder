@@ -254,10 +254,12 @@ export default {
         return initialData.applet.themeId;
       }
 
-      return themes && themes.length >= 1 ? themes[0].themeId : null;
+      return themes && themes.length >= 1 ? themes[0]._id : null;
     }
 
-    state.themeId = initDefaultThemeId(state.themes, initialData);
+    const themeId = initDefaultThemeId(state.themes, initialData);
+    state.themeId = themeId;
+    state.originalThemeId = themeId;
   },
 
   setCurrentScreen (state, screen) {

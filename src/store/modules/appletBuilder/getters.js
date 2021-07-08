@@ -44,6 +44,10 @@ export default {
     return state.original;
   },
 
+  originalThemeId (state) {
+    return state.originalThemeId;
+  },
+
   itemTemplates (state) {
     return state.templates;
   },

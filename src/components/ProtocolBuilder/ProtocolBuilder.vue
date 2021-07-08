@@ -60,7 +60,7 @@
               :items="themes"
               :label="'Select theme'"
               item-text="name"
-              item-value="themeId"
+              item-value="_id"
               hide-details
               single-line
               outlined

@@ -282,17 +282,11 @@ export default {
     },
 
     uploadProtocol (data) {
-      this.$emit("uploadProtocol", {
-        applet: data,
-        themeId: this.themeId
-      });
+      this.$emit("uploadProtocol", data);
     },
 
     updateProtocol (data) {
-      this.$emit("updateProtocol", {
-        protocol: data,
-        themeId: this.themeId
-      });
+      this.$emit("updateProtocol", data);
     },
 
     onUploadError (msg) {

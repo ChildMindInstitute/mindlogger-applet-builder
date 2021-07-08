@@ -101,4 +101,5 @@ export default {
   currentScreen: config.PROTOCOL_SCREEN,
   currentActivity: null,
   themeId: null,
+  originalThemeId: null
 }

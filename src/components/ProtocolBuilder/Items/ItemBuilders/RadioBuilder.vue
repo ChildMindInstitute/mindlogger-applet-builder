@@ -640,8 +640,8 @@ export default {
       isTokenValue,
       colorPalettes: {
         pastel: ["#b5feef", "#68e5a8", "#faf193", "#fabd93", "#f17688"],
-        retro: ["#988189", "#9cc7bd", "#f6f2d4", "#f5bf77", "#f59797"],
-        greyScale: ["#909090", "#a6a6a6", "#c6c6c6", "#e0e0e0", "#f2f2f2"],
+        retro: ["#9cc7bd", "#f6f2d4", "#f5bf77", "#f59797", "#988189"],
+        grayScale: ["#f2f2f2", "#e0e0e0", "#c6c6c6", "#a6a6a6", "#909090"],
       },
       colorPalette: this.initialItemData.colorPalette || false,
       hasScoreValue: this.initialItemData.hasScoreValue || false,

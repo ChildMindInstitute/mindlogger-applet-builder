@@ -246,9 +246,18 @@ export default {
 
   initThemes (state, themes) {
     state.themes = themes;
+  },
 
-    const theme = themes ? themes.find(theme => theme.name === 'mindlogger') : null;
-    state.themeId = theme ? theme.themeId : null;
+  initThemeId (state, initialData) {
+    const initDefaultThemeId = (themes, initialData) => {
+      if (initialData && initialData.applet && initialData.applet.themeId) {
+        return initialData.applet.themeId;
+      }
+
+      return themes && themes.length >= 1 ? themes[0].id : null;
+    }
+
+    state.themeId = initDefaultThemeId(state.themes, initialData);
   },
 
   setCurrentScreen (state, screen) {

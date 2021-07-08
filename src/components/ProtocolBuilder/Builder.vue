@@ -136,7 +136,10 @@ export default {
   },
   async beforeMount() {
     this.setTemplates(this.templates);
+
     this.initThemes(this.themes);
+    this.initThemeId(this.initialData);
+
     this.setVersions(this.versions);
     this.setCurrentScreen(config.PROTOCOL_SCREEN);
     this.setCurrentActivity(-1);
@@ -178,6 +181,7 @@ export default {
       'initProtocolData',
       'setTemplates',
       'initThemes',
+      'initThemeId',
       'setCurrentScreen',
       'setFormattedOriginalProtocol',
       'setPrizeActivity',

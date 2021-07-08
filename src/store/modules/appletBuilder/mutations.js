@@ -254,7 +254,7 @@ export default {
         return initialData.applet.themeId;
       }
 
-      return themes && themes.length >= 1 ? themes[0].id : null;
+      return themes && themes.length >= 1 ? themes[0].themeId : null;
     }
 
     state.themeId = initDefaultThemeId(state.themes, initialData);

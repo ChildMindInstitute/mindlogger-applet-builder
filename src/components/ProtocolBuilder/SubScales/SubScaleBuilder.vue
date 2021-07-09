@@ -109,7 +109,6 @@
                   >
                     * {{ item.name }} *
                   </v-list-item-content>
-
                 </v-list-item>
               </template>
             </v-list>
@@ -213,15 +212,14 @@
                   />
                 </v-list-item-action>
                 <v-list-item-content>
-                  <div
-                  >
+                  <div>
                     <span
                       :class="item.isSubScale ? 'subscale-name' : ''"
                     >{{ item.name }}</span>
                     <template
                       v-if="item.isSubScale"
                     >
-                    (
+                      (
                       <span
                         v-for="(subItem, index) in item.items"
                         :key="index"
@@ -233,7 +231,7 @@
                         </span>
                         <span>{{ index != item.items.length - 1 ? ',' : '' }}</span>
                       </span>
-                    )
+                      )
                     </template>
                   </div>
                 </v-list-item-content>
@@ -333,6 +331,34 @@ export default {
       return itemCount;
     }
   },
+  watch: {
+    currentActivity: {
+      deep: true,
+      handler() {
+        this.itemsFormatted = this.mergeList(this.formattedItems(), this.formattedSubScales());
+
+        if (this.isExpanded) {
+          this.$set(this, 'itemsFormatted', this.mergeList(
+            this.itemsFormatted.filter(item => !item.isSubScale),
+            this.formattedSubScales()
+          ));
+        }
+      }
+    },
+    valid: {
+      handler () {
+        this.saveSubScale ();
+      }
+    },
+    isExpanded() {
+      if (this.isExpanded) {
+        this.$set(this, 'itemsFormatted', this.mergeList(
+          this.itemsFormatted.filter(item => !item.isSubScale),
+          this.formattedSubScales()
+        ));
+      }
+    },
+  },
   created() {
     const self = this;
     self.keyDownHandler = function ({ key }) {
@@ -361,34 +387,6 @@ export default {
       exists: message.length > 0,
       message
     });
-  },
-  watch: {
-    currentActivity: {
-      deep: true,
-      handler() {
-        this.itemsFormatted = this.mergeList(this.formattedItems(), this.formattedSubScales());
-
-        if (this.isExpanded) {
-          this.$set(this, 'itemsFormatted', this.mergeList(
-            this.itemsFormatted.filter(item => !item.isSubScale),
-            this.formattedSubScales()
-          ));
-        }
-      }
-    },
-    valid: {
-      handler () {
-        this.saveSubScale ();
-      }
-    },
-    isExpanded() {
-      if (this.isExpanded) {
-        this.$set(this, 'itemsFormatted', this.mergeList(
-          this.itemsFormatted.filter(item => !item.isSubScale),
-          this.formattedSubScales()
-        ));
-      }
-    },
   },
   methods: {
     ...mapMutations(config.MODULE_NAME,

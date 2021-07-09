@@ -918,11 +918,13 @@ export default class Activity {
         const jsExpression = msg['reprolib:terms/jsExpression'];
         const message = msg['reprolib:terms/message'];
         const outputType = msg['reprolib:terms/outputType']
+        const nextActivity = msg['reprolib:terms/nextActivity']
 
         return {
           jsExpression: _.get(jsExpression, [0, '@value']),
           message: _.get(message, [0, '@value']),
           outputType: _.get(outputType, [0, '@value'], 'cumulative'),
+          nextActivity: _.get(nextActivity, [0, '@value']),
         }
       }),
       orderList: _.get(orders, '0.@list', []).map(order => order['@id'])

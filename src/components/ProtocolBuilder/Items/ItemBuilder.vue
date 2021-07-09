@@ -679,7 +679,6 @@ export default {
   },
 
   beforeMount() {
-
     Object.assign(this, {
       valid: this.item.name && this.item.name.length > 0,
       hasScoringItem: this.currentActivity.items.some((item) => item.options.hasScoreValue),

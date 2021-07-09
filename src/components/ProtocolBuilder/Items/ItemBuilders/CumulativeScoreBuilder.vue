@@ -11,15 +11,11 @@
         <v-expansion-panel-header class="rule-header">
           <div class="rule-header">
             <div class="rule-title">
-              <span :class="rule.valid ? '' : 'invalid'">{{ rule.name }}</span> 
+              <span :class="rule.valid ? '' : 'invalid'">{{ rule.name }}</span>
             </div>
 
-            <v-btn
-              @click="deleteCumulative(id)"
-            >
-              <v-icon>
-                mdi-delete
-              </v-icon>
+            <v-btn @click="deleteCumulative(id)">
+              <v-icon> mdi-delete </v-icon>
             </v-btn>
           </div>
         </v-expansion-panel-header>
@@ -41,9 +37,7 @@
               class="items"
               subheader
             >
-              <v-list-item-group
-                color="primary"
-              >
+              <v-list-item-group color="primary">
                 <v-list-item
                   v-for="(item, index) in rule.items"
                   :key="index"
@@ -100,12 +94,48 @@
             @input="onUpdateRule(rule)"
           />
 
+          <v-switch 
+            v-model="rule.isActivityInRange" 
+            inset 
+            type="text" 
+            @change="(v) => activitySelect(v, rule, 'activityInRange')" 
+          />
+
+          <v-select
+            v-if="rule.isActivityInRange"
+            v-model="rule.activityInRange"
+            :items="activityNames"
+            item-text="name"
+            item-value="name"
+            label="Select Activity"
+            single-line
+            @change="onUpdateRule(rule)"
+          />
+
           <v-text-field
             v-model="rule.messageOutRange"
             label="Message out of range"
             type="text"
             :rules="textRules"
             @input="onUpdateRule(rule)"
+          />
+
+          <v-switch 
+            v-model="rule.isActivityOutRange" 
+            inset 
+            type="text" 
+            @change="(v) => activitySelect(v, rule, 'activityOutRange')" 
+          />
+
+          <v-select
+            v-if="rule.isActivityOutRange"
+            v-model="rule.activityOutRange"
+            :items="activityNames"
+            item-text="name"
+            item-value="name"
+            label="Select Activity"
+            single-line
+            @change="onUpdateRule(rule)"
           />
         </v-expansion-panel-content>
       </v-expansion-panel>
@@ -121,40 +151,43 @@
 </template>
 
 <style scoped>
-  .item-list .items {
-    max-height: 200px;
-    overflow-y: scroll;
-  }
+.item-list .items {
+  max-height: 200px;
+  overflow-y: scroll;
+}
 
-  .item-list .list-title {
-    color: rgba(0, 0, 0, 0.6);
-  }
+.item-list .list-title {
+  color: rgba(0, 0, 0, 0.6);
+}
 
-  .invalid {
-    border-bottom: 2px solid red;
-  }
+.invalid {
+  border-bottom: 2px solid red;
+}
 
-  .rule-header {
-    display: flex;
-  }
+.rule-header {
+  display: flex;
+}
 
-  .rule-header .rule-title {
-    width: 100%;
-  }
+.rule-header .rule-title {
+  width: 100%;
+}
 
-  .rule-header .rule-title span {
-    width: 100%;
-    font-weight: 600;
-    font-size: 20px;
-  }
+.rule-header .rule-title span {
+  width: 100%;
+  font-weight: 600;
+  font-size: 20px;
+}
 </style>
 
 <script>
+import { mapGetters } from 'vuex';
+import config from '../../../../config';
+
 export default {
   props: {
     initialItemData: {
       type: Object,
-      required: true
+      required: true,
     },
     items: {
       type: Array,
@@ -167,35 +200,36 @@ export default {
       panels: [0],
       options: [
         {
-          text: 'at or above',
-          value: true
+          text: "at or above",
+          value: true,
         },
         {
-          text: 'at or below',
-          value: false
-        }
+          text: "at or below",
+          value: false,
+        },
       ],
       outputTypes: [
         {
-          text: 'Percentage Correct',
-          value: 'percentage',
+          text: "Percentage Correct",
+          value: "percentage",
         },
         {
-          text: 'Cumulative Total',
-          value: 'cumulative'
-        }
+          text: "Cumulative Total",
+          value: "cumulative",
+        },
       ],
-      scoreValueRules: [
-        v => v !== '' || 'score value must not be empty',
-      ],
-      textRules: [
-        v => !!v || 'this field must not be empty',
-      ]
+
+      scoreValueRules: [(v) => v !== "" || "score value must not be empty"],
+      textRules: [(v) => !!v || "this field must not be empty"],
+      activityNames: []
     };
+  },
+  computed: {
+    ...mapGetters(config.MODULE_NAME, ['activities', 'currentActivity']),
   },
   beforeMount() {
     let rules = this.initialItemData.cumulativeScores || [];
-    rules = rules.map(rule => ({ ...rule }));
+    rules = rules.map((rule) => ({ ...rule }));
 
     for (let rule of rules) {
       Object.assign(rule, this.parseRuleData(rule));
@@ -205,8 +239,10 @@ export default {
 
     if (!rules.length) {
       this.rules.push(this.parseRuleData());
-      this.$emit('updateCumulativeScore', this.rules);
+      this.$emit("updateCumulativeScore", this.rules);
     }
+
+    this.activityNames = this.activities && this.activities.filter(obj => obj.name !== this.currentActivity.name).map(act => act.name)
   },
   methods: {
     nameKeydown(e) {
@@ -214,95 +250,128 @@ export default {
         e.preventDefault();
       }
     },
-    update () {
-      this.$emit('updateCumulativeScore', this.rules);
+    update() {
+      this.$emit("updateCumulativeScore", this.rules);
     },
 
-    rowClicked (item, rule) {
+    rowClicked(item, rule) {
       item.selected = !item.selected;
 
       this.onUpdateRule(rule);
     },
 
-    onUpdateRule (rule) {
+    activitySelect(v, rule, key) {
+      if(!v) this.onUpdateRule({...rule, [key]: null})
+    },
+
+    onUpdateRule(rule) {
       rule.compute = {
-        jsExpression: rule.items.filter(item => item.selected).map(item => item.name).join(' + '),
+        jsExpression: rule.items
+          .filter((item) => item.selected)
+          .map((item) => item.name)
+          .join(" + "),
         variableName: rule.name,
-      }
+      };
 
       rule.messages = [
         {
-          jsExpression: rule.name + (rule.operator.value ? ' >= ' : ' <= ') + rule.score,
+          jsExpression:
+            rule.name + (rule.operator.value ? " >= " : " <= ") + rule.score,
           message: rule.messageInRange,
           outputType: rule.outputType.value,
+          nextActivity: rule.activityInRange
         },
         {
-          jsExpression: rule.name + (rule.operator.value ? ' < ' : ' > ') + rule.score,
+          jsExpression:
+            rule.name + (rule.operator.value ? " < " : " > ") + rule.score,
           message: rule.messageOutRange,
           outputType: rule.outputType.value,
-        }
-      ]
+          nextActivity: rule.activityOutRange
+        },
+      ];
 
-      rule.valid = rule.messageInRange.length && 
+      rule.valid =
+        rule.messageInRange.length &&
         rule.messageOutRange.length &&
         rule.messageInRange.length &&
-        rule.score !== '' && 
-        rule.items.some(item => item.selected)
+        rule.score !== "" &&
+        (rule.isActivityInRange ? rule.isActivityInRange && rule.activityInRange : true) &&
+        (rule.isActivityOutRange ? rule.isActivityOutRange && rule.activityOutRange : true) &&
+        rule.items.some((item) => item.selected);
 
       this.update();
     },
 
-    parseRuleData (rule) {
+    parseRuleData(rule) {
       if (!rule) {
         return {
-          name: '',
-          items: this.items.filter(item => item.options && item.options.hasScoreValue).map(item => ({
-            name: item.name,
-            selected: false,
-          })),
+          name: "",
+          items: this.items
+            .filter((item) => item.options && item.options.hasScoreValue)
+            .map((item) => ({
+              name: item.name,
+              selected: false,
+            })),
           operator: this.options[0],
-          score: '',
+          score: "",
           outputType: this.outputTypes[0],
-          messageInRange: '',
-          messageOutRange: '',
+          messageInRange: "",
+          messageOutRange: "",
           valid: false,
         };
       }
 
-      const itemNames = rule.compute.jsExpression.split(' + ').map(name => name.trim());
+      const itemNames = rule.compute.jsExpression
+        .split(" + ")
+        .map((name) => name.trim());
 
       const message = rule.messages.find(
-        message => 
-          message.jsExpression.includes('>=') || message.jsExpression.includes('<=')
+        (message) =>
+          message.jsExpression.includes(">=") ||
+          message.jsExpression.includes("<=")
       );
+
+      const messageOutRange = message == rule.messages[0]
+            ? rule.messages[1]
+            : rule.messages[0];
 
       return {
         name: rule.compute.variableName,
-        items: this.items.filter(item => item.options && item.options.hasScoreValue).map(item => ({
-          name: item.name,
-          selected: itemNames.includes(item.name)
-        })),
-        operator: this.options.find(option => option.value === message.jsExpression.includes('>=')),
+        items: this.items
+          .filter((item) => item.options && item.options.hasScoreValue)
+          .map((item) => ({
+            name: item.name,
+            selected: itemNames.includes(item.name),
+          })),
+        operator: this.options.find(
+          (option) => option.value === message.jsExpression.includes(">=")
+        ),
         score: message.jsExpression.split(/[><]=/g)[1].trim(),
-        outputType: this.outputTypes.find(outputType => outputType.value === message.outputType),
+        outputType: this.outputTypes.find(
+          (outputType) => outputType.value === message.outputType
+        ),
         messageInRange: message.message,
-        messageOutRange: message == rule.messages[0] ? rule.messages[1].message : rule.messages[0].message,
+        messageOutRange: messageOutRange.message,
         valid: true,
-      }
+        isActivityInRange: Boolean(message && message.nextActivity),
+        activityInRange: message && message.nextActivity,
+        isActivityOutRange: Boolean(messageOutRange && messageOutRange.nextActivity),
+        activityOutRange: messageOutRange && messageOutRange.nextActivity
+      };
     },
 
-    deleteCumulative (id) {
+    deleteCumulative(id) {
       this.rules.splice(id, 1);
 
       this.update();
     },
 
-    addNewCumulative () {
+    addNewCumulative() {
       this.rules.push(this.parseRuleData(null));
       this.panels.push(this.rules.length - 1);
 
       this.update();
-    }
-  }
-}
+    },
+  },
+};
 </script>

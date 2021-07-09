@@ -4,7 +4,7 @@
     <v-checkbox
       v-model="isSkippable"
       label="Skippable Item"
-      :disabled="isSkippableItem == 2"
+      :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
     />
     <OptionalItemText
       :colClasses="'d-flex align-center'"
@@ -14,7 +14,7 @@
       :text="isOptionalText"
       :required="responseOptions.isOptionalTextRequired"
       @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
-      @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
+      @required="updateRequired"
     />
   </div>
 </template>
@@ -59,6 +59,18 @@ export default {
   },
 
   methods: {
+    updateRequired(event) {
+      // disable the skippable button if item is required 
+      if (event) {
+        this.isSkippable = false
+        this.isSkippableItem=2
+      } else {
+        this.isSkippableItem=0
+      }
+
+      this.responseOptions.isOptionalTextRequired = event;
+      this.onUpdateResponseOptions();
+    },
     onUpdateResponseOptions() {
       this.$emit('updateResponseOptions', this.responseOptions);
     },

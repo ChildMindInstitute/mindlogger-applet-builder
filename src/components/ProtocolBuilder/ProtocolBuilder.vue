@@ -280,8 +280,10 @@ export default {
       this.markdownDialog = true;
     },
 
-    editActivity (index) {
-      this.setCurrentActivity(index);
+    editActivity (index, isNew = false) {
+      const activity = this.withoutPrize[index];
+      const currentIndex = isNew ? index : this.activities.findIndex(({name}) => name === activity.name);
+      this.setCurrentActivity(currentIndex);
       this.setCurrentScreen(config.ITEM_SCREEN);
     },
 
@@ -289,7 +291,7 @@ export default {
       const activityCount = this.activities.length;
 
       this.addActivity();
-      this.editActivity(activityCount);
+      this.editActivity(activityCount, true);
     },
   }
 }

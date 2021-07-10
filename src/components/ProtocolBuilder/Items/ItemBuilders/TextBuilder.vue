@@ -36,7 +36,7 @@
         <v-checkbox
           v-model="isSkippable"
           label="Skippable Item"
-          :disabled="isSkippableItem == 2"
+          :disabled="isSkippableItem == 2 || requiredValue"
         />
       </v-col>
       <v-col

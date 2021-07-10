@@ -58,6 +58,10 @@ export default {
   },
   methods: {
     onUpdateResponseOptions() {
+      if (this.responseOptions.isOptionalTextRequired)
+        this.$emit('updateAllow', false);
+      else if (this.responseOptions.isOptionalTextRequired === false)
+        this.$emit('updateAllow', undefined);
       this.$emit('updateResponseOptions', this.responseOptions);
     },
   },

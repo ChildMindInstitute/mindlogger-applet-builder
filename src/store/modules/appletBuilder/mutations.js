@@ -118,6 +118,8 @@ const activityMutations = {
         ...item,
         id: null,
       })),
+      finalSubScale: { ...activity.finalSubScale },
+      subScales: [...activity.subScales],
       conditionalItems,
     };
 

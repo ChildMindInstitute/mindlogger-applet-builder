@@ -12,6 +12,7 @@
           maxlength="55"
           label="Applet Name"
           required
+          @change="name = name.trim()"
         />
         <v-text-field
           v-model="description"
@@ -162,7 +163,7 @@ export default {
   data () {
     return {
       markdownDialog: false,
-      textRules: [(v) => !!v || "This field is required"],
+      textRules: [(v) => !!v.trim() || "This field is required"],
     }
   },
   computed: {

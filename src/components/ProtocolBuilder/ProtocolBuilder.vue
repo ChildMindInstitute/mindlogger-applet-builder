@@ -103,7 +103,7 @@
 
               <v-btn
                 icon
-                @click="deleteActivity(index)"
+                @click="deleteActivity(activities.findIndex(act => act == activity))"
               >
                 <v-icon color="grey lighten-1">
                   delete

@@ -36,7 +36,7 @@
         <v-checkbox
           v-model="isSkippable"
           label="Skippable Item"
-          :disabled="this.requiredValue"
+          :disabled="isSkippableItem == 2 || requiredValue"
         />
       </v-col>
       <v-col
@@ -132,6 +132,8 @@ export default {
         'valueType': this.isNumerical ? 'xsd:integer' : 'xsd:string',
       };
       this.$emit('updateOptions', responseOptions);
+      if (this.requiredValue) 
+        this.$emit('updateAllow', false);
     },
     updateAnswer() {
       const { correctAnswer, requiredAnswer } = this;

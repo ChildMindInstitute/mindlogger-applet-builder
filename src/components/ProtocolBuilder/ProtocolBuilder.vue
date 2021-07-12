@@ -12,6 +12,7 @@
           maxlength="55"
           label="Applet Name"
           required
+          @change="name = name.trim()"
         />
         <v-text-field
           v-model="description"
@@ -84,7 +85,7 @@
             <v-card-actions>
               <v-btn
                 icon
-                @click="duplicateActivity(index)"
+                @click="duplicateActivity(activities.findIndex(act => act == activity))"
               >
                 <v-icon color="grey lighten-1">
                   content_copy
@@ -121,8 +122,8 @@
       </v-card>
     </v-form>
 
-    <LandingPageEditor 
-      :visibility="markdownDialog" 
+    <LandingPageEditor
+      :visibility="markdownDialog"
       :markdownText="markdownData"
       @close="onCloseEditor"
       @submit="onSubmitEditor"
@@ -146,7 +147,7 @@
 
 <script>
 import LandingPageEditor from './LandingPageEditor';
-import Uploader from './Uploader.vue'; 
+import Uploader from './Uploader.vue';
 import Protocol from '../../models/Protocol';
 import Activity from '../../models/Protocol';
 import Item from '../../models/Protocol';
@@ -162,7 +163,7 @@ export default {
   data () {
     return {
       markdownDialog: false,
-      textRules: [(v) => !!v || "This field is required"],
+      textRules: [(v) => !!v.trim() || "This field is required"],
     }
   },
   computed: {
@@ -210,8 +211,8 @@ export default {
 
     activityStatus () {
       return this.withoutPrize.map(activity => !(
-        !activity.valid 
-          || activity.items.some(item => !item.valid) 
+        !activity.valid
+          || activity.items.some(item => !item.valid)
           || activity.items.length === 0
           || activity.subScales.some(subScale => !subScale.valid)
           || activity.conditionalItems.some(conditional => !conditional.valid)
@@ -219,13 +220,13 @@ export default {
     },
   },
   methods: {
-    ...mapMutations(config.MODULE_NAME, 
+    ...mapMutations(config.MODULE_NAME,
       [
-        'updateProtocolMetaInfo', 
-        'duplicateActivity', 
-        'deleteActivity', 
-        'addActivity', 
-        'setCurrentActivity', 
+        'updateProtocolMetaInfo',
+        'duplicateActivity',
+        'deleteActivity',
+        'addActivity',
+        'setCurrentActivity',
         'setCurrentScreen',
       ]
     ),
@@ -238,7 +239,7 @@ export default {
       });
     },
     async onAddImageFromDevice (uploadFunction) {
-      this.$emit('loading', true); 
+      this.$emit('loading', true);
 
       try {
         this.appletImage = await uploadFunction();
@@ -266,7 +267,7 @@ export default {
       });
     },
     onEventNotify (event) {
-      this.$emit('loading', false); 
+      this.$emit('loading', false);
       this.$emit('notify', event);
     },
     onSubmitEditor (markdownData) {

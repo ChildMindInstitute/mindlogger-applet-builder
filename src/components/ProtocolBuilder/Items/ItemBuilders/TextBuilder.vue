@@ -58,7 +58,7 @@
         <v-checkbox
           v-model="requiredValue"
           label="Response required"
-          @change="update"
+          @change="updateRequiredValue"
         />
       </v-col>
     </v-row>
@@ -116,6 +116,15 @@ export default {
   },
 
   methods: {
+    updateRequiredValue() {
+      if (this.requiredValue) { 
+          this.isSkippable = false
+          this.isSkippableItem = 2
+      } else {
+          this.isSkippableItem = 1
+      }
+      this.update()
+    },
     update () {
       const responseOptions = {
         'maxLength': this.maxLength,
@@ -128,6 +137,7 @@ export default {
     },
     updateAnswer() {
       const { correctAnswer, requiredAnswer } = this;
+      console.log("requiredAnswer:", requiredAnswer)
       if (!requiredAnswer) {
         this.$emit('updateAnswer', "");
       } else {

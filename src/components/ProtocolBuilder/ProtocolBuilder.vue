@@ -63,8 +63,16 @@
             <v-subheader class="ml-10">
               Applet Watermark
             </v-subheader>
-
-
+            <Uploader
+              :initialType="'image'"
+              :initialData="appletWatermark"
+              :initialAdditionalType="'small-circle'"
+              :initialTitle="'Applet Image'"
+              @onAddFromUrl="onAddWatermarkFromUrl($event)"
+              @onAddFromDevice="onAddWatermarkFromDevice($event)"
+              @onRemove="onRemoveWatermark()"
+              @onNotify="onWatermarkNotify($event)"
+            />
           </v-col>
         </v-row>
       </v-card>
@@ -100,7 +108,7 @@
             <v-card-actions>
               <v-btn
                 icon
-                @click="duplicateActivity(index)"
+                @click="duplicateActivity(activities.findIndex(act => act == activity))"
               >
                 <v-icon color="grey lighten-1">
                   content_copy
@@ -118,7 +126,7 @@
 
               <v-btn
                 icon
-                @click="deleteActivity(index)"
+                @click="deleteActivity(activities.findIndex(act => act == activity))"
               >
                 <v-icon color="grey lighten-1">
                   delete
@@ -137,8 +145,8 @@
       </v-card>
     </v-form>
 
-    <LandingPageEditor 
-      :visibility="markdownDialog" 
+    <LandingPageEditor
+      :visibility="markdownDialog"
       :markdownText="markdownData"
       @close="onCloseEditor"
       @submit="onSubmitEditor"
@@ -162,7 +170,7 @@
 
 <script>
 import LandingPageEditor from './LandingPageEditor';
-import Uploader from './Uploader.vue'; 
+import Uploader from './Uploader.vue';
 import Protocol from '../../models/Protocol';
 import Activity from '../../models/Protocol';
 import Item from '../../models/Protocol';
@@ -178,7 +186,7 @@ export default {
   data () {
     return {
       markdownDialog: false,
-      textRules: [(v) => !!v || "This field is required"],
+      textRules: [(v) => !!v.trim() || "This field is required"],
     }
   },
   computed: {
@@ -235,8 +243,8 @@ export default {
 
     activityStatus () {
       return this.withoutPrize.map(activity => !(
-        !activity.valid 
-          || activity.items.some(item => !item.valid) 
+        !activity.valid
+          || activity.items.some(item => !item.valid)
           || activity.items.length === 0
           || activity.subScales.some(subScale => !subScale.valid)
           || activity.conditionalItems.some(conditional => !conditional.valid)
@@ -244,13 +252,13 @@ export default {
     },
   },
   methods: {
-    ...mapMutations(config.MODULE_NAME, 
+    ...mapMutations(config.MODULE_NAME,
       [
-        'updateProtocolMetaInfo', 
-        'duplicateActivity', 
-        'deleteActivity', 
-        'addActivity', 
-        'setCurrentActivity', 
+        'updateProtocolMetaInfo',
+        'duplicateActivity',
+        'deleteActivity',
+        'addActivity',
+        'setCurrentActivity',
         'setCurrentScreen',
       ]
     ),
@@ -307,7 +315,7 @@ export default {
       this.$emit('notify', event);
     },
     async onAddImageFromDevice (uploadFunction) {
-      this.$emit('loading', true); 
+      this.$emit('loading', true);
 
       try {
         this.appletImage = await uploadFunction();
@@ -335,7 +343,7 @@ export default {
       });
     },
     onEventNotify (event) {
-      this.$emit('loading', false); 
+      this.$emit('loading', false);
       this.$emit('notify', event);
     },
     onSubmitEditor (markdownData) {
@@ -349,8 +357,10 @@ export default {
       this.markdownDialog = true;
     },
 
-    editActivity (index) {
-      this.setCurrentActivity(index);
+    editActivity (index, isNew = false) {
+      const activity = this.withoutPrize[index];
+      const currentIndex = isNew ? index : this.activities.findIndex(({name}) => name === activity.name);
+      this.setCurrentActivity(currentIndex);
       this.setCurrentScreen(config.ITEM_SCREEN);
     },
 
@@ -358,7 +368,7 @@ export default {
       const activityCount = this.activities.length;
 
       this.addActivity();
-      this.editActivity(activityCount);
+      this.editActivity(activityCount, true);
     },
   }
 }

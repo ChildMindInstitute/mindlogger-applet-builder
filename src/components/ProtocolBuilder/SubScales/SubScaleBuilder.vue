@@ -125,36 +125,53 @@
             width="100%"
             class="items"
           >
-            <v-list subheader>
-              <v-subheader>Items associated with one or more sub-scales</v-subheader>
+            <v-card-title>
+              Items associated with one or more sub-scales
+            </v-card-title>
 
-              <template v-for="(item, index) in itemsFormatted">
-                <v-list-item
-                  v-if="item.subScales.length > 0"
-                  :key="index"
-                >
-                  <v-list-item-content>
-                    <div class="item-with-subscale d-flex">
-                      <div
-                        v-if="!item.isSubScale"
-                        class="item-name"
-                      >
-                        {{ item.name }}
-                      </div>
-                      <div
-                        v-else
-                        class="item-name subscale-name"
-                      >
-                        {{ item.name }}
-                      </div>
-                      <div class="subscales">
-                        {{ item.subScales.map(subScale => subScale.variableName).join(', ') }}
-                      </div>
-                    </div>
-                  </v-list-item-content>
-                </v-list-item>
+            <v-simple-table>
+              <template v-slot:default>
+                <thead>
+                  <tr>
+                    <th class="text-left">
+                      Item
+                    </th>
+                    <th class="text-left">
+                      SubScales
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <template v-for="(item, index) in itemsFormatted">
+                    <tr
+                      v-if="item.subScales.length > 0"
+                      :key="index"
+                    >
+                      <td>
+                        <div
+                          v-if="!item.isSubScale"
+                          class="item-name"
+                        >
+                          {{ item.name }}
+                        </div>
+                        <div
+                          v-else
+                          class="item-name subscale-name"
+                        >
+                          {{ item.name }}
+                        </div>
+                      </td>
+                      <td>
+                        <div class="subscales">
+                          {{ item.subScales.map(subScale => subScale.variableName).join(', ') }}
+                        </div>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
               </template>
-            </v-list>
+            </v-simple-table>
           </v-card>
         </v-col>
       </v-row>
@@ -452,6 +469,7 @@ export default {
             item => item.isSubScale ? `(${item.name})` : item.name
           ).join(' + '),
         isAverageScore: this.scoringType === "sum" ? false : true,
+        lookupTable: this.subScale && this.subScale.lookupTable,
         valid: this.valid && this.selectedItemCount >= 1
       };
 

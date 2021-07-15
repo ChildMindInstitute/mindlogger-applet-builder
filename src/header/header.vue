@@ -215,7 +215,7 @@
       width="350"
     >
       <v-card>
-        <v-card-title class="grey lighten-2">
+        <v-card-title class="grey lighten-2 d-block">
           Protocol Data Alert
         </v-card-title>
         <v-card-text class="pa-4">
@@ -229,6 +229,12 @@
 <style scoped>
   .invalid {
     border-bottom: 4px solid red;
+  }
+  .d-block{
+    display: block !important;
+  }
+  .v-dialog .v-card .v-card__title {
+    display: block !important;
   }
 </style>
 

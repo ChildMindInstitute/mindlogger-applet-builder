@@ -12,6 +12,7 @@
           maxlength="55"
           label="Applet Name"
           required
+          @change="name = name.trim()"
         />
         <v-text-field
           v-model="description"
@@ -100,7 +101,7 @@
             <v-card-actions>
               <v-btn
                 icon
-                @click="duplicateActivity(index)"
+                @click="duplicateActivity(activities.findIndex(act => act == activity))"
               >
                 <v-icon color="grey lighten-1">
                   content_copy
@@ -118,7 +119,7 @@
 
               <v-btn
                 icon
-                @click="deleteActivity(index)"
+                @click="deleteActivity(activities.findIndex(act => act == activity))"
               >
                 <v-icon color="grey lighten-1">
                   delete
@@ -178,7 +179,7 @@ export default {
   data () {
     return {
       markdownDialog: false,
-      textRules: [(v) => !!v || "This field is required"]
+      textRules: [(v) => !!v.trim() || "This field is required"],
     }
   },
   computed: {
@@ -210,6 +211,7 @@ export default {
         this.updateProtocolMetaInfo({ markdownData })
       }
     },
+
     appletImage: {
       get: function () {
         return this.protocol.image
@@ -305,8 +307,10 @@ export default {
       this.markdownDialog = true;
     },
 
-    editActivity (index) {
-      this.setCurrentActivity(index);
+    editActivity (index, isNew = false) {
+      const activity = this.withoutPrize[index];
+      const currentIndex = isNew ? index : this.activities.findIndex(({name}) => name === activity.name);
+      this.setCurrentActivity(currentIndex);
       this.setCurrentScreen(config.ITEM_SCREEN);
     },
 
@@ -314,8 +318,8 @@ export default {
       const activityCount = this.activities.length;
 
       this.addActivity();
-      this.editActivity(activityCount);
-    }
+      this.editActivity(activityCount, true);
+    },
   }
 }
 </script>

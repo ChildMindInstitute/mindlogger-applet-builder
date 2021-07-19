@@ -568,6 +568,8 @@ export default {
     },
 
     onUpdateResponseOptions() {
+      if (this.responseOptions.isOptionalTextRequired)
+        this.$emit('updateAllow', false);
       this.$emit('updateResponseOptions', this.responseOptions);
     },
 

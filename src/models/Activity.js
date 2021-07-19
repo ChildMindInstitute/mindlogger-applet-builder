@@ -900,7 +900,7 @@ export default class Activity {
         };
 
         if (lookupTable && Array.isArray(lookupTable)) {
-          subScaleData['lookupTable'] = parseLookupTable(false, lookupTable);
+          subScaleData.lookupTable = parseLookupTable(false, lookupTable);
         }
 
         return subScaleData;

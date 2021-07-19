@@ -34,6 +34,10 @@
   .builder {
     background: rgb(239,239,243);
   }
+  .d-block{
+    display: block !important;
+  }
+
 </style>
 
 <script>

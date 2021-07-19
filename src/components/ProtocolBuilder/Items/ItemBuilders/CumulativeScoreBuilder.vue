@@ -4,6 +4,11 @@
       v-model="panels"
       multiple
     >
+      <MarkDownEditor
+        v-model="overview"
+        placeholder="Overview"
+        @input="onUpdateRule(rule)"
+      />
       <v-expansion-panel
         v-for="(rule, id) in rules"
         :key="id"
@@ -32,7 +37,40 @@
             @input="onUpdateRule(rule)"
             @keydown="nameKeydown($event)"
           />
-
+          <MarkDownEditor
+            v-model="rule.description"
+            placeholder="Cumulative Score Description"
+            @input="onUpdateRule(rule)"
+          />
+          <v-card class="mb-4">
+            <v-card-title>Which direction should be used in the report</v-card-title>
+            <v-card-text>
+              <v-radio-group
+                v-model="rule.scoreDirection"
+                class="mt-0"
+                color="primary"
+                row
+                @change="onUpdateRule(rule)"
+              >
+                <v-radio value="1">
+                  <template v-slot:label>
+                    <img
+                      src="@/assets/score_bar.png"
+                      class="score-bar"
+                    >
+                  </template>
+                </v-radio>
+                <v-radio value="-1">
+                  <template v-slot:label>
+                    <img
+                      src="@/assets/score_bar.png"
+                      class="score-bar reverse"
+                    >
+                  </template>
+                </v-radio>
+              </v-radio-group>
+            </v-card-text>
+          </v-card>
           <div class="item-list">
             <div class="list-title">
               Items within cumulative score
@@ -147,10 +185,23 @@
     font-weight: 600;
     font-size: 20px;
   }
+
+  .score-bar {
+    width: 200px;
+  }
+  .score-bar.reverse{
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+  }
 </style>
 
 <script>
+import MarkDownEditor from '../../MarkDownEditor';
+
 export default {
+  components: {
+    MarkDownEditor
+  },
   props: {
     initialItemData: {
       type: Object,
@@ -165,6 +216,7 @@ export default {
     return {
       rules: [],
       panels: [0],
+      overview: '',
       options: [
         {
           text: 'at or above',

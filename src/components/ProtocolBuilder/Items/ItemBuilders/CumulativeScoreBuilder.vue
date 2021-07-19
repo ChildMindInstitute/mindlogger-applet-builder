@@ -93,7 +93,7 @@
           />
 
           <div>
-            Message {{rule.operator.text}}
+            Message {{ rule.operator.text }}
             <MarkDownEditor
               v-model="rule.messageInRange"
               :rules="textRules"

@@ -93,7 +93,6 @@ const activityMutations = {
 
   duplicateActivity (state, index) {
     const activities = state.protocol.activities;
-
     const names = activities.map((activity) => activity.name);
     const activity = activities[index];
 
@@ -101,6 +100,15 @@ const activityMutations = {
     while (names.includes(`${activity.name} (${suffix})`)) {
       suffix++;
     }
+
+    const conditionalItems = activity.conditionalItems.map(conditionalItem => {
+      const conditions = conditionalItem.conditions.map(condition => ({ ...condition }));
+
+      return {
+        ...conditionalItem,
+        conditions,
+      };
+    })
 
     const newActivity = {
       ...activity,
@@ -110,7 +118,9 @@ const activityMutations = {
         ...item,
         id: null,
       })),
-      conditionalItems: [...activity.conditionalItems],
+      finalSubScale: { ...activity.finalSubScale },
+      subScales: [...activity.subScales],
+      conditionalItems,
     };
 
     // if (state.protocol.id && activity.id) {
@@ -169,7 +179,10 @@ const subScaleMutations = {
   addSubScale (state) {
     if (state.currentActivity) {
       state.currentActivity.subScales.push({
-        lookupTable: null
+        lookupTable: null,
+        variableName: '',
+        jsExpression: '',
+        valid: false
       });
     }
   },

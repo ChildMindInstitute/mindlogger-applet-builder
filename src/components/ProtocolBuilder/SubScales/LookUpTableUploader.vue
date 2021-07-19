@@ -45,6 +45,7 @@
       </v-btn>
       <v-spacer />
       <v-btn
+        :disabled="!updated"
         color="primary"
         @click="onSaveLookupTable"
       >
@@ -142,6 +143,7 @@ export default {
       isExampleTable: !this.subScale['lookupTable'],
       dialog: false,
       dialogText: '',
+      updated: false
     };
   },
   computed: {
@@ -192,6 +194,7 @@ export default {
           } else {
             this.lookupTable = lookupTable;
             this.isExampleTable = false;
+            this.updated = true;
             this.dialogText = `Your lookup table for ${this.subScale.variableName} was parsed successfully.`;
           }
 

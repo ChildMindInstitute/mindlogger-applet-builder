@@ -748,6 +748,7 @@ export default class Activity {
         itemLogs.push({
           name: `item ${currentItems[entry[1]]['skos:prefLabel']} was updated`,
           type: 'updated',
+          itemId: currentItems[entry[1]] && currentItems[entry[1]]._id,
           children: changeLog.log,
         });
 
@@ -763,8 +764,9 @@ export default class Activity {
       const changeLog = Item.getChangeInfo({}, currentItems[id]);
 
       itemLogs.push({
-        name: `item ${currentItems[id]['skos:prefLabel']} was inserted`,
+        name: `item ${currentItems[id]['skos:prefLabel']} was added`,
         type: 'inserted',
+        itemId: currentItems[id] && currentItems[id]._id,
         children: changeLog.log,
       });
 
@@ -844,7 +846,7 @@ export default class Activity {
       }
     });
 
-    const parseLookupTable = (isFinalSubScale, lookupTable) => lookupTable.map(row => {
+    const parseLookupTable = (isFinalSubScale, lookupTable) => (Array.isArray(lookupTable) && lookupTable.map(row => {
       const age = row['reprolib:terms/age'];
       const rawScore = row['reprolib:terms/rawScore'];
       const sex = row['reprolib:terms/sex'];
@@ -865,7 +867,7 @@ export default class Activity {
       }
 
       return data;
-    });
+    }) || null);
 
     const activityInfo = {
       _id: id && id.split('/')[1],
@@ -895,14 +897,14 @@ export default class Activity {
         };
 
         if (lookupTable && Array.isArray(lookupTable)) {
-          subScaleData['lookupTable'] = parseLookupTable(false, lookupTable);
+          subScaleData.lookupTable = parseLookupTable(false, lookupTable);
         }
 
         return subScaleData;
       }),
       finalSubScale: finalSubScale && finalSubScale[0] && {
         isAverageScore: _.get(finalSubScale, [0, 'reprolib:terms/isAverageScore', 0, '@value'], false),
-        lookupTable: parseLookupTable(true, _.get(finalSubScale, [0, 'reprolib:terms/lookupTable'], [])),
+        lookupTable: parseLookupTable(true, _.get(finalSubScale, [0, 'reprolib:terms/lookupTable'], null)),
         variableName: _.get(finalSubScale, [0, 'reprolib:terms/variableName', 0, '@value'])
       },
       compute: Array.isArray(compute) && compute.map((exp) => {

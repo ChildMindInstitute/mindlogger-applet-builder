@@ -36,7 +36,7 @@
         <v-checkbox
           v-model="isSkippable"
           label="Skippable Item"
-          :disabled="isSkippableItem == 2"
+          :disabled="isSkippableItem == 2 || requiredValue"
         />
       </v-col>
       <v-col
@@ -58,7 +58,7 @@
         <v-checkbox
           v-model="requiredValue"
           label="Response required"
-          @change="update"
+          @change="updateRequiredValue"
         />
       </v-col>
     </v-row>
@@ -116,6 +116,15 @@ export default {
   },
 
   methods: {
+    updateRequiredValue() {
+      if (this.requiredValue) { 
+          this.isSkippable = false
+          this.isSkippableItem = 2
+      } else {
+          this.isSkippableItem = 1
+      }
+      this.update()
+    },
     update () {
       const responseOptions = {
         'maxLength': this.maxLength,
@@ -123,9 +132,12 @@ export default {
         'valueType': this.isNumerical ? 'xsd:integer' : 'xsd:string',
       };
       this.$emit('updateOptions', responseOptions);
+      if (this.requiredValue) 
+        this.$emit('updateAllow', false);
     },
     updateAnswer() {
       const { correctAnswer, requiredAnswer } = this;
+      console.log("requiredAnswer:", requiredAnswer)
       if (!requiredAnswer) {
         this.$emit('updateAnswer', "");
       } else {

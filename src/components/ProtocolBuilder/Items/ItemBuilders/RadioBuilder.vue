@@ -325,6 +325,20 @@
             @change="update"
           />
         </v-col>
+
+        <v-col
+          class="d-flex align-center"
+          cols="12"
+          md="3"
+          sm="6"
+        >
+          <v-checkbox
+            v-model="removeBackOption"
+            label="Remove back button"
+            @change="update"
+          />
+        </v-col>
+
         <v-col>
           <v-checkbox
             v-if="isTokenValue"
@@ -493,6 +507,7 @@ export default {
       responseOptions: this.initialResponseOptions,
       isTooltipOpen: false,
       isOptionalText: this.initialIsOptionalText,
+      removeBackOption: this.initialItemData.removeBackOption,
       randomizeOptions: this.initialItemData.randomizeOptions,
     };
   },
@@ -597,6 +612,7 @@ export default {
         'isMultipleChoice': this.isMultipleChoice,
         'isSkippableItem': this.isSkippable,
         'randomizeOptions': this.randomizeOptions,
+        'removeBackOption': this.removeBackOption,
         'options': this.options.map(option => ({
           ...option,
           value: Number(option.value),

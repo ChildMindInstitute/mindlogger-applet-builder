@@ -275,49 +275,58 @@
         v-if="item.inputType === 'video'"
         :key="`${baseKey}-video`"
         :initial-is-optional-text="item.isOptionalText"
+        :initial-item-data="item.options"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
+        @updateOptions="updateOptions"
       />
 
       <PhotoBuilder
         v-if="item.inputType === 'photo'"
         :key="`${baseKey}-photo`"
+        :initial-item-data="item.options"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
+        @updateOptions="updateOptions"
       />
 
       <TimeRangeBuilder
         v-if="item.inputType === 'timeRange'"
         :key="`${baseKey}-timeRange`"
+        :initial-item-data="item.options"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
+        @updateOptions="updateOptions"
       />
 
       <DateBuilder
         v-if="item.inputType === 'date'"
         :key="`${baseKey}-date`"
+        :initial-item-data="item.options"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
+        @updateOptions="updateOptions"
       />
 
       <DrawingBuilder
         v-if="item.inputType === 'drawing'"
         :key="`${baseKey}-drawing`"
+        :initial-item-data="item.options"
         :initial-item-response-options="item.responseOptions"
         :initial-item-input-options="item.inputOptions"
         :initial-is-optional-text="item.isOptionalText"
@@ -328,6 +337,7 @@
         @updateAllow="updateAllow"
         @loading="loading = $event"
         @notify="notify = $event"
+        @updateOptions="updateOptions"
       />
 
       <AudioRecordBuilder
@@ -354,11 +364,13 @@
         @updateAllow="updateAllow"
         @loading="loading = $event"
         @notify="notify = $event"
+        @updateOptions="updateOptions"
       />
 
       <GeolocationBuilder
         v-if="item.inputType === 'geolocation'"
         :key="`${baseKey}-geolocation`"
+        :initial-item-data="item.options"
         :initial-item-response-options="item.responseOptions"
         :initial-is-optional-text="item.isOptionalText"
         :is-skippable-item="skippable"
@@ -367,6 +379,7 @@
         @loading="loading = $event"
         @notify="notify = $event"
         @updateAllow="updateAllow"
+        @updateOptions="updateOptions"
       />
 
       <AudioStimulusBuilder
@@ -382,6 +395,7 @@
         @validation="item.valid = $event"
         @loading="loading = $event"
         @notify="notify = $event"
+        @updateOptions="updateOptions"
       />
 
       <CumulativeScoreBuilder

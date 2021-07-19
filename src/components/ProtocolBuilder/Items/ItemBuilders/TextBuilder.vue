@@ -61,6 +61,18 @@
           @change="updateRequiredValue"
         />
       </v-col>
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="removeBackOption"
+          label="Remove back button"
+          @change="update"
+        />
+      </v-col>
     </v-row>
   </v-form>
 </template>
@@ -90,6 +102,7 @@ export default {
       correctAnswer: this.initialAnswer || "",
       maxLength: this.initialItemData.maxLength || 50,
       requiredValue: this.initialItemData.requiredValue || false,
+      removeBackOption: this.initialItemData.removeBackOption,
       requiredAnswer: this.initialAnswer ? true : false,
       isNumerical: ((this.responseOption.valueType && this.responseOption.valueType.includes('integer'))
         || (this.initialItemData.valueType && this.initialItemData.valueType.includes('integer')))
@@ -129,6 +142,7 @@ export default {
       const responseOptions = {
         'maxLength': this.maxLength,
         'requiredValue': this.requiredValue,
+        'removeBackOption': this.removeBackOption,
         'valueType': this.isNumerical ? 'xsd:integer' : 'xsd:string',
       };
       this.$emit('updateOptions', responseOptions);
@@ -137,7 +151,7 @@ export default {
     },
     updateAnswer() {
       const { correctAnswer, requiredAnswer } = this;
-      console.log("requiredAnswer:", requiredAnswer)
+
       if (!requiredAnswer) {
         this.$emit('updateAnswer', "");
       } else {

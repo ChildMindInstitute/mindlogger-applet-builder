@@ -410,6 +410,7 @@ export default class Activity {
       },
       subScales: this.ref.subScales,
       finalSubScale: (this.ref.finalSubScale.variableName ? [this.ref.finalSubScale] : []),
+      hasResponseIdentifier: !!this.ref.items.find(item => item.options.isResponseIdentifier),
       ...this.parseCumulative(),
     };
   }

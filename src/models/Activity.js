@@ -903,9 +903,9 @@ export default class Activity {
         return subScaleData;
       }),
       finalSubScale: finalSubScale && finalSubScale[0] && {
-        isAverageScore: _.get(finalSubScale, [0, 'reprolib:terms/isAverageScore', 0, '@value'], false),
-        lookupTable: parseLookupTable(true, _.get(finalSubScale, [0, 'reprolib:terms/lookupTable'], null)),
-        variableName: _.get(finalSubScale, [0, 'reprolib:terms/variableName', 0, '@value'])
+        isAverageScore: _.get(isAverageScore, [0, '@value'], false),
+        jsExpression: _.get(jsExpression, [0, '@value']),
+        variableName: _.get(variableName, [0, '@value']),
       },
       compute: Array.isArray(compute) && compute.map((exp) => {
         const jsExpression = exp['reprolib:terms/jsExpression'];

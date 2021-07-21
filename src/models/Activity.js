@@ -904,9 +904,9 @@ export default class Activity {
         const isAverageScore = subScale['reprolib:terms/isAverageScore'];
 
         let subScaleData = {
-          isAverageScore: isAverageScore[0] && isAverageScore[0]['@value'],
-          jsExpression: jsExpression[0] && jsExpression[0]['@value'],
-          variableName: variableName[0] && variableName[0]['@value'],
+          isAverageScore: _.get(isAverageScore, [0, '@value'], false),
+          jsExpression: _.get(jsExpression, [0, '@value']),
+          variableName: _.get(variableName, [0, '@value']),
           subScaleId: index + 1,
         };
 

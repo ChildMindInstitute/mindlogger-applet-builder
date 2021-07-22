@@ -1,6 +1,15 @@
 {
   "name": "applet-schema-builder",
   "version": "0.7.1",
+  "homepage": "https://github.com/ChildMindInstitute/mindlogger-applet-builder",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ChildMindInstitute/mindlogger-applet-builder.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ChildMindInstitute/mindlogger-applet-builder/issues"
+  },
+  "license": "SEE LICENSE in LICENSE.md",
   "private": false,
   "main": "./dist/applet-schema-builder.common.js",
   "scripts": {

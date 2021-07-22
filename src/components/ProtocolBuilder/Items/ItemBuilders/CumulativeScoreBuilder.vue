@@ -188,40 +188,40 @@
 </template>
 
 <style scoped>
-  .item-list .items {
-    max-height: 200px;
-    overflow-y: scroll;
-  }
+.item-list .items {
+  max-height: 200px;
+  overflow-y: scroll;
+}
 
-  .item-list .list-title {
-    color: rgba(0, 0, 0, 0.6);
-  }
+.item-list .list-title {
+  color: rgba(0, 0, 0, 0.6);
+}
 
-  .invalid {
-    border-bottom: 2px solid red;
-  }
+.invalid {
+  border-bottom: 2px solid red;
+}
 
-  .rule-header {
-    display: flex;
-  }
+.rule-header {
+  display: flex;
+}
 
-  .rule-header .rule-title {
-    width: 100%;
-  }
+.rule-header .rule-title {
+  width: 100%;
+}
 
-  .rule-header .rule-title span {
-    width: 100%;
-    font-weight: 600;
-    font-size: 20px;
-  }
+.rule-header .rule-title span {
+  width: 100%;
+  font-weight: 600;
+  font-size: 20px;
+}
 
-  .score-bar {
-    width: 200px;
-  }
-  .score-bar.reverse{
-    -webkit-transform: scaleX(-1);
-    transform: scaleX(-1);
-  }
+.score-bar {
+  width: 200px;
+}
+.score-bar.reverse{
+  -webkit-transform: scaleX(-1);
+  transform: scaleX(-1);
+}
 </style>
 
 <script>

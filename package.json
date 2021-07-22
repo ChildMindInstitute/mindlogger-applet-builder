@@ -1,12 +1,13 @@
 {
   "name": "applet-schema-builder",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "private": false,
   "main": "./dist/applet-schema-builder.common.js",
   "scripts": {
     "serve": "vue-cli-service serve --mode local",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
+    "key-search": "python3 keySearch.py",
     "build-bundle": "vue-cli-service build --target lib --name applet-schema-builder ./src/components/index.js",
     "publish-package": "npm publish --access=public"
   },

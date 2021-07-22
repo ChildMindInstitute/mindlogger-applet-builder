@@ -109,7 +109,6 @@
                   >
                     {{ item.name }}
                   </v-list-item-content>
-
                 </v-list-item>
               </template>
             </v-list>
@@ -354,6 +353,34 @@ export default {
       return itemCount;
     }
   },
+  watch: {
+    currentActivity: {
+      deep: true,
+      handler() {
+        this.itemsFormatted = this.mergeList(this.formattedItems(), this.formattedSubScales());
+
+        if (this.isExpanded) {
+          this.$set(this, 'itemsFormatted', this.mergeList(
+            this.itemsFormatted.filter(item => !item.isSubScale),
+            this.formattedSubScales()
+          ));
+        }
+      }
+    },
+    valid: {
+      handler () {
+        this.saveSubScale ();
+      }
+    },
+    isExpanded() {
+      if (this.isExpanded) {
+        this.$set(this, 'itemsFormatted', this.mergeList(
+          this.itemsFormatted.filter(item => !item.isSubScale),
+          this.formattedSubScales()
+        ));
+      }
+    },
+  },
   created() {
     const self = this;
     self.keyDownHandler = function ({ key }) {
@@ -382,34 +409,6 @@ export default {
       exists: message.length > 0,
       message
     });
-  },
-  watch: {
-    currentActivity: {
-      deep: true,
-      handler() {
-        this.itemsFormatted = this.mergeList(this.formattedItems(), this.formattedSubScales());
-
-        if (this.isExpanded) {
-          this.$set(this, 'itemsFormatted', this.mergeList(
-            this.itemsFormatted.filter(item => !item.isSubScale),
-            this.formattedSubScales()
-          ));
-        }
-      }
-    },
-    valid: {
-      handler () {
-        this.saveSubScale ();
-      }
-    },
-    isExpanded() {
-      if (this.isExpanded) {
-        this.$set(this, 'itemsFormatted', this.mergeList(
-          this.itemsFormatted.filter(item => !item.isSubScale),
-          this.formattedSubScales()
-        ));
-      }
-    },
   },
   methods: {
     ...mapMutations(config.MODULE_NAME,

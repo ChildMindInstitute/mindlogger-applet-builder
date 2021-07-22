@@ -236,6 +236,11 @@ export default {
             return itemData;
           });
 
+          if (activityItems.length < activityInfo.orderList.length) {
+            delete activityInfo.finalSubScale
+            delete activityInfo.subScales
+          }
+
           const activityBuilderData = activityModel.getActivityBuilderData({
             ...activityInfo,
             items: activityItems,

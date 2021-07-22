@@ -45,6 +45,30 @@ export function isImageValid(data) {
   });
 }
 
+export function isVideoUrlValid(url) {
+  const video = document.createElement('video');
+  video.src = url;
+
+  return new Promise((resolve, reject) => {
+    video.onload = () => {
+      resolve(url);
+    }
+
+    video.onerror = async () => {
+      try {
+        await isImageValid(url, ["gif"])
+        if (url.match(/\.gif$/)) {
+          resolve(url);
+        } else {
+          reject('Please check if you use correct gif url.');
+        }
+      } catch (err) {
+        reject('Please check if you use correct video url.');
+      }
+    }
+  });
+}
+
 export class Uploader {
   constructor(dirName = '') {
     this.client = this.init(dirName);

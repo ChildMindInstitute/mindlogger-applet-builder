@@ -2,9 +2,9 @@
   <v-row>
     <v-col
       :class="colClasses"
-      :cols="cols"
-      :md="md"
-      :sm="sm"
+      :cols="12"
+      :md="6"
+      :sm="6"
     >
       <v-checkbox
         v-model="isText"
@@ -16,9 +16,9 @@
     <v-col
       v-if="isText"
       :class="colClasses"
-      :cols="cols"
-      :md="md"
-      :sm="sm"
+      :cols="12"
+      :md="6"
+      :sm="6"
     >
       <v-checkbox
         v-model="isRequired"

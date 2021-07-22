@@ -5,9 +5,8 @@
       multiple
     >
       <MarkDownEditor
-        v-model="overview"
+        v-model="scoreOverview"
         placeholder="Overview"
-        @input="onUpdateRule(rule)"
       />
       <v-expansion-panel
         v-for="(rule, id) in rules"
@@ -52,7 +51,7 @@
                 row
                 @change="onUpdateRule(rule)"
               >
-                <v-radio value="1">
+                <v-radio value="true">
                   <template v-slot:label>
                     <img
                       src="@/assets/score_bar.png"
@@ -60,7 +59,7 @@
                     >
                   </template>
                 </v-radio>
-                <v-radio value="-1">
+                <v-radio value="false">
                   <template v-slot:label>
                     <img
                       src="@/assets/score_bar.png"
@@ -211,12 +210,16 @@ export default {
       type: Array,
       required: true,
     },
+    scoreOverview: {
+      type: String,
+      required: false,
+      default: ''
+    },
   },
   data: function () {
     return {
       rules: [],
       panels: [0],
-      overview: '',
       options: [
         {
           text: 'at or above',
@@ -280,6 +283,7 @@ export default {
       rule.compute = {
         jsExpression: rule.items.filter(item => item.selected).map(item => item.name).join(' + '),
         variableName: rule.name,
+        direction: rule.direction,
       }
 
       rule.messages = [
@@ -308,6 +312,7 @@ export default {
       if (!rule) {
         return {
           name: '',
+          direction: true,
           items: this.items.filter(item => item.options && item.options.hasScoreValue).map(item => ({
             name: item.name,
             selected: false,
@@ -330,6 +335,7 @@ export default {
 
       return {
         name: rule.compute.variableName,
+        direction: rule.compute.direction,
         items: this.items.filter(item => item.options && item.options.hasScoreValue).map(item => ({
           name: item.name,
           selected: itemNames.includes(item.name)

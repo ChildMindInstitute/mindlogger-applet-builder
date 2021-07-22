@@ -640,7 +640,7 @@ export default class Activity {
                 message => message.jsExpression.split(/[<>]=*\s/g)[0].trim() == oldCumulative.variableName.trim()
               );
 
-              if (newCumulative.jsExpression !== oldCumulative.jsExpression || JSON.stringify(oldMessages) !== JSON.stringify(newMessages) || newCumulative.direction !== oldCumulative.direction) {
+              if (newCumulative.jsExpression !== oldCumulative.jsExpression || JSON.stringify(oldMessages) !== JSON.stringify(newMessages) || newCumulative.description !== oldCumulative.description || newCumulative.direction !== oldCumulative.direction) {
                 updates.push(`cumulative ${oldCumulative.variableName} was updated`);
               }
             } else {
@@ -927,6 +927,7 @@ export default class Activity {
       compute: Array.isArray(compute) && compute.map((exp) => ({
         jsExpression: _.get(exp, ['reprolib:terms/jsExpression', 0, '@value']),
         variableName: _.get(exp, ['reprolib:terms/variableName', 0, '@value']),
+        description: _.get(exp, ['reprolib:terms/description', 0, '@value']),
         direction: _.get(exp, ['reprolib:terms/direction', 0, '@value'], true),
       })),
       messages: Array.isArray(messages) && messages.map((msg) => ({

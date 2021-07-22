@@ -325,7 +325,6 @@ export default {
           .map((item) => item.name)
           .join(" + "),
         variableName: rule.name,
-        direction: rule.direction,
       };
 
       rule.messages = [
@@ -361,6 +360,7 @@ export default {
       if (!rule) {
         return {
           name: "",
+          description: "",
           direction: true,
           items: this.items
             .filter((item) => item.options && item.options.hasScoreValue)
@@ -393,6 +393,7 @@ export default {
 
       return {
         name: rule.compute.variableName,
+        description: rule.compute.description,
         direction: rule.compute.direction,
         items: this.items
           .filter((item) => item.options && item.options.hasScoreValue)

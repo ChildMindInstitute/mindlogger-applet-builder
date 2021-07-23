@@ -261,7 +261,12 @@ export default {
     },
 
     activitySelect(v, rule, key) {
-      if(!v) this.onUpdateRule({...rule, [key]: null})
+      if(!v) {
+        rule[key] = null;
+        this.onUpdateRule(rule)
+      } else {
+        this.update();
+      }
     },
 
     onUpdateRule(rule) {

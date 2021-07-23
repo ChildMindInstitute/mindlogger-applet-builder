@@ -21,6 +21,10 @@ const activityGetters = {
 
   tokenPrizeModal (state) {
     return state.protocol.tokenPrizeModal;
+  },
+
+  themeId (state) {
+    return state.themeId;
   }
 };
 
@@ -40,8 +44,16 @@ export default {
     return state.original;
   },
 
+  originalThemeId (state) {
+    return state.originalThemeId;
+  },
+
   itemTemplates (state) {
     return state.templates;
+  },
+
+  themes (state) {
+    return state.themes;
   },
 
   currentScreen (state) {

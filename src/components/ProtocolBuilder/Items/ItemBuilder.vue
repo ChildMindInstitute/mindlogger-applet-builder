@@ -104,6 +104,14 @@
           @onRemove="onRemoveHeaderImage()"
           @onNotify="loading = false; notify = $event;"
         />
+
+        <div
+          v-if="item.inputType == 'text' && item.options && item.options.isResponseIdentifier"
+          class="my-2"
+        >
+          {{ responseIdentifierMessage }}
+        </div>
+
         <v-textarea
           v-if="item.inputType !== 'cumulativeScore'"
           v-model="largeText"
@@ -191,6 +199,12 @@
           v-model="currentActivity.allowSummary"
           label="Allow the user to see results"
         />
+        <v-col 
+          v-if="item.inputType !== 'radio' && item.inputType !== 'checkbox' && item.inputType !== 'slider' && item.inputType !== 'text'"
+          class="d-flex align-center red--text"
+        >
+          This item is only available for use in mobile version of MindLogger.
+        </v-col>
       </v-row>
 
       <div
@@ -633,6 +647,7 @@ export default {
       baseKey: 0,
       loading: false,
       notify: {},
+      responseIdentifierMessage: 'By using this option, the user will be required to enter response data identifier text into the field. The text entered will identify the response data collected at that point in time. The identifier used will be filterable on the user\'s data visualization tab.'
     }
   },
   computed: {
@@ -684,7 +699,6 @@ export default {
   },
 
   beforeMount() {
-
     Object.assign(this, {
       valid: this.item.name && this.item.name.length > 0,
       hasScoringItem: this.currentActivity.items.some((item) => item.options.hasScoreValue),

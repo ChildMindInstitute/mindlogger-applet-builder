@@ -290,6 +290,21 @@
         @updateAllow="updateAllow"
       />
 
+      <AgeSelectorBuilder
+        v-if="item.inputType === 'ageSelector'"
+        :key="`${baseKey}-ageSelector`"
+        :is-skippable-item="skippable"
+        :initial-item-data="item.options"
+        :initial-response-options="item.responseOptions"
+        :initial-is-optional-text="item.isOptionalText"
+        @updateOptions="updateOptions"
+        @updateAllow="updateAllow"
+        @updateOptionalText="updateOptionalText"
+        @updateResponseOptions="updateResponseOptions"
+        @loading="loading = $event"
+        @notify="notify = $event"
+      />
+
       <PhotoBuilder
         v-if="item.inputType === 'photo'"
         :key="`${baseKey}-photo`"
@@ -568,6 +583,7 @@ import StackedRadioBuilder from "./ItemBuilders/StackedRadioBuilder.vue";
 import TextBuilder from "./ItemBuilders/TextBuilder.vue";
 import SliderBuilder from "./ItemBuilders/SliderBuilder.vue";
 import VideoBuilder from "./ItemBuilders/VideoBuilder.vue";
+import AgeSelectorBuilder from "./ItemBuilders/AgeSelectorBuilder.vue";
 import PhotoBuilder from "./ItemBuilders/PhotoBuilder.vue";
 import TimeRangeBuilder from "./ItemBuilders/TimeRangeBuilder.vue";
 import DateBuilder from "./ItemBuilders/DateBuilder.vue";
@@ -595,6 +611,7 @@ export default {
     TextBuilder,
     SliderBuilder,
     VideoBuilder,
+    AgeSelectorBuilder, 
     PhotoBuilder,
     TimeRangeBuilder,
     DateBuilder,

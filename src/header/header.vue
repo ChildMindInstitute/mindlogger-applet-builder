@@ -319,6 +319,7 @@ export default {
       }
 
       this.formattedProtocol().then((data) => {
+        console.log('data----------------', data);
         if (!this.formattedOriginalProtocol) {
           this.$emit("uploadProtocol", data);
         } else {

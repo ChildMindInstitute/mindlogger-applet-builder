@@ -73,7 +73,7 @@
           <v-row>
             <div 
               class="d-flex justify-start align-center option-item pl-2"
-              :style="{background: colorPalette ? option.color : 'none'}"
+              :style="{background: colorPalette ? option.color : 'none', color: colorPalette ? invertColor(option.color) : 'black'}"
             >
               <input
                 v-if="isMultipleChoice"
@@ -350,23 +350,15 @@
             @change="update"
           />
         </v-col>
-        <v-col
-          class="d-flex align-center"
-          cols="12"
-          md="6"
-          sm="12">
-          <OptionalItemText
-            colClasses="d-flex align-center py-0 px-3"
-            :cols="12"
-            :md="6"
-            :sm="12"
-            :text="isOptionalText"
-            :required="responseOptions.isOptionalTextRequired"
-            @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
-            @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
-          />
-        </v-col>
       </v-row>
+        <OptionalItemText
+          colClasses="d-flex align-center py-0 px-3"
+
+          :text="isOptionalText"
+          :required="responseOptions.isOptionalTextRequired"
+          @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
+          @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
+        />
     </v-form>
 
     <v-dialog
@@ -719,6 +711,21 @@ export default {
       this.colorPickerDialog = true;
       this.currentOption = option;
       this.currentOptionColor = option.color || "#ffffff";
+    },
+
+    invertColor(hex) {
+      let color = hex;
+
+      if (!color) {
+        return 'black';
+      }
+      color = color.substring(1);
+      color = parseInt(color, 16);
+      color = 0xFFFFFF ^ color;
+      color = color.toString(16);
+      color = ("000000" + color).slice(-6);
+      color = "#" + color;
+      return color;
     },
 
     setOptionColor() {

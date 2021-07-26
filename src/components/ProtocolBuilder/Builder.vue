@@ -79,6 +79,11 @@ export default {
       required: false,
       default: null,
     },
+    themes: {
+      type: Array,
+      required: false,
+      default: null,
+    },
     versions: {
       type: Array,
       required: false,
@@ -107,6 +112,7 @@ export default {
       'activities',
       'prizeActivity',
       'templateUpdateRequest',
+      'themeId'
     ]),
     config() {
       return config;
@@ -134,6 +140,10 @@ export default {
   },
   async beforeMount() {
     this.setTemplates(this.templates);
+
+    this.initThemes(this.themes);
+    this.initThemeId(this.initialData);
+
     this.setVersions(this.versions);
     this.setCurrentScreen(config.PROTOCOL_SCREEN);
     this.setCurrentActivity(-1);
@@ -174,6 +184,8 @@ export default {
     ...mapMutations(config.MODULE_NAME, [
       'initProtocolData',
       'setTemplates',
+      'initThemes',
+      'initThemeId',
       'setCurrentScreen',
       'setFormattedOriginalProtocol',
       'setPrizeActivity',
@@ -235,6 +247,11 @@ export default {
             itemData.id = null;
             return itemData;
           });
+
+          if (activityItems.length < activityInfo.orderList.length) {
+            delete activityInfo.finalSubScale
+            delete activityInfo.subScales
+          }
 
           const activityBuilderData = activityModel.getActivityBuilderData({
             ...activityInfo,

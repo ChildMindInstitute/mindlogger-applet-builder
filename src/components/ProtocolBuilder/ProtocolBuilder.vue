@@ -51,6 +51,22 @@
             @onRemove="onRemoveImage()"
             @onNotify="onEventNotify($event)"
           />
+
+          <v-subheader class="ml-10" v-if="themes && themes.length">
+            Theme
+          </v-subheader>
+
+          <v-select v-if="themes && themes.length"
+              v-model="selectedTheme"
+              :items="themes"
+              :label="'Select theme'"
+              item-text="name"
+              item-value="_id"
+              hide-details
+              single-line
+              outlined
+              dense
+          />
         </div>
       </v-card>
 
@@ -167,7 +183,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(config.MODULE_NAME, ['protocol', 'activities']),
+    ...mapGetters(config.MODULE_NAME, ['protocol', 'activities', 'themes', 'themeId']),
     config() {
       return config;
     },
@@ -205,6 +221,15 @@ export default {
       }
     },
 
+    selectedTheme: {
+      get: function () {
+        return this.themeId
+      },
+      set: function (themeId) {
+        this.updateThemeId(themeId)
+      }
+    },
+
     withoutPrize () {
       return this.activities.filter(activity => Boolean(activity['isPrize']) === false);
     },
@@ -228,6 +253,7 @@ export default {
         'addActivity',
         'setCurrentActivity',
         'setCurrentScreen',
+        'updateThemeId'
       ]
     ),
     onAddImageFromUrl (event) {

@@ -155,6 +155,9 @@ export default {
               if (choice['schema:value']) {
                 optionSchema.value = choice['schema:value'];
               }
+              if (choice['schema:color']) {
+                optionSchema.color = choice['schema:color'];
+              }
               if (choice['schema:image']) {
                 optionSchema.image = choice['schema:image'];
               }

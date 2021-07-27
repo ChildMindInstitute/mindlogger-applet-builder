@@ -194,13 +194,19 @@
             </template>
           </v-select>
         </v-col>
-        <v-col 
+        <v-col
           v-if="item.inputType !== 'radio' && item.inputType !== 'checkbox' && item.inputType !== 'slider' && item.inputType !== 'text'"
           class="d-flex align-center red--text"
         >
           This item is only available for use in mobile version of MindLogger.
         </v-col>
       </v-row>
+
+      <v-checkbox
+        v-if="item.inputType === 'cumulativeScore'"
+        v-model="currentActivity.allowSummary"
+        label="Allow the user to see results"
+      />
 
       <div
         v-if="item.inputType === 'markdownMessage'"

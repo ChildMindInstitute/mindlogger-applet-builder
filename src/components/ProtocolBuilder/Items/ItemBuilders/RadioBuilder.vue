@@ -1,13 +1,22 @@
 <template>
   <div>
     <v-form>
-      <v-row
-        class="ma-2"
-      >
+      <v-row v-if="colorPalette" class="mt-2 mx-2">
+        Color Palette
+      </v-row>
+      <v-row v-if="colorPalette" class="my-3 mx-2">
+        <v-btn
+          fab
+          x-small
+          color="primary"
+          @click="colorPaletteDialog = true"
+        >
+          <v-icon color="white">mdi-plus</v-icon>
+        </v-btn>
+      </v-row>
+      <v-row class="ma-2">
         Options
-
         <v-spacer />
-
         <template
           v-if="isTokenValue"
         >
@@ -58,11 +67,14 @@
       >
         <div
           v-for="(option, index) in options"
-          :key="index"
           class="px-2"
+          :key="index"
         >
           <v-row>
-            <div class="radio-option">
+            <div 
+              class="d-flex justify-start align-center option-item pl-2"
+              :style="{background: colorPalette ? option.color : 'none', color: colorPalette ? invertColor(option.color) : 'black'}"
+            >
               <input
                 v-if="isMultipleChoice"
                 class="mx-2"
@@ -78,9 +90,7 @@
                 value="false"
                 disabled
               >
-              <span>
-                {{ option.name }}
-              </span>
+              <span>{{ option.name }}</span>
             </div>
 
             <v-spacer />
@@ -90,17 +100,15 @@
                 icon
                 @click="option.expanded = !option.expanded"
               >
-                <v-icon
-                  v-if="!option.expanded"
-                  color="grey lighten-1"
-                >
-                  edit
-                </v-icon>
-                <v-icon
-                  v-if="option.expanded"
-                >
-                  mdi-chevron-double-up
-                </v-icon>
+                <v-icon v-if="!option.expanded">edit</v-icon>
+                <v-icon v-if="option.expanded">mdi-chevron-double-up</v-icon>
+              </v-btn>
+              <v-btn
+                v-if="colorPalette"
+                icon
+                @click="openColorPicker(option)"
+              >
+                <v-icon>palette</v-icon>
               </v-btn>
               <Uploader
                 :initialType="'image'"
@@ -116,9 +124,7 @@
                 icon
                 @click="deleteOption(index)"
               >
-                <v-icon color="grey lighten-1">
-                  delete
-                </v-icon>
+                <v-icon>delete</v-icon>
               </v-btn>
             </div>
           </v-row>
@@ -137,7 +143,7 @@
                   v-model="option.name"
                   :rules="textRules"
                   label="Option Text"
-                  counter="75"
+                  counter="45"
                   @change="updateOption(option)"
                 />
               </v-col>
@@ -325,39 +331,153 @@
             @change="update"
           />
         </v-col>
-        <v-col>
+        <v-col
+          class="d-flex align-center"
+          cols="12"
+          md="3"
+          sm="6"
+        >
           <v-checkbox
-            v-if="isTokenValue"
+            v-model="colorPalette"
+            label="Set color palette"
+            @change="update"
+          />
+        </v-col>
+        <v-col v-if="isTokenValue">
+          <v-checkbox
             v-model="enableNegativeTokens"
             label="Reduce cumulation of tokens with negative token responses"
             @change="update"
           />
         </v-col>
       </v-row>
-      <OptionalItemText
-        :colClasses="'d-flex align-center'"
-        :cols="12"
-        :md="3"
-        :sm="6"
-        :text="isOptionalText"
-        :required="responseOptions.isOptionalTextRequired"
-        @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
-        @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
-      />
+        <OptionalItemText
+          colClasses="d-flex align-center py-0 px-3"
+
+          :text="isOptionalText"
+          :required="responseOptions.isOptionalTextRequired"
+          @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
+          @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
+        />
     </v-form>
+
+    <v-dialog
+      v-model="colorPaletteDialog"
+      persistent
+      max-width="1200px"
+    >
+      <v-card>
+        <v-card-title class="primary white--text">
+          <span>Apply a Template</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container 
+            class="d-flex justify-center"
+            fluid
+          >
+            <v-radio-group
+              v-model="selectedPalette"
+              row
+            >
+              <div
+                class="pa-4 d-flex flex-column"
+                v-for="value in Object.keys(colorPalettes)"
+                :key="value"
+              >
+                <v-radio
+                  class="mb-4 ma-auto"
+                  :value="value"
+                >
+                  <template v-slot:label>
+                    <div class="text-capitalize">{{value}}</div>
+                  </template>
+                </v-radio>
+                <v-card @click="selectedPalette = value">
+                  <v-card-text>
+                    <div>This is what the options would look like:</div>
+                    <div class="text--primary mt-4">
+                      <div 
+                        v-for="(optionColor, index) in colorPalettes[value]"
+                        class="d-flex justify-center align-center option-color"
+                        :style="{backgroundColor: optionColor}"
+                        :key="optionColor"
+                      >
+                        Option {{index + 1}}
+                      </div>
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </div>
+            </v-radio-group>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <small class="d-flex align-center ml-4">
+            <v-icon class="mr-1">info</v-icon> 
+            The patter repeats after the 5th option
+          </small>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="blue darken-1"
+            text
+            @click="colorPaletteDialog = false"
+          >
+            Close
+          </v-btn>
+          <v-btn
+            color="blue darken-1"
+            text
+            @click="applyColorPalette"
+          >
+            Apply
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog
+      v-model="colorPickerDialog"
+      persistent
+      max-width="350px"
+    >
+      <v-card>
+        <v-card-title class="primary white--text">
+          <span>Set Option Color</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container 
+            class="d-flex justify-center"
+            fluid
+          >
+            <v-color-picker
+              class="ma-2"
+              v-model="currentOptionColor"
+              show-swatches
+            ></v-color-picker>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="blue darken-1"
+            text
+            @click="colorPickerDialog = false"
+          >
+            Close
+          </v-btn>
+          <v-btn
+            color="blue darken-1"
+            text
+            @click="setOptionColor"
+          >
+            Save
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
 <style lang="scss" scoped>
-  .radio-option {
-    display: flex;
-    align-items: center;
-  }
-
-  .radio-option > * {
-    margin-left: 10px;
-  }
-
   .mx-template-list {
     position: absolute;
     margin-top: 36px;
@@ -366,6 +486,28 @@
 
   .option-list {
     width: 65%;
+  }
+
+  .option-item {
+    width: 50%;
+    height: 37px;
+    border: 2px solid white;
+    border-radius: 5px;
+  }
+
+  .option-color {
+    margin: 1px;
+    width: 100%;
+    height: 40px;
+    border: 2px solid white;
+    border-radius: 5px;
+  }
+
+  .option-circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid grey;
   }
 
   .upload-from-pc {
@@ -469,6 +611,7 @@ export default {
         score: option.score || 0,
         image: option.image || '',
         description: option.description || '',
+        color: option.color || '',
         alert: option.alert || '',
         expanded: false,
         valid: true
@@ -487,13 +630,25 @@ export default {
       items: [],
 
       isTokenValue,
+      colorPalettes: {
+        pastel: ["#b5feef", "#68e5a8", "#faf193", "#fabd93", "#f17688"],
+        retro: ["#9cc7bd", "#f6f2d4", "#f5bf77", "#f59797", "#988189"],
+        grayScale: ["#f2f2f2", "#e0e0e0", "#c6c6c6", "#a6a6a6", "#909090"],
+      },
+      colorPalette: this.initialItemData.colorPalette || false,
       hasScoreValue: this.initialItemData.hasScoreValue || false,
       hasResponseAlert: this.initialItemData.hasResponseAlert || false,
       enableNegativeTokens: this.initialItemData.enableNegativeTokens || false,
-      responseOptions: this.initialResponseOptions,
-      isTooltipOpen: false,
-      isOptionalText: this.initialIsOptionalText,
       randomizeOptions: this.initialItemData.randomizeOptions,
+      responseOptions: this.initialResponseOptions,
+      isOptionalText: this.initialIsOptionalText,
+      currentOption: null,
+      currentOptionColor: "",
+      selectedPalette: null,
+      isTooltipOpen: false,
+      colorPickerDialog: false,
+      colorPaletteDialog: false,
+      mode: "hex",
     };
   },
 
@@ -524,6 +679,7 @@ export default {
         'value': 0,
         'score': 0,
         'description': '',
+        'color': '',
         'expanded': false,
         'image': '',
         'alert': '',
@@ -549,6 +705,44 @@ export default {
       const updatedItems = items.filter(({ text, value, description }) => text !== item.text || value !== item.value || description !== item.description)
       this.items = [...updatedItems]
       this.$emit('removeTemplate', item);
+    },
+
+    openColorPicker(option) {
+      this.colorPickerDialog = true;
+      this.currentOption = option;
+      this.currentOptionColor = option.color || "#ffffff";
+    },
+
+    invertColor(hex) {
+      let color = hex;
+
+      if (!color) {
+        return 'black';
+      }
+      color = color.substring(1);
+      color = parseInt(color, 16);
+      color = 0xFFFFFF ^ color;
+      color = color.toString(16);
+      color = ("000000" + color).slice(-6);
+      color = "#" + color;
+      return color;
+    },
+
+    setOptionColor() {
+      const optionIndex = this.options.findIndex(({ name }) => name === this.currentOption.name);
+
+      this.currentOption.color = this.currentOptionColor;
+      this.options[optionIndex] = this.currentOption;
+      this.colorPickerDialog = false;
+      this.update();
+    },
+
+    applyColorPalette() {
+      this.colorPaletteDialog = false;
+      this.options.forEach((option, index) => {
+        option.color = this.colorPalettes[this.selectedPalette][index % 5];
+      })
+      this.update();
     },
 
     appendTemplate(option) {
@@ -587,7 +781,6 @@ export default {
       this.options.splice(index, 1);
       this.update();
     },
-
     update() {
       const responseOptions = {
         'hasScoreValue': this.hasScoreValue,
@@ -596,6 +789,7 @@ export default {
         'enableNegativeTokens': this.enableNegativeTokens,
         'isMultipleChoice': this.isMultipleChoice,
         'isSkippableItem': this.isSkippable,
+        'colorPalette': this.colorPalette,
         'randomizeOptions': this.randomizeOptions,
         'options': this.options.map(option => ({
           ...option,

@@ -94,23 +94,32 @@
             @input="onUpdateRule(rule)"
           />
 
-          <v-switch 
-            v-model="rule.isActivityInRange" 
-            inset 
-            type="text" 
-            @change="(v) => activitySelect(v, rule, 'activityInRange')" 
-          />
-
-          <v-select
-            v-if="rule.isActivityInRange"
-            v-model="rule.activityInRange"
-            :items="activityNames"
-            item-text="name"
-            item-value="name"
-            label="Select Activity"
-            single-line
-            @change="onUpdateRule(rule)"
-          />
+          <div class="d-flex align-baseline mt-2">
+            <v-switch 
+              v-model="rule.isActivityInRange" 
+              class="mt-0 pt-0"
+              inset 
+              type="text" 
+              @change="(v) => activitySelect(v, rule, 'activityInRange')" 
+            />
+            <div v-if="rule.isActivityInRange" class="d-flex align-baseline">
+              <div class="mr-2"> SHOW </div>
+              <v-select
+                v-model="rule.activityInRange"
+                class="range-select"
+                :items="activityNames"
+                item-text="name"
+                item-value="name"
+                label="Select Activity"
+                solo
+                @change="onUpdateRule(rule)"
+              />
+              <div class="ml-2 text-uppercase">IF THE USER'S SCORE OF {{rule.operator.text || 'X'}} IS {{rule.score || 'Y'}}</div>
+            </div>
+            <div v-else>
+              <div>Show an activity based on the score the user achieves</div>
+            </div>
+          </div>
 
           <v-text-field
             v-model="rule.messageOutRange"
@@ -120,23 +129,33 @@
             @input="onUpdateRule(rule)"
           />
 
-          <v-switch 
-            v-model="rule.isActivityOutRange" 
-            inset 
-            type="text" 
-            @change="(v) => activitySelect(v, rule, 'activityOutRange')" 
-          />
+          <div class="d-flex align-baseline mt-2">
+            <v-switch 
+              v-model="rule.isActivityOutRange" 
+              class="mt-0 pt-0"
+              inset 
+              type="text" 
+              @change="(v) => activitySelect(v, rule, 'activityOutRange')" 
+            />
 
-          <v-select
-            v-if="rule.isActivityOutRange"
-            v-model="rule.activityOutRange"
-            :items="activityNames"
-            item-text="name"
-            item-value="name"
-            label="Select Activity"
-            single-line
-            @change="onUpdateRule(rule)"
-          />
+            <div v-if="rule.isActivityOutRange" class="d-flex align-baseline">
+              <div class="mr-2"> SHOW </div>
+              <v-select
+                class="range-select"
+                v-model="rule.activityOutRange"
+                :items="activityNames"
+                item-text="name"
+                item-value="name"
+                label="Select Activity"
+                solo
+                @change="onUpdateRule(rule)"
+              />
+              <div class="ml-2">IF THE USER'S SCORE OUT OF RANGE</div>
+            </div>
+            <div v-else>
+              <div>Show an activity based on the score the user achieves</div>
+            </div>
+          </div>
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
@@ -170,6 +189,10 @@
 
 .rule-header .rule-title {
   width: 100%;
+}
+
+.range-select {
+  height: 48px;
 }
 
 .rule-header .rule-title span {

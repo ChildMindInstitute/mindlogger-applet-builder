@@ -686,6 +686,10 @@ export default {
         'valid': true,
       };
 
+      if (this.selectedPalette) {
+        nextOption.color = this.colorPalettes[this.selectedPalette][this.options.length % 5];
+      }
+
       if (this.hasScoreValue) {
         nextOption.score = this.nextOptionScore;
         this.nextOptionScore++;
@@ -779,6 +783,9 @@ export default {
     },
     deleteOption(index) {
       this.options.splice(index, 1);
+      this.options.forEach((option, index) => {
+        option.color = this.colorPalettes[this.selectedPalette][index % 5];
+      })
       this.update();
     },
     update() {

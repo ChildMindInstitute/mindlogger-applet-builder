@@ -490,7 +490,7 @@
 
   .option-item {
     width: 50%;
-    height: 37px;
+    height: auto;
     border: 2px solid white;
     border-radius: 5px;
   }

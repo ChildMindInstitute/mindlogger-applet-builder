@@ -86,13 +86,14 @@
             @change="onUpdateRule(rule)"
           />
 
-          <v-text-field
-            v-model="rule.messageInRange"
-            :label="`Message ${rule.operator.text}`"
-            type="text"
-            :rules="textRules"
-            @input="onUpdateRule(rule)"
-          />
+          <div>
+            Message {{ rule.operator.text }}
+            <MarkDownEditor
+              v-model="rule.messageInRange"
+              :rules="textRules"
+              @input="onUpdateRule(rule)"
+            />
+          </div>
 
           <div class="d-flex align-baseline mt-2">
             <v-switch 
@@ -121,13 +122,14 @@
             </div>
           </div>
 
-          <v-text-field
-            v-model="rule.messageOutRange"
-            label="Message out of range"
-            type="text"
-            :rules="textRules"
-            @input="onUpdateRule(rule)"
-          />
+          <div>
+            Message out of range
+            <MarkDownEditor
+              v-model="rule.messageOutRange"
+              :rules="textRules"
+              @input="onUpdateRule(rule)"
+            />
+          </div>
 
           <div class="d-flex align-baseline mt-2">
             <v-switch 
@@ -205,8 +207,12 @@
 <script>
 import { mapGetters } from 'vuex';
 import config from '../../../../config';
+import MarkDownEditor from '../../MarkDownEditor';
 
 export default {
+  components: {
+    MarkDownEditor
+  },
   props: {
     initialItemData: {
       type: Object,
@@ -321,7 +327,6 @@ export default {
       rule.valid =
         rule.messageInRange.length &&
         rule.messageOutRange.length &&
-        rule.messageInRange.length &&
         rule.score !== "" &&
         (rule.isActivityInRange ? rule.isActivityInRange && rule.activityInRange : true) &&
         (rule.isActivityOutRange ? rule.isActivityOutRange && rule.activityOutRange : true) &&

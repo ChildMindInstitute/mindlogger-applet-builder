@@ -35,11 +35,13 @@ export default class Activity {
     return {
       name: initialActivityData.name || '',
       description: initialActivityData.description || '',
+      splash: initialActivityData.splash || '',
       preamble: initialActivityData.preamble || '',
       shuffleActivityOrder: initialActivityData.shuffle || false,
       isSkippable: initialActivityData.isSkippable || false,
       items: items || [],
       disableBack: initialActivityData.disableBack || false,
+      allowSummary: initialActivityData.allowSummary !== undefined ? initialActivityData.allowSummary : true,
       id: initialActivityData._id || null,
       textRules: [(v) => !!v || 'This field is required'],
       error: '',
@@ -381,6 +383,7 @@ export default class Activity {
     const allowed = [];
     this.ref.isSkippable && allowed.push('skipped');
     this.ref.disableBack && allowed.push('disableBack');
+    !this.ref.allowSummary && allowed.push('disableSummary');
 
     return {
       '@context': [
@@ -392,6 +395,7 @@ export default class Activity {
       'skos:prefLabel': this.ref.name,
       'skos:altLabel': this.ref.name,
       'schema:description': this.ref.description,
+      'schema:splash': this.ref.splash,
       'schema:schemaVersion': '0.0.1',
       'schema:version': '0.0.1',
       preamble: this.ref.preamble,
@@ -408,6 +412,7 @@ export default class Activity {
       },
       subScales: this.ref.subScales,
       finalSubScale: (this.ref.finalSubScale.variableName ? [this.ref.finalSubScale] : []),
+      hasResponseIdentifier: !!this.ref.items.find(item => item.options.isResponseIdentifier),
       ...this.parseCumulative(),
     };
   }
@@ -469,10 +474,12 @@ export default class Activity {
       _id: this.ref.id,
       name: this.ref.name,
       description: this.ref.description,
+      splash: this.ref.splash,
       preamble: this.ref.preamble,
       shuffle: this.ref.shuffleActivityOrder,
       isSkippable: this.ref.isSkippable,
       disableBack: this.ref.disableBack,
+      allowSummary: this.ref.allowSummary,
       schema: schema,
       context: context,
       items: this.ref.items.filter(item => item.ui.inputType !== 'cumulativeScore'),
@@ -496,6 +503,13 @@ export default class Activity {
         removed: (field) => `Activity description was removed`,
         inserted: (field) =>
           `Activity description was added (${_.get(newValue, field)})`,
+      },
+      'schema:splash': {
+        updated: (field) =>
+          `Activity splash screen was changed to ${_.get(newValue, field)}`,
+        removed: (field) => `Activity splash screen was removed`,
+        inserted: (field) =>
+          `Activity splash screen was added (${_.get(newValue, field)})`,
       },
       'ui.shuffle': {
         updated: (field) =>
@@ -810,6 +824,7 @@ export default class Activity {
     const {
       ['http://www.w3.org/2004/02/skos/core#prefLabel']: name,
       ['schema:description']: description,
+      ['schema:splash']: splash,
       ['reprolib:terms/preamble']: activityPreamble,
       ['reprolib:terms/shuffle']: shuffle,
       ['reprolib:terms/allow']: allow,
@@ -875,6 +890,8 @@ export default class Activity {
         name && name[0] && name[0]['@value'],
       description:
         description && description[0] && description[0]['@value'],
+      splash:
+        splash && splash[0] && splash[0]['@value'],
       isPrize:
         isPrize && isPrize[0] && isPrize[0]['@value'],
       preamble:
@@ -890,9 +907,9 @@ export default class Activity {
         const isAverageScore = subScale['reprolib:terms/isAverageScore'];
 
         let subScaleData = {
-          isAverageScore: isAverageScore[0] && isAverageScore[0]['@value'],
-          jsExpression: jsExpression[0] && jsExpression[0]['@value'],
-          variableName: variableName[0] && variableName[0]['@value'],
+          isAverageScore: _.get(isAverageScore, [0, '@value'], false),
+          jsExpression: _.get(jsExpression, [0, '@value']),
+          variableName: _.get(variableName, [0, '@value']),
           subScaleId: index + 1,
         };
 
@@ -920,11 +937,13 @@ export default class Activity {
         const jsExpression = msg['reprolib:terms/jsExpression'];
         const message = msg['reprolib:terms/message'];
         const outputType = msg['reprolib:terms/outputType']
+        const nextActivity = msg['reprolib:terms/nextActivity']
 
         return {
           jsExpression: _.get(jsExpression, [0, '@value']),
           message: _.get(message, [0, '@value']),
           outputType: _.get(outputType, [0, '@value'], 'cumulative'),
+          nextActivity: _.get(nextActivity, [0, '@value']),
         }
       }),
       orderList: _.get(orders, '0.@list', []).map(order => order['@id'])
@@ -939,6 +958,7 @@ export default class Activity {
     if (allowList.some((item) => item.includes('disable_back'))) {
       activityInfo.disableBack = true;
     }
+    activityInfo.allowSummary = !allowList.some((item) => item.includes('disable_summary'))
 
     activityInfo.valid = true;
 

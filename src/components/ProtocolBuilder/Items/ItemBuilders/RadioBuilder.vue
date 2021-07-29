@@ -73,7 +73,7 @@
           <v-row>
             <div 
               class="d-flex justify-start align-center option-item pl-2"
-              :style="{background: colorPalette ? option.color : 'none', color: colorPalette ? invertColor(option.color) : 'black'}"
+              :style="{background: colorPalette ? option.color : 'none', color: colorPalette ? getTextColor(option.color) : 'black'}"
             >
               <input
                 v-if="isMultipleChoice"
@@ -674,6 +674,7 @@ export default {
 
   methods: {
     addOption() {
+      let currentPalette = "";
       const nextOption = {
         'name': `Option ${this.options.length + 1}`,
         'value': 0,
@@ -686,8 +687,20 @@ export default {
         'valid': true,
       };
 
-      if (this.selectedPalette) {
-        nextOption.color = this.colorPalettes[this.selectedPalette][this.options.length % 5];
+      Object.keys(this.colorPalettes).forEach(key => {
+        let isPaletteAvaiable = true;
+        this.options.forEach((option, index) => {
+          if (option.color !== this.colorPalettes[key][index % this.colorPalettes[key].length]) {
+            isPaletteAvaiable = false;
+          }
+        });
+
+        if (this.options.length && isPaletteAvaiable) {
+          currentPalette = key;
+        }
+      })
+      if (currentPalette) {
+        nextOption.color = this.colorPalettes[currentPalette][this.options.length % 5];
       }
 
       if (this.hasScoreValue) {
@@ -704,6 +717,15 @@ export default {
       this.update();
     },
 
+    getTextColor(hex) {
+      let hexcolor = hex.replace("#", "");
+      let r = parseInt(hexcolor.substr(0, 2), 16);
+      let g = parseInt(hexcolor.substr(2, 2), 16);
+      let b = parseInt(hexcolor.substr(4, 2), 16);
+      let yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+      return (yiq >= 128) ? '#333333' : 'white';
+    },
+
     removeTemplate(item) {
       const { items } = this;
       const updatedItems = items.filter(({ text, value, description }) => text !== item.text || value !== item.value || description !== item.description)
@@ -715,21 +737,6 @@ export default {
       this.colorPickerDialog = true;
       this.currentOption = option;
       this.currentOptionColor = option.color || "#ffffff";
-    },
-
-    invertColor(hex) {
-      let color = hex;
-
-      if (!color) {
-        return 'black';
-      }
-      color = color.substring(1);
-      color = parseInt(color, 16);
-      color = 0xFFFFFF ^ color;
-      color = color.toString(16);
-      color = ("000000" + color).slice(-6);
-      color = "#" + color;
-      return color;
     },
 
     setOptionColor() {
@@ -783,9 +790,6 @@ export default {
     },
     deleteOption(index) {
       this.options.splice(index, 1);
-      this.options.forEach((option, index) => {
-        option.color = this.colorPalettes[this.selectedPalette][index % 5];
-      })
       this.update();
     },
     update() {

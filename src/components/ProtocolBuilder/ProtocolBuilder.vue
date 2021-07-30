@@ -5,53 +5,77 @@
       lazy-validation
     >
       <v-card class="pa-4 my-4">
-        <v-text-field
-          v-model="name"
-          :rules="textRules"
-          counter="55"
-          maxlength="55"
-          label="Applet Name"
-          required
-          @change="name = name.trim()"
-        />
-        <v-text-field
-          v-model="description"
-          :rules="textRules"
-          counter="230"
-          maxlength="230"
-          label="Applet Description"
-          required
-        />
-        <div class="d-flex flex-row mt-6">
-          <v-subheader class="ml-2">
-            About Page
-          </v-subheader>
-          <v-btn
-            class="ml-2"
-            fab
-            small
-            @click="onEditAboutPage"
-          >
-            <v-icon color="grey darken-1">
-              mdi-pencil
-            </v-icon>
-          </v-btn>
-
-          <v-subheader class="ml-10">
-            Applet Image
-          </v-subheader>
-
-          <Uploader
-            :initialType="'image'"
-            :initialData="appletImage"
-            :initialAdditionalType="'small-circle'"
-            :initialTitle="'Applet Image'"
-            @onAddFromUrl="onAddImageFromUrl($event)"
-            @onAddFromDevice="onAddImageFromDevice($event)"
-            @onRemove="onRemoveImage()"
-            @onNotify="onEventNotify($event)"
+        <v-row class="mx-2">
+          <v-text-field
+            v-model="name"
+            :rules="textRules"
+            counter="55"
+            maxlength="55"
+            label="Applet Name"
+            required
           />
+        </v-row>
+        <v-row class="mx-2">
+          <v-text-field
+            v-model="description"
+            :rules="textRules"
+            counter="230"
+            maxlength="230"
+            label="Applet Description"
+            required
+          />
+        </v-row>
+        <v-row>
+          <v-col class="d-flex">
+            <v-subheader class="ml-2">
+              About Page
+            </v-subheader>
+            <v-btn
+              class="ml-2"
+              fab
+              small
+              @click="onEditAboutPage"
+            >
+              <v-icon color="grey darken-1">
+                mdi-pencil
+              </v-icon>
+            </v-btn>
+          </v-col>
+          
+          <v-col class="d-flex">
+            <v-subheader class="ml-10">
+              Applet Image
+            </v-subheader>
 
+            <Uploader
+              :initialType="'image'"
+              :initialData="appletImage"
+              :initialAdditionalType="'small-circle'"
+              :initialTitle="'Applet Image'"
+              @onAddFromUrl="onAddImageFromUrl($event)"
+              @onAddFromDevice="onAddImageFromDevice($event)"
+              @onRemove="onRemoveImage()"
+              @onNotify="onEventNotify($event)"
+            />
+          </v-col>
+
+          <v-col class="d-flex">
+            <v-subheader class="ml-10">
+              Applet Watermark
+            </v-subheader>
+            <Uploader
+              :initialType="'image'"
+              :initialData="appletWatermark"
+              :initialAdditionalType="'small-circle'"
+              :initialTitle="'Applet Image'"
+              @onAddFromUrl="onAddWatermarkFromUrl($event)"
+              @onAddFromDevice="onAddWatermarkFromDevice($event)"
+              @onRemove="onRemoveWatermark()"
+              @onNotify="onWatermarkNotify($event)"
+            />
+          </v-col>
+        </v-row>
+        <div>
           <v-subheader class="ml-10" v-if="themes && themes.length">
             Theme
           </v-subheader>
@@ -212,6 +236,15 @@ export default {
       }
     },
 
+    appletWatermark: {
+      get: function () {
+        return this.protocol.watermark
+      },
+      set: function (watermark) {
+        this.updateProtocolMetaInfo({ watermark })
+      }
+    },
+
     appletImage: {
       get: function () {
         return this.protocol.image
@@ -263,6 +296,50 @@ export default {
         message: `Applet image from URL is successfully added.`,
         duration: 3000,
       });
+    },
+    onAddWatermarkFromUrl (event) {
+      this.appletWatermark = event;
+      this.$emit('notify', {
+        type: 'success',
+        message: `Applet watermark from URL is successfully added.`,
+        duration: 3000,
+      });
+    },
+    async onAddWatermarkFromDevice (uploadFunction) {
+      console.log('0000');
+      this.$emit('loading', true); 
+      console.log('1111', uploadFunction);
+      try {
+        this.appletWatermark = await uploadFunction();
+        console.log('222222');
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'success',
+          message: `Applet watermark is successfully added.`,
+          duration: 3000,
+        });
+      } catch (error) {
+        console.log('5555error', error);
+        this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'error',
+          message: `Something went wrong with uploading applet watermark.`,
+        });
+        console.log('6666');
+      }
+    },
+    onRemoveWatermark () {
+      this.appletWatermark = '';
+      // this.update();
+      this.$emit('notify', {
+        type: 'warning',
+        message: `Applet watermark is successfully removed.`,
+        duration: 3000,
+      });
+    },
+    onWatermarkNotify (event) {
+      this.$emit('loading', false); 
+      this.$emit('notify', event);
     },
     async onAddImageFromDevice (uploadFunction) {
       this.$emit('loading', true);

@@ -8,7 +8,7 @@
       @imgAdd="$imgAdd"
     >
       <template slot="left-toolbar-after">
-        <div
+        <!-- <div
           aria-hidden="true"
           class="video_play"
           :class="{'selected': videoDropDown}"
@@ -17,14 +17,14 @@
           @mouseenter="$mouseenter_video_dropdown"
         >
           <v-icon>video_library</v-icon>
-          <transition name="fade"> 
-            <div 
+          <transition name="fade">
+            <div
               v-show="videoDropDown"
               class="op-image popup-dropdown transition"
               @mouseleave="$mouseleave_video_dropdown"
               @mouseenter="$mouseenter_video_dropdown"
             >
-              <div 
+              <div
                 class="dropdown-item"
                 @click.stop="linkType='Video'; linkDialog=true;"
               >
@@ -43,7 +43,7 @@
               </div>
             </div>
           </transition>
-        </div>
+        </div> -->
 
         <div
           aria-hidden="true"
@@ -54,14 +54,14 @@
           @mouseenter="$mouseenter_audio_dropdown"
         >
           <v-icon>audiotrack</v-icon>
-          <transition name="fade"> 
-            <div 
+          <transition name="fade">
+            <div
               v-show="audioDropDown"
               class="op-image popup-dropdown transition"
               @mouseleave="$mouseleave_audio_dropdown"
               @mouseenter="$mouseenter_audio_dropdown"
             >
-              <div 
+              <div
                 class="dropdown-item"
                 @click.stop="linkType='Audio'; linkDialog=true;"
               >
@@ -315,7 +315,7 @@
                   color: #000;
               }
           }
-  
+
       }
   }
 

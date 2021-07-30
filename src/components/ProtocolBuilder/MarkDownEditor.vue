@@ -4,6 +4,7 @@
       ref="md"
       :value="value"
       :language="'en'"
+      :toolbars="toolbars"
       @input="$emit('input', $event)"
       @imgAdd="$imgAdd"
     >
@@ -327,6 +328,7 @@
 <script>
 import ImageUploader from '../../models/ImageUploader';
 import {toolbar_left_addlink} from 'mavon-editor/src/lib/toolbar_left_click.js'
+import { CONFIG } from 'mavon-editor/src/lib/config.js';
 
 export default {
   props: {
@@ -346,6 +348,10 @@ export default {
       linkType: 'link',
       linkText: '',
       linkAddr: '',
+      toolbars: {
+        ...CONFIG.toolbars,
+        fullscreen: false
+      }
     }
   },
   methods: {

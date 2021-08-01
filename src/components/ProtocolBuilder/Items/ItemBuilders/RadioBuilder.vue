@@ -789,7 +789,27 @@ export default {
       this.update();
     },
     deleteOption(index) {
+      let currentPalette = "";
+
+      Object.keys(this.colorPalettes).forEach(key => {
+        let isPaletteAvaiable = true;
+        this.options.forEach((option, index) => {
+          if (option.color !== this.colorPalettes[key][index % this.colorPalettes[key].length]) {
+            isPaletteAvaiable = false;
+          }
+        });
+
+        if (this.options.length && isPaletteAvaiable) {
+          currentPalette = key;
+        }
+      })
+
       this.options.splice(index, 1);
+      if (currentPalette) {
+        this.options.forEach((option, index) => {
+          option.color = this.colorPalettes[this.selectedPalette][index % 5];
+        })
+      }
       this.update();
     },
     update() {

@@ -184,6 +184,12 @@ export default class Item {
         'isResponseIdentifier': this.ref.options.isResponseIdentifier
       }
     }
+    if (this.ref.inputType === "drawing") {
+      return {
+        ...this.ref.responseOptions,
+        "topNavigationOption": this.ref.options.topNavigationOption,
+      }
+    }
     if (this.ref.inputType === "slider") {
       const choices = this.getSliderChoices(this.ref.options, this.ref.options.hasScoreValue, this.ref.options.hasResponseAlert);
       let responseOptions = {
@@ -233,7 +239,7 @@ export default class Item {
         "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
       };
     }
-    if (this.ref.inputType === "audioImageRecord" || this.ref.inputType === "drawing" || this.ref.inputType === "geolocation" || this.ref.inputType === "photo" || this.ref.inputType === "video" || this.ref.inputType === "timeRange") {
+    if (this.ref.inputType === "audioImageRecord" || this.ref.inputType === "geolocation" || this.ref.inputType === "photo" || this.ref.inputType === "video" || this.ref.inputType === "timeRange") {
       return this.ref.responseOptions;
     }
     if (this.ref.inputType === "audioRecord") {
@@ -355,7 +361,8 @@ export default class Item {
       itemObj.responseOptions = itemObj.responseOptions || this.ref.responseOptions;
     }
 
-    else if(this.ref.inputType === "drawing") {
+    else if (this.ref.inputType === "drawing") {
+      itemObj.responseOptions = itemObj.responseOptions || this.ref.responseOptions;
       itemObj.inputOptions = this.ref.inputOptions;
     }
 
@@ -602,6 +609,9 @@ export default class Item {
       'options.colorPalette': {
         updated: optionUpdate('Color Palette'),
       },
+      'options.topNavigationOption': {
+        updated: optionUpdate('Navigation Buttons'),
+      },
       'options.continousSlider': {
         updated: valueUpdate('Continous Slider'),
       },
@@ -751,6 +761,9 @@ export default class Item {
       
       let colorPalette =
         _.get(responseOptions, [0, 'reprolib:terms/colorPalette']);
+      
+      let topNavigationOption =
+        _.get(responseOptions, [0, 'reprolib:terms/topNavigationOption']);
 
       let itemOptions =
         _.get(responseOptions, [0, 'reprolib:terms/itemOptions'], []);
@@ -803,6 +816,11 @@ export default class Item {
           _.get(colorPalette, [0, '@value']);
       }
 
+      if (topNavigationOption) {
+        itemContent.topNavigationOption =
+          _.get(topNavigationOption, [0, '@value']);
+      }
+
       if (valueType) {
         itemContent.valueType =
           valueType[0] && valueType[0]['@id'];
@@ -851,6 +869,12 @@ export default class Item {
                 };
               }
             ),
+        };
+      }
+
+      if (itemType === 'drawing') {
+        itemContent.options = {
+          topNavigationOption: itemContent.topNavigationOption || false,
         };
       }
 
@@ -1041,7 +1065,6 @@ export default class Item {
             _.get(responseOptions, [0, 'schema:minValue', 0, '@value']),
         };
       }
-
     }
 
     const inputOptions = item['reprolib:terms/inputs'];

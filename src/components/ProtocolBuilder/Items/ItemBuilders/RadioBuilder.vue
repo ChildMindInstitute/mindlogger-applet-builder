@@ -597,6 +597,7 @@ export default {
         'isMultipleChoice': this.isMultipleChoice,
         'isSkippableItem': this.isSkippable,
         'randomizeOptions': this.randomizeOptions,
+        'valueType': this.isTokenValue ? 'xsd:token' : 'xsd:anyURI',
         'options': this.options.map(option => ({
           ...option,
           value: Number(option.value),

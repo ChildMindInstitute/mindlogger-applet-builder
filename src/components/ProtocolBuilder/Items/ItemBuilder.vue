@@ -104,6 +104,21 @@
           @onRemove="onRemoveHeaderImage()"
           @onNotify="loading = false; notify = $event;"
         />
+        <div v-if="item.inputType !== 'cumulativeScore'" class="d-flex flex-row mt-6">
+          <v-subheader class="ml-2">
+            * Text
+          </v-subheader>
+          <v-btn
+            class="ml-2"
+            fab
+            small
+            @click="onEditLargeText"
+          >
+            <v-icon color="grey darken-1">
+              mdi-pencil
+            </v-icon>
+          </v-btn>
+        </div>
 
         <div
           v-if="item.inputType == 'text' && item.options && item.options.isResponseIdentifier"
@@ -419,13 +434,6 @@
           width="15"
           :src="itemInputTypes.find(({ text }) => text === item.inputType).icon"
         >
-
-        <span
-          v-if="item.inputType !== 'cumulativeScore' && item.inputType !== 'markdownMessage'"
-          class="ml-2"
-        >
-          {{ largeText }}
-        </span>
       </div>
     </div>
 
@@ -485,6 +493,12 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <LandingPageEditor 
+      :visibility="markdownDialog" 
+      :markdownText="largeText"
+      @close="onCloseEditor"
+      @submit="onSubmitEditor"
+    />
   </v-card>
 </template>
 
@@ -579,6 +593,7 @@ import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
 import StackedRadioBuilder from "./ItemBuilders/StackedRadioBuilder.vue";
 import TextBuilder from "./ItemBuilders/TextBuilder.vue";
 import SliderBuilder from "./ItemBuilders/SliderBuilder.vue";
+import LandingPageEditor from '../LandingPageEditor';
 import VideoBuilder from "./ItemBuilders/VideoBuilder.vue";
 import PhotoBuilder from "./ItemBuilders/PhotoBuilder.vue";
 import TimeRangeBuilder from "./ItemBuilders/TimeRangeBuilder.vue";
@@ -619,6 +634,7 @@ export default {
     MarkDownEditor,
     StackedRadioBuilder,
     StackedSliderBuilder,
+    LandingPageEditor,
     Notify,
     Loading,
   },
@@ -640,6 +656,7 @@ export default {
       itemConditionals: [],
       hasScoringItem: false,
       removeDialog: false,
+      markdownDialog: false,
       valid: false,
       largeText: '',
       headerImage: '',
@@ -730,6 +747,19 @@ export default {
 
     editItem () {
       this.isExpanded = !this.isExpanded;
+    },
+
+    onCloseEditor () {
+      this.markdownDialog = false;
+    },
+
+    onEditLargeText () {
+      this.markdownDialog = true;
+    },
+
+    onSubmitEditor (markdownData) {
+      this.largeText = markdownData;
+      this.onCloseEditor();
     },
 
     onDeleteItem () {

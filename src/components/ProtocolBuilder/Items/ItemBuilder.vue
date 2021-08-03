@@ -104,12 +104,12 @@
           @onRemove="onRemoveHeaderImage()"
           @onNotify="loading = false; notify = $event;"
         />
-        <div v-if="item.inputType !== 'cumulativeScore'" class="d-flex flex-row mt-6">
-          <v-subheader class="ml-2">
-            * Text
-          </v-subheader>
+        <div v-if="item.inputType !== 'cumulativeScore'" class="d-flex align-center flex-row mt-6">
+          <div class="ml-2">
+            Text
+          </div>
           <v-btn
-            class="ml-2"
+            class="ml-3"
             fab
             small
             @click="onEditLargeText"
@@ -126,18 +126,7 @@
         >
           {{ responseIdentifierMessage }}
         </div>
-
-        <v-textarea
-          v-if="item.inputType !== 'cumulativeScore'"
-          v-model="largeText"
-          label="Large Text"
-          auto-grow
-          filled
-          rows="1"
-          :error-messages="largeText ? '' : 'Large Text is required.'"
-        />
       </template>
-
       <v-row>
         <v-col
           cols="12"
@@ -496,6 +485,7 @@
     <LandingPageEditor 
       :visibility="markdownDialog" 
       :markdownText="largeText"
+      headText="Text"
       @close="onCloseEditor"
       @submit="onSubmitEditor"
     />

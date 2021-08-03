@@ -165,6 +165,7 @@
     <LandingPageEditor
       :visibility="markdownDialog"
       :markdownText="markdownData"
+      headText="About Page"
       @close="onCloseEditor"
       @submit="onSubmitEditor"
     />

@@ -771,6 +771,7 @@ export default {
         'hasScoreValue': this.hasScoreValue,
         'hasResponseAlert': this.hasResponseAlert,
         'isTokenValue': this.isTokenValue,
+        'valueType': this.isTokenValue ? 'xsd:token' : 'xsd:anyURI',
         'isMultipleChoice': this.isMultipleChoice,
         'isSkippableItem': this.isSkippable,
         'options': this.options,

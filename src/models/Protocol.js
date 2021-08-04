@@ -60,6 +60,7 @@ export default class Protocol {
       "skos:prefLabel": this.ref.name,
       "schema:description": this.ref.description,
       "schema:image": this.ref.image,
+      "schema:watermark": this.ref.watermark,
       "schema:schemaVersion": this.ref.protocolVersion,
       "schema:version": this.ref.protocolVersion,
       landingPageContent: this.ref.markdownData, //point to the readme of protocol
@@ -141,6 +142,11 @@ export default class Protocol {
         updated: (field) => `Applet image was changed to ${_.get(newValue, field)}`,
         removed: (field) => `Applet image was removed`,
         inserted: (field) => `Applet image was added (${_.get(newValue, field)})`
+      },
+      'schema:watermark': {
+        updated: (field) => `Applet watermark was changed to ${_.get(newValue, field)}`,
+        removed: (field) => `Applet watermark was removed`,
+        inserted: (field) => `Applet watermark was added (${_.get(newValue, field)})`
       },
       'schema:description': {
         updated: (field) => `Applet description was changed to ${_.get(newValue, field)}`,
@@ -290,6 +296,7 @@ export default class Protocol {
       name: _.get(prefLabel, [0, '@value'], 'applet'),
       appletId: applet['_id'].split("/").pop(),
       image: applet['schema:image'],
+      watermark: applet['schema:watermark'],
       description: applet['schema:description'][0]['@value'],
       protocolVersion: _.get(applet, 'schema:schemaVersion[0].@value', this.protocolVersion)
     };

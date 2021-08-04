@@ -7,7 +7,7 @@
     >
       <v-card>
         <v-card-title class="primary white--text">
-          <span class="headline">About Page</span>
+          <span class="headline">{{headText}}</span>
         </v-card-title>
         <v-card-text>
           <v-container>
@@ -15,8 +15,17 @@
               v-model="markdownData"
             />
           </v-container>
+          <div v-if="headText === 'Text'" class="text-right mr-4">
+            {{markdownData.length}} / 75
+          </div>
         </v-card-text>
         <v-card-actions>
+          <div 
+            v-if="markdownData.length > 75 && headText === 'Text'"
+            class="ml-4 text-caption red--text"
+          >
+            * Visibility decreases over 75 characters 
+          </div>
           <v-spacer />
           <v-btn
             color="blue darken-1"
@@ -48,6 +57,10 @@ export default {
     MarkDownEditor,
   },
   props: {
+    headText: {
+      type: String,
+      default: "",
+    },
     visibility: {
       type: Boolean,
       default: false,

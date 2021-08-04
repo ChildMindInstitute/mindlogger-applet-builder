@@ -73,7 +73,7 @@
           <v-row>
             <div 
               class="d-flex justify-start align-center option-item pl-2"
-              :style="{background: colorPalette ? option.color : 'none'}"
+              :style="{background: colorPalette ? option.color : 'none', color: colorPalette ? getTextColor(option.color) : 'black'}"
             >
               <input
                 v-if="isMultipleChoice"
@@ -350,23 +350,15 @@
             @change="update"
           />
         </v-col>
-        <v-col
-          class="d-flex align-center"
-          cols="12"
-          md="6"
-          sm="12">
-          <OptionalItemText
-            colClasses="d-flex align-center py-0 px-3"
-            :cols="12"
-            :md="6"
-            :sm="12"
-            :text="isOptionalText"
-            :required="responseOptions.isOptionalTextRequired"
-            @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
-            @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
-          />
-        </v-col>
       </v-row>
+        <OptionalItemText
+          colClasses="d-flex align-center py-0 px-3"
+
+          :text="isOptionalText"
+          :required="responseOptions.isOptionalTextRequired"
+          @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
+          @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
+        />
     </v-form>
 
     <v-dialog
@@ -498,7 +490,7 @@
 
   .option-item {
     width: 50%;
-    height: 37px;
+    height: auto;
     border: 2px solid white;
     border-radius: 5px;
   }
@@ -682,6 +674,7 @@ export default {
 
   methods: {
     addOption() {
+      let currentPalette = "";
       const nextOption = {
         'name': `Option ${this.options.length + 1}`,
         'value': 0,
@@ -693,6 +686,22 @@ export default {
         'alert': '',
         'valid': true,
       };
+
+      Object.keys(this.colorPalettes).forEach(key => {
+        let isPaletteAvaiable = true;
+        this.options.forEach((option, index) => {
+          if (option.color !== this.colorPalettes[key][index % this.colorPalettes[key].length]) {
+            isPaletteAvaiable = false;
+          }
+        });
+
+        if (this.options.length && isPaletteAvaiable) {
+          currentPalette = key;
+        }
+      })
+      if (currentPalette) {
+        nextOption.color = this.colorPalettes[currentPalette][this.options.length % 5];
+      }
 
       if (this.hasScoreValue) {
         nextOption.score = this.nextOptionScore;
@@ -706,6 +715,19 @@ export default {
       this.options.push(nextOption);
 
       this.update();
+    },
+
+    getTextColor(hex) {
+      if (!hex) {
+        return '#333333';
+      }
+
+      let hexcolor = hex.replace("#", "");
+      let r = parseInt(hexcolor.substr(0, 2), 16);
+      let g = parseInt(hexcolor.substr(2, 2), 16);
+      let b = parseInt(hexcolor.substr(4, 2), 16);
+      let yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+      return (yiq >= 128) ? '#333333' : 'white';
     },
 
     removeTemplate(item) {
@@ -771,7 +793,27 @@ export default {
       this.update();
     },
     deleteOption(index) {
+      let currentPalette = "";
+
+      Object.keys(this.colorPalettes).forEach(key => {
+        let isPaletteAvaiable = true;
+        this.options.forEach((option, index) => {
+          if (option.color !== this.colorPalettes[key][index % this.colorPalettes[key].length]) {
+            isPaletteAvaiable = false;
+          }
+        });
+
+        if (this.options.length && isPaletteAvaiable) {
+          currentPalette = key;
+        }
+      })
+
       this.options.splice(index, 1);
+      if (currentPalette) {
+        this.options.forEach((option, index) => {
+          option.color = this.colorPalettes[this.selectedPalette][index % 5];
+        })
+      }
       this.update();
     },
     update() {
@@ -784,6 +826,7 @@ export default {
         'isSkippableItem': this.isSkippable,
         'colorPalette': this.colorPalette,
         'randomizeOptions': this.randomizeOptions,
+        'valueType': this.isTokenValue ? 'xsd:token' : 'xsd:anyURI',
         'options': this.options.map(option => ({
           ...option,
           value: Number(option.value),

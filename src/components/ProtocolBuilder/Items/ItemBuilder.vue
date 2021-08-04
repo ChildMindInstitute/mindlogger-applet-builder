@@ -104,6 +104,21 @@
           @onRemove="onRemoveHeaderImage()"
           @onNotify="loading = false; notify = $event;"
         />
+        <div v-if="item.inputType !== 'cumulativeScore'" class="d-flex align-center flex-row mt-6">
+          <div class="ml-2">
+            Text
+          </div>
+          <v-btn
+            class="ml-3"
+            fab
+            small
+            @click="onEditLargeText"
+          >
+            <v-icon color="grey darken-1">
+              mdi-pencil
+            </v-icon>
+          </v-btn>
+        </div>
 
         <div
           v-if="item.inputType == 'text' && item.options && item.options.isResponseIdentifier"
@@ -111,18 +126,7 @@
         >
           {{ responseIdentifierMessage }}
         </div>
-
-        <v-textarea
-          v-if="item.inputType !== 'cumulativeScore'"
-          v-model="largeText"
-          label="Large Text"
-          auto-grow
-          filled
-          rows="1"
-          :error-messages="largeText ? '' : 'Large Text is required.'"
-        />
       </template>
-
       <v-row>
         <v-col
           cols="12"
@@ -194,13 +198,19 @@
             </template>
           </v-select>
         </v-col>
-        <v-col 
+        <v-col
           v-if="item.inputType !== 'radio' && item.inputType !== 'checkbox' && item.inputType !== 'slider' && item.inputType !== 'text'"
           class="d-flex align-center red--text"
         >
           This item is only available for use in mobile version of MindLogger.
         </v-col>
       </v-row>
+
+      <v-checkbox
+        v-if="item.inputType === 'cumulativeScore'"
+        v-model="currentActivity.allowSummary"
+        label="Allow the user to see results"
+      />
 
       <div
         v-if="item.inputType === 'markdownMessage'"
@@ -414,13 +424,6 @@
           width="15"
           :src="itemInputTypes.find(({ text }) => text === item.inputType).icon"
         >
-
-        <span
-          v-if="item.inputType !== 'cumulativeScore' && item.inputType !== 'markdownMessage'"
-          class="ml-2"
-        >
-          {{ largeText }}
-        </span>
       </div>
     </div>
 
@@ -480,6 +483,13 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <LandingPageEditor 
+      :visibility="markdownDialog" 
+      :markdownText="largeText"
+      headText="Text"
+      @close="onCloseEditor"
+      @submit="onSubmitEditor"
+    />
   </v-card>
 </template>
 
@@ -574,6 +584,7 @@ import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
 import StackedRadioBuilder from "./ItemBuilders/StackedRadioBuilder.vue";
 import TextBuilder from "./ItemBuilders/TextBuilder.vue";
 import SliderBuilder from "./ItemBuilders/SliderBuilder.vue";
+import LandingPageEditor from '../LandingPageEditor';
 import VideoBuilder from "./ItemBuilders/VideoBuilder.vue";
 import PhotoBuilder from "./ItemBuilders/PhotoBuilder.vue";
 import TimeRangeBuilder from "./ItemBuilders/TimeRangeBuilder.vue";
@@ -614,6 +625,7 @@ export default {
     MarkDownEditor,
     StackedRadioBuilder,
     StackedSliderBuilder,
+    LandingPageEditor,
     Notify,
     Loading,
   },
@@ -635,6 +647,7 @@ export default {
       itemConditionals: [],
       hasScoringItem: false,
       removeDialog: false,
+      markdownDialog: false,
       valid: false,
       largeText: '',
       headerImage: '',
@@ -725,6 +738,19 @@ export default {
 
     editItem () {
       this.isExpanded = !this.isExpanded;
+    },
+
+    onCloseEditor () {
+      this.markdownDialog = false;
+    },
+
+    onEditLargeText () {
+      this.markdownDialog = true;
+    },
+
+    onSubmitEditor (markdownData) {
+      this.largeText = markdownData;
+      this.onCloseEditor();
     },
 
     onDeleteItem () {

@@ -826,6 +826,7 @@ export default {
         'isSkippableItem': this.isSkippable,
         'colorPalette': this.colorPalette,
         'randomizeOptions': this.randomizeOptions,
+        'valueType': this.isTokenValue ? 'xsd:token' : 'xsd:anyURI',
         'options': this.options.map(option => ({
           ...option,
           value: Number(option.value),

@@ -50,6 +50,21 @@
           @change="update"
         />
       </v-col>
+    </v-row>
+
+    <v-row>
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        sm="3"
+      >
+        <v-checkbox
+          v-model="isResponseIdentifier"
+          label="Response Data Identifier"
+          @change="update"
+        />
+      </v-col>
+
       <v-col
         class="d-flex align-center"
         cols="12"
@@ -104,6 +119,7 @@ export default {
       requiredValue: this.initialItemData.requiredValue || false,
       removeBackOption: this.initialItemData.removeBackOption,
       requiredAnswer: this.initialAnswer ? true : false,
+      isResponseIdentifier: this.initialItemData.isResponseIdentifier || false,
       isNumerical: ((this.responseOption.valueType && this.responseOption.valueType.includes('integer'))
         || (this.initialItemData.valueType && this.initialItemData.valueType.includes('integer')))
       || false,
@@ -143,6 +159,7 @@ export default {
         'maxLength': this.maxLength,
         'requiredValue': this.requiredValue,
         'removeBackOption': this.removeBackOption,
+        'isResponseIdentifier': this.isResponseIdentifier,
         'valueType': this.isNumerical ? 'xsd:integer' : 'xsd:string',
       };
       this.$emit('updateOptions', responseOptions);

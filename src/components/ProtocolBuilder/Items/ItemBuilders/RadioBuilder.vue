@@ -338,18 +338,6 @@
           sm="6"
         >
           <v-checkbox
-            v-model="removeBackOption"
-            label="Remove back button"
-            @change="update"
-          />
-        </v-col>
-        <v-col
-          class="d-flex align-center"
-          cols="12"
-          md="3"
-          sm="6"
-        >
-          <v-checkbox
             v-model="colorPalette"
             label="Set color palette"
             @change="update"
@@ -654,7 +642,6 @@ export default {
       randomizeOptions: this.initialItemData.randomizeOptions,
       responseOptions: this.initialResponseOptions,
       isOptionalText: this.initialIsOptionalText,
-      removeBackOption: this.initialItemData.removeBackOption,
       currentOption: null,
       currentOptionColor: "",
       selectedPalette: null,
@@ -839,7 +826,6 @@ export default {
         'isSkippableItem': this.isSkippable,
         'colorPalette': this.colorPalette,
         'randomizeOptions': this.randomizeOptions,
-        'removeBackOption': this.removeBackOption,
         'valueType': this.isTokenValue ? 'xsd:token' : 'xsd:anyURI',
         'options': this.options.map(option => ({
           ...option,

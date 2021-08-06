@@ -34,34 +34,11 @@
     <p class="mb-8">
       For this type of item will be added default image if you are not going use your own image.
     </p>
-    <v-row>
-      <v-col
-        class="d-flex align-center"
-        cols="12"
-        md="3"
-        sm="6"
-      >
-        <v-checkbox
-          v-model="isSkippable"
-          label="Skippable Item"
-          :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
-          @change="update"
-        />
-      </v-col>
-
-      <v-col
-        class="d-flex align-center"
-        cols="12"
-        md="3"
-        sm="6"
-      >
-        <v-checkbox
-          v-model="removeBackOption"
-          label="Remove back button"
-          @change="update"
-        />
-      </v-col>
-    </v-row>
+    <v-checkbox
+      v-model="isSkippable"
+      label="Skippable Item"
+      :disabled="isSkippableItem == 2"
+    />
   </v-form>
 </template>
 
@@ -99,7 +76,6 @@ export default {
 
     return {
       responseOptions,
-      removeBackOption: this.initialItemData.removeBackOption,
       valid: true,
       minValueRules: [
         v => (v > 0 && v % 1 === 0) || 'Min response length must be a positive integer',
@@ -162,13 +138,6 @@ export default {
         message: 'Image successfully removed from AudioImageRecord Item.',
         duration: 3000,
       });
-    },
-    update() {
-      const responseOptions = {
-        'isSkippableItem': this.isSkippable,
-        'removeBackOption': this.removeBackOption,
-      };
-      this.$emit('updateOptions', responseOptions);
     },
 
   }

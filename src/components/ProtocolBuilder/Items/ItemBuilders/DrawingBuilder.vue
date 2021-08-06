@@ -24,47 +24,11 @@
       @onNotify="$emit('loading', false); $emit('notify', $event);"
     />
 
-    <v-row>
-      <v-col
-        class="d-flex align-center"
-        cols="12"
-        md="3"
-        sm="6"
-      >
-        <v-checkbox
-          v-model="isSkippable"
-          label="Skippable Item"
-          :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
-          @change="update"
-        />
-      </v-col>
-
-      <v-col
-        class="d-flex align-center"
-        cols="12"
-        md="3"
-        sm="6"
-      >
-        <v-checkbox
-          v-model="removeBackOption"
-          label="Remove back button"
-          @change="update"
-        />
-      </v-col>
-
-      <v-col
-        class="d-flex align-center"
-        cols="12"
-        md="3"
-        sm="6"
-      >
-        <v-checkbox
-          v-model="removeUndoOption"
-          label="Remove undo button"
-          @change="update"
-        />
-      </v-col>
-    </v-row>
+    <v-checkbox
+      v-model="isSkippable"
+      label="Skippable Item"
+      :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
+    />
     <OptionalItemText
       :colClasses="'d-flex align-center'"
       :cols="12"
@@ -91,10 +55,6 @@ export default {
     initialItemResponseOptions: {
       type: Object,
       required: true,
-    },
-    initialItemData: {
-      type: Object,
-      required: true
     },
     initialItemInputOptions: {
       type: Array,
@@ -127,8 +87,6 @@ export default {
 
     return {
       responseOptions,
-      removeBackOption: this.initialItemData.removeBackOption,
-      removeUndoOption: this.initialItemData.removeUndoOption,
       inputBackgroundOption,
       inputOptions,
       isOptionalText: this.initialIsOptionalText,
@@ -226,14 +184,7 @@ export default {
         duration: 3000,
       });
     },
-    update() {
-      const responseOptions = {
-        isSkippableItem: this.isSkippable,
-        removeBackOption: this.removeBackOption,
-        removeUndoOption: this.removeUndoOption,
-      };
-      this.$emit('updateOptions', responseOptions);
-    },
+
   }
 }
 </script>

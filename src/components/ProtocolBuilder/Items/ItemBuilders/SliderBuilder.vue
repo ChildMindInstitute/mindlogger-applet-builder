@@ -174,18 +174,6 @@
           @change="update"
         />
       </v-col>
-      <v-col
-        class="d-flex align-center"
-        cols="12"
-        md="3"
-        sm="6"
-      >
-        <v-checkbox
-          v-model="removeBackOption"
-          label="Remove back button"
-          @change="update"
-        />
-      </v-col>
     </v-row>
 
     <OptionalItemText
@@ -442,7 +430,7 @@ export default {
       alertMessage: this.initialItemData.responseAlertMessage || '',
       alertMinValue: Number(this.initialItemData.minAlertValue || this.initialItemData.minSliderTick || 0),
       alertMaxValue: Number(this.initialItemData.maxAlertValue || this.initialItemData.maxSliderTick || 0),
-      removeBackOption: this.initialItemData.removeBackOption,
+
       showTickMarks: this.initialItemData.showTickMarks || false,
       scores: this.initialItemData.scores || [],
       alerts: this.initialItemData.alerts || [],
@@ -516,7 +504,6 @@ export default {
         'hasScoreValue': this.hasScoreValue,
         'hasResponseAlert': this.hasResponseAlert,
         'continousSlider': this.continousSlider,
-        'removeBackOption': this.removeBackOption,
         'showTickMarks': this.showTickMarks,
         'scores': this.hasScoreValue ? this.scores : false,
       };

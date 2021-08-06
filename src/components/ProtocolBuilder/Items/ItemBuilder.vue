@@ -104,20 +104,48 @@
           @onRemove="onRemoveHeaderImage()"
           @onNotify="loading = false; notify = $event;"
         />
-        <div v-if="item.inputType !== 'cumulativeScore'" class="d-flex align-center flex-row mt-6">
-          <div class="ml-2">
-            Text
-          </div>
-          <v-btn
-            class="ml-3"
-            fab
-            small
-            @click="onEditLargeText"
+        <div v-if="item.inputType !== 'cumulativeScore'">
+          <v-card 
+            v-if="isTextExpanded" 
+            elevation="2" 
+            class="d-flex justify-space-between grey white--text px-6 py-2 card-expanded"
           >
-            <v-icon color="grey darken-1">
-              mdi-pencil
-            </v-icon>
-          </v-btn>
+            <div>Text Creator</div>
+            <div>
+              <v-icon
+                color="white"
+                @click="isTextExpanded = false"
+              >
+                mdi-chevron-up
+              </v-icon>
+            </div>
+          </v-card>
+          <v-card v-else elevation="2" class="d-flex justify-space-between px-6 py-2">
+            <div>Text Creator</div>
+            <div>
+              <v-icon
+                @click="isTextExpanded = true"
+              >
+                mdi-chevron-down
+              </v-icon>
+            </div>
+          </v-card>
+          <v-container v-if="isTextExpanded" class="pa-0">
+            <MarkDownEditor 
+              v-model="largeText"
+            />
+          </v-container>
+          <div class="d-flex mt-2" :class="largeText.length > 75 ? 'justify-space-between' : 'justify-end'">
+            <div 
+              v-if="largeText.length > 75 && isTextExpanded"
+              class="ml-4 text-body-2 red--text text-left"
+            >
+              Visibility decreases over 75 characters 
+            </div>
+            <div v-if="isTextExpanded" class="text-right mr-4">
+              {{largeText.length}} / 75
+            </div>
+          </div>
         </div>
 
         <div
@@ -299,49 +327,58 @@
         v-if="item.inputType === 'video'"
         :key="`${baseKey}-video`"
         :initial-is-optional-text="item.isOptionalText"
+        :initial-item-data="item.options"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
+        @updateOptions="updateOptions"
       />
 
       <PhotoBuilder
         v-if="item.inputType === 'photo'"
         :key="`${baseKey}-photo`"
+        :initial-item-data="item.options"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
+        @updateOptions="updateOptions"
       />
 
       <TimeRangeBuilder
         v-if="item.inputType === 'timeRange'"
         :key="`${baseKey}-timeRange`"
+        :initial-item-data="item.options"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
+        @updateOptions="updateOptions"
       />
 
       <DateBuilder
         v-if="item.inputType === 'date'"
         :key="`${baseKey}-date`"
+        :initial-item-data="item.options"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
+        @updateOptions="updateOptions"
       />
 
       <DrawingBuilder
         v-if="item.inputType === 'drawing'"
         :key="`${baseKey}-drawing`"
+        :initial-item-data="item.options"
         :initial-item-response-options="item.responseOptions"
         :initial-item-input-options="item.inputOptions"
         :initial-is-optional-text="item.isOptionalText"
@@ -352,6 +389,7 @@
         @updateAllow="updateAllow"
         @loading="loading = $event"
         @notify="notify = $event"
+        @updateOptions="updateOptions"
       />
 
       <AudioRecordBuilder
@@ -378,11 +416,13 @@
         @updateAllow="updateAllow"
         @loading="loading = $event"
         @notify="notify = $event"
+        @updateOptions="updateOptions"
       />
 
       <GeolocationBuilder
         v-if="item.inputType === 'geolocation'"
         :key="`${baseKey}-geolocation`"
+        :initial-item-data="item.options"
         :initial-item-response-options="item.responseOptions"
         :initial-is-optional-text="item.isOptionalText"
         :is-skippable-item="skippable"
@@ -391,6 +431,7 @@
         @loading="loading = $event"
         @notify="notify = $event"
         @updateAllow="updateAllow"
+        @updateOptions="updateOptions"
       />
 
       <AudioStimulusBuilder
@@ -406,6 +447,7 @@
         @validation="item.valid = $event"
         @loading="loading = $event"
         @notify="notify = $event"
+        @updateOptions="updateOptions"
       />
 
       <CumulativeScoreBuilder
@@ -482,13 +524,6 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <LandingPageEditor 
-      :visibility="markdownDialog" 
-      :markdownText="largeText"
-      headText="Text"
-      @close="onCloseEditor"
-      @submit="onSubmitEditor"
-    />
   </v-card>
 </template>
 
@@ -563,6 +598,11 @@
     align-items: center;
   }
 
+  .card-expanded {
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
   .invalid {
     background-color: #d44c4c;
   }
@@ -583,7 +623,6 @@ import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
 import StackedRadioBuilder from "./ItemBuilders/StackedRadioBuilder.vue";
 import TextBuilder from "./ItemBuilders/TextBuilder.vue";
 import SliderBuilder from "./ItemBuilders/SliderBuilder.vue";
-import LandingPageEditor from '../LandingPageEditor';
 import VideoBuilder from "./ItemBuilders/VideoBuilder.vue";
 import PhotoBuilder from "./ItemBuilders/PhotoBuilder.vue";
 import TimeRangeBuilder from "./ItemBuilders/TimeRangeBuilder.vue";
@@ -624,7 +663,6 @@ export default {
     MarkDownEditor,
     StackedRadioBuilder,
     StackedSliderBuilder,
-    LandingPageEditor,
     Notify,
     Loading,
   },
@@ -646,12 +684,12 @@ export default {
       itemConditionals: [],
       hasScoringItem: false,
       removeDialog: false,
-      markdownDialog: false,
       valid: false,
       largeText: '',
       headerImage: '',
       isExpanded: false,
       isItemNameEditing: false,
+      isTextExpanded: false,
       baseKey: 0,
       loading: false,
       notify: {},
@@ -737,19 +775,6 @@ export default {
 
     editItem () {
       this.isExpanded = !this.isExpanded;
-    },
-
-    onCloseEditor () {
-      this.markdownDialog = false;
-    },
-
-    onEditLargeText () {
-      this.markdownDialog = true;
-    },
-
-    onSubmitEditor (markdownData) {
-      this.largeText = markdownData;
-      this.onCloseEditor();
     },
 
     onDeleteItem () {

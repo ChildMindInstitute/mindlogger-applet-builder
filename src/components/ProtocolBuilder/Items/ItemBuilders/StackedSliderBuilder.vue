@@ -180,6 +180,18 @@
                 Edit Alerts
               </v-btn>
             </v-col>
+            <v-col
+              class="d-flex align-center"
+              cols="12"
+              md="3"
+              sm="6"
+            >
+              <v-checkbox
+                v-model="removeBackOption"
+                label="Remove back button"
+                @change="update"
+              />
+            </v-col>
           </v-row>
         </div>
       </div>
@@ -428,6 +440,7 @@ export default {
         v => !!v || 'Alert Message cannot be empty',
       ],
       hasScoreValue: this.initialItemData.hasScoreValue || false,
+      removeBackOption: this.initialItemData.removeBackOption,
       hasResponseAlert: this.initialItemData.hasResponseAlert || false,
       scoreDialog: {
         visible: false,
@@ -534,6 +547,7 @@ export default {
       const responseOptions = {
         'hasScoreValue': this.hasScoreValue,
         'hasResponseAlert': this.hasResponseAlert,
+        'removeBackOption': this.removeBackOption,
         'sliderOptions': this.sliders.map(slider => ({
           'minSliderTick': slider.minSliderTick,
           'maxSliderTick': slider.maxSliderTick,

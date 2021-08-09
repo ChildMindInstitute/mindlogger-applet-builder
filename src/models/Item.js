@@ -127,7 +127,7 @@ export default class Item {
   getResponseOptions() {
     if (this.ref.inputType === 'stackedRadio' || this.ref.inputType === 'stackedCheckbox') {
       return {
-        "valueType": (this.ref.options.valueType.includes("token") || this.ref.options.isTokenValue) ? "xsd:token" : "xsd:anyURI",
+        "valueType": (this.ref.options.valueType && this.ref.options.valueType.includes("token") || this.ref.options.isTokenValue) ? "xsd:token" : "xsd:anyURI",
         "scoring": this.ref.options.hasScoreValue,
         "responseAlert": this.ref.options.hasResponseAlert,
         "multipleChoice": this.ref.options.isMultipleChoice,
@@ -164,7 +164,7 @@ export default class Item {
     if (this.ref.inputType === "radio" || this.ref.inputType === "prize" || this.ref.inputType === "checkbox") {
       const choices = this.getRadioChoices();
       return {
-        "valueType": (this.ref.options.valueType.includes("token") || this.ref.options.isTokenValue) ? "xsd:token" : "xsd:anyURI",
+        "valueType": (this.ref.options.valueType && this.ref.options.valueType.includes("token") || this.ref.options.isTokenValue) ? "xsd:token" : "xsd:anyURI",
         "enableNegativeTokens": this.ref.options.enableNegativeTokens,
         "scoring": this.ref.options.hasScoreValue,
         "responseAlert": this.ref.options.hasResponseAlert,
@@ -748,7 +748,7 @@ export default class Item {
 
       let responseAlert =
         _.get(responseOptions, [0, 'reprolib:terms/responseAlert']);
-      
+
       let colorPalette =
         _.get(responseOptions, [0, 'reprolib:terms/colorPalette']);
 

@@ -6,6 +6,7 @@
     >
       <MarkDownEditor
         v-model="scoreOverview"
+        class="score-overview"
         placeholder="Overview"
       />
       <v-expansion-panel
@@ -34,6 +35,7 @@
           />
           <MarkDownEditor
             v-model="rule.description"
+            class="mb-4"
             placeholder="Cumulative Score Description"
             @input="onUpdateRule(rule)"
           />
@@ -41,13 +43,13 @@
             <v-card-title>Which direction should be used in the report</v-card-title>
             <v-card-text>
               <v-radio-group
-                v-model="rule.scoreDirection"
+                v-model="rule.direction"
                 class="mt-0"
                 color="primary"
                 row
                 @change="onUpdateRule(rule)"
               >
-                <v-radio value="true">
+                <v-radio :value="true">
                   <template v-slot:label>
                     <img
                       src="@/assets/score_bar.png"
@@ -55,7 +57,7 @@
                     >
                   </template>
                 </v-radio>
-                <v-radio value="false">
+                <v-radio :value="false">
                   <template v-slot:label>
                     <img
                       src="@/assets/score_bar.png"
@@ -240,6 +242,9 @@
   font-size: 20px;
 }
 
+.score-overview {
+  width: 100%
+}
 .score-bar {
   width: 200px;
 }
@@ -267,10 +272,9 @@ export default {
       type: Array,
       required: true,
     },
-    scoreOverview: {
-      type: String,
-      required: false,
-      default: ''
+    activity: {
+      type: Object,
+      required: true,
     },
   },
   data: function () {
@@ -305,6 +309,14 @@ export default {
   },
   computed: {
     ...mapGetters(config.MODULE_NAME, ['activities', 'currentActivity']),
+    scoreOverview: {
+      get() {
+        return this.activity.scoreOverview;
+      },
+      set(value) {
+        this.activity.scoreOverview = value;
+      }
+    }
   },
   beforeMount() {
     let rules = this.initialItemData.cumulativeScores || [];
@@ -355,6 +367,8 @@ export default {
           .map((item) => item.name)
           .join(" + "),
         variableName: rule.name,
+        direction: rule.direction,
+        description: rule.description,
       };
 
       rule.messages = [

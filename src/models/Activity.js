@@ -930,7 +930,7 @@ export default class Activity {
       compute: Array.isArray(compute) && compute.map((exp) => ({
         jsExpression: _.get(exp, ['reprolib:terms/jsExpression', 0, '@value']),
         variableName: _.get(exp, ['reprolib:terms/variableName', 0, '@value']),
-        description: _.get(exp, ['reprolib:terms/description', 0, '@value']),
+        description: _.get(exp, ['schema:description', 0, '@value']),
         direction: _.get(exp, ['reprolib:terms/direction', 0, '@value'], true),
       })),
       messages: Array.isArray(messages) && messages.map((msg) => ({

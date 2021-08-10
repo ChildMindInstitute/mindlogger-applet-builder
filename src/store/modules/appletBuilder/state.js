@@ -67,6 +67,10 @@ export default {
       icon: baseImageURL + 'item-types/date-icon.png',
     },
     {
+      text: "duration",
+      icon: baseImageURL + 'item-types/date-icon.png',
+    },
+    {
       text: "drawing",
       icon: baseImageURL + 'item-types/drawing-icon.png',
     },

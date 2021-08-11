@@ -68,7 +68,7 @@ export default {
     },
     {
       text: "duration",
-      icon: baseImageURL + 'item-types/date-icon.png',
+      icon: baseImageURL + 'item-types/duration.png',
     },
     {
       text: "drawing",

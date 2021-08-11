@@ -317,6 +317,17 @@
         @updateAllow="updateAllow"
       />
 
+      <DurationPicker
+        v-if="item.inputType === 'duration'"
+        :key="`${baseKey}-photo`"
+        :initial-is-optional-text="item.isOptionalText"
+        :initial-item-response-options="item.responseOptions"
+        :is-skippable-item="skippable"
+        @updateOptionalText="updateOptionalText"
+        @updateResponseOptions="updateResponseOptions"
+        @updateAllow="updateAllow"
+      />
+
       <TimeRangeBuilder
         v-if="item.inputType === 'timeRange'"
         :key="`${baseKey}-timeRange`"
@@ -586,6 +597,7 @@ import SliderBuilder from "./ItemBuilders/SliderBuilder.vue";
 import LandingPageEditor from '../LandingPageEditor';
 import VideoBuilder from "./ItemBuilders/VideoBuilder.vue";
 import PhotoBuilder from "./ItemBuilders/PhotoBuilder.vue";
+import DurationPicker from "./ItemBuilders/DurationPicker.vue";
 import TimeRangeBuilder from "./ItemBuilders/TimeRangeBuilder.vue";
 import DateBuilder from "./ItemBuilders/DateBuilder.vue";
 import DrawingBuilder from "./ItemBuilders/DrawingBuilder.vue";
@@ -615,6 +627,7 @@ export default {
     PhotoBuilder,
     TimeRangeBuilder,
     DateBuilder,
+    DurationPicker,
     DrawingBuilder,
     AudioRecordBuilder,
     AudioImageRecordBuilder,

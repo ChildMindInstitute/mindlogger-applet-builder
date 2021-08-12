@@ -109,23 +109,24 @@
             v-if="isTextExpanded" 
             elevation="2" 
             class="d-flex justify-space-between grey white--text px-6 py-2 card-expanded"
+            @click="isTextExpanded = !isTextExpanded"
           >
             <div>Text Creator</div>
             <div>
-              <v-icon
-                color="white"
-                @click="isTextExpanded = false"
-              >
+              <v-icon color="white">
                 mdi-chevron-up
               </v-icon>
             </div>
           </v-card>
-          <v-card v-else elevation="2" class="d-flex justify-space-between px-6 py-2">
+          <v-card 
+            v-else 
+            elevation="2" 
+            class="d-flex justify-space-between px-6 py-2"
+            @click="isTextExpanded = !isTextExpanded"
+          >
             <div>Text Creator</div>
             <div>
-              <v-icon
-                @click="isTextExpanded = true"
-              >
+              <v-icon>
                 mdi-chevron-down
               </v-icon>
             </div>
@@ -135,6 +136,10 @@
               v-model="largeText"
             />
           </v-container>
+
+          <div v-if="largeText.length === 0" class="error--text text-body-2 mt-2 ml-4"> 
+            * This field is required
+          </div>
           <div class="d-flex mt-2" :class="largeText.length > 75 ? 'justify-space-between' : 'justify-end'">
             <div 
               v-if="largeText.length > 75 && isTextExpanded"
@@ -445,12 +450,13 @@
       />
     </v-form>
 
-    <div class="px-2">
+    <div class="px-2 pt-2">
       <div class="item-quiz">
         <img
           width="15"
           :src="itemInputTypes.find(({ text }) => text === item.inputType).icon"
         >
+        <span v-if="!isExpanded" class="ml-1">{{largeText.replace(/[^0-9A-Za-z ]/g, '')}}</span>
       </div>
     </div>
 

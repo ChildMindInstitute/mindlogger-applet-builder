@@ -1,6 +1,6 @@
 {
   "name": "applet-schema-builder",
-  "version": "0.7.11",
+  "version": "0.7.12",
   "homepage": "https://github.com/ChildMindInstitute/mindlogger-applet-builder",
   "repository": {
     "type": "git",

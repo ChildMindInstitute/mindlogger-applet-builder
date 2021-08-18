@@ -319,10 +319,12 @@
 
       <DurationPicker
         v-if="item.inputType === 'duration'"
-        :key="`${baseKey}-photo`"
+        :key="`${baseKey}-duration`"
         :initial-is-optional-text="item.isOptionalText"
-        :initial-item-response-options="item.responseOptions"
+        :initial-response-options="item.responseOptions"
+        :initial-item-data="item.options"
         :is-skippable-item="skippable"
+        @updateOptions="updateOptions"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"

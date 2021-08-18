@@ -233,6 +233,12 @@ export default class Item {
         "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
       };
     }
+    if (this.ref.inputType === "duration") {
+      return {
+        "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
+        "timeDuration": this.ref.options.timeDuration,
+      }
+    }
     if (this.ref.inputType === "audioImageRecord" || this.ref.inputType === "drawing" || this.ref.inputType === "geolocation" || this.ref.inputType === "photo" || this.ref.inputType === "video" || this.ref.inputType === "timeRange") {
       return this.ref.responseOptions;
     }
@@ -549,6 +555,9 @@ export default class Item {
       'options.sliderOptions': {
         updated: (field) =>'sliderOptions are updated',
       },
+      'options.timeDuration': {
+        updated: (field) => 'timeDuration is updated',
+      },
       'options.itemList': {
         updated: (field) =>'itemList is updated',
       },
@@ -751,6 +760,9 @@ export default class Item {
 
       let colorPalette =
         _.get(responseOptions, [0, 'reprolib:terms/colorPalette']);
+      
+      let timeDuration =
+        _.get(responseOptions, [0, 'schema:timeDuration']);
 
       let itemOptions =
         _.get(responseOptions, [0, 'reprolib:terms/itemOptions'], []);
@@ -801,6 +813,11 @@ export default class Item {
       if (colorPalette) {
         itemContent.colorPalette =
           _.get(colorPalette, [0, '@value']);
+      }
+
+      if (timeDuration) {
+        itemContent.timeDuration =
+          _.get(timeDuration, [0, '@value']);
       }
 
       if (valueType) {
@@ -1043,6 +1060,11 @@ export default class Item {
         };
       }
 
+      if (itemType === 'duration') {
+        itemContent.options = {
+          timeDuration: itemContent.timeDuration || {},
+        };
+      }
     }
 
     const inputOptions = item['reprolib:terms/inputs'];

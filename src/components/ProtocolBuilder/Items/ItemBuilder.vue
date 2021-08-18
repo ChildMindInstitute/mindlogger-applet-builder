@@ -104,20 +104,53 @@
           @onRemove="onRemoveHeaderImage()"
           @onNotify="loading = false; notify = $event;"
         />
-        <div v-if="item.inputType !== 'cumulativeScore'" class="d-flex align-center flex-row mt-6">
-          <div class="ml-2">
-            Text
-          </div>
-          <v-btn
-            class="ml-3"
-            fab
-            small
-            @click="onEditLargeText"
+        <div v-if="item.inputType !== 'cumulativeScore'">
+          <v-card 
+            v-if="isTextExpanded" 
+            elevation="2" 
+            class="d-flex justify-space-between grey white--text px-6 py-2 card-expanded"
+            @click="isTextExpanded = !isTextExpanded"
           >
-            <v-icon color="grey darken-1">
-              mdi-pencil
-            </v-icon>
-          </v-btn>
+            <div>Text Creator</div>
+            <div>
+              <v-icon color="white">
+                mdi-chevron-up
+              </v-icon>
+            </div>
+          </v-card>
+          <v-card 
+            v-else 
+            elevation="2" 
+            class="d-flex justify-space-between px-6 py-2"
+            @click="isTextExpanded = !isTextExpanded"
+          >
+            <div>Text Creator</div>
+            <div>
+              <v-icon>
+                mdi-chevron-down
+              </v-icon>
+            </div>
+          </v-card>
+          <v-container v-if="isTextExpanded" class="pa-0">
+            <MarkDownEditor 
+              v-model="largeText"
+            />
+          </v-container>
+
+          <div v-if="largeText.length === 0" class="error--text text-body-2 mt-2 ml-4"> 
+            * This field is required
+          </div>
+          <div class="d-flex mt-2" :class="largeText.length > 75 ? 'justify-space-between' : 'justify-end'">
+            <div 
+              v-if="largeText.length > 75 && isTextExpanded"
+              class="ml-4 text-body-2 red--text text-left"
+            >
+              Visibility decreases over 75 characters 
+            </div>
+            <div v-if="isTextExpanded" class="text-right mr-4">
+              {{largeText.length}} / 75
+            </div>
+          </div>
         </div>
 
         <div
@@ -430,12 +463,13 @@
       />
     </v-form>
 
-    <div class="px-2">
+    <div class="px-2 pt-2">
       <div class="item-quiz">
         <img
           width="15"
           :src="itemInputTypes.find(({ text }) => text === item.inputType).icon"
         >
+        <span v-if="!isExpanded" class="ml-1">{{largeText.replace(/[^0-9A-Za-z ]/g, '')}}</span>
       </div>
     </div>
 
@@ -495,13 +529,6 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <LandingPageEditor 
-      :visibility="markdownDialog" 
-      :markdownText="largeText"
-      headText="Text"
-      @close="onCloseEditor"
-      @submit="onSubmitEditor"
-    />
   </v-card>
 </template>
 
@@ -596,7 +623,6 @@ import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
 import StackedRadioBuilder from "./ItemBuilders/StackedRadioBuilder.vue";
 import TextBuilder from "./ItemBuilders/TextBuilder.vue";
 import SliderBuilder from "./ItemBuilders/SliderBuilder.vue";
-import LandingPageEditor from '../LandingPageEditor';
 import VideoBuilder from "./ItemBuilders/VideoBuilder.vue";
 import PhotoBuilder from "./ItemBuilders/PhotoBuilder.vue";
 import DurationPicker from "./ItemBuilders/DurationPicker.vue";
@@ -639,7 +665,6 @@ export default {
     MarkDownEditor,
     StackedRadioBuilder,
     StackedSliderBuilder,
-    LandingPageEditor,
     Notify,
     Loading,
   },
@@ -666,6 +691,7 @@ export default {
       largeText: '',
       headerImage: '',
       isExpanded: false,
+      isTextExpanded: false,
       isItemNameEditing: false,
       baseKey: 0,
       loading: false,
@@ -752,19 +778,6 @@ export default {
 
     editItem () {
       this.isExpanded = !this.isExpanded;
-    },
-
-    onCloseEditor () {
-      this.markdownDialog = false;
-    },
-
-    onEditLargeText () {
-      this.markdownDialog = true;
-    },
-
-    onSubmitEditor (markdownData) {
-      this.largeText = markdownData;
-      this.onCloseEditor();
     },
 
     onDeleteItem () {

@@ -45,7 +45,7 @@ export default {
   },
   data() {
     return {
-      timeLimit: this.responseTimeLimit,
+      timeLimit: this.responseTimeLimit / 1000,
       timerOption: this.responseTimeLimit ? true: false,
     }
   },
@@ -56,7 +56,7 @@ export default {
       }
 
       this.$emit('update', {
-        responseTimeLimit: Number(this.timerOption ? this.timeLimit : 0)
+        responseTimeLimit: Number(this.timerOption ? this.timeLimit * 1000 : 0)
       });
     }
   }

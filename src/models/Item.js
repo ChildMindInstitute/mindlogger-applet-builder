@@ -548,7 +548,7 @@ export default class Item {
             return 'Response time limit option has been disabled'
           }
 
-          return `Response time limit was updated to ${_.get(newValue, field)} seconds`
+          return `Response time limit was updated to ${_.get(newValue, field) / 1000} seconds`
         }
       },
       'isOptionalText': {

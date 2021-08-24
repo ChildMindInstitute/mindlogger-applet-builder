@@ -267,12 +267,14 @@
         :has-prize-activity="hasPrizeActivity"
         :is-reviewer-activity="isReviewerActivity"
         :initial-is-optional-text="item.isOptionalText"
+        :timer="item.timer"
         @openPrize="setTokenPrizeModalStatus(true)"
         @removeTemplate="onRemoveTemplate"
         @updateTemplates="onUpdateTemplates"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
         @updateOptionalText="updateOptionalText"
+        @updateTimer="updateTimer"
         @updateResponseOptions="updateResponseOptions"
         @loading="loading = $event"
         @notify="notify = $event"
@@ -311,10 +313,12 @@
         :initial-response-options="item.responseOptions"
         :initial-is-optional-text="item.isOptionalText"
         :is-reviewer-activity="isReviewerActivity"
+        :timer="item.timer"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
+        @updateTimer="updateTimer"
         @loading="loading = $event"
         @notify="notify = $event"
       />
@@ -336,9 +340,11 @@
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
+        :timer="item.timer"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
+        @updateTimer="updateTimer"
       />
 
       <AgeSelectorBuilder
@@ -362,9 +368,11 @@
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
+        :timer="item.timer"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
+        @updateTimer="updateTimer"
       />
 
       <TimeRangeBuilder
@@ -373,9 +381,11 @@
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
+        :timer="item.timer"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
+        @updateTimer="updateTimer"
       />
 
       <DateBuilder
@@ -384,9 +394,11 @@
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
+        :timer="item.timer"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
+        @updateTimer="updateTimer"
       />
 
       <DrawingBuilder
@@ -396,12 +408,14 @@
         :initial-item-input-options="item.inputOptions"
         :initial-is-optional-text="item.isOptionalText"
         :is-skippable-item="skippable"
+        :timer="item.timer"
         @updateResponseOptions="updateResponseOptions"
         @updateInputOptions="updateInputOptions"
         @updateOptionalText="updateOptionalText"
         @updateAllow="updateAllow"
         @loading="loading = $event"
         @notify="notify = $event"
+        @updateTimer="updateTimer"
       />
 
       <AudioRecordBuilder
@@ -411,10 +425,12 @@
         :initial-item-data="item.options"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
+        :timer="item.timer"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
+        @updateTimer="updateTimer"
       />
 
       <AudioImageRecordBuilder
@@ -436,11 +452,13 @@
         :initial-item-response-options="item.responseOptions"
         :initial-is-optional-text="item.isOptionalText"
         :is-skippable-item="skippable"
+        :timer="item.timer"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @loading="loading = $event"
         @notify="notify = $event"
         @updateAllow="updateAllow"
+        @updateTimer="updateTimer"
       />
 
       <AudioStimulusBuilder
@@ -908,6 +926,13 @@ export default {
       this.updateItemMetaInfo({
         index: this.itemIndex,
         obj: { isOptionalText }
+      });
+    },
+
+    updateTimer(timer) {
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { timer }
       });
     },
 

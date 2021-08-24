@@ -135,10 +135,38 @@ const activityMutations = {
     state.protocol.activities.splice(index, 1);
   },
 
-  addActivity (state) {
-    const model = new Activity;
+  addActivity(state, isABTrails) {
+    const activityModel = new Activity;
+    let items = [];
+
+    if (isABTrails) {
+      const itemModel = new Item();
+
+      for (let i = 1; i <= 4; i += 1) {
+        const inputType = 'trail';
+        let trailsItem = {
+          name: inputType + i,
+          question: inputType + i,
+          description: inputType + i,
+          options: {
+            options: [],
+          },
+          ui: {
+            inputType,
+            allow: []
+          }
+        };
+        const itemData = itemModel.getItemBuilderData(trailsItem);
+        itemData.valid = true;
+
+        items.push({ ...itemData });
+      }
+    }
+
+    console.log('items--------', items);
+
     state.protocol.activities.push({
-      ...model.getActivityBuilderData({ items: [] }),
+      ...activityModel.getActivityBuilderData({ items, isABTrails }),
       index: state.protocol.activities.length,
     })
   },

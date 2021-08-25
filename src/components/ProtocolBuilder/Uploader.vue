@@ -21,7 +21,7 @@
     </v-alert>
     <!-- Showing when user did not specify what type of uploader to show -->
 
-    <div v-if="initialType === 'audio' || initialType === 'image'">
+    <div v-else>
       <v-expansion-panels
         v-if="initialAdditionalType !== 'small-circle'"
       >
@@ -50,6 +50,16 @@
                 @change="onAddFromDevice($event, null)"
               >
               <!-- /if initialType === 'image' -->
+
+              <input
+                v-if="initialType === 'video'"
+                ref="fileInput"
+                class="file-input"
+                type="file"
+                accept="video/*, image/gif"
+                @change="onAddFromDevice($event, null)"
+              >
+              <!-- /if initialType === 'video' -->
 
               <v-btn @click="$refs.fileInput.click()">
                 Your computer
@@ -257,7 +267,7 @@
 </template>
 
 <script>
-import { Uploader, isAudioUrlValid, isImageValid } from '../../models/Uploader';
+import { Uploader, isAudioUrlValid, isImageValid, isVideoUrlValid } from '../../models/Uploader';
 import AddFromUrl from './Additional/AddFromUrl.vue';
 
 export default {
@@ -283,7 +293,7 @@ export default {
     }
   },
   data() {
-    const structureTypes = ['image', 'audio'];
+    const structureTypes = ['image', 'audio', 'video'];
     const uploader = new Uploader(this.initialType);
 
     return {
@@ -316,6 +326,7 @@ export default {
       try {
         if(this.initialType === 'audio') await isAudioUrlValid(url);
         else if(this.initialType === 'image') await isImageValid(url);
+        else if(this.initialType === 'video') await isVideoUrlValid(url);
 
         this.uploadData = url;
         this.isAddingFromUrl = false;

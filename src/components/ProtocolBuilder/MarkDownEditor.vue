@@ -4,11 +4,12 @@
       ref="md"
       :value="value"
       :language="'en'"
+      :toolbars="toolbars"
       @input="$emit('input', $event)"
       @imgAdd="$imgAdd"
     >
       <template slot="left-toolbar-after">
-        <div
+        <!-- <div
           aria-hidden="true"
           class="video_play"
           :class="{'selected': videoDropDown}"
@@ -17,14 +18,14 @@
           @mouseenter="$mouseenter_video_dropdown"
         >
           <v-icon>video_library</v-icon>
-          <transition name="fade"> 
-            <div 
+          <transition name="fade">
+            <div
               v-show="videoDropDown"
               class="op-image popup-dropdown transition"
               @mouseleave="$mouseleave_video_dropdown"
               @mouseenter="$mouseenter_video_dropdown"
             >
-              <div 
+              <div
                 class="dropdown-item"
                 @click.stop="linkType='Video'; linkDialog=true;"
               >
@@ -43,7 +44,7 @@
               </div>
             </div>
           </transition>
-        </div>
+        </div> -->
 
         <div
           aria-hidden="true"
@@ -54,14 +55,14 @@
           @mouseenter="$mouseenter_audio_dropdown"
         >
           <v-icon>audiotrack</v-icon>
-          <transition name="fade"> 
-            <div 
+          <transition name="fade">
+            <div
               v-show="audioDropDown"
               class="op-image popup-dropdown transition"
               @mouseleave="$mouseleave_audio_dropdown"
               @mouseenter="$mouseenter_audio_dropdown"
             >
-              <div 
+              <div
                 class="dropdown-item"
                 @click.stop="linkType='Audio'; linkDialog=true;"
               >
@@ -315,7 +316,7 @@
                   color: #000;
               }
           }
-  
+
       }
   }
 
@@ -327,6 +328,7 @@
 <script>
 import ImageUploader from '../../models/ImageUploader';
 import {toolbar_left_addlink} from 'mavon-editor/src/lib/toolbar_left_click.js'
+import { CONFIG } from 'mavon-editor/src/lib/config.js';
 
 export default {
   props: {
@@ -346,6 +348,10 @@ export default {
       linkType: 'link',
       linkText: '',
       linkAddr: '',
+      toolbars: {
+        ...CONFIG.toolbars,
+        fullscreen: false
+      }
     }
   },
   methods: {

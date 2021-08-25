@@ -254,6 +254,24 @@ export default {
     state.templates = templates;
   },
 
+  initThemes (state, themes) {
+    state.themes = themes;
+  },
+
+  initThemeId (state, initialData) {
+    const initDefaultThemeId = (themes, initialData) => {
+      if (initialData && initialData.applet && initialData.applet.themeId) {
+        return initialData.applet.themeId;
+      }
+
+      return themes && themes.length >= 1 ? themes[0]._id : null;
+    }
+
+    const themeId = initDefaultThemeId(state.themes, initialData);
+    state.themeId = themeId;
+    state.originalThemeId = themeId;
+  },
+
   setCurrentScreen (state, screen) {
     state.currentScreen = screen;
   },
@@ -262,6 +280,10 @@ export default {
   updateProtocolMetaInfo (state, obj) {
     Object.assign(state.protocol, obj);
     state.protocol.valid = Protocol.checkValidation(state.protocol);
+  },
+
+  updateThemeId (state, themeId) {
+      state.themeId = themeId;
   },
 
   resetProtocol (state) {

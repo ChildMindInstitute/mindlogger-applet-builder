@@ -104,17 +104,62 @@
           @onRemove="onRemoveHeaderImage()"
           @onNotify="loading = false; notify = $event;"
         />
-        <v-textarea
-          v-if="item.inputType !== 'cumulativeScore'"
-          v-model="largeText"
-          label="Large Text"
-          auto-grow
-          filled
-          rows="1"
-          :error-messages="largeText ? '' : 'Large Text is required.'"
-        />
-      </template>
+        <div v-if="item.inputType !== 'cumulativeScore'">
+          <v-card 
+            v-if="isTextExpanded" 
+            elevation="2" 
+            class="d-flex justify-space-between grey white--text px-6 py-2 card-expanded"
+            @click="isTextExpanded = !isTextExpanded"
+          >
+            <div>Text Creator</div>
+            <div>
+              <v-icon color="white">
+                mdi-chevron-up
+              </v-icon>
+            </div>
+          </v-card>
+          <v-card 
+            v-else 
+            elevation="2" 
+            class="d-flex justify-space-between px-6 py-2"
+            @click="isTextExpanded = !isTextExpanded"
+          >
+            <div>Text Creator</div>
+            <div>
+              <v-icon>
+                mdi-chevron-down
+              </v-icon>
+            </div>
+          </v-card>
+          <v-container v-if="isTextExpanded" class="pa-0">
+            <MarkDownEditor 
+              v-model="largeText"
+            />
+          </v-container>
 
+          <div v-if="largeText.length === 0" class="error--text text-body-2 mt-2 ml-4"> 
+            * This field is required
+          </div>
+          <div class="d-flex mt-2" :class="largeText.length > 75 ? 'justify-space-between' : 'justify-end'">
+            <div 
+              v-if="largeText.length > 75 && isTextExpanded"
+              class="ml-4 text-body-2 red--text text-left"
+            >
+              Visibility decreases over 75 characters 
+            </div>
+            <div v-if="isTextExpanded" class="text-right mr-4">
+              {{largeText.length}} / 75
+            </div>
+          </div>
+        </div>
+
+        <div
+          v-if="item.inputType == 'text' && item.options && item.options.isResponseIdentifier"
+          class="my-2"
+        >
+          {{ responseIdentifierMessage }}
+        </div>
+      </template>
       <v-row>
         <v-col
           cols="12"
@@ -186,7 +231,19 @@
             </template>
           </v-select>
         </v-col>
+        <v-col
+          v-if="item.inputType !== 'radio' && item.inputType !== 'checkbox' && item.inputType !== 'slider' && item.inputType !== 'text'"
+          class="d-flex align-center red--text"
+        >
+          This item is only available for use in mobile version of MindLogger.
+        </v-col>
       </v-row>
+
+      <v-checkbox
+        v-if="item.inputType === 'cumulativeScore'"
+        v-model="currentActivity.allowSummary"
+        label="Allow the user to see results"
+      />
 
       <div
         v-if="item.inputType === 'markdownMessage'"
@@ -393,19 +450,13 @@
       />
     </v-form>
 
-    <div class="px-2">
+    <div class="px-2 pt-2">
       <div class="item-quiz">
         <img
           width="15"
           :src="itemInputTypes.find(({ text }) => text === item.inputType).icon"
         >
-
-        <span
-          v-if="item.inputType !== 'cumulativeScore' && item.inputType !== 'markdownMessage'"
-          class="ml-2"
-        >
-          {{ largeText }}
-        </span>
+        <span v-if="!isExpanded" class="ml-1">{{largeText.replace(/[^0-9A-Za-z ]/g, '')}}</span>
       </div>
     </div>
 
@@ -620,14 +671,17 @@ export default {
       itemConditionals: [],
       hasScoringItem: false,
       removeDialog: false,
+      markdownDialog: false,
       valid: false,
       largeText: '',
       headerImage: '',
       isExpanded: false,
+      isTextExpanded: false,
       isItemNameEditing: false,
       baseKey: 0,
       loading: false,
       notify: {},
+      responseIdentifierMessage: 'By using this option, the user will be required to enter response data identifier text into the field. The text entered will identify the response data collected at that point in time. The identifier used will be filterable on the user\'s data visualization tab.'
     }
   },
   computed: {
@@ -679,7 +733,6 @@ export default {
   },
 
   beforeMount() {
-
     Object.assign(this, {
       valid: this.item.name && this.item.name.length > 0,
       hasScoringItem: this.currentActivity.items.some((item) => item.options.hasScoreValue),

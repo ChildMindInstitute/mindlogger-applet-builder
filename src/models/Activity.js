@@ -41,6 +41,8 @@ export default class Activity {
       isSkippable: initialActivityData.isSkippable || false,
       items: items || [],
       disableBack: initialActivityData.disableBack || false,
+      allowSummary: initialActivityData.allowSummary !== undefined ? initialActivityData.allowSummary : true,
+      isReviewerActivity: initialActivityData.isReviewerActivity || false,
       id: initialActivityData._id || null,
       textRules: [(v) => !!v || 'This field is required'],
       error: '',
@@ -382,6 +384,7 @@ export default class Activity {
     const allowed = [];
     this.ref.isSkippable && allowed.push('skipped');
     this.ref.disableBack && allowed.push('disableBack');
+    !this.ref.allowSummary && allowed.push('disableSummary');
 
     return {
       '@context': [
@@ -397,6 +400,7 @@ export default class Activity {
       'schema:schemaVersion': '0.0.1',
       'schema:version': '0.0.1',
       preamble: this.ref.preamble,
+      isReviewerActivity: this.ref.isReviewerActivity,
       scoringLogic: {},
       'repronim:timeUnit': 'yearmonthdate',
       isPrize: this.ref.isPrize,
@@ -474,9 +478,11 @@ export default class Activity {
       description: this.ref.description,
       splash: this.ref.splash,
       preamble: this.ref.preamble,
+      isReviewerActivity: this.ref.isReviewerActivity,
       shuffle: this.ref.shuffleActivityOrder,
       isSkippable: this.ref.isSkippable,
       disableBack: this.ref.disableBack,
+      allowSummary: this.ref.allowSummary,
       schema: schema,
       context: context,
       items: this.ref.items.filter(item => item.ui.inputType !== 'cumulativeScore'),
@@ -574,6 +580,10 @@ export default class Activity {
             ...insertedOptions.map((option) => `${option} option was enabled`),
           ];
         },
+      },
+      'isReviewerActivity': {
+        updated: (field) =>
+          `Reviewer activity option was ${_.get(newValue, field) ? 'enabled' : 'disabled'}`,
       },
       'subScales': {
         updated: (field) => {
@@ -823,6 +833,7 @@ export default class Activity {
       ['schema:description']: description,
       ['schema:splash']: splash,
       ['reprolib:terms/preamble']: activityPreamble,
+      ['reprolib:terms/isReviewerActivity']: isReviewerActivity,
       ['reprolib:terms/shuffle']: shuffle,
       ['reprolib:terms/allow']: allow,
       ['reprolib:terms/addProperties']: addProperties,
@@ -895,6 +906,10 @@ export default class Activity {
         activityPreamble &&
         activityPreamble[0] &&
         activityPreamble[0]['@value'],
+      isReviewerActivity:
+        isReviewerActivity &&
+        isReviewerActivity[0] &&
+        isReviewerActivity[0]['@value'],
       shuffle: shuffle && shuffle[0] && shuffle[0]['@value'],
       visibilities,
       subScales: Array.isArray(subScales) && subScales.map((subScale, index) => {
@@ -955,6 +970,7 @@ export default class Activity {
     if (allowList.some((item) => item.includes('disable_back'))) {
       activityInfo.disableBack = true;
     }
+    activityInfo.allowSummary = !allowList.some((item) => item.includes('disable_summary'))
 
     activityInfo.valid = true;
 

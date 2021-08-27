@@ -134,6 +134,18 @@
 
               <v-btn
                 icon
+                @click="hideActivity(activities.findIndex(act => act == activity))"
+              >
+                <v-icon v-if="isHidden" color="grey lighten-1">
+                  mdi-eye-off-outline
+                </v-icon>
+                <v-icon v-else color="grey lighten-1">
+                  mdi-eye-outline
+                </v-icon>
+              </v-btn>
+
+              <v-btn
+                icon
                 @click="editActivity(index)"
               >
                 <v-icon color="grey lighten-1">
@@ -204,6 +216,7 @@ export default {
   data () {
     return {
       markdownDialog: false,
+      isHidden: false,
       textRules: [(v) => !!v.trim() || "This field is required"],
     }
   },
@@ -284,6 +297,7 @@ export default {
         'updateProtocolMetaInfo',
         'duplicateActivity',
         'deleteActivity',
+        'showOrHideActivity',
         'addActivity',
         'setCurrentActivity',
         'setCurrentScreen',
@@ -390,6 +404,11 @@ export default {
       const currentIndex = isNew ? index : this.activities.findIndex(({name}) => name === activity.name);
       this.setCurrentActivity(currentIndex);
       this.setCurrentScreen(config.ITEM_SCREEN);
+    },
+
+    hideActivity (index) {
+      this.isHidden = !this.isHidden;
+      this.showOrHideActivity(index);
     },
 
     newActivity () {

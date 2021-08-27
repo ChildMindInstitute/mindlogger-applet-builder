@@ -135,6 +135,11 @@ const activityMutations = {
     state.protocol.activities.splice(index, 1);
   },
 
+  showOrHideActivity(state, index) {
+    const isHidden = !!state.protocol.activities[index].isHidden;
+    state.protocol.activities[index].isHidden = !isHidden;
+  },
+
   addActivity (state) {
     const model = new Activity;
     state.protocol.activities.push({

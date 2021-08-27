@@ -39,6 +39,7 @@ export default class Activity {
       preamble: initialActivityData.preamble || '',
       shuffleActivityOrder: initialActivityData.shuffle || false,
       isSkippable: initialActivityData.isSkippable || false,
+      isHidden: initialActivityData.isHidden || false,
       items: items || [],
       disableBack: initialActivityData.disableBack || false,
       allowSummary: initialActivityData.allowSummary !== undefined ? initialActivityData.allowSummary : true,
@@ -402,6 +403,7 @@ export default class Activity {
       scoringLogic: {},
       'repronim:timeUnit': 'yearmonthdate',
       isPrize: this.ref.isPrize,
+      isHidden: this.ref.isHidden,
       baseAppletId: this.ref.baseAppletId,
       baseActivityId: this.ref.baseActivityId,
       ui: {
@@ -510,6 +512,12 @@ export default class Activity {
         removed: (field) => `Activity splash screen was removed`,
         inserted: (field) =>
           `Activity splash screen was added (${_.get(newValue, field)})`,
+      },
+      'isHidden': {
+        updated: (field) =>
+          `Activity visibility is ${
+          _.get(newValue, field, false) ? 'disabled' : 'enabled'
+          }`,
       },
       'ui.shuffle': {
         updated: (field) =>

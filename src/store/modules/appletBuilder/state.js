@@ -39,6 +39,10 @@ export default {
       icon: baseImageURL + 'item-types/check-box-icon.png',
     },
     {
+      text: 'dropdownList',
+      icon: baseImageURL + 'item-types/dropdown-icon.png',
+    },
+    {
       text: "text",
       icon: baseImageURL + 'item-types/text-input-icon.png',
     },

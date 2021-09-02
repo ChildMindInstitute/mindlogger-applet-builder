@@ -4,11 +4,6 @@
       v-model="panels"
       multiple
     >
-      <MarkDownEditor
-        v-model="scoreOverview"
-        class="score-overview"
-        placeholder="Overview"
-      />
       <v-expansion-panel
         v-for="(rule, id) in rules"
         :key="id"
@@ -33,41 +28,7 @@
             @input="onUpdateRule(rule)"
             @keydown="nameKeydown($event)"
           />
-          <MarkDownEditor
-            v-model="rule.description"
-            class="mb-4"
-            placeholder="Cumulative Score Description"
-            @input="onUpdateRule(rule)"
-          />
-          <v-card class="mb-4">
-            <v-card-title>Which direction should be used in the report</v-card-title>
-            <v-card-text>
-              <v-radio-group
-                v-model="rule.direction"
-                class="mt-0"
-                color="primary"
-                row
-                @change="onUpdateRule(rule)"
-              >
-                <v-radio :value="true">
-                  <template v-slot:label>
-                    <img
-                      src="@/assets/score_bar.png"
-                      class="score-bar"
-                    >
-                  </template>
-                </v-radio>
-                <v-radio :value="false">
-                  <template v-slot:label>
-                    <img
-                      src="@/assets/score_bar.png"
-                      class="score-bar reverse"
-                    >
-                  </template>
-                </v-radio>
-              </v-radio-group>
-            </v-card-text>
-          </v-card>
+
           <div class="item-list">
             <div class="list-title">
               Items within cumulative score
@@ -241,17 +202,6 @@
   font-weight: 600;
   font-size: 20px;
 }
-
-.score-overview {
-  width: 100%
-}
-.score-bar {
-  width: 200px;
-}
-.score-bar.reverse{
-  -webkit-transform: scaleX(-1);
-  transform: scaleX(-1);
-}
 </style>
 
 <script>
@@ -270,10 +220,6 @@ export default {
     },
     items: {
       type: Array,
-      required: true,
-    },
-    activity: {
-      type: Object,
       required: true,
     },
   },
@@ -309,14 +255,6 @@ export default {
   },
   computed: {
     ...mapGetters(config.MODULE_NAME, ['activities', 'currentActivity']),
-    scoreOverview: {
-      get() {
-        return this.activity.scoreOverview;
-      },
-      set(value) {
-        this.activity.scoreOverview = value;
-      }
-    }
   },
   beforeMount() {
     let rules = this.initialItemData.cumulativeScores || [];
@@ -367,8 +305,6 @@ export default {
           .map((item) => item.name)
           .join(" + "),
         variableName: rule.name,
-        direction: rule.direction,
-        description: rule.description,
       };
 
       rule.messages = [
@@ -403,8 +339,6 @@ export default {
       if (!rule) {
         return {
           name: "",
-          description: "",
-          direction: true,
           items: this.items
             .filter((item) => item.options && item.options.hasScoreValue)
             .map((item) => ({
@@ -436,8 +370,6 @@ export default {
 
       return {
         name: rule.compute.variableName,
-        description: rule.compute.description,
-        direction: rule.compute.direction,
         items: this.items
           .filter((item) => item.options && item.options.hasScoreValue)
           .map((item) => ({

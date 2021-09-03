@@ -154,7 +154,7 @@ export default {
     },
     updateAnswer() {
       const { correctAnswer, requiredAnswer } = this;
-      console.log("requiredAnswer:", requiredAnswer)
+
       if (!requiredAnswer) {
         this.$emit('updateAnswer', "");
       } else {

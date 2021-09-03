@@ -134,9 +134,9 @@
 
               <v-btn
                 icon
-                @click="hideActivity(activities.findIndex(act => act == activity))"
+                @click="showOrHideActivity(activities.findIndex(act => act == activity))"
               >
-                <v-icon v-if="isHidden" color="grey lighten-1">
+                <v-icon v-if="activity.isVis" color="grey lighten-1">
                   mdi-eye-off-outline
                 </v-icon>
                 <v-icon v-else color="grey lighten-1">
@@ -216,7 +216,7 @@ export default {
   data () {
     return {
       markdownDialog: false,
-      isHidden: false,
+      isVis: [],
       textRules: [(v) => !!v.trim() || "This field is required"],
     }
   },
@@ -321,12 +321,9 @@ export default {
       });
     },
     async onAddWatermarkFromDevice (uploadFunction) {
-      console.log('0000');
       this.$emit('loading', true); 
-      console.log('1111', uploadFunction);
       try {
         this.appletWatermark = await uploadFunction();
-        console.log('222222');
         this.$emit('loading', false);
         this.$emit('notify', {
           type: 'success',
@@ -334,13 +331,11 @@ export default {
           duration: 3000,
         });
       } catch (error) {
-        console.log('5555error', error);
         this.$emit('loading', false);
         this.$emit('notify', {
           type: 'error',
           message: `Something went wrong with uploading applet watermark.`,
         });
-        console.log('6666');
       }
     },
     onRemoveWatermark () {
@@ -404,11 +399,6 @@ export default {
       const currentIndex = isNew ? index : this.activities.findIndex(({name}) => name === activity.name);
       this.setCurrentActivity(currentIndex);
       this.setCurrentScreen(config.ITEM_SCREEN);
-    },
-
-    hideActivity (index) {
-      this.isHidden = !this.isHidden;
-      this.showOrHideActivity(index);
     },
 
     newActivity () {

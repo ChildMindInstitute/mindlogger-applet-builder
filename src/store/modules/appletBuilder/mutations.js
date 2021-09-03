@@ -46,6 +46,11 @@ const itemMutations = {
     }
   },
 
+  showOrHideItem(state, index) {
+    const isVis = !!state.currentActivity.items[index].isVis;
+    state.currentActivity.items[index].isVis = !isVis;
+  },
+
   duplicateItem(state, index) {
     const item = JSON.parse(JSON.stringify(state.currentActivity.items[index]));
 
@@ -136,8 +141,8 @@ const activityMutations = {
   },
 
   showOrHideActivity(state, index) {
-    const isHidden = !!state.protocol.activities[index].isHidden;
-    state.protocol.activities[index].isHidden = !isHidden;
+    const isVis = !!state.protocol.activities[index].isVis;
+    state.protocol.activities[index].isVis = !isVis;
   },
 
   addActivity (state) {

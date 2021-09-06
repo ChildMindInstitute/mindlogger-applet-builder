@@ -36,7 +36,7 @@
         <v-checkbox
           v-model="isSkippable"
           label="Skippable Item"
-          :disabled="isSkippableItem == 2 || requiredValue"
+          :disabled="isSkippableItem == 2"
         />
       </v-col>
       <v-col
@@ -62,18 +62,6 @@
           v-model="isResponseIdentifier"
           label="Response Data Identifier"
           @change="update"
-        />
-      </v-col>
-
-      <v-col
-        class="d-flex align-center"
-        cols="12"
-        sm="3"
-      >
-        <v-checkbox
-          v-model="requiredValue"
-          label="Response required"
-          @change="updateRequiredValue"
         />
       </v-col>
     </v-row>
@@ -104,7 +92,6 @@ export default {
     return {
       correctAnswer: this.initialAnswer || "",
       maxLength: this.initialItemData.maxLength || 50,
-      requiredValue: this.initialItemData.requiredValue || false,
       requiredAnswer: this.initialAnswer ? true : false,
       isResponseIdentifier: this.initialItemData.isResponseIdentifier || false,
       isNumerical: ((this.responseOption.valueType && this.responseOption.valueType.includes('integer'))
@@ -132,25 +119,13 @@ export default {
   },
 
   methods: {
-    updateRequiredValue() {
-      if (this.requiredValue) { 
-          this.isSkippable = false
-          this.isSkippableItem = 2
-      } else {
-          this.isSkippableItem = 1
-      }
-      this.update()
-    },
     update () {
       const responseOptions = {
         'maxLength': this.maxLength,
-        'requiredValue': this.requiredValue,
         'isResponseIdentifier': this.isResponseIdentifier,
         'valueType': this.isNumerical ? 'xsd:integer' : 'xsd:string',
       };
       this.$emit('updateOptions', responseOptions);
-      if (this.requiredValue) 
-        this.$emit('updateAllow', false);
     },
     updateAnswer() {
       const { correctAnswer, requiredAnswer } = this;

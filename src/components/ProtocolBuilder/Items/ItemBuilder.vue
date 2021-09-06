@@ -105,9 +105,9 @@
           @onNotify="loading = false; notify = $event;"
         />
         <div v-if="item.inputType !== 'cumulativeScore'">
-          <v-card 
-            v-if="isTextExpanded" 
-            elevation="2" 
+          <v-card
+            v-if="isTextExpanded"
+            elevation="2"
             class="d-flex justify-space-between grey white--text px-6 py-2 card-expanded"
             @click="isTextExpanded = !isTextExpanded"
           >
@@ -118,9 +118,9 @@
               </v-icon>
             </div>
           </v-card>
-          <v-card 
-            v-else 
-            elevation="2" 
+          <v-card
+            v-else
+            elevation="2"
             class="d-flex justify-space-between px-6 py-2"
             @click="isTextExpanded = !isTextExpanded"
           >
@@ -132,20 +132,20 @@
             </div>
           </v-card>
           <v-container v-if="isTextExpanded" class="pa-0">
-            <MarkDownEditor 
+            <MarkDownEditor
               v-model="largeText"
             />
           </v-container>
 
-          <div v-if="largeText.length === 0" class="error--text text-body-2 mt-2 ml-4"> 
+          <div v-if="largeText.length === 0" class="error--text text-body-2 mt-2 ml-4">
             * This field is required
           </div>
           <div class="d-flex mt-2" :class="largeText.length > 75 ? 'justify-space-between' : 'justify-end'">
-            <div 
+            <div
               v-if="largeText.length > 75 && isTextExpanded"
               class="ml-4 text-body-2 red--text text-left"
             >
-              Visibility decreases over 75 characters 
+              Visibility decreases over 75 characters
             </div>
             <div v-if="isTextExpanded" class="text-right mr-4">
               {{largeText.length}} / 75
@@ -232,7 +232,7 @@
           </v-select>
         </v-col>
         <v-col
-          v-if="item.inputType !== 'radio' && item.inputType !== 'checkbox' && item.inputType !== 'slider' && item.inputType !== 'text'"
+          v-if="item.inputType !== 'radio' && item.inputType !== 'checkbox' && item.inputType !== 'slider' && item.inputType !== 'text' && item.inputType !== 'cumulativeScore'"
           class="d-flex align-center red--text"
         >
           This item is only available for use in mobile version of MindLogger.

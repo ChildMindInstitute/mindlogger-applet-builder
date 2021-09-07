@@ -466,7 +466,7 @@ export default {
       colorPickerDialog: false,
       colorPaletteDialog: false,
       mode: "hex",
-      isMultipleChoice: false,
+      isMultipleChoice: this.initialItemData.isMultipleChoice || false,
     };
   },
 

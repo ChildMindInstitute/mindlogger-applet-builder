@@ -199,7 +199,6 @@ export default class Item {
         "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
         choices: choices
       };
-
       if (this.ref.options.continousSlider && this.ref.options.hasResponseAlert) {
         Object.assign(responseOptions, {
           "minAlertValue": this.ref.options.minAlertValue,
@@ -209,6 +208,12 @@ export default class Item {
       }
 
       return responseOptions;
+    }
+    if (this.ref.inputType === "ageSelector") {
+      return {
+        "schema:minAge": this.ref.options.minAge,
+        "schema:maxAge": this.ref.options.maxAge,
+      }
     }
     if (this.ref.inputType === 'stackedSlider') {
       return {
@@ -573,6 +578,14 @@ export default class Item {
       'options.maxValue': {
         updated: valueUpdate('maxValue'),
         inserted: valueInsert('maxValue'),
+      },
+      'options.minAge': {
+        updated: valueUpdate('minAge'),
+        inserted: valueInsert('minAge'),
+      },
+      'options.maxAge': {
+        updated: valueUpdate('maxAge'),
+        inserted: valueInsert('maxAge'),
       },
       'options.minValueImg': {
         updated: valueUpdate('minValueImg'),
@@ -946,6 +959,14 @@ export default class Item {
           item['schema:correctAnswer'][0] &&
           item['schema:correctAnswer'][0]['@value']) {
           itemContent.correctAnswer = item['schema:correctAnswer'][0]['@value']
+        }
+      }
+      if (itemType === 'ageSelector') {
+        itemContent.options = {
+          maxAge:
+            _.get(responseOptions, [0, 'schema:maxAge', 0, '@value']),
+          minAge:
+            _.get(responseOptions, [0, 'schema:minAge', 0, '@value']),
         }
       }
       if (itemType === 'slider') {

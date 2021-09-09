@@ -232,7 +232,7 @@
           </v-select>
         </v-col>
         <v-col
-          v-if="item.inputType !== 'radio' && item.inputType !== 'checkbox' && item.inputType !== 'slider' && item.inputType !== 'text' && item.inputType !== 'cumulativeScore'"
+          v-if="item.inputType !== 'radio' && item.inputType !== 'checkbox' && item.inputType !== 'slider' && item.inputType !== 'text' && item.inputType !== 'cumulativeScore' && item.inputType !== 'ageSelector'"
           class="d-flex align-center red--text"
         >
           This item is only available for use in mobile version of MindLogger.
@@ -656,7 +656,7 @@ export default {
     TextBuilder,
     SliderBuilder,
     VideoBuilder,
-    AgeSelectorBuilder, 
+    AgeSelectorBuilder,
     PhotoBuilder,
     TimeRangeBuilder,
     DateBuilder,

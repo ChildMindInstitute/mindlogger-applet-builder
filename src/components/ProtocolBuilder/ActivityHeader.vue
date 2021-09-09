@@ -154,7 +154,6 @@ export default {
     async onAddSplashFromDevice(uploadFunction) {
       try {
         this.splash = await uploadFunction();
-        console.log('onAddSplashFromDevice', this.splash)
         this.loading = false;
         this.notify = {
           type: 'success',

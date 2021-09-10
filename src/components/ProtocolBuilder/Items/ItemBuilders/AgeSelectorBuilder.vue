@@ -11,9 +11,7 @@
             v-model="minAge"
             label="Min Value"
             type="number"
-            min="1"
-            :max="maxAge"
-            @input="ageRangeUpdate($event, 'min')"
+            @input="update"
           />
         </v-col>
         <v-col
@@ -24,12 +22,15 @@
           <v-text-field
             v-model="maxAge"
             label="Max Value"
-            type="number"
-            :min="minAge"
+            min="0"
             max="105"
-            @input="ageRangeUpdate($event, 'max')"
+            type="number"
+            @input="update"
           />
         </v-col>
+      </v-row>
+      <v-row v-if="!valid" class="ml-4 red--text">
+        * Maximum value should be bigger than minimum value
       </v-row>
     </div>
 
@@ -148,31 +149,28 @@ export default {
   methods: {
     update () {
       if (this.maxAge > 105) {
-        this.maxAge = 105;
+        this.$nextTick(() => {
+          this.maxAge = 105;
+        });
       } else if (this.minAge < 1) {
-        this.minAge = 1;
+        this.$nextTick(() => {
+          this.minAge = 1;
+        });
+      }
+
+      if (this.maxAge <= this.minAge) {
+        this.valid = false;
+      } else {
+        this.valid = true;
       }
 
       const responseOptions = {
         'minAge': this.minAge,
         'maxAge': this.maxAge,
+        'valid': this.valid,
       };
 
       this.$emit('updateOptions', responseOptions);
-    },
-
-    ageRangeUpdate(ev, type) {
-      if (Number(this.maxAge) > 105) {
-        return false;
-      }
-      if (Number(this.minAge) < 0) {
-        return false;
-      }
-      if (this.minAge === '' || this.maxAge === '' || Number(this.minAge) > Number(this.maxAge)) {
-        return ;
-      }
-
-      this.update();
     },
 
     onUpdateResponseOptions() {

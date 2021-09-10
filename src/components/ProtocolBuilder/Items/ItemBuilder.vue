@@ -348,7 +348,7 @@
         :initial-item-data="item.options"
         :initial-response-options="item.responseOptions"
         :initial-is-optional-text="item.isOptionalText"
-        @updateOptions="updateOptions"
+        @updateOptions="updateAgeOptions"
         @updateAllow="updateAllow"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
@@ -935,6 +935,21 @@ export default {
       this.updateItemMetaInfo({
         index: this.itemIndex,
         obj: { options: newOptions }
+      })
+
+      const model = new Item();
+      model.updateReferenceObject(this.item);
+
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { responseOptions: model.getResponseOptions() }
+      })
+    },
+
+    updateAgeOptions (newOptions) {
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { options: newOptions, valid: newOptions.valid }
       })
 
       const model = new Item();

@@ -1191,6 +1191,7 @@ export default class Item {
   static checkValidation(item) {
     if (!item.name
       || !item.inputType
+      || (item.options && item.options.valid === false)
       || !item.question
       || (item.inputType !== "markdownMessage"
         && item.inputType !== "cumulativeScore"

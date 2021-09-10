@@ -163,8 +163,6 @@ const activityMutations = {
       }
     }
 
-    console.log('items--------', items);
-
     state.protocol.activities.push({
       ...activityModel.getActivityBuilderData({ items, isABTrails }),
       index: state.protocol.activities.length,

@@ -14,6 +14,10 @@ export default class Activity {
       initialActivityData.conditionalItems = this.getConditionalItems(initialActivityData, initialActivityData.items);
     }
 
+    if (initialActivityData.activityType && initialActivityData.activityType.includes('ABTrails')) {
+      initialActivityData.isABTrails = true;
+    }
+
     const items = (initialActivityData.items || []).map(item => item);
 
     if (initialActivityData.compute && initialActivityData.compute.length) {
@@ -840,6 +844,7 @@ export default class Activity {
       ['reprolib:terms/messages']: messages,
       ['reprolib:terms/isPrize']: isPrize,
       ['reprolib:terms/order']: orders,
+      ['@type']: activityType,
       ['_id']: id,
     } = activitiesObj;
 
@@ -903,6 +908,9 @@ export default class Activity {
         activityPreamble &&
         activityPreamble[0] &&
         activityPreamble[0]['@value'],
+      activityType:
+        activityType &&
+        activityType[0],
       shuffle: shuffle && shuffle[0] && shuffle[0]['@value'],
       visibilities,
       subScales: Array.isArray(subScales) && subScales.map((subScale, index) => {

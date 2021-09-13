@@ -10,6 +10,8 @@
           <v-text-field
             v-model="minAge"
             label="Min Value"
+            min="0"
+            max="105"
             type="number"
             @input="update"
           />
@@ -152,13 +154,23 @@ export default {
         this.$nextTick(() => {
           this.maxAge = 105;
         });
-      } else if (this.minAge < 1) {
+      } else if (this.maxAge < 0) {
+        this.$nextTick(() => {
+          this.maxAge = 1;
+        });
+      }
+
+      if (this.minAge > 105) {
+        this.$nextTick(() => {
+          this.minAge = 105;
+        });
+      } else if (this.minAge < 0) {
         this.$nextTick(() => {
           this.minAge = 1;
         });
       }
 
-      if (this.maxAge <= this.minAge) {
+      if (Number(this.maxAge) <= Number(this.minAge)) {
         this.valid = false;
       } else {
         this.valid = true;

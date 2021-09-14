@@ -462,6 +462,7 @@
         v-if="item.inputType === 'cumulativeScore'"
         :key="`${baseKey}-cumulativeScore`"
         :items="currentActivity.items"
+        :activity="currentActivity"
         :initial-item-data="item"
         @updateCumulativeScore="updateCumulativeScore"
       />

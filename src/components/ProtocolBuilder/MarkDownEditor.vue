@@ -4,6 +4,7 @@
       ref="md"
       :value="value"
       :language="'en'"
+      :placeholder="placeholder"
       :toolbars="toolbars"
       @input="$emit('input', $event)"
       @imgAdd="$imgAdd"
@@ -335,6 +336,11 @@ export default {
     value: {
       type: String,
       required: true,
+    },
+    placeholder: {
+      type: String,
+      required: false,
+      default: '',
     }
   },
   data() {

@@ -52,7 +52,7 @@
                 <v-radio :value="true">
                   <template v-slot:label>
                     <img
-                      src="@/assets/score_bar.png"
+                      :src="baseImageURL + 'score_bar.png'"
                       class="score-bar"
                     >
                   </template>
@@ -60,7 +60,7 @@
                 <v-radio :value="false">
                   <template v-slot:label>
                     <img
-                      src="@/assets/score_bar.png"
+                      :src="baseImageURL + 'score_bar.png'"
                       class="score-bar reverse"
                     >
                   </template>
@@ -135,12 +135,12 @@
           </div>
 
           <div class="d-flex align-baseline mt-2">
-            <v-switch 
-              v-model="rule.isActivityInRange" 
+            <v-switch
+              v-model="rule.isActivityInRange"
               class="mt-0 pt-0"
-              inset 
-              type="text" 
-              @change="(v) => activitySelect(v, rule, 'activityInRange')" 
+              inset
+              type="text"
+              @change="(v) => activitySelect(v, rule, 'activityInRange')"
             />
             <div v-if="rule.isActivityInRange" class="d-flex align-baseline">
               <div class="mr-2"> SHOW </div>
@@ -171,12 +171,12 @@
           </div>
 
           <div class="d-flex align-baseline mt-2">
-            <v-switch 
-              v-model="rule.isActivityOutRange" 
+            <v-switch
+              v-model="rule.isActivityOutRange"
               class="mt-0 pt-0"
-              inset 
-              type="text" 
-              @change="(v) => activitySelect(v, rule, 'activityOutRange')" 
+              inset
+              type="text"
+              @change="(v) => activitySelect(v, rule, 'activityOutRange')"
             />
 
             <div v-if="rule.isActivityOutRange" class="d-flex align-baseline">
@@ -308,7 +308,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(config.MODULE_NAME, ['activities', 'currentActivity']),
+    ...mapGetters(config.MODULE_NAME, ['activities', 'currentActivity', 'baseImageURL']),
     scoreOverview: {
       get() {
         return this.activity.scoreOverview;

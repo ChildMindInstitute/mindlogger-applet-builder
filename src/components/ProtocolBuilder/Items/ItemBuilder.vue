@@ -289,6 +289,8 @@
         :initial-item-data="item.options"
         :item-templates="itemTemplates"
         :has-prize-activity="hasPrizeActivity"
+        :timer="item.timer"
+        @updateTimer="updateTimer"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
       />
@@ -332,6 +334,8 @@
         @updateAllow="updateAllow"
         @loading="loading = $event"
         @notify="notify = $event"
+        :timer="item.timer"
+        @updateTimer="updateTimer"
       />
 
       <VideoBuilder

@@ -240,6 +240,12 @@
       </v-col>
     </v-row>
 
+    <ItemTimerOption
+      colClasses="d-flex align-center py-0 px-3"
+      @update="updateTimerOption"
+      :responseTimeLimit="timer"
+    />
+
     <v-dialog
       v-model="scoreDialog.visible"
       max-width="350"
@@ -380,11 +386,13 @@
 
 <script>
 import ImageUpldr from '../../../../models/ImageUploader';
+import ItemTimerOption from '../../Partial/ItemTimerOption';
 import Uploader from '../../Uploader.vue';
 
 export default {
   components: {
-    Uploader
+    Uploader,
+    ItemTimerOption
   },
   props: {
     initialItemData: {
@@ -394,6 +402,10 @@ export default {
     isSkippableItem: {
       type: Number,
       default: 0,
+    },
+    timer: {
+      type: Number,
+      required: false
     },
   },
   data: function () {
@@ -464,6 +476,10 @@ export default {
     this.update();
   },
   methods: {
+    updateTimerOption(option) {
+      this.$emit('updateTimer', option.responseTimeLimit)
+    },
+
     resetScores () {
       const slider = this.scoreDialog.slider;
       for (let i = Number(slider.minSliderTick); i <= Number(slider.maxSliderTick); i++) {

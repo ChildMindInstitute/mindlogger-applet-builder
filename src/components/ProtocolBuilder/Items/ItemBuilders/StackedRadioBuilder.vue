@@ -437,6 +437,12 @@
           />
         </v-col>
       </v-row>
+
+      <ItemTimerOption
+        colClasses="d-flex align-center py-0 px-3"
+        @update="updateTimerOption"
+        :responseTimeLimit="timer"
+      />
     </v-form>
 
     <v-dialog
@@ -551,11 +557,13 @@
 
 <script>
 import ImageUpldr from '../../../../models/ImageUploader';
+import ItemTimerOption from '../../Partial/ItemTimerOption';
 import TableEditor from './TableEditor';
 
 export default {
   components: {
     TableEditor,
+    ItemTimerOption,
   },
   props: {
     initialItemData: {
@@ -583,7 +591,11 @@ export default {
       type: Boolean,
       required: false,
       default: false
-    }
+    },
+    timer: {
+      type: Number,
+      required: false
+    },
   },
   data: function () {
     const imgUploader = new ImageUpldr();
@@ -689,6 +701,10 @@ export default {
   },
 
   methods: {
+    updateTimerOption(option) {
+      this.$emit('updateTimer', option.responseTimeLimit)
+    },
+
     addOption() {
       const nextOption = {
         'name': `Option ${this.options.length + 1}`,

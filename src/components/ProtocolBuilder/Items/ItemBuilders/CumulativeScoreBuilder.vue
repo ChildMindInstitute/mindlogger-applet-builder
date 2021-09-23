@@ -489,10 +489,10 @@ export default {
         valid: true,
         isActivityInRange: Boolean(message && message.nextActivity),
         activityInRange: message && message.nextActivity,
-        hideActivityInRange: message && message.hasOwnProperty('hideActivity') ? message.hideActivity : true,
+        hideActivityInRange: message && message.hasOwnProperty('hideActivity') && message.hideActivity !== undefined ? message.hideActivity : true,
         isActivityOutRange: Boolean(messageOutRange && messageOutRange.nextActivity),
         activityOutRange: messageOutRange && messageOutRange.nextActivity,
-        hideActivityOutRange: messageOutRange && messageOutRange.hasOwnProperty('hideActivity') ? messageOutRange.hideActivity : true,
+        hideActivityOutRange: messageOutRange && messageOutRange.hasOwnProperty('hideActivity') && messageOutRange.hideActivity !== undefined ? messageOutRange.hideActivity : true,
       };
     },
 

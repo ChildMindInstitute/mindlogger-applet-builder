@@ -307,12 +307,9 @@ export default {
       });
     },
     async onAddWatermarkFromDevice (uploadFunction) {
-      console.log('0000');
       this.$emit('loading', true); 
-      console.log('1111', uploadFunction);
       try {
         this.appletWatermark = await uploadFunction();
-        console.log('222222');
         this.$emit('loading', false);
         this.$emit('notify', {
           type: 'success',
@@ -320,13 +317,11 @@ export default {
           duration: 3000,
         });
       } catch (error) {
-        console.log('5555error', error);
         this.$emit('loading', false);
         this.$emit('notify', {
           type: 'error',
           message: `Something went wrong with uploading applet watermark.`,
         });
-        console.log('6666');
       }
     },
     onRemoveWatermark () {

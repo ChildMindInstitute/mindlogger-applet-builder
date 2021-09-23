@@ -71,7 +71,7 @@
           :key="index"
         >
           <v-row>
-            <div 
+            <div
               class="d-flex justify-start align-center option-item pl-2"
               :style="{background: colorPalette ? option.color : 'none', color: colorPalette ? getTextColor(option.color) : 'black'}"
             >
@@ -90,7 +90,7 @@
                 value="false"
                 disabled
               >
-              <span>{{ option.name }}</span>
+              <span class="option-name">{{ option.name }}</span>
             </div>
 
             <v-spacer />
@@ -143,7 +143,7 @@
                   v-model="option.name"
                   :rules="textRules"
                   label="Option Text"
-                  counter="45"
+                  counter="75"
                   @change="updateOption(option)"
                 />
               </v-col>
@@ -271,6 +271,7 @@
       />
       <v-row>
         <v-col
+          v-if="!isReviewerActivity"
           class="d-flex align-center"
           cols="12"
           md="3"
@@ -295,6 +296,7 @@
           />
         </v-col>
         <v-col
+          v-if="!isReviewerActivity"
           class="d-flex align-center"
           cols="12"
           md="3"
@@ -307,6 +309,7 @@
           />
         </v-col>
         <v-col
+          v-if="!isReviewerActivity"
           class="d-flex align-center"
           cols="12"
           md="3"
@@ -371,7 +374,7 @@
           <span>Apply a Template</span>
         </v-card-title>
         <v-card-text>
-          <v-container 
+          <v-container
             class="d-flex justify-center"
             fluid
           >
@@ -396,7 +399,7 @@
                   <v-card-text>
                     <div>This is what the options would look like:</div>
                     <div class="text--primary mt-4">
-                      <div 
+                      <div
                         v-for="(optionColor, index) in colorPalettes[value]"
                         class="d-flex justify-center align-center option-color"
                         :style="{backgroundColor: optionColor}"
@@ -413,7 +416,7 @@
         </v-card-text>
         <v-card-actions>
           <small class="d-flex align-center ml-4">
-            <v-icon class="mr-1">info</v-icon> 
+            <v-icon class="mr-1">info</v-icon>
             The patter repeats after the 5th option
           </small>
           <v-spacer></v-spacer>
@@ -444,7 +447,7 @@
           <span>Set Option Color</span>
         </v-card-title>
         <v-card-text>
-          <v-container 
+          <v-container
             class="d-flex justify-center"
             fluid
           >
@@ -493,6 +496,10 @@
     height: auto;
     border: 2px solid white;
     border-radius: 5px;
+  }
+
+  .option-name {
+    max-width: 100%;
   }
 
   .option-color {
@@ -590,6 +597,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    isReviewerActivity: {
+      type: Boolean,
+      default: false
+    }
   },
   data: function () {
 

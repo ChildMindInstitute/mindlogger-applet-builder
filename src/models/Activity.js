@@ -42,6 +42,7 @@ export default class Activity {
       items: items || [],
       disableBack: initialActivityData.disableBack || false,
       allowSummary: initialActivityData.allowSummary !== undefined ? initialActivityData.allowSummary : true,
+      isReviewerActivity: initialActivityData.isReviewerActivity || false,
       id: initialActivityData._id || null,
       textRules: [(v) => !!v || 'This field is required'],
       error: '',
@@ -65,6 +66,7 @@ export default class Activity {
       },
       allowEdit: true,
       isPrize: initialActivityData.isPrize || false,
+      scoreOverview: initialActivityData.scoreOverview || '',
       valid: initialActivityData.valid !== undefined ? initialActivityData.valid : true,
     };
   }
@@ -399,6 +401,7 @@ export default class Activity {
       'schema:schemaVersion': '0.0.1',
       'schema:version': '0.0.1',
       preamble: this.ref.preamble,
+      isReviewerActivity: this.ref.isReviewerActivity,
       scoringLogic: {},
       'repronim:timeUnit': 'yearmonthdate',
       isPrize: this.ref.isPrize,
@@ -423,7 +426,7 @@ export default class Activity {
       '@version': 1.1,
     };
     var isPrefixNeeded = false;
-    this.ref.items.forEach(function(item) {
+    this.ref.items.forEach(function (item) {
       if ('iri' in item) {
         contextObj[item.name] = {
           '@id': item.iri,
@@ -463,6 +466,7 @@ export default class Activity {
     return {
       compute,
       messages,
+      scoreOverview: this.ref.scoreOverview,
     }
   }
 
@@ -476,6 +480,7 @@ export default class Activity {
       description: this.ref.description,
       splash: this.ref.splash,
       preamble: this.ref.preamble,
+      isReviewerActivity: this.ref.isReviewerActivity,
       shuffle: this.ref.shuffleActivityOrder,
       isSkippable: this.ref.isSkippable,
       disableBack: this.ref.disableBack,
@@ -578,6 +583,10 @@ export default class Activity {
           ];
         },
       },
+      'isReviewerActivity': {
+        updated: (field) =>
+          `Reviewer activity option was ${_.get(newValue, field) ? 'enabled' : 'disabled'}`,
+      },
       'subScales': {
         updated: (field) => {
           const updates = [];
@@ -641,7 +650,7 @@ export default class Activity {
                 message => message.jsExpression.split(/[<>]=*\s/g)[0].trim() == oldCumulative.variableName.trim()
               );
 
-              if (newCumulative.jsExpression !== oldCumulative.jsExpression || JSON.stringify(oldMessages) !== JSON.stringify(newMessages)) {
+              if (newCumulative.jsExpression !== oldCumulative.jsExpression || JSON.stringify(oldMessages) !== JSON.stringify(newMessages) || newCumulative.description !== oldCumulative.description || newCumulative.direction !== oldCumulative.direction) {
                 updates.push(`cumulative ${oldCumulative.variableName} was updated`);
               }
             } else {
@@ -826,6 +835,7 @@ export default class Activity {
       ['schema:description']: description,
       ['schema:splash']: splash,
       ['reprolib:terms/preamble']: activityPreamble,
+      ['reprolib:terms/isReviewerActivity']: isReviewerActivity,
       ['reprolib:terms/shuffle']: shuffle,
       ['reprolib:terms/allow']: allow,
       ['reprolib:terms/addProperties']: addProperties,
@@ -833,6 +843,7 @@ export default class Activity {
       ['reprolib:terms/finalSubScale']: finalSubScale,
       ['reprolib:terms/compute']: compute,
       ['reprolib:terms/messages']: messages,
+      ['reprolib:terms/scoreOverview']: scoreOverview,
       ['reprolib:terms/isPrize']: isPrize,
       ['reprolib:terms/order']: orders,
       ['_id']: id,
@@ -898,6 +909,10 @@ export default class Activity {
         activityPreamble &&
         activityPreamble[0] &&
         activityPreamble[0]['@value'],
+      isReviewerActivity:
+        isReviewerActivity &&
+        isReviewerActivity[0] &&
+        isReviewerActivity[0]['@value'],
       shuffle: shuffle && shuffle[0] && shuffle[0]['@value'],
       visibilities,
       subScales: Array.isArray(subScales) && subScales.map((subScale, index) => {
@@ -924,28 +939,19 @@ export default class Activity {
         lookupTable: parseLookupTable(true, _.get(finalSubScale, [0, 'reprolib:terms/lookupTable'], null)),
         variableName: _.get(finalSubScale, [0, 'reprolib:terms/variableName', 0, '@value'])
       },
-      compute: Array.isArray(compute) && compute.map((exp) => {
-        const jsExpression = exp['reprolib:terms/jsExpression'];
-        const variableName = exp['reprolib:terms/variableName'];
-
-        return {
-          jsExpression: jsExpression && jsExpression[0] && jsExpression[0]['@value'],
-          variableName: variableName && variableName[0] && variableName[0]['@value'],
-        }
-      }),
-      messages: Array.isArray(messages) && messages.map((msg) => {
-        const jsExpression = msg['reprolib:terms/jsExpression'];
-        const message = msg['reprolib:terms/message'];
-        const outputType = msg['reprolib:terms/outputType']
-        const nextActivity = msg['reprolib:terms/nextActivity']
-
-        return {
-          jsExpression: _.get(jsExpression, [0, '@value']),
-          message: _.get(message, [0, '@value']),
-          outputType: _.get(outputType, [0, '@value'], 'cumulative'),
-          nextActivity: _.get(nextActivity, [0, '@value']),
-        }
-      }),
+      compute: Array.isArray(compute) && compute.map((exp) => ({
+        jsExpression: _.get(exp, ['reprolib:terms/jsExpression', 0, '@value']),
+        variableName: _.get(exp, ['reprolib:terms/variableName', 0, '@value']),
+        description: _.get(exp, ['schema:description', 0, '@value']),
+        direction: _.get(exp, ['reprolib:terms/direction', 0, '@value'], true),
+      })),
+      messages: Array.isArray(messages) && messages.map((msg) => ({
+        jsExpression: _.get(msg, ['reprolib:terms/jsExpression', 0, '@value']),
+        message: _.get(msg, ['reprolib:terms/message', 0, '@value']),
+        outputType: _.get(msg, ['reprolib:terms/outputType', 0, '@value'], 'cumulative'),
+        nextActivity: _.get(msg, ['reprolib:terms/nextActivity', 0, '@value']),
+      })),
+      scoreOverview: _.get(scoreOverview, [0, '@value']),
       orderList: _.get(orders, '0.@list', []).map(order => order['@id'])
     };
 
@@ -965,7 +971,7 @@ export default class Activity {
     return activityInfo;
   }
 
-  static checkValidation (act) {
+  static checkValidation(act) {
     if (!act.name) {
       return false;
     }

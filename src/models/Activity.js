@@ -49,6 +49,7 @@ export default class Activity {
       name: initialActivityData.name || '',
       description: initialActivityData.description || '',
       splash: initialActivityData.splash || '',
+      image: initialActivityData.image || '',
       preamble: initialActivityData.preamble || '',
       shuffleActivityOrder: initialActivityData.shuffle || false,
       isSkippable: initialActivityData.isSkippable || false,
@@ -413,6 +414,7 @@ export default class Activity {
       'skos:altLabel': this.ref.name,
       'schema:description': this.ref.description,
       'schema:splash': this.ref.splash,
+      'schema:image': this.ref.image,
       'schema:schemaVersion': '0.0.1',
       'schema:version': '0.0.1',
       preamble: this.ref.preamble,
@@ -497,6 +499,7 @@ export default class Activity {
       description: this.ref.description,
       isVis: this.ref.isVis,
       splash: this.ref.splash,
+      image: this.ref.image,
       preamble: this.ref.preamble,
       isReviewerActivity: this.ref.isReviewerActivity,
       shuffle: this.ref.shuffleActivityOrder,
@@ -539,6 +542,12 @@ export default class Activity {
           `Activity visibility is ${
           _.get(newValue, field, false) ? 'disabled' : 'enabled'
           }`,
+      'schema:image': {
+        updated: (field) =>
+          `Activity image was changed to ${_.get(newValue, field)}`,
+        removed: (field) => `Activity image was removed`,
+        inserted: (field) =>
+          `Activity image was added (${_.get(newValue, field)})`
       },
       'ui.shuffle': {
         updated: (field) =>
@@ -859,6 +868,7 @@ export default class Activity {
       ['schema:description']: description,
       ['reprolib:terms/isVis']: visibility,
       ['schema:splash']: splash,
+      ['schema:image']: image,
       ['reprolib:terms/preamble']: activityPreamble,
       ['reprolib:terms/isReviewerActivity']: isReviewerActivity,
       ['reprolib:terms/shuffle']: shuffle,
@@ -930,6 +940,8 @@ export default class Activity {
         visibility && visibility[0] && visibility[0]['@value'],
       splash:
         splash && splash[0] && splash[0]['@value'],
+      image:
+        image || '',
       isPrize:
         isPrize && isPrize[0] && isPrize[0]['@value'],
       preamble:

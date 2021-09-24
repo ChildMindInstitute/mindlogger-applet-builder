@@ -39,17 +39,25 @@
       @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
       @required="updateRequired"
     />
+
+    <ItemTimerOption
+      colClasses="d-flex align-center py-0 px-3"
+      @update="updateTimerOption"
+      :responseTimeLimit="timer || 0"
+    />
   </div>
 </template>
 
 <script>
 import Uploader from '../../Uploader.vue';
 import OptionalItemText from '../../Partial/OptionalItemText.vue';
+import ItemTimerOption from '../../Partial/ItemTimerOption';
 
 export default {
   components: {
     Uploader,
     OptionalItemText,
+    ItemTimerOption,
   },
   props: {
     initialItemResponseOptions: {
@@ -67,6 +75,10 @@ export default {
     isSkippableItem: {
       type: Number,
       default: 0,
+    },
+    timer: {
+      type: Number,
+      required: false
     },
   },
   data: function () {
@@ -103,8 +115,12 @@ export default {
     }
   },
   methods: {
+    updateTimerOption(option) {
+      this.$emit('updateTimer', option.responseTimeLimit)
+    },
+
     updateRequired(event) {
-      // disable the skippable button if item is required 
+      // disable the skippable button if item is required
       if (event) {
         this.isSkippable = false
         this.isSkippableItem=2

@@ -391,6 +391,7 @@ export default {
       rule.valid =
         rule.messageInRange.length &&
         rule.messageOutRange.length &&
+        rule.name !== "" &&
         rule.score !== "" &&
         (rule.isActivityInRange ? rule.isActivityInRange && rule.activityInRange : true) &&
         (rule.isActivityOutRange ? rule.isActivityOutRange && rule.activityOutRange : true) &&

@@ -87,6 +87,10 @@ export default {
       icon: baseImageURL + 'item-types/audio-stimulus-icon.png',
     },
     {
+      text: "ageSelector",
+      icon: baseImageURL + 'item-types/slider-icon.png',
+    },
+    {
       text: "markdownMessage",
       icon: baseImageURL + 'item-types/message-icon.png',
     },

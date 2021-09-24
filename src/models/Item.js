@@ -50,6 +50,7 @@ export default class Item {
       markdownText: (initialItemData.question || ''),
       valid: initialItemData.valid === undefined ? true : initialItemData.valid,
       isOptionalText: initialItemData.isOptionalText || false,
+      timer: initialItemData.timer || 0
     };
 
     const model = new Item();
@@ -127,7 +128,7 @@ export default class Item {
   getResponseOptions() {
     if (this.ref.inputType === 'stackedRadio' || this.ref.inputType === 'stackedCheckbox') {
       return {
-        "valueType": (this.ref.valueType.includes("token") || this.ref.options.isTokenValue) ? "xsd:token" : "xsd:anyURI",
+        "valueType": (this.ref.options.valueType && this.ref.options.valueType.includes("token") || this.ref.options.isTokenValue) ? "xsd:token" : "xsd:anyURI",
         "scoring": this.ref.options.hasScoreValue,
         "responseAlert": this.ref.options.hasResponseAlert,
         "multipleChoice": this.ref.options.isMultipleChoice,
@@ -158,13 +159,13 @@ export default class Item {
           }
 
           return info;
-        })) || []
+        })) || [],
       }
     }
     if (this.ref.inputType === "radio" || this.ref.inputType === "prize" || this.ref.inputType === "checkbox") {
       const choices = this.getRadioChoices();
       return {
-        "valueType": (this.ref.valueType.includes("token") || this.ref.options.isTokenValue) ? "xsd:token" : "xsd:anyURI",
+        "valueType": (this.ref.options.valueType && this.ref.options.valueType.includes("token") || this.ref.options.isTokenValue) ? "xsd:token" : "xsd:anyURI",
         "enableNegativeTokens": this.ref.options.enableNegativeTokens,
         "scoring": this.ref.options.hasScoreValue,
         "responseAlert": this.ref.options.hasResponseAlert,
@@ -174,7 +175,7 @@ export default class Item {
         "schema:minValue": 1,
         "schema:maxValue": choices.length,
         "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
-        choices: choices
+        choices: choices,
       };
     }
     if (this.ref.inputType === "text") {
@@ -203,9 +204,8 @@ export default class Item {
         "schema:maxValueImg": this.ref.options.maxValueImg,
         "showTickMarks": this.ref.options.showTickMarks,
         "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
-        choices: choices
+        choices: choices,
       };
-
       if (this.ref.options.continousSlider && this.ref.options.hasResponseAlert) {
         Object.assign(responseOptions, {
           "minAlertValue": this.ref.options.minAlertValue,
@@ -215,6 +215,12 @@ export default class Item {
       }
 
       return responseOptions;
+    }
+    if (this.ref.inputType === "ageSelector") {
+      return {
+        "schema:minAge": this.ref.options.minAge,
+        "schema:maxAge": this.ref.options.maxAge,
+      }
     }
     if (this.ref.inputType === 'stackedSlider') {
       return {
@@ -244,6 +250,7 @@ export default class Item {
     }
     if (this.ref.inputType === "audioRecord") {
         this.ref.options.isOptionalTextRequired = this.ref.responseOptions.isOptionalTextRequired;
+
         return this.ref.options;
     } else {
         return {};
@@ -345,6 +352,7 @@ export default class Item {
       description: this.ref.description,
       options: this.ref.options,
       isOptionalText: this.ref.isOptionalText,
+      timer: this.ref.timer,
       allowEdit: this.ref.allowEdit,
       ...schema
     };
@@ -540,6 +548,16 @@ export default class Item {
       'correctAnswer': {
         updated: (field) => `Correct answer was changed`
       },
+      'timer': {
+        updated: field => {
+          const newTimeLimit = _.get(newValue, field);
+          if (newTimeLimit < 0) {
+            return 'Response time limit option has been disabled'
+          }
+
+          return `Response time limit was updated to ${_.get(newValue, field) / 1000} seconds`
+        }
+      },
       'isOptionalText': {
         updated: optionUpdate('Optional text option'),
       },
@@ -580,6 +598,14 @@ export default class Item {
       'options.maxValue': {
         updated: valueUpdate('maxValue'),
         inserted: valueInsert('maxValue'),
+      },
+      'options.minAge': {
+        updated: valueUpdate('minAge'),
+        inserted: valueInsert('minAge'),
+      },
+      'options.maxAge': {
+        updated: valueUpdate('maxAge'),
+        inserted: valueInsert('maxAge'),
       },
       'options.minValueImg': {
         updated: valueUpdate('minValueImg'),
@@ -725,6 +751,8 @@ export default class Item {
         _.get(item, ['reprolib:terms/allowEdit', 0, '@value'], true),
       isOptionalText:
         _.get(item, ['reprolib:terms/isOptionalText', 0, '@value'], false),
+      timer:
+        _.get(item, ['reprolib:terms/timer', 0, '@value'], 0)
     };
 
     let responseOptions = item['reprolib:terms/responseOptions'];
@@ -758,7 +786,7 @@ export default class Item {
 
       let responseAlert =
         _.get(responseOptions, [0, 'reprolib:terms/responseAlert']);
-      
+
       let colorPalette =
         _.get(responseOptions, [0, 'reprolib:terms/colorPalette']);
       
@@ -834,6 +862,7 @@ export default class Item {
           hasResponseAlert: itemContent.responseAlert || false,
           colorPalette: itemContent.colorPalette || false,
           randomizeOptions: itemContent.randomizeOptions || false,
+          valueType: itemContent.valueType,
           options:
             responseOptions[0] &&
             responseOptions[0]['schema:itemListElement'] &&
@@ -969,6 +998,14 @@ export default class Item {
           item['schema:correctAnswer'][0] &&
           item['schema:correctAnswer'][0]['@value']) {
           itemContent.correctAnswer = item['schema:correctAnswer'][0]['@value']
+        }
+      }
+      if (itemType === 'ageSelector') {
+        itemContent.options = {
+          maxAge:
+            _.get(responseOptions, [0, 'schema:maxAge', 0, '@value']),
+          minAge:
+            _.get(responseOptions, [0, 'schema:minAge', 0, '@value']),
         }
       }
       if (itemType === 'slider') {
@@ -1192,6 +1229,7 @@ export default class Item {
   static checkValidation(item) {
     if (!item.name
       || !item.inputType
+      || (item.options && item.options.valid === false)
       || !item.question
       || (item.inputType !== "markdownMessage"
         && item.inputType !== "cumulativeScore"

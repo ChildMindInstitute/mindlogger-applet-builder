@@ -128,6 +128,7 @@
       </v-col>
 
       <v-col
+        v-if="!isReviewerActivity"
         class="d-flex align-center"
         cols="12"
         sm="3"
@@ -140,6 +141,7 @@
       </v-col>
 
       <v-col
+        v-if="!isReviewerActivity"
         class="d-flex align-center"
         cols="12"
         sm="3"
@@ -185,6 +187,12 @@
       :required="responseOptions.isOptionalTextRequired"
       @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
       @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
+    />
+
+    <ItemTimerOption
+      colClasses="d-flex align-center py-0 px-3"
+      @update="updateTimerOption"
+      :responseTimeLimit="timer"
     />
 
     <v-dialog
@@ -378,11 +386,13 @@
 <script>
 import Uploader from '../../Uploader.vue';
 import OptionalItemText from '../../Partial/OptionalItemText.vue';
+import ItemTimerOption from '../../Partial/ItemTimerOption';
 
 export default {
   components: {
     Uploader,
     OptionalItemText,
+    ItemTimerOption,
   },
   props: {
     initialItemData: {
@@ -400,6 +410,14 @@ export default {
     initialIsOptionalText: {
       type: Boolean,
       default: false,
+    },
+    isReviewerActivity: {
+      type: Boolean,
+      default: false
+    },
+    timer: {
+      type: Number,
+      required: false
     },
   },
   data: function () {
@@ -454,6 +472,10 @@ export default {
     this.update();
   },
   methods: {
+    updateTimerOption(option) {
+      this.$emit('updateTimer', option.responseTimeLimit)
+    },
+
     resetScores () {
       for (let i = Number(this.minSliderTick); i <= Number(this.maxSliderTick); i++) {
         this.$set(this.scores, i - this.minSliderTick, i - this.minSliderTick + 1);

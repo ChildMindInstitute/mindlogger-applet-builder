@@ -1084,11 +1084,11 @@ export default class Item {
           })),
         };
         itemContent.options.sliderOptions.forEach(slider => {
-          if (!isFinite(slider.minValue)) {
-            slider.minValue = 0;
+          if (!isFinite(slider.minSliderTick)) {
+            slider.minSliderTick = 0;
           }
-          if (!isFinite(slider.maxValue)) {
-            slider.maxValue = 5;
+          if (!isFinite(slider.maxSliderTick)) {
+            slider.maxSliderTick = 5;
           }
         })
       }

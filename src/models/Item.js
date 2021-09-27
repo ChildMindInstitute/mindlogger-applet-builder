@@ -50,6 +50,7 @@ export default class Item {
       markdownText: (initialItemData.question || ''),
       valid: initialItemData.valid === undefined ? true : initialItemData.valid,
       isOptionalText: initialItemData.isOptionalText || false,
+      timer: initialItemData.timer || 0
     };
 
     const model = new Item();
@@ -158,7 +159,7 @@ export default class Item {
           }
 
           return info;
-        })) || []
+        })) || [],
       }
     }
     if (this.ref.inputType === "radio" || this.ref.inputType === "prize" || this.ref.inputType === "checkbox") {
@@ -174,7 +175,7 @@ export default class Item {
         "schema:minValue": 1,
         "schema:maxValue": choices.length,
         "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
-        choices: choices
+        choices: choices,
       };
     }
     if (this.ref.inputType === "text") {
@@ -182,6 +183,12 @@ export default class Item {
         'valueType': this.ref.options.valueType || this.ref.valueType,
         'requiredValue': this.ref.options.requiredValue,
         'isResponseIdentifier': this.ref.options.isResponseIdentifier
+      }
+    }
+    if (this.ref.inputType === "drawing") {
+      return {
+        ...this.ref.responseOptions,
+        "topNavigationOption": this.ref.options.topNavigationOption,
       }
     }
     if (this.ref.inputType === "slider") {
@@ -197,7 +204,7 @@ export default class Item {
         "schema:maxValueImg": this.ref.options.maxValueImg,
         "showTickMarks": this.ref.options.showTickMarks,
         "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
-        choices: choices
+        choices: choices,
       };
       if (this.ref.options.continousSlider && this.ref.options.hasResponseAlert) {
         Object.assign(responseOptions, {
@@ -238,11 +245,12 @@ export default class Item {
         "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
       };
     }
-    if (this.ref.inputType === "audioImageRecord" || this.ref.inputType === "drawing" || this.ref.inputType === "geolocation" || this.ref.inputType === "photo" || this.ref.inputType === "video" || this.ref.inputType === "timeRange") {
+    if (this.ref.inputType === "audioImageRecord" || this.ref.inputType === "geolocation" || this.ref.inputType === "photo" || this.ref.inputType === "video" || this.ref.inputType === "timeRange") {
       return this.ref.responseOptions;
     }
     if (this.ref.inputType === "audioRecord") {
         this.ref.options.isOptionalTextRequired = this.ref.responseOptions.isOptionalTextRequired;
+
         return this.ref.options;
     } else {
         return {};
@@ -344,6 +352,7 @@ export default class Item {
       description: this.ref.description,
       options: this.ref.options,
       isOptionalText: this.ref.isOptionalText,
+      timer: this.ref.timer,
       allowEdit: this.ref.allowEdit,
       ...schema
     };
@@ -360,7 +369,8 @@ export default class Item {
       itemObj.responseOptions = itemObj.responseOptions || this.ref.responseOptions;
     }
 
-    else if(this.ref.inputType === "drawing") {
+    else if (this.ref.inputType === "drawing") {
+      itemObj.responseOptions = itemObj.responseOptions || this.ref.responseOptions;
       itemObj.inputOptions = this.ref.inputOptions;
     }
 
@@ -538,6 +548,16 @@ export default class Item {
       'correctAnswer': {
         updated: (field) => `Correct answer was changed`
       },
+      'timer': {
+        updated: field => {
+          const newTimeLimit = _.get(newValue, field);
+          if (newTimeLimit < 0) {
+            return 'Response time limit option has been disabled'
+          }
+
+          return `Response time limit was updated to ${_.get(newValue, field) / 1000} seconds`
+        }
+      },
       'isOptionalText': {
         updated: optionUpdate('Optional text option'),
       },
@@ -614,6 +634,9 @@ export default class Item {
       },
       'options.colorPalette': {
         updated: optionUpdate('Color Palette'),
+      },
+      'options.topNavigationOption': {
+        updated: optionUpdate('Navigation Buttons'),
       },
       'options.continousSlider': {
         updated: valueUpdate('Continous Slider'),
@@ -728,6 +751,8 @@ export default class Item {
         _.get(item, ['reprolib:terms/allowEdit', 0, '@value'], true),
       isOptionalText:
         _.get(item, ['reprolib:terms/isOptionalText', 0, '@value'], false),
+      timer:
+        _.get(item, ['reprolib:terms/timer', 0, '@value'], 0)
     };
 
     let responseOptions = item['reprolib:terms/responseOptions'];
@@ -764,6 +789,9 @@ export default class Item {
 
       let colorPalette =
         _.get(responseOptions, [0, 'reprolib:terms/colorPalette']);
+      
+      let topNavigationOption =
+        _.get(responseOptions, [0, 'reprolib:terms/topNavigationOption']);
 
       let itemOptions =
         _.get(responseOptions, [0, 'reprolib:terms/itemOptions'], []);
@@ -816,6 +844,11 @@ export default class Item {
           _.get(colorPalette, [0, '@value']);
       }
 
+      if (topNavigationOption) {
+        itemContent.topNavigationOption =
+          _.get(topNavigationOption, [0, '@value']);
+      }
+
       if (valueType) {
         itemContent.valueType =
           valueType[0] && valueType[0]['@id'];
@@ -865,6 +898,12 @@ export default class Item {
                 };
               }
             ),
+        };
+      }
+
+      if (itemType === 'drawing') {
+        itemContent.options = {
+          topNavigationOption: itemContent.topNavigationOption || false,
         };
       }
 
@@ -1045,11 +1084,11 @@ export default class Item {
           })),
         };
         itemContent.options.sliderOptions.forEach(slider => {
-          if (!isFinite(slider.minValue)) {
-            slider.minValue = 0;
+          if (!isFinite(slider.minSliderTick)) {
+            slider.minSliderTick = 0;
           }
-          if (!isFinite(slider.maxValue)) {
-            slider.maxValue = 5;
+          if (!isFinite(slider.maxSliderTick)) {
+            slider.maxSliderTick = 5;
           }
         })
       }
@@ -1063,7 +1102,6 @@ export default class Item {
             _.get(responseOptions, [0, 'schema:minValue', 0, '@value']),
         };
       }
-
     }
 
     const inputOptions = item['reprolib:terms/inputs'];

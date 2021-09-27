@@ -176,6 +176,8 @@ export default {
       }
 
       this.setFormattedOriginalProtocol(JSON.parse(JSON.stringify(original)));
+    } else {
+      this.setFormattedOriginalProtocol(null);
     }
 
     this.$emit("setLoading", false);

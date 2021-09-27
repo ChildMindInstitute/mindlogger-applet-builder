@@ -354,14 +354,20 @@
           />
         </v-col>
       </v-row>
-        <OptionalItemText
-          colClasses="d-flex align-center py-0 px-3"
+      <OptionalItemText
+        colClasses="d-flex align-center py-0 px-3"
 
-          :text="isOptionalText"
-          :required="responseOptions.isOptionalTextRequired"
-          @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
-          @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
-        />
+        :text="isOptionalText"
+        :required="responseOptions.isOptionalTextRequired"
+        @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
+        @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
+      />
+
+      <ItemTimerOption
+        colClasses="d-flex align-center py-0 px-3"
+        @update="updateTimerOption"
+        :responseTimeLimit="timer"
+      />
     </v-form>
 
     <v-dialog
@@ -558,13 +564,15 @@
 <script>
 import Uploader from '../../Uploader.vue';
 import OptionalItemText from '../../Partial/OptionalItemText.vue';
+import ItemTimerOption from '../../Partial/ItemTimerOption';
 import MarkDownEditor from '../../MarkDownEditor';
 
 export default {
   components: {
     Uploader,
     OptionalItemText,
-    MarkDownEditor
+    MarkDownEditor,
+    ItemTimerOption,
   },
   props: {
     initialItemData: {
@@ -600,7 +608,11 @@ export default {
     isReviewerActivity: {
       type: Boolean,
       default: false
-    }
+    },
+    timer: {
+      type: Number,
+      required: false
+    },
   },
   data: function () {
 
@@ -684,6 +696,10 @@ export default {
   },
 
   methods: {
+    updateTimerOption(option) {
+      this.$emit('updateTimer', option.responseTimeLimit)
+    },
+
     addOption() {
       let currentPalette = "";
       const nextOption = {

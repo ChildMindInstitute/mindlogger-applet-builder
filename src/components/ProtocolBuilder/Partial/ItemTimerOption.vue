@@ -52,7 +52,7 @@ export default {
   methods: {
     update() {
       if (this.timerOption) {
-        this.timeLimit = this.timeLimit || 1;
+        this.timeLimit = this.timeLimit || 10;
       }
 
       this.$emit('update', {

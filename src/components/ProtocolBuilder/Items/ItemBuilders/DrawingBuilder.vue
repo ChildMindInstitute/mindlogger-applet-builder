@@ -24,11 +24,34 @@
       @onNotify="$emit('loading', false); $emit('notify', $event);"
     />
 
-    <v-checkbox
-      v-model="isSkippable"
-      label="Skippable Item"
-      :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
-    />
+    <v-row>
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="isSkippable"
+          label="Skippable Item"
+          :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
+        />
+      </v-col>
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="topNavigationOption"
+          label="Move navigation buttons to top of screen"
+          @change="update"
+        
+        />
+      </v-col>
+    </v-row>
+
     <OptionalItemText
       :colClasses="'d-flex align-center'"
       :cols="12"
@@ -60,6 +83,10 @@ export default {
     ItemTimerOption,
   },
   props: {
+    initialItemData: {
+      type: Object,
+      required: true
+    },
     initialItemResponseOptions: {
       type: Object,
       required: true,
@@ -101,6 +128,7 @@ export default {
       responseOptions,
       inputBackgroundOption,
       inputOptions,
+      topNavigationOption: this.initialItemData.topNavigationOption || false,
       isOptionalText: this.initialIsOptionalText,
     }
   },
@@ -150,6 +178,13 @@ export default {
     updateImage(url) {
       this.responseOptions['schema:image'] = url;
       this.onUpdateResponseOptions();
+    },
+
+    update() {
+      const responseOptions = {
+        'topNavigationOption': this.topNavigationOption,
+      };
+      this.$emit('updateOptions', responseOptions);
     },
 
     updateBackgroundImage(url) {

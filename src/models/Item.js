@@ -37,6 +37,7 @@ export default class Item {
       description: initialItemData.description || '',
       correctAnswer: initialItemData.correctAnswer || '',
       valueType: initialItemData.valueType || '',
+      isVis: initialItemData.isVis || false,
       inputType,
       options: initialItemData.options || {},
       allow: initialItemData.ui && initialItemData.ui.allow
@@ -101,6 +102,7 @@ export default class Item {
                 "@type": "schema:option",
                 "schema:name": option.name,
                 "schema:value": option.value,
+                "reprolib:terms/isVis": option.isVis,
                 "schema:color": option.color,
                 "schema:description": option.description,
             };
@@ -277,6 +279,7 @@ export default class Item {
         "skos:prefLabel": this.ref.name,
         "skos:altLabel": this.ref.name,
         "schema:description": this.ref.description,
+        isVis: this.ref.isVis,
         "schema:schemaVersion": "0.0.1",
         "schema:version": "0.0.1",
         ui: {
@@ -350,6 +353,7 @@ export default class Item {
         ? this.ref.question.image ? `\r\n\r\n![''](${this.ref.question.image} =250x250)\r\n\r\n${this.ref.question.text}` : this.ref.question.text
         : this.ref.markdownText,
       description: this.ref.description,
+      isVis: this.ref.isVis,
       options: this.ref.options,
       isOptionalText: this.ref.isOptionalText,
       timer: this.ref.timer,
@@ -406,29 +410,31 @@ export default class Item {
 
   static getHistoryTemplate(oldValue, newValue) {
     const radioOptionListUpdate = (field) => {
-      const oldOptions = _.get(oldValue, field, []).map(({ name, value, score }) => {
+      const oldOptions = _.get(oldValue, field, []).map(({ name, value, score, isVis }) => {
         return {
           name,
           value,
-          score
+          score,
+          isVis,
         }
       });
-      const newOptions = _.get(newValue, field, []).map(({ name, value, score }) => {
+      const newOptions = _.get(newValue, field, []).map(({ name, value, score, isVis }) => {
         return {
           name,
           value,
-          score
+          score,
+          isVis,
         }
       });
 
       const removedOptions = oldOptions.filter(option => {
         return newOptions.find(newOption => {
-          return option.name === newOption.name && option.value === newOption.value && option.score === newOption.score
+          return option.name === newOption.name && option.value === newOption.value && option.score === newOption.score && option.isVis === newOption.isVis
         }) ? false : true
       });
       const insertedOptions = newOptions.filter(newOption => {
         return oldOptions.find(option => {
-          return option.name === newOption.name && option.value === newOption.value && option.score === newOption.score
+          return option.name === newOption.name && option.value === newOption.value && option.score === newOption.score && option.isVis === newOption.isVis
         }) ? false : true
       });
 
@@ -567,6 +573,12 @@ export default class Item {
       },
       'ui.allow': {
         updated: allowListUpdate,
+      },
+      'isVis': {
+        updated: (field) =>
+          `Item visibility is ${
+          _.get(newValue, field, false) ? 'disabled' : 'enabled'
+          }`,
       },
       'options.isMultipleChoice': {
         updated: optionUpdate('Multiple choice option'),
@@ -742,6 +754,7 @@ export default class Item {
         _.get(item, ['schema:question', 0, '@value']),
       description:
         _.get(item, ['schema:description', 0, '@value']),
+      isVis: _.get(item, ['reprolib:terms/isVis', 0, '@value']),
       ui: {
         allow,
         inputType:
@@ -874,6 +887,7 @@ export default class Item {
                 const color = itemListElement["schema:color"];
                 const score = itemListElement["schema:score"];
                 const alert = itemListElement["schema:alert"];
+                const isVis = itemListElement["reprolib:terms/isVis"];
                 const description = itemListElement["schema:description"];
 
                 return {
@@ -890,6 +904,8 @@ export default class Item {
                     Array.isArray(value) && value[0] && value[0]['@value'],
                   score:
                     Array.isArray(score) && score[0] && score[0]['@value'],
+                  isVis:
+                    Array.isArray(isVis) && isVis[0] && isVis[0]['@value'],
                   alert:
                     Array.isArray(alert) && alert[0] && alert[0]['@value'],
                   description:

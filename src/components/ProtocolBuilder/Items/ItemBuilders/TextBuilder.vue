@@ -129,6 +129,7 @@ export default {
     },
     updateAnswer() {
       const { correctAnswer, requiredAnswer } = this;
+
       if (!requiredAnswer) {
         this.$emit('updateAnswer', "");
       } else {

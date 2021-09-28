@@ -134,6 +134,18 @@
 
               <v-btn
                 icon
+                @click="showOrHideActivity(activities.findIndex(act => act == activity))"
+              >
+                <v-icon v-if="activity.isVis" color="grey lighten-1">
+                  mdi-eye-off-outline
+                </v-icon>
+                <v-icon v-else color="grey lighten-1">
+                  mdi-eye-outline
+                </v-icon>
+              </v-btn>
+
+              <v-btn
+                icon
                 @click="editActivity(index)"
               >
                 <v-icon color="grey lighten-1">
@@ -204,6 +216,7 @@ export default {
   data () {
     return {
       markdownDialog: false,
+      isVis: [],
       textRules: [(v) => !!v.trim() || "This field is required"],
     }
   },
@@ -284,6 +297,7 @@ export default {
         'updateProtocolMetaInfo',
         'duplicateActivity',
         'deleteActivity',
+        'showOrHideActivity',
         'addActivity',
         'setCurrentActivity',
         'setCurrentScreen',

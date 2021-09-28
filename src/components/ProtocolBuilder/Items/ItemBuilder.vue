@@ -417,7 +417,6 @@
         :key="`${baseKey}-drawing`"
         :initial-item-data="item.options"
         :initial-item-response-options="item.responseOptions"
-        :initial-item-data="item.options"
         :initial-item-input-options="item.inputOptions"
         :initial-is-optional-text="item.isOptionalText"
         :is-skippable-item="skippable"
@@ -738,7 +737,6 @@ export default {
       isExpanded: false,
       isTextExpanded: false,
       isItemNameEditing: false,
-      isTextExpanded: false,
       baseKey: 0,
       loading: false,
       notify: {},

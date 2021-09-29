@@ -18,11 +18,34 @@
       :rules="maxValueRules"
       @change="update"
     />
-    <v-checkbox
-      v-model="isSkippable"
-      label="Skippable Item"
-      :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
-    />
+    <v-row>
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="isSkippable"
+          label="Skippable Item"
+          :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
+          @change="update"
+        />
+      </v-col>
+
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="removeBackOption"
+          label="Remove back button"
+          @change="update"
+        />
+      </v-col>
+    </v-row>
 
     <OptionalItemText
       :colClasses="'d-flex align-center'"
@@ -85,6 +108,7 @@ export default {
       maxValueRules: [
         v => (v > 0 && v % 1 === 0) || 'Max response length must be a positive integer',
       ],
+      removeBackOption: this.initialItemData.removeBackOption,
       responseOptions: this.initialItemResponseOptions,
       isOptionalText: this.initialIsOptionalText,
     };
@@ -120,6 +144,8 @@ export default {
       const responseOptions = {
         'schema:minValue': this.minValue,
         'schema:maxValue': this.maxValue,
+        'isSkippableItem': this.isSkippable,
+        'removeBackOption': this.removeBackOption,
       };
       this.$emit('updateOptions', responseOptions);
     },

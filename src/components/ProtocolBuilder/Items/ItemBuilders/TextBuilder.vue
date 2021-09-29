@@ -64,6 +64,30 @@
           @change="update"
         />
       </v-col>
+
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        sm="3"
+      >
+        <v-checkbox
+          v-model="requiredValue"
+          label="Response required"
+          @change="updateRequiredValue"
+        />
+      </v-col>
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="removeBackOption"
+          label="Remove back button"
+          @change="update"
+        />
+      </v-col>
     </v-row>
   </v-form>
 </template>
@@ -92,6 +116,8 @@ export default {
     return {
       correctAnswer: this.initialAnswer || "",
       maxLength: this.initialItemData.maxLength || 50,
+      requiredValue: this.initialItemData.requiredValue || false,
+      removeBackOption: this.initialItemData.removeBackOption,
       requiredAnswer: this.initialAnswer ? true : false,
       isResponseIdentifier: this.initialItemData.isResponseIdentifier || false,
       isNumerical: ((this.responseOption.valueType && this.responseOption.valueType.includes('integer'))
@@ -122,6 +148,8 @@ export default {
     update () {
       const responseOptions = {
         'maxLength': this.maxLength,
+        'requiredValue': this.requiredValue,
+        'removeBackOption': this.removeBackOption,
         'isResponseIdentifier': this.isResponseIdentifier,
         'valueType': this.isNumerical ? 'xsd:integer' : 'xsd:string',
       };

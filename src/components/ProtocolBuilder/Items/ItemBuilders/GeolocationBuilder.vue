@@ -15,11 +15,34 @@
       @onNotify="$emit('loading', false); $emit('notify', $event);"
     />
 
-    <v-checkbox
-      v-model="isSkippable"
-      label="Skippable Item"
-      :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
-    />
+    <v-row>
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="isSkippable"
+          label="Skippable Item"
+          :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
+          @change="update"
+        />
+      </v-col>
+
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="removeBackOption"
+          label="Remove back button"
+          @change="update"
+        />
+      </v-col>
+    </v-row>
     <OptionalItemText
       :colClasses="'d-flex align-center'"
       :cols="12"
@@ -54,6 +77,10 @@ export default {
     initialItemResponseOptions: {
       type: Object,
       required: true,
+    },
+    initialItemData: {
+      type: Object,
+      required: true
     },
     initialIsOptionalText: {
       type: Boolean,
@@ -141,7 +168,13 @@ export default {
         duration: 3000,
       });
     },
-
+    update() {
+      const responseOptions = {
+        'isSkippableItem': this.isSkippable,
+        'removeBackOption': this.removeBackOption,
+      };
+      this.$emit('updateOptions', responseOptions);
+    },
   },
 }
 </script>

@@ -7,8 +7,8 @@
       <span class="activity-name">{{ name }}</span>
       <v-spacer />
       <v-card-actions>
-        <v-btn 
-          icon 
+        <v-btn
+          icon
           @click="editActivtiy"
         >
           <v-icon
@@ -58,17 +58,29 @@
         <v-col
           class="py-0"
           cols="12"
-          sm="6"
+          sm="4"
         >
           <v-checkbox
             v-model="isSkippable"
             label="Allow user to skip all items"
           />
         </v-col>
+
         <v-col
           class="py-0"
           cols="12"
-          sm="6"
+          sm="4"
+        >
+          <v-checkbox
+            v-model="isReviewerActivity"
+            label="This activity will only be available to review a user's data on the user's detail page"
+          />
+        </v-col>
+
+        <v-col
+          class="py-0"
+          cols="12"
+          sm="4"
         >
           <v-checkbox
             v-model="isDisableResponseChanges"
@@ -208,6 +220,14 @@ export default {
       },
       set: function (isSkippable) {
         this.updateActivityMetaInfo({ isSkippable });
+      }
+    },
+    isReviewerActivity: {
+      get: function () {
+        return this.currentActivity && this.currentActivity.isReviewerActivity;
+      },
+      set: function (isReviewerActivity) {
+        this.updateActivityMetaInfo({ isReviewerActivity });
       }
     },
     isDisableResponseChanges: {

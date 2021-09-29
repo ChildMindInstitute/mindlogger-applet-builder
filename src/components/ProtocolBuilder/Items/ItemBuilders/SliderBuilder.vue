@@ -5,7 +5,7 @@
         <v-col
           class="d-flex align-center"
           cols="12"
-          sm="3"
+          sm="5"
         >
           <v-text-field
             v-model="minSliderTick"
@@ -18,13 +18,13 @@
         </v-col>
 
         <v-col
-          sm="3"
+          sm="5"
         >
           <v-text-field
             v-model="minValue"
+            :rules="minLabelRules"
             label="Min Label"
             counter="20"
-            maxlength="20"
             @change="update"
           />
         </v-col>
@@ -47,7 +47,7 @@
         <v-col
           class="d-flex align-center"
           cols="12"
-          sm="3"
+          sm="5"
         >
           <v-text-field
             v-model="maxSliderTick"
@@ -60,13 +60,13 @@
         </v-col>
 
         <v-col
-          sm="3"
+          sm="5"
         >
           <v-text-field
             v-model="maxValue"
+            :rules="maxLabelRules"
             label="Max Label"
             counter="20"
-            maxlength="20"
             @change="update"
           />
         </v-col>
@@ -128,6 +128,7 @@
       </v-col>
 
       <v-col
+        v-if="!isReviewerActivity"
         class="d-flex align-center"
         cols="12"
         sm="3"
@@ -140,6 +141,7 @@
       </v-col>
 
       <v-col
+        v-if="!isReviewerActivity"
         class="d-flex align-center"
         cols="12"
         sm="3"
@@ -174,6 +176,18 @@
           @change="update"
         />
       </v-col>
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="removeBackOption"
+          label="Remove back button"
+          @change="update"
+        />
+      </v-col>
     </v-row>
 
     <OptionalItemText
@@ -185,6 +199,12 @@
       :required="responseOptions.isOptionalTextRequired"
       @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
       @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
+    />
+
+    <ItemTimerOption
+      colClasses="d-flex align-center py-0 px-3"
+      @update="updateTimerOption"
+      :responseTimeLimit="timer"
     />
 
     <v-dialog
@@ -378,11 +398,13 @@
 <script>
 import Uploader from '../../Uploader.vue';
 import OptionalItemText from '../../Partial/OptionalItemText.vue';
+import ItemTimerOption from '../../Partial/ItemTimerOption';
 
 export default {
   components: {
     Uploader,
     OptionalItemText,
+    ItemTimerOption,
   },
   props: {
     initialItemData: {
@@ -401,6 +423,14 @@ export default {
       type: Boolean,
       default: false,
     },
+    isReviewerActivity: {
+      type: Boolean,
+      default: false
+    },
+    timer: {
+      type: Number,
+      required: false
+    },
   },
   data: function () {
     return {
@@ -411,6 +441,14 @@ export default {
       maxValue: this.initialItemData.maxValue || '',
       maxValueImg: this.initialItemData.maxValueImg || '',
       valid: true,
+      minLabelRules: [
+        v => !!v || 'Min label cannot be empty',
+        v => v.length <= 20 || 'Visibility decreases over 75 characters',
+      ],
+      maxLabelRules: [
+        v => !!v || 'Max label cannot be empty',
+        v => v.length <= 20 || 'Visibility decreases over 75 characters',
+      ],
       textRules: [
         v => !!v || 'Radio options cannot be empty',
       ],
@@ -430,7 +468,7 @@ export default {
       alertMessage: this.initialItemData.responseAlertMessage || '',
       alertMinValue: Number(this.initialItemData.minAlertValue || this.initialItemData.minSliderTick || 0),
       alertMaxValue: Number(this.initialItemData.maxAlertValue || this.initialItemData.maxSliderTick || 0),
-
+      removeBackOption: this.initialItemData.removeBackOption,
       showTickMarks: this.initialItemData.showTickMarks || false,
       scores: this.initialItemData.scores || [],
       alerts: this.initialItemData.alerts || [],
@@ -454,6 +492,10 @@ export default {
     this.update();
   },
   methods: {
+    updateTimerOption(option) {
+      this.$emit('updateTimer', option.responseTimeLimit)
+    },
+
     resetScores () {
       for (let i = Number(this.minSliderTick); i <= Number(this.maxSliderTick); i++) {
         this.$set(this.scores, i - this.minSliderTick, i - this.minSliderTick + 1);
@@ -504,6 +546,7 @@ export default {
         'hasScoreValue': this.hasScoreValue,
         'hasResponseAlert': this.hasResponseAlert,
         'continousSlider': this.continousSlider,
+        'removeBackOption': this.removeBackOption,
         'showTickMarks': this.showTickMarks,
         'scores': this.hasScoreValue ? this.scores : false,
       };

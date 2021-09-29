@@ -24,11 +24,61 @@
       @onNotify="$emit('loading', false); $emit('notify', $event);"
     />
 
-    <v-checkbox
-      v-model="isSkippable"
-      label="Skippable Item"
-      :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
-    />
+    <v-row>
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="isSkippable"
+          label="Skippable Item"
+          :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
+          @change="update"
+        />
+      </v-col>
+
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="topNavigationOption"
+          label="Move navigation buttons to top of screen"
+          @change="update"
+        
+        />
+      </v-col>
+
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="removeBackOption"
+          label="Remove back button"
+          @change="update"
+        />
+      </v-col>
+
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="removeUndoOption"
+          label="Remove undo button"
+          @change="update"
+        />
+      </v-col>
+    </v-row>
     <OptionalItemText
       :colClasses="'d-flex align-center'"
       :cols="12"
@@ -39,22 +89,38 @@
       @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
       @required="updateRequired"
     />
+
+    <ItemTimerOption
+      colClasses="d-flex align-center py-0 px-3"
+      @update="updateTimerOption"
+      :responseTimeLimit="timer || 0"
+    />
   </div>
 </template>
 
 <script>
 import Uploader from '../../Uploader.vue';
 import OptionalItemText from '../../Partial/OptionalItemText.vue';
+import ItemTimerOption from '../../Partial/ItemTimerOption';
 
 export default {
   components: {
     Uploader,
     OptionalItemText,
+    ItemTimerOption,
   },
   props: {
+    initialItemData: {
+      type: Object,
+      required: true
+    },
     initialItemResponseOptions: {
       type: Object,
       required: true,
+    },
+    initialItemData: {
+      type: Object,
+      required: true
     },
     initialItemInputOptions: {
       type: Array,
@@ -67,6 +133,10 @@ export default {
     isSkippableItem: {
       type: Number,
       default: 0,
+    },
+    timer: {
+      type: Number,
+      required: false
     },
   },
   data: function () {
@@ -87,8 +157,11 @@ export default {
 
     return {
       responseOptions,
+      removeBackOption: this.initialItemData.removeBackOption,
+      removeUndoOption: this.initialItemData.removeUndoOption,
       inputBackgroundOption,
       inputOptions,
+      topNavigationOption: this.initialItemData.topNavigationOption || false,
       isOptionalText: this.initialIsOptionalText,
     }
   },
@@ -103,8 +176,12 @@ export default {
     }
   },
   methods: {
+    updateTimerOption(option) {
+      this.$emit('updateTimer', option.responseTimeLimit)
+    },
+
     updateRequired(event) {
-      // disable the skippable button if item is required 
+      // disable the skippable button if item is required
       if (event) {
         this.isSkippable = false
         this.isSkippableItem=2
@@ -134,6 +211,13 @@ export default {
     updateImage(url) {
       this.responseOptions['schema:image'] = url;
       this.onUpdateResponseOptions();
+    },
+
+    update() {
+      const responseOptions = {
+        'topNavigationOption': this.topNavigationOption,
+      };
+      this.$emit('updateOptions', responseOptions);
     },
 
     updateBackgroundImage(url) {
@@ -184,7 +268,14 @@ export default {
         duration: 3000,
       });
     },
-
+    update() {
+      const responseOptions = {
+        isSkippableItem: this.isSkippable,
+        removeBackOption: this.removeBackOption,
+        removeUndoOption: this.removeUndoOption,
+      };
+      this.$emit('updateOptions', responseOptions);
+    },
   }
 }
 </script>

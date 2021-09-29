@@ -16,15 +16,23 @@
       @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
       @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
     />
+
+    <ItemTimerOption
+      colClasses="d-flex align-center py-0 px-3"
+      @update="updateTimerOption"
+      :responseTimeLimit="timer"
+    />
   </div>
 </template>
 
 <script>
 import OptionalItemText from '../../Partial/OptionalItemText.vue';
+import ItemTimerOption from '../../Partial/ItemTimerOption';
 
 export default {
   components: {
     OptionalItemText,
+    ItemTimerOption,
   },
   props: {
     initialItemResponseOptions: {
@@ -38,6 +46,10 @@ export default {
     isSkippableItem: {
       type: Number,
       default: 0,
+    },
+    timer: {
+      type: Number,
+      required: false
     },
   },
   data() {
@@ -57,6 +69,10 @@ export default {
     }
   },
   methods: {
+    updateTimerOption(option) {
+      this.$emit('updateTimer', option.responseTimeLimit)
+    },
+
     onUpdateResponseOptions() {
       if (this.responseOptions.isOptionalTextRequired)
         this.$emit('updateAllow', false);

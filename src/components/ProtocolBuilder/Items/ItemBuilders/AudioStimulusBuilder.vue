@@ -29,18 +29,45 @@
     />
     <!-- Audio Uploader -->
 
-    <v-checkbox
-      v-model="isSkippable"
-      label="Skippable Item"
-      :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
-    />
-
-    <v-checkbox
-      v-model="replayInputOption['schema:value']"
-      label="Media Replay Allowed"
-      @change="onUpdateInputOptions"
-    />
-
+    <v-row>
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="isSkippable"
+          label="Skippable Item"
+          :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
+          @change="update"
+        />
+      </v-col>
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="replayInputOption['schema:value']"
+          label="Media Replay Allowed"
+          @change="onUpdateInputOptions"
+        />
+      </v-col>
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="removeBackOption"
+          label="Remove back button"
+          @change="update"
+        />
+      </v-col>
+    </v-row>
     <v-dialog
       v-model="isRecordProcess"
       persistent
@@ -114,6 +141,10 @@ export default {
       type: Array,
       default: new Array(),
     },
+    initialItemData: {
+      type: Object,
+      required: true
+    },
     initialItemMedia: {
       type: Object,
       default: new Object(),
@@ -164,7 +195,7 @@ export default {
       mediaObj,
 
       audio: asInputOption['schema:value'],
-
+      removeBackOption: this.initialItemData.removeBackOption,
       isRecordProcess: false,
       isRecordProcessVisible: false,
       recordedAudioData: null,
@@ -307,8 +338,14 @@ export default {
       this.onUpdateInputOptions();
       this.onUpdateMedia();
       this.onValidate();
-    }
-
+    },
+    update() {
+      const responseOptions = {
+        'isSkippableItem': this.isSkippable,
+        'removeBackOption': this.removeBackOption,
+      };
+      this.$emit('updateOptions', responseOptions);
+    },
   }
 };
 </script>

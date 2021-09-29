@@ -1,34 +1,11 @@
 <template>
   <div>
     <p>Users will be prompted to take a photo.</p>
-    <v-row>
-      <v-col
-        class="d-flex align-center"
-        cols="12"
-        md="3"
-        sm="6"
-      >
-        <v-checkbox
-          v-model="isSkippable"
-          label="Skippable Item"
-          :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
-          @change="update"
-        />
-      </v-col>
-
-      <v-col
-        class="d-flex align-center"
-        cols="12"
-        md="3"
-        sm="6"
-      >
-        <v-checkbox
-          v-model="removeBackOption"
-          label="Remove back button"
-          @change="update"
-        />
-      </v-col>
-    </v-row>
+    <v-checkbox
+      v-model="isSkippable"
+      label="Skippable Item"
+      :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
+    />
     <OptionalItemText
       :colClasses="'d-flex align-center'"
       :cols="12"
@@ -62,10 +39,6 @@ export default {
       type: Object,
       required: true,
     },
-    initialItemData: {
-      type: Object,
-      required: true
-    },
     initialIsOptionalText: {
       type: Boolean,
       default: false,
@@ -82,7 +55,6 @@ export default {
   data() {
     return {
       responseOptions: this.initialItemResponseOptions,
-      removeBackOption: this.initialItemData.removeBackOption,
       isOptionalText: this.initialIsOptionalText,
     }
   },
@@ -119,13 +91,6 @@ export default {
       else if (this.responseOptions.isOptionalTextRequired === false)
         this.$emit('updateAllow', undefined);
       this.$emit('updateResponseOptions', this.responseOptions);
-    },
-    update() {
-      const responseOptions = {
-        'isSkippableItem': this.isSkippable,
-        'removeBackOption': this.removeBackOption,
-      };
-      this.$emit('updateOptions', responseOptions);
     },
   },
 }

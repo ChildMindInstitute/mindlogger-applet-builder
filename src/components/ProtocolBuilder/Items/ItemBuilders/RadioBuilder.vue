@@ -122,6 +122,17 @@
               />
               <v-btn
                 icon
+                @click="hideOption(index)"
+              >
+                <v-icon v-if="option.isVis">
+                  mdi-eye-off-outline
+                </v-icon>
+                <v-icon v-else>
+                  mdi-eye-outline
+                </v-icon>
+              </v-btn>
+              <v-btn
+                icon
                 @click="deleteOption(index)"
               >
                 <v-icon>delete</v-icon>
@@ -645,6 +656,7 @@ export default {
         value: option.value || 0,
         score: option.score || 0,
         image: option.image || '',
+        isVis: option.isVis || false,
         description: option.description || '',
         color: option.color || '',
         alert: option.alert || '',
@@ -719,6 +731,7 @@ export default {
         'name': `Option ${this.options.length + 1}`,
         'value': 0,
         'score': 0,
+        'isVis': false,
         'description': '',
         'color': '',
         'expanded': false,
@@ -888,6 +901,14 @@ export default {
         }
       }
 
+      this.update();
+    },
+
+    hideOption(index) {
+      const itemOptions = [...this.options];
+
+      itemOptions[index].isVis = !itemOptions[index].isVis;
+      this.options = [...itemOptions];
       this.update();
     },
 

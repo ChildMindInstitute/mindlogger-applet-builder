@@ -39,6 +39,7 @@ export default class Activity {
       preamble: initialActivityData.preamble || '',
       shuffleActivityOrder: initialActivityData.shuffle || false,
       isSkippable: initialActivityData.isSkippable || false,
+      isVis: initialActivityData.isVis || false,
       items: items || [],
       disableBack: initialActivityData.disableBack || false,
       allowSummary: initialActivityData.allowSummary !== undefined ? initialActivityData.allowSummary : true,
@@ -405,6 +406,7 @@ export default class Activity {
       scoringLogic: {},
       'repronim:timeUnit': 'yearmonthdate',
       isPrize: this.ref.isPrize,
+      isVis: this.ref.isVis,
       baseAppletId: this.ref.baseAppletId,
       baseActivityId: this.ref.baseActivityId,
       ui: {
@@ -474,10 +476,12 @@ export default class Activity {
     const schema = this.getCompressedSchema();
     const context = this.getContext();
     const conditionalItems = this.ref.conditionalItems;
+
     return {
       _id: this.ref.id,
       name: this.ref.name,
       description: this.ref.description,
+      isVis: this.ref.isVis,
       splash: this.ref.splash,
       preamble: this.ref.preamble,
       isReviewerActivity: this.ref.isReviewerActivity,
@@ -515,6 +519,12 @@ export default class Activity {
         removed: (field) => `Activity splash screen was removed`,
         inserted: (field) =>
           `Activity splash screen was added (${_.get(newValue, field)})`,
+      },
+      'isVis': {
+        updated: (field) =>
+          `Activity visibility is ${
+          _.get(newValue, field, false) ? 'disabled' : 'enabled'
+          }`,
       },
       'ui.shuffle': {
         updated: (field) =>
@@ -833,6 +843,7 @@ export default class Activity {
     const {
       ['http://www.w3.org/2004/02/skos/core#prefLabel']: name,
       ['schema:description']: description,
+      ['reprolib:terms/isVis']: visibility,
       ['schema:splash']: splash,
       ['reprolib:terms/preamble']: activityPreamble,
       ['reprolib:terms/isReviewerActivity']: isReviewerActivity,
@@ -901,6 +912,8 @@ export default class Activity {
         name && name[0] && name[0]['@value'],
       description:
         description && description[0] && description[0]['@value'],
+      isVis:
+        visibility && visibility[0] && visibility[0]['@value'],
       splash:
         splash && splash[0] && splash[0]['@value'],
       isPrize:

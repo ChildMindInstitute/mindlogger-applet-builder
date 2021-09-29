@@ -26,6 +26,18 @@
         </v-btn>
         <v-btn
           icon
+          v-if="!isConditionalItem()"
+          @click="hideItem(itemIndex)"
+        >
+          <v-icon v-if="isVis" color="grey lighten-1">
+            mdi-eye-off-outline
+          </v-icon>
+          <v-icon v-else color="grey lighten-1">
+            mdi-eye-outline
+          </v-icon>
+        </v-btn>
+        <v-btn
+          icon
           @click="editItem"
         >
           <v-icon
@@ -740,6 +752,7 @@ export default {
       baseKey: 0,
       loading: false,
       notify: {},
+      isVis: false,
       responseIdentifierMessage: 'By using this option, the user will be required to enter response data identifier text into the field. The text entered will identify the response data collected at that point in time. The identifier used will be filterable on the user\'s data visualization tab.'
     }
   },
@@ -814,6 +827,7 @@ export default {
       isExpanded: !this.item.name.length
     });
 
+    this.isVis = !!this.item.isVis;
     this.setItemName();
 
   },
@@ -822,6 +836,7 @@ export default {
       [
         'updateItemMetaInfo',
         'duplicateItem',
+        'showOrHideItem',
         'deleteConditional',
         'deleteItem',
         'updateItemInputType',
@@ -836,6 +851,11 @@ export default {
 
     editItem () {
       this.isExpanded = !this.isExpanded;
+    },
+
+    hideItem (index) {
+      this.isVis = !this.isVis;
+      this.showOrHideItem(index);
     },
 
     onDeleteItem () {
@@ -866,6 +886,10 @@ export default {
       })
 
       this.removeDialog = false;
+    },
+
+    isConditionalItem () {
+      return this.conditionals.some(({ showValue }) => showValue === this.item.name);
     },
 
     nameKeydown (e) {

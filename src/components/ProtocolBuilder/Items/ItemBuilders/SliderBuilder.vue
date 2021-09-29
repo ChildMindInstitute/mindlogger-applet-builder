@@ -5,7 +5,7 @@
         <v-col
           class="d-flex align-center"
           cols="12"
-          sm="3"
+          sm="5"
         >
           <v-text-field
             v-model="minSliderTick"
@@ -18,13 +18,13 @@
         </v-col>
 
         <v-col
-          sm="3"
+          sm="5"
         >
           <v-text-field
             v-model="minValue"
+            :rules="minLabelRules"
             label="Min Label"
             counter="20"
-            maxlength="20"
             @change="update"
           />
         </v-col>
@@ -47,7 +47,7 @@
         <v-col
           class="d-flex align-center"
           cols="12"
-          sm="3"
+          sm="5"
         >
           <v-text-field
             v-model="maxSliderTick"
@@ -60,13 +60,13 @@
         </v-col>
 
         <v-col
-          sm="3"
+          sm="5"
         >
           <v-text-field
             v-model="maxValue"
+            :rules="maxLabelRules"
             label="Max Label"
             counter="20"
-            maxlength="20"
             @change="update"
           />
         </v-col>
@@ -441,6 +441,14 @@ export default {
       maxValue: this.initialItemData.maxValue || '',
       maxValueImg: this.initialItemData.maxValueImg || '',
       valid: true,
+      minLabelRules: [
+        v => !!v || 'Min label cannot be empty',
+        v => v.length <= 20 || 'Visibility decreases over 75 characters',
+      ],
+      maxLabelRules: [
+        v => !!v || 'Max label cannot be empty',
+        v => v.length <= 20 || 'Visibility decreases over 75 characters',
+      ],
       textRules: [
         v => !!v || 'Radio options cannot be empty',
       ],

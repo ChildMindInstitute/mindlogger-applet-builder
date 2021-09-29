@@ -354,7 +354,6 @@
         v-if="item.inputType === 'video'"
         :key="`${baseKey}-video`"
         :initial-is-optional-text="item.isOptionalText"
-        :initial-item-data="item.options"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
         :timer="item.timer"
@@ -382,7 +381,6 @@
       <PhotoBuilder
         v-if="item.inputType === 'photo'"
         :key="`${baseKey}-photo`"
-        :initial-item-data="item.options"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
@@ -391,13 +389,11 @@
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
         @updateTimer="updateTimer"
-        @updateOptions="updateOptions"
       />
 
       <TimeRangeBuilder
         v-if="item.inputType === 'timeRange'"
         :key="`${baseKey}-timeRange`"
-        :initial-item-data="item.options"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
@@ -406,13 +402,11 @@
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
         @updateTimer="updateTimer"
-        @updateOptions="updateOptions"
       />
 
       <DateBuilder
         v-if="item.inputType === 'date'"
         :key="`${baseKey}-date`"
-        :initial-item-data="item.options"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
@@ -421,14 +415,13 @@
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
         @updateTimer="updateTimer"
-        @updateOptions="updateOptions"
       />
 
       <DrawingBuilder
         v-if="item.inputType === 'drawing'"
         :key="`${baseKey}-drawing`"
-        :initial-item-data="item.options"
         :initial-item-response-options="item.responseOptions"
+        :initial-item-data="item.options"
         :initial-item-input-options="item.inputOptions"
         :initial-is-optional-text="item.isOptionalText"
         :is-skippable-item="skippable"
@@ -469,13 +462,11 @@
         @updateAllow="updateAllow"
         @loading="loading = $event"
         @notify="notify = $event"
-        @updateOptions="updateOptions"
       />
 
       <GeolocationBuilder
         v-if="item.inputType === 'geolocation'"
         :key="`${baseKey}-geolocation`"
-        :initial-item-data="item.options"
         :initial-item-response-options="item.responseOptions"
         :initial-is-optional-text="item.isOptionalText"
         :is-skippable-item="skippable"
@@ -486,7 +477,6 @@
         @notify="notify = $event"
         @updateAllow="updateAllow"
         @updateTimer="updateTimer"
-        @updateOptions="updateOptions"
       />
 
       <AudioStimulusBuilder
@@ -502,7 +492,6 @@
         @validation="item.valid = $event"
         @loading="loading = $event"
         @notify="notify = $event"
-        @updateOptions="updateOptions"
       />
 
       <CumulativeScoreBuilder
@@ -655,11 +644,6 @@
     align-items: center;
   }
 
-  .card-expanded {
-    border-bottom-right-radius: 0;
-    border-bottom-left-radius: 0;
-  }
-
   .invalid {
     background-color: #d44c4c;
   }
@@ -743,6 +727,7 @@ export default {
       itemConditionals: [],
       hasScoringItem: false,
       removeDialog: false,
+      markdownDialog: false,
       valid: false,
       largeText: '',
       headerImage: '',

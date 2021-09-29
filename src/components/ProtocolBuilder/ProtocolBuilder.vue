@@ -134,7 +134,6 @@
 
               <v-btn
                 icon
-                v-if="isThresholdActivity(activity)"
                 @click="showOrHideActivity(activities.findIndex(act => act == activity))"
               >
                 <v-icon v-if="activity.isVis" color="grey lighten-1">
@@ -320,20 +319,6 @@ export default {
         message: `Applet watermark from URL is successfully added.`,
         duration: 3000,
       });
-    },
-    isThresholdActivity (activity) {
-      let res = true;
-      this.activities.forEach(({ items }) => {
-        items.forEach(({ cumulativeScores }) => {
-          cumulativeScores.forEach(({ activityInRange, activityOutRange }) => {
-            if (activityInRange === activity.name || activityOutRange === activity.name) {
-              res = false;
-            }
-          })
-        })
-      })
-
-      return res;
     },
     async onAddWatermarkFromDevice (uploadFunction) {
       this.$emit('loading', true); 

@@ -26,7 +26,6 @@
         </v-btn>
         <v-btn
           icon
-          v-if="!isConditionalItem()"
           @click="hideItem(itemIndex)"
         >
           <v-icon v-if="isVis" color="grey lighten-1">
@@ -886,10 +885,6 @@ export default {
       })
 
       this.removeDialog = false;
-    },
-
-    isConditionalItem () {
-      return this.conditionals.some(({ showValue }) => showValue === this.item.name);
     },
 
     nameKeydown (e) {

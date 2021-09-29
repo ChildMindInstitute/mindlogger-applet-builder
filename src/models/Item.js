@@ -132,6 +132,7 @@ export default class Item {
       return {
         "valueType": (this.ref.options.valueType && this.ref.options.valueType.includes("token") || this.ref.options.isTokenValue) ? "xsd:token" : "xsd:anyURI",
         "scoring": this.ref.options.hasScoreValue,
+        "removeBackOption": this.ref.options.removeBackOption,
         "responseAlert": this.ref.options.hasResponseAlert,
         "multipleChoice": this.ref.options.isMultipleChoice,
         "options": this.ref.options.options.map(option => ({
@@ -172,6 +173,7 @@ export default class Item {
         "scoring": this.ref.options.hasScoreValue,
         "responseAlert": this.ref.options.hasResponseAlert,
         "randomizeOptions": this.ref.options.randomizeOptions,
+        "removeBackOption": this.ref.options.removeBackOption,
         "colorPalette": this.ref.options.colorPalette,
         "multipleChoice": this.ref.options.isMultipleChoice,
         "schema:minValue": 1,
@@ -183,6 +185,7 @@ export default class Item {
     if (this.ref.inputType === "text") {
       return {
         'valueType': this.ref.options.valueType || this.ref.valueType,
+        "removeBackOption": this.ref.options.removeBackOption,
         'requiredValue': this.ref.options.requiredValue,
         'isResponseIdentifier': this.ref.options.isResponseIdentifier
       }
@@ -198,6 +201,7 @@ export default class Item {
       let responseOptions = {
         "valueType": "xsd:integer",
         "scoring": this.ref.options.hasScoreValue,
+        "removeBackOption": this.ref.options.removeBackOption,
         "responseAlert": this.ref.options.hasResponseAlert,
         "continousSlider": this.ref.options.continousSlider,
         "schema:minValue": this.ref.options.minValue,
@@ -229,6 +233,7 @@ export default class Item {
         "valueType": "xsd:integer",
         "scoring": this.ref.options.hasScoreValue,
         "responseAlert": this.ref.options.hasResponseAlert,
+        "removeBackOption": this.ref.options.removeBackOption,
         "sliderOptions": (this.ref.options.sliderOptions || []).map(slider => ({
           "schema:minValue": slider.minValue,
           "schema:maxValue": slider.maxValue,
@@ -244,11 +249,20 @@ export default class Item {
         valueType: "xsd:date",
         requiredValue: true,
         "schema:maxValue": "new Date()",
+        "removeBackOption": this.ref.options.removeBackOption,
         "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
       };
     }
+    if (this.ref.inputType === "drawing") {
+      return {
+        "removeBackOption": this.ref.options.removeBackOption,
+        "removeUndoOption": this.ref.options.removeUndoOption,
+      }
+    }
     if (this.ref.inputType === "audioImageRecord" || this.ref.inputType === "geolocation" || this.ref.inputType === "photo" || this.ref.inputType === "video" || this.ref.inputType === "timeRange") {
-      return this.ref.responseOptions;
+      return {
+        "removeBackOption": this.ref.options.removeBackOption,
+      }
     }
     if (this.ref.inputType === "audioRecord") {
         this.ref.options.isOptionalTextRequired = this.ref.responseOptions.isOptionalTextRequired;
@@ -790,6 +804,9 @@ export default class Item {
         _.get(responseOptions, [0, 'reprolib:terms/scoring']);
       let randomizeOptions =
         _.get(responseOptions, [0, 'reprolib:terms/randomizeOptions']);
+      
+      let removeBackOption =
+        _.get(responseOptions, [0, 'reprolib:terms/removeBackOption']);
 
       let continousSlider =
         _.get(responseOptions, [0, 'reprolib:terms/continousSlider']);
@@ -837,6 +854,16 @@ export default class Item {
           _.get(randomizeOptions, [0, '@value']);
       }
 
+      if (removeBackOption) {
+        itemContent.removeBackOption =
+          _.get(removeBackOption, [0, '@value']);
+      }
+
+      if (removeUndoOption) {
+        itemContent.removeUndoOption =
+          _.get(removeUndoOption, [0, '@value']);
+      }
+
       if (continousSlider) {
         itemContent.continousSlider =
           continousSlider[0] && continousSlider[0]['@value'];
@@ -873,6 +900,7 @@ export default class Item {
           enableNegativeTokens: itemContent.enableNegativeTokens || false,
           hasScoreValue: itemContent.scoring || false,
           hasResponseAlert: itemContent.responseAlert || false,
+          removeBackOption: itemContent.removeBackOption || false,
           colorPalette: itemContent.colorPalette || false,
           randomizeOptions: itemContent.randomizeOptions || false,
           valueType: itemContent.valueType,
@@ -943,6 +971,7 @@ export default class Item {
           isMultipleChoice: itemContent.multipleChoice || false,
           hasScoreValue: itemContent.scoring || false,
           hasResponseAlert: itemContent.responseAlert || false,
+          removeBackOption: itemContent.removeBackOption || false,
           itemList: itemList.map(item => {
             const image = item['schema:image'];
 
@@ -1006,6 +1035,7 @@ export default class Item {
         itemContent.options = {
           requiredValue:
             _.get(responseOptions, [0, 'reprolib:terms/requiredValue', 0, '@value']),
+          removeBackOption: itemContent.removeBackOption || false,
           isResponseIdentifier:
             _.get(responseOptions, [0, 'reprolib:terms/isResponseIdentifier', 0, '@value'])
           // TODO: add 'maximum response length' value which is absent for now
@@ -1029,6 +1059,7 @@ export default class Item {
           hasScoreValue: itemContent.scoring || false,
           hasResponseAlert: itemContent.responseAlert || false,
           continousSlider: itemContent.continousSlider || false,
+          removeBackOption: itemContent.removeBackOption || false,
           maxValue:
             _.get(responseOptions, [0, 'schema:maxValue', 0, '@value']),
           minValue:
@@ -1070,6 +1101,7 @@ export default class Item {
         itemContent.options = {
           hasScoreValue: itemContent.scoring || false,
           hasResponseAlert: itemContent.responseAlert || false,
+          removeBackOption: itemContent.removeBackOption || false,
           sliderOptions: _.get(responseOptions, [0, 'reprolib:terms/sliderOptions'], []).map(slider => ({
             sliderLabel:
               _.get(slider, ['schema:sliderLabel', 0, '@value'], ''),
@@ -1112,12 +1144,30 @@ export default class Item {
         itemContent.options = {
           requiredValue:
             _.get(responseOptions, [0, 'reprolib:terms/requiredValue', 0, '@value']),
+          removeBackOption: itemContent.removeBackOption || false,
           'schema:maxValue':
             _.get(responseOptions, [0, 'schema:maxValue', 0, '@value']),
           'schema:minValue':
             _.get(responseOptions, [0, 'schema:minValue', 0, '@value']),
         };
       }
+      if (itemType === 'drawing') {
+        itemContent.options = {
+          removeBackOption: itemContent.removeBackOption || false,
+          removeUndoOption: itemContent.removeUndoOption || false,
+        };
+      }
+      if (itemType === 'audioStimulus'
+        || itemType === 'geolocation'
+        || itemType === 'date'
+        || itemType === 'video'
+        || itemType === 'photo'
+        || itemType === 'timeRange') {
+        itemContent.options = {
+          removeBackOption: itemContent.removeBackOption || false
+        };
+      }
+
     }
 
     const inputOptions = item['reprolib:terms/inputs'];

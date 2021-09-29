@@ -436,6 +436,18 @@
             @change="update"
           />
         </v-col>
+        <v-col
+          class="d-flex align-center"
+          cols="12"
+          md="3"
+          sm="6"
+        >
+          <v-checkbox
+            v-model="removeBackOption"
+            label="Remove back button"
+            @change="update"
+          />
+        </v-col>
       </v-row>
 
       <ItemTimerOption
@@ -667,6 +679,7 @@ export default {
 
       isTokenValue,
       hasScoreValue: this.initialItemData.hasScoreValue || false,
+      removeBackOption: this.initialItemData.removeBackOption,
       hasResponseAlert: this.initialItemData.hasResponseAlert || false,
       imgUploader,
       values,
@@ -790,6 +803,7 @@ export default {
         'valueType': this.isTokenValue ? 'xsd:token' : 'xsd:anyURI',
         'isMultipleChoice': this.isMultipleChoice,
         'isSkippableItem': this.isSkippable,
+        'removeBackOption': this.removeBackOption,
         'options': this.options,
         'itemList': this.itemList,
         'choices': (this.isTokenValue || this.hasScoreValue || this.hasResponseAlert) ? choices : [],

@@ -804,9 +804,12 @@ export default class Item {
         _.get(responseOptions, [0, 'reprolib:terms/scoring']);
       let randomizeOptions =
         _.get(responseOptions, [0, 'reprolib:terms/randomizeOptions']);
-      
+
       let removeBackOption =
         _.get(responseOptions, [0, 'reprolib:terms/removeBackOption']);
+
+      let removeUndoOption =
+        _.get(responseOptions, [0, 'reprolib:terms/removeUndoOption']);
 
       let continousSlider =
         _.get(responseOptions, [0, 'reprolib:terms/continousSlider']);
@@ -819,7 +822,7 @@ export default class Item {
 
       let colorPalette =
         _.get(responseOptions, [0, 'reprolib:terms/colorPalette']);
-      
+
       let topNavigationOption =
         _.get(responseOptions, [0, 'reprolib:terms/topNavigationOption']);
 

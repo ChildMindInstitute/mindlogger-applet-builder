@@ -556,7 +556,7 @@
                 :key="conditional.id + condition.ifValue.name"
               >
                 <v-list-item-content>
-                  <v-list-item-title v-text="condition.ifValue.name + ' ' + condition.stateValue.name + ' is ' + condition.answerValue.name" />
+                  <v-list-item-title v-text="condition.ifValue.name + ' ' + condition.stateValue.name + ' is ' + getConditionAnswer(condition)" />
                 </v-list-item-content>
               </v-list-item>
             </v-list-group>
@@ -856,6 +856,16 @@ export default {
     hideItem (index) {
       this.isVis = !this.isVis;
       this.showOrHideItem(index);
+    },
+
+    getConditionAnswer (condition) {
+      if (condition.answerValue) {
+        return condition.answerValue.name;
+      }
+      if (condition.maxValue || condition.maxValue === 0) {
+        return condition.maxValue;
+      }
+      return condition.minValue;
     },
 
     onDeleteItem () {

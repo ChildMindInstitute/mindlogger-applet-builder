@@ -443,11 +443,11 @@ export default {
       valid: true,
       minLabelRules: [
         v => !!v || 'Min label cannot be empty',
-        v => v.length <= 20 || 'Visibility decreases over 75 characters',
+        v => v.length <= 20 || 'Visibility decreases over 20 characters',
       ],
       maxLabelRules: [
         v => !!v || 'Max label cannot be empty',
-        v => v.length <= 20 || 'Visibility decreases over 75 characters',
+        v => v.length <= 20 || 'Visibility decreases over 20 characters',
       ],
       textRules: [
         v => !!v || 'Radio options cannot be empty',

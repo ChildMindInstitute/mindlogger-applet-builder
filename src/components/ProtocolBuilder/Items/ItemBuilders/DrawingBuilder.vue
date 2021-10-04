@@ -61,7 +61,7 @@
       >
         <v-checkbox
           v-model="removeBackOption"
-          label="Remove back button"
+          label="Remove ability to go back to the previous item"
           @change="update"
         />
       </v-col>

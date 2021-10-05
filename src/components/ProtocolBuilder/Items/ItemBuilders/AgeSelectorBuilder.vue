@@ -52,6 +52,18 @@
           :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
         />
       </v-col>
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="removeBackOption"
+          label="Remove ability to go back to the previous item"
+          @change="update"
+        />
+      </v-col>
     </v-row>
 
     <OptionalItemText
@@ -131,6 +143,7 @@ export default {
       /** continuous slider */
       isOptionalText: this.initialIsOptionalText,
       responseOptions: this.initialResponseOptions,
+      removeBackOption: this.initialItemData.removeBackOption,
     };
   },
 
@@ -180,6 +193,7 @@ export default {
         'minAge': this.minAge,
         'maxAge': this.maxAge,
         'valid': this.valid,
+        'removeBackOption': this.removeBackOption,
       };
 
       this.$emit('updateOptions', responseOptions);

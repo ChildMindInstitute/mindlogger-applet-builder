@@ -180,18 +180,6 @@
                 Edit Alerts
               </v-btn>
             </v-col>
-            <v-col
-              class="d-flex align-center"
-              cols="12"
-              md="3"
-              sm="6"
-            >
-              <v-checkbox
-                v-model="removeBackOption"
-                label="Remove back button"
-                @change="update"
-              />
-            </v-col>
           </v-row>
         </div>
       </div>
@@ -236,6 +224,19 @@
           v-model="hasScoreValue"
           label="Option Score"
           @change="onUpdateScoreOption"
+        />
+      </v-col>
+
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="removeBackOption"
+          label="Remove ability to go back to the previous item"
+          @change="update"
         />
       </v-col>
 

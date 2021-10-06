@@ -1217,6 +1217,10 @@ export default class Item {
       const CONTENT_URL = 'schema:contentUrl';
 
       media.forEach(obj => {
+        if (!Object.keys(obj).length) {
+          return ;
+        }
+
         const mediaObj = Object.entries(obj)[0][1];
         const modifiedmMediaObj = {};
 

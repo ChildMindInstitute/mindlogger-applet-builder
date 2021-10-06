@@ -207,6 +207,9 @@ export default class Item {
         "removeBackOption": this.ref.options.removeBackOption,
         "responseAlert": this.ref.options.hasResponseAlert,
         "continousSlider": this.ref.options.continousSlider,
+        'tickLabels': this.ref.options.tickLabels,
+        'textAnchors': this.ref.options.textAnchors,
+        'tickMark': this.ref.options.tickMark,
         "schema:minValue": this.ref.options.minValue,
         "schema:maxValue": this.ref.options.maxValue,
         "schema:minValueImg": this.ref.options.minValueImg,
@@ -445,6 +448,9 @@ export default class Item {
       itemObj.options.minSliderTick = itemObj.options.minSliderTick || 0;
       itemObj.options.maxSliderTick = itemObj.options.maxSliderTick || 0;
       itemObj.options.continousSlider = itemObj.options.continousSlider || false;
+      itemObj.options.textAnchors = itemObj.options.textAnchors || false;
+      itemObj.options.tickLabels = itemObj.options.tickLabels || false;
+      itemObj.options.tickMark = itemObj.options.tickMark || false;
       itemObj.options.hasScoreValue = itemObj.options.hasScoreValue || false;
       itemObj.options.hasResponseAlert = itemObj.options.hasResponseAlert || false;
     }
@@ -703,6 +709,15 @@ export default class Item {
       'options.continousSlider': {
         updated: valueUpdate('Continous Slider'),
       },
+      'options.tickLabels': {
+        updated: valueUpdate('Tick Labels'),
+      },
+      'options.textAnchors': {
+        updated: valueUpdate('Text Anchors'),
+      },
+      'options.tickMark': {
+        updated: valueUpdate('Tick Mark'),
+      },
       'options.scores': {
         updated: scoreUpdate,
       },
@@ -880,6 +895,15 @@ export default class Item {
       let continousSlider =
         _.get(responseOptions, [0, 'reprolib:terms/continousSlider']);
 
+      let tickLabels =
+        _.get(responseOptions, [0, 'reprolib:terms/tickLabel']);
+
+      let textAnchors =
+        _.get(responseOptions, [0, 'reprolib:terms/textAnchors']);
+
+      let tickMark =
+        _.get(responseOptions, [0, 'reprolib:terms/tickMark']);
+      
       let showTickMarks =
         _.get(responseOptions, [0, 'reprolib:terms/showTickMarks']);
 
@@ -937,6 +961,21 @@ export default class Item {
       if (removeUndoOption) {
         itemContent.removeUndoOption =
           _.get(removeUndoOption, [0, '@value']);
+      }
+
+      if (tickLabels) {
+        itemContent.tickLabels =
+          tickLabels[0] && tickLabels[0]['@value'];
+      }
+
+      if (textAnchors) {
+        itemContent.textAnchors =
+          textAnchors[0] && textAnchors[0]['@value'];
+      }
+
+      if (tickMark) {
+        itemContent.tickMark =
+          tickMark[0] && tickMark[0]['@value'];
       }
 
       if (continousSlider) {
@@ -1156,6 +1195,9 @@ export default class Item {
           hasScoreValue: itemContent.scoring || false,
           hasResponseAlert: itemContent.responseAlert || false,
           continousSlider: itemContent.continousSlider || false,
+          tickLabels: itemContent.tickLabels || false,
+          textAnchors: itemContent.textAnchors || false,
+          tickMark: itemContent.tickMark || false,
           removeBackOption: itemContent.removeBackOption || false,
           maxValue:
             _.get(responseOptions, [0, 'schema:maxValue', 0, '@value']),

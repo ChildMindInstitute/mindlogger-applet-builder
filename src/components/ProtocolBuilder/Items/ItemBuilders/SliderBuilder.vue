@@ -42,7 +42,6 @@
           />
         </v-col>
       </v-row>
-
       <v-row>
         <v-col
           class="d-flex align-center"
@@ -81,6 +80,30 @@
             @onAddFromDevice="$emit('loading', true); onAddSliderImageFromDevice($event, 'Max');"
             @onRemove="maxValueImg = ''; onRemoveSliderImage('Max');"
             @onNotify="$emit('loading', false); $emit('notify', $event);"
+          />
+        </v-col>
+      </v-row>
+
+      <v-row>
+        <v-col cols="12" sm="4">
+          <v-switch
+            v-model="tickMark"
+            label="Tick Marks"
+            @change="update"
+          />
+        </v-col>
+        <v-col cols="12" sm="4">
+          <v-switch
+            v-model="tickLabels"
+            label="Tick Mark Labels"
+            @change="update"
+          />
+        </v-col>
+        <v-col cols="12" sm="4">
+          <v-switch
+            v-model="textAnchors"
+            label="Text Anchors"
+            @change="update"
           />
         </v-col>
       </v-row>
@@ -440,6 +463,9 @@ export default {
       minValueImg: this.initialItemData.minValueImg || '',
       maxValue: this.initialItemData.maxValue || '',
       maxValueImg: this.initialItemData.maxValueImg || '',
+      textAnchors: this.initialItemData.textAnchors || false,
+      tickMark: this.initialItemData.tickMark || false,
+      tickLabels: this.initialItemData.tickLabels || false,
       valid: true,
       minLabelRules: [
         v => !!v || 'Min label cannot be empty',
@@ -543,6 +569,9 @@ export default {
         'minValueImg': this.minValueImg,
         'maxValue': this.maxValue || "Max",
         'maxValueImg': this.maxValueImg,
+        'tickLabels': this.tickLabels,
+        'textAnchors': this.textAnchors,
+        'tickMark': this.tickMark,
         'hasScoreValue': this.hasScoreValue,
         'hasResponseAlert': this.hasResponseAlert,
         'continousSlider': this.continousSlider,

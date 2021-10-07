@@ -94,7 +94,7 @@
         </v-col>
         <v-col cols="12" sm="4">
           <v-switch
-            v-model="tickLabels"
+            v-model="tickLabel"
             label="Tick Mark Labels"
             @change="update"
           />
@@ -188,17 +188,6 @@
         />
       </v-col>
 
-      <v-col
-        class="d-flex align-center"
-        cols="12"
-        sm="3"
-      >
-        <v-checkbox
-          v-model="showTickMarks"
-          label="Turn off Tick Marks & Labels"
-          @change="update"
-        />
-      </v-col>
       <v-col
         class="d-flex align-center"
         cols="12"
@@ -465,7 +454,7 @@ export default {
       maxValueImg: this.initialItemData.maxValueImg || '',
       textAnchors: this.initialItemData.textAnchors || false,
       tickMark: this.initialItemData.tickMark || false,
-      tickLabels: this.initialItemData.tickLabels || false,
+      tickLabel: this.initialItemData.tickLabel || false,
       valid: true,
       minLabelRules: [
         v => !!v || 'Min label cannot be empty',
@@ -495,7 +484,6 @@ export default {
       alertMinValue: Number(this.initialItemData.minAlertValue || this.initialItemData.minSliderTick || 0),
       alertMaxValue: Number(this.initialItemData.maxAlertValue || this.initialItemData.maxSliderTick || 0),
       removeBackOption: this.initialItemData.removeBackOption,
-      showTickMarks: this.initialItemData.showTickMarks || false,
       scores: this.initialItemData.scores || [],
       alerts: this.initialItemData.alerts || [],
       isOptionalText: this.initialIsOptionalText,
@@ -569,14 +557,13 @@ export default {
         'minValueImg': this.minValueImg,
         'maxValue': this.maxValue || "Max",
         'maxValueImg': this.maxValueImg,
-        'tickLabels': this.tickLabels,
+        'tickLabel': this.tickLabel,
         'textAnchors': this.textAnchors,
         'tickMark': this.tickMark,
         'hasScoreValue': this.hasScoreValue,
         'hasResponseAlert': this.hasResponseAlert,
         'continousSlider': this.continousSlider,
         'removeBackOption': this.removeBackOption,
-        'showTickMarks': this.showTickMarks,
         'scores': this.hasScoreValue ? this.scores : false,
       };
 

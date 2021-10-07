@@ -266,6 +266,16 @@
           :value="item.markdownText"
           @input="onUpdateMarkdownText"
         />
+
+        <v-divider
+          class="my-4"
+        />
+
+        <ItemTimerOption
+          colClasses="d-flex align-center py-0 px-3"
+          @update="updateTimer($event.responseTimeLimit)"
+          :responseTimeLimit="item.timer"
+        />
       </div>
 
       <RadioBuilder
@@ -693,6 +703,7 @@ import GeolocationBuilder from "./ItemBuilders/GeolocationBuilder.vue";
 import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
 import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
 import StackedSliderBuilder from "./ItemBuilders/StackedSliderBuilder";
+import ItemTimerOption from "../Partial/ItemTimerOption";
 
 import MarkDownEditor from "../MarkDownEditor";
 import Item from '../../../models/Item';
@@ -725,6 +736,7 @@ export default {
     StackedSliderBuilder,
     Notify,
     Loading,
+    ItemTimerOption,
   },
   props: {
     itemIndex: {

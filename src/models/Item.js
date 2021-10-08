@@ -1309,6 +1309,10 @@ export default class Item {
         && !item.question.text)) {
       return false;
     }
+    if (item.inputType === "ageSelector"
+      && (item.options.minAge === "" || item.options.maxAge === "")) {
+      return false;
+    }
     if (item.cumulativeScores) {
       for (let i = 0; i < item.cumulativeScores.length; i++) {
         if (!item.cumulativeScores[i].valid) {

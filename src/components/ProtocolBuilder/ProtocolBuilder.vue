@@ -299,6 +299,7 @@ export default {
         'duplicateActivity',
         'deleteActivity',
         'showOrHideActivity',
+        'showActivity',
         'addActivity',
         'setCurrentActivity',
         'setCurrentScreen',
@@ -323,6 +324,7 @@ export default {
     },
     isThresholdActivity (activity) {
       let res = true;
+
       this.activities.forEach(({ items }) => {
         items.forEach(({ cumulativeScores }) => {
           cumulativeScores.forEach(({ activityInRange, activityOutRange }) => {
@@ -332,6 +334,11 @@ export default {
           })
         })
       })
+
+      if (!res) {
+        const index = this.activities.findIndex(act => act == activity);
+        this.showActivity(index);
+      }
 
       return res;
     },

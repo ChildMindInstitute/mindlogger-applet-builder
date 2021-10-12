@@ -193,6 +193,8 @@ export default class Item {
     if (this.ref.inputType === "drawing") {
       return {
         ...this.ref.responseOptions,
+        "removeBackOption": this.ref.options.removeBackOption,
+        "removeUndoOption": this.ref.options.removeUndoOption,
         "topNavigationOption": this.ref.options.topNavigationOption,
       }
     }
@@ -252,12 +254,6 @@ export default class Item {
         "removeBackOption": this.ref.options.removeBackOption,
         "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
       };
-    }
-    if (this.ref.inputType === "drawing") {
-      return {
-        "removeBackOption": this.ref.options.removeBackOption,
-        "removeUndoOption": this.ref.options.removeUndoOption,
-      }
     }
     if (this.ref.inputType === "audioImageRecord" || this.ref.inputType === "geolocation" || this.ref.inputType === "photo" || this.ref.inputType === "video" || this.ref.inputType === "timeRange") {
       return {
@@ -664,6 +660,12 @@ export default class Item {
       'options.topNavigationOption': {
         updated: optionUpdate('Navigation Buttons'),
       },
+      'options.removeUndoOption': {
+        updated: optionUpdate('Remove Undo Option'),
+      },
+      'options.removeBackOption': {
+        updated: optionUpdate('Remove Back Option'),
+      },
       'options.continousSlider': {
         updated: valueUpdate('Continous Slider'),
       },
@@ -948,12 +950,6 @@ export default class Item {
         };
       }
 
-      if (itemType === 'drawing') {
-        itemContent.options = {
-          topNavigationOption: itemContent.topNavigationOption || false,
-        };
-      }
-
       if (itemType === 'stackedRadio') {
         let parsedItemOptions = [];
         for (let i = 0; i < itemList.length; i++) {
@@ -1156,10 +1152,12 @@ export default class Item {
       }
       if (itemType === 'drawing') {
         itemContent.options = {
+          topNavigationOption: itemContent.topNavigationOption || false,
           removeBackOption: itemContent.removeBackOption || false,
           removeUndoOption: itemContent.removeUndoOption || false,
         };
       }
+
       if (itemType === 'audioStimulus'
         || itemType === 'geolocation'
         || itemType === 'date'

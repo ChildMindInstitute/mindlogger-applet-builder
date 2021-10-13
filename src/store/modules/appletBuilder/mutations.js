@@ -52,7 +52,7 @@ const itemMutations = {
   },
 
   showItem(state, index) {
-    state.currentActivity.items[index].isVis = true;
+    state.currentActivity.items[index].isVis = false;
   },
 
   duplicateItem(state, index) {
@@ -150,7 +150,7 @@ const activityMutations = {
   },
 
   showActivity(state, index) {
-    state.protocol.activities[index].isVis = true;
+    state.protocol.activities[index].isVis = false;
   },
 
   addActivity (state) {

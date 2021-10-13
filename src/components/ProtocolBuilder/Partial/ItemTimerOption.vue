@@ -51,8 +51,10 @@ export default {
   },
   methods: {
     update() {
+      let limit = this.timeLimit;
+
       if (this.timerOption) {
-        this.timeLimit = this.timeLimit || 10;
+        limit = limit || 0;
       }
 
       this.$emit('update', {

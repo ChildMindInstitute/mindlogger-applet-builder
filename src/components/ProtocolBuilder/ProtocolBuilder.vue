@@ -335,7 +335,7 @@ export default {
         })
       })
 
-      if (res) {
+      if (!res) {
         const index = this.activities.findIndex(act => act == activity);
         this.showActivity(index);
       }

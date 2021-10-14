@@ -517,6 +517,17 @@
         @updateOptions="updateOptions"
       />
 
+      <PastBehaviorTracker
+        v-if="item.inputType === 'pastBehaviorTracker'"
+        :key="`${baseKey}-pastBehaviorTracker`"
+        :is-skippable-item="skippable"
+        :initial-item-data="item.options"
+        @notify="notify = $event"
+        @loading="loading = $event"
+        @updateOptions="updateOptions"
+        @updateAllow="updateAllow"
+      />
+
       <CumulativeScoreBuilder
         v-if="item.inputType === 'cumulativeScore'"
         :key="`${baseKey}-cumulativeScore`"
@@ -704,6 +715,7 @@ import GeolocationBuilder from "./ItemBuilders/GeolocationBuilder.vue";
 import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
 import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
 import StackedSliderBuilder from "./ItemBuilders/StackedSliderBuilder";
+import PastBehaviorTracker from "./ItemBuilders/PastBehaviorTracker";
 import ItemTimerOption from "../Partial/ItemTimerOption";
 
 import MarkDownEditor from "../MarkDownEditor";
@@ -738,6 +750,7 @@ export default {
     Notify,
     Loading,
     ItemTimerOption,
+    PastBehaviorTracker,
   },
   props: {
     itemIndex: {

@@ -1326,6 +1326,10 @@ export default class Item {
       }
     }
 
+    if (item.timer && item.timer < 0 ) {
+      return false;
+    }
+
     return true;
   }
 }

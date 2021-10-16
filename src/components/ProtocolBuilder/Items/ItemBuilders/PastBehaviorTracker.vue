@@ -295,7 +295,7 @@ export default {
       }
 
       if (type == 'negative') {
-        if (behavior.rate < 0 || !behavior.startTime || !behavior.endTime) {
+        if (!behavior.rate || behavior.rate <= 0 || !behavior.startTime || !behavior.endTime) {
           return false;
         }
       }
@@ -387,7 +387,7 @@ export default {
         }
       }
 
-      let valid = true;
+      let valid = (this.positiveBehaviors.length > 0 || this.negativeBehaviors.length > 0);
       for (const behavior of this.positiveBehaviors) {
         if (!behavior.valid) {
           valid = false;

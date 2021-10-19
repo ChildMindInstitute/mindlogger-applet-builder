@@ -106,6 +106,7 @@ export default {
 
     return {
       isOptionalText: this.initialIsOptionalText,
+      removeBackOption: this.initialItemData.removeBackOption,
       responseOptions,
     }
   },

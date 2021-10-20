@@ -5,7 +5,8 @@
       <v-col
         class="d-flex align-center"
         cols="12"
-        sm="3"
+        md="3"
+        sm="6"
       >
         <v-checkbox
           v-model="isSkippable"
@@ -16,23 +17,23 @@
       <v-col
         class="d-flex align-center"
         cols="12"
-        sm="3"
-      >
-        <ItemTimerOption
-          colClasses="d-flex align-center py-0 px-3"
-          @update="updateTimerOption"
-          :responseTimeLimit="timer"
-        />
-      </v-col>
-      <v-col
-        class="d-flex align-center"
-        cols="12"
-        sm="3"
+        md="3"
+        sm="6"
       >
         <v-checkbox
           v-model="removeBackOption"
           label="Remove ability to go back to the previous item"
           @change="update"
+        />
+      </v-col>
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+      > 
+        <ItemTimerOption
+          colClasses="d-flex align-center py-0 px-3"
+          @update="updateTimerOption"
+          :responseTimeLimit="timer"
         />
       </v-col>
     </v-row>

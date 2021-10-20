@@ -3,7 +3,9 @@ export const timeScreen = {
 	"question": "How would you like to log behaviors for?",
 	"description": "",
 	"ui": {
-		"allow": [],
+		"allow": [
+			"auto_advance"
+		],
 		"inputType": "radio"
 	},
 	"multipleChoice": false,

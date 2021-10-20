@@ -401,6 +401,7 @@ export default {
       }
 
       this.$emit('updateOptions', {
+        ...this.initialItemData,
         positiveBehaviors: this.positiveBehaviors,
         negativeBehaviors: this.negativeBehaviors,
         valid

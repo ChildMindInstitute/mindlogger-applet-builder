@@ -232,6 +232,14 @@ export default class Item {
       }
     }
 
+    if (this.ref.inputType == 'futureBehaviorTracker') {
+      return {
+        positiveBehaviors: this.ref.options.positiveBehaviors,
+        negativeBehaviors: this.ref.options.negativeBehaviors,
+        timeScreen: this.ref.options.timeScreen
+      }
+    }
+
     if (this.ref.inputType === "ageSelector") {
       return {
         "schema:minAge": this.ref.options.minAge,
@@ -833,6 +841,9 @@ export default class Item {
       let negativeBehaviors =
         _.get(responseOptions, [0, 'reprolib:terms/negativeBehaviors']);
 
+      let timeScreen =
+        _.get(responseOptions, [0, 'reprolib:terms/timeScreen']);
+
       let isOptionalTextRequired =
         _.get(responseOptions, [0, 'reprolib:terms/isOptionalTextRequired']);
 
@@ -992,7 +1003,7 @@ export default class Item {
         };
       }
 
-      if (itemType === 'pastBehaviorTracker') {
+      if (itemType === 'pastBehaviorTracker' || itemType == 'futureBehaviorTracker') {
         itemContent.options = {
           positiveBehaviors: positiveBehaviors.map(behavior => ({
             image: _.get(behavior, ['schema:image'], ''),
@@ -1012,6 +1023,10 @@ export default class Item {
           })),
 
           valid: true
+        }
+
+        if (itemType == 'futureBehaviorTracker') {
+          itemContent.options.timeScreen = _.get(timeScreen, [0, '@value'])
         }
       }
 

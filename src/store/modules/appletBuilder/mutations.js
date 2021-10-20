@@ -34,6 +34,7 @@ const itemMutations = {
     const itemData = model.getItemBuilderData(obj);
     itemData.valid = Item.checkValidation(itemData);
 
+    state.currentActivity.items[index].options.timeScreen = obj.name;
     state.currentActivity.items.splice(index, 0, itemData);
   },
 

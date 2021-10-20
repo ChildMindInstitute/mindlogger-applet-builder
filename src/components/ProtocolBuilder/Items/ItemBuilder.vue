@@ -41,18 +41,11 @@
           @click="editItem"
         >
           <v-icon
-            v-if="!isExpanded && item.allowEdit"
+            v-if="!isExpanded"
             color="grey lighten-1"
           >
             edit
           </v-icon>
-          <v-icon
-            v-else-if="!isExpanded"
-            color="grey lighten-1"
-          >
-            mdi-eye
-          </v-icon>
-
           <v-icon
             v-else
             color="grey lighten-1"
@@ -706,6 +699,7 @@ import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
 import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
 import StackedSliderBuilder from "./ItemBuilders/StackedSliderBuilder";
 import BehaviorTracker from "./ItemBuilders/BehaviorTracker";
+import { timeScreen } from './ItemBuilders/timeScreen';
 
 import MarkDownEditor from "../MarkDownEditor";
 import Item from '../../../models/Item';
@@ -859,6 +853,8 @@ export default {
         'updateItemInputType',
         'setTokenPrizeModalStatus',
         'insertTemplateUpdateRequest',
+        'addTimeScreen',
+        'deleteTimeScreen'
       ],
     ),
 
@@ -903,7 +899,14 @@ export default {
     },
 
     removeConditionals () {
+      const inputType = this.item.inputType;
+
       this.deleteItem(this.itemIndex);
+
+      if (inputType == 'futureBehaviorTracker') {
+        this.deleteTimeScreen(this.itemIndex - 1)
+      }
+
       this.itemConditionals.forEach((conditional) => {
         const index = this.conditionals.findIndex(({ id }) => id === conditional.id);
 
@@ -941,6 +944,8 @@ export default {
       updates.options = { options: [] };
       updates.allow = false;
 
+      const prev = this.item.inputType;
+
       this.updateItemMetaInfo({
         index: this.itemIndex,
         obj: updates
@@ -955,6 +960,15 @@ export default {
       })
 
       this.baseKey++;
+
+      if (prev == 'futureBehaviorTracker') {
+        this.deleteTimeScreen(this.itemIndex-1)
+      } else if (inputType == 'futureBehaviorTracker') {
+        this.addTimeScreen({
+          index: this.itemIndex,
+          screen: timeScreen
+        })
+      }
     },
 
     onUpdateName (name) {

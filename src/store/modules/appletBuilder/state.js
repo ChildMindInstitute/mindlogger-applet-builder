@@ -101,6 +101,10 @@ export default {
     {
       text: "pastBehaviorTracker",
       icon: baseImageURL + 'item-types/past-behavior-tracker-icon.png'
+    },
+    {
+      text: "futureBehaviorTracker",
+      icon: baseImageURL + 'item-types/future-behavior-tracker-icon.png'
     }
   ],
   templates: [],

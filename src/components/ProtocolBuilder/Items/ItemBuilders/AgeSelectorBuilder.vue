@@ -163,35 +163,41 @@ export default {
   },
   methods: {
     update () {
+      let maxAge = this.maxAge;
+      let minAge = this.minAge;
       if (this.maxAge > 105) {
         this.$nextTick(() => {
           this.maxAge = 105;
         });
+        maxAge = 105;
       } else if (this.maxAge < 0) {
         this.$nextTick(() => {
           this.maxAge = 1;
         });
+        maxAge = 1;
       }
 
       if (this.minAge > 105) {
         this.$nextTick(() => {
           this.minAge = 105;
         });
+        minAge = 105;
       } else if (this.minAge < 0) {
         this.$nextTick(() => {
           this.minAge = 1;
         });
+        minAge = 1;
       }
 
-      if (Number(this.maxAge) <= Number(this.minAge)) {
+      if (Number(maxAge) <= Number(minAge)) {
         this.valid = false;
       } else {
         this.valid = true;
       }
 
       const responseOptions = {
-        'minAge': this.minAge,
-        'maxAge': this.maxAge,
+        'minAge': Number(minAge),
+        'maxAge': Number(maxAge),
         'valid': this.valid,
         'removeBackOption': this.removeBackOption,
       };

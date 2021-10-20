@@ -517,9 +517,9 @@
         @updateOptions="updateOptions"
       />
 
-      <PastBehaviorTracker
-        v-if="item.inputType === 'pastBehaviorTracker'"
-        :key="`${baseKey}-pastBehaviorTracker`"
+      <BehaviorTracker
+        v-if="item.inputType === 'pastBehaviorTracker' || item.inputType == 'futureBehaviorTracker'"
+        :key="`${baseKey}-${item.inputType}`"
         :is-skippable-item="skippable"
         :initial-item-data="item.options"
         @notify="notify = $event"
@@ -715,7 +715,7 @@ import GeolocationBuilder from "./ItemBuilders/GeolocationBuilder.vue";
 import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
 import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
 import StackedSliderBuilder from "./ItemBuilders/StackedSliderBuilder";
-import PastBehaviorTracker from "./ItemBuilders/PastBehaviorTracker";
+import BehaviorTracker from "./ItemBuilders/BehaviorTracker";
 import ItemTimerOption from "../Partial/ItemTimerOption";
 
 import MarkDownEditor from "../MarkDownEditor";
@@ -750,7 +750,7 @@ export default {
     Notify,
     Loading,
     ItemTimerOption,
-    PastBehaviorTracker,
+    BehaviorTracker,
   },
   props: {
     itemIndex: {

@@ -228,6 +228,7 @@ export default class Item {
       return {
         "schema:minAge": this.ref.options.minAge,
         "schema:maxAge": this.ref.options.maxAge,
+        "removeBackOption": this.ref.options.removeBackOption,
       }
     }
     if (this.ref.inputType === 'stackedSlider') {
@@ -255,7 +256,12 @@ export default class Item {
         "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
       };
     }
-    if (this.ref.inputType === "audioImageRecord" || this.ref.inputType === "geolocation" || this.ref.inputType === "photo" || this.ref.inputType === "video" || this.ref.inputType === "timeRange") {
+    if (this.ref.inputType === "audioImageRecord"
+      || this.ref.inputType === "geolocation"
+      || this.ref.inputType === "audioStimulus"
+      || this.ref.inputType === "photo"
+      || this.ref.inputType === "video"
+      || this.ref.inputType === "timeRange") {
       return {
         "removeBackOption": this.ref.options.removeBackOption,
       }
@@ -396,6 +402,7 @@ export default class Item {
     }
 
     else if (this.ref.inputType === "audioStimulus") {
+      itemObj.responseOptions = itemObj.responseOptions || this.ref.responseOptions;
       itemObj.inputOptions = this.ref.inputOptions;
       itemObj.media = this.ref.media;
     }
@@ -1047,6 +1054,7 @@ export default class Item {
       }
       if (itemType === 'ageSelector') {
         itemContent.options = {
+          removeBackOption: itemContent.removeBackOption || false,
           maxAge:
             _.get(responseOptions, [0, 'schema:maxAge', 0, '@value']),
           minAge:
@@ -1246,17 +1254,6 @@ export default class Item {
 
     itemContent.valid = true;
 
-    // TODO: compare with new structure and delete !!!!!
-    const responseOptions2 = item['reprolib:terms/responseOptions'];
-    if(responseOptions2 && responseOptions2.length > 0) {
-      if(
-        itemType === 'audioImageRecord'
-        || itemType === 'drawing'
-        || itemType === 'geolocation'
-      ) {
-        itemContent.responseOptions = this.responseOptionsModifier(itemType, responseOptions2);
-      }
-    }
 
     return itemContent;
   }

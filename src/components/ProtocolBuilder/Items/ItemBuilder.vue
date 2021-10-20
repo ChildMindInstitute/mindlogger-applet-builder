@@ -964,7 +964,7 @@ export default {
       if (prev == 'futureBehaviorTracker') {
         this.deleteTimeScreen(this.itemIndex-1)
       } else if (inputType == 'futureBehaviorTracker') {
-        this.addTimeScreen({
+        let name = this.addTimeScreen({
           index: this.itemIndex,
           screen: timeScreen
         })

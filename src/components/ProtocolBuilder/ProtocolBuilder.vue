@@ -327,10 +327,12 @@ export default {
 
       this.activities.forEach(({ items }) => {
         items.forEach(({ cumulativeScores }) => {
-          cumulativeScores.forEach(({ activityInRange, activityOutRange }) => {
-            if (activityInRange === activity.name || activityOutRange === activity.name) {
-              res = false;
-            }
+          cumulativeScores.forEach(({ messages }) => {
+            messages.forEach(message => {
+              if (message.nextActivity === activity.name) {
+                res = false;
+              }
+            });
           })
         })
       })

@@ -260,6 +260,7 @@ export default class Item {
       || this.ref.inputType === "geolocation"
       || this.ref.inputType === "audioStimulus"
       || this.ref.inputType === "photo"
+      || this.ref.inputType === "markdownMessage"
       || this.ref.inputType === "video"
       || this.ref.inputType === "timeRange") {
       return {
@@ -1170,6 +1171,7 @@ export default class Item {
         || itemType === 'geolocation'
         || itemType === 'date'
         || itemType === 'video'
+        || itemType === 'markdownMessage'
         || itemType === 'photo'
         || itemType === 'timeRange') {
         itemContent.options = {

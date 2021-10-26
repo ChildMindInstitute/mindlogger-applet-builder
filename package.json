@@ -30,7 +30,7 @@
     "csvtojson": "^2.0.10",
     "file-loader": "^6.2.0",
     "file-saver": "^2.0.2",
-    "jszip": "^3.2.2",
+    "jszip": "^3.7.0",
     "less": "^4.1.0",
     "less-loader": "^7.2.1",
     "markdown-it-html5-embed": "^1.0.0",

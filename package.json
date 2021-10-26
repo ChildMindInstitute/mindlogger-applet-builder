@@ -25,7 +25,7 @@
     "@sentry/integrations": "^5.26.0",
     "@toast-ui/vue-editor": "^2.4.0",
     "aws-s3": "^2.0.5",
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "core-js": "^3.6.4",
     "csvtojson": "^2.0.10",
     "file-loader": "^6.2.0",

@@ -26,6 +26,18 @@
         </v-btn>
         <v-btn
           icon
+          v-if="!isConditionalItem(itemIndex)"
+          @click="hideItem(itemIndex)"
+        >
+          <v-icon v-if="isVis" color="grey lighten-1">
+            mdi-eye-off-outline
+          </v-icon>
+          <v-icon v-else color="grey lighten-1">
+            mdi-eye-outline
+          </v-icon>
+        </v-btn>
+        <v-btn
+          icon
           @click="editItem"
         >
           <v-icon
@@ -254,6 +266,16 @@
           :value="item.markdownText"
           @input="onUpdateMarkdownText"
         />
+
+        <v-divider
+          class="my-4"
+        />
+
+        <ItemTimerOption
+          colClasses="d-flex align-center py-0 px-3"
+          @update="updateTimer($event.responseTimeLimit)"
+          :responseTimeLimit="item.timer"
+        />
       </div>
 
       <RadioBuilder
@@ -267,12 +289,14 @@
         :has-prize-activity="hasPrizeActivity"
         :is-reviewer-activity="isReviewerActivity"
         :initial-is-optional-text="item.isOptionalText"
+        :timer="item.timer"
         @openPrize="setTokenPrizeModalStatus(true)"
         @removeTemplate="onRemoveTemplate"
         @updateTemplates="onUpdateTemplates"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
         @updateOptionalText="updateOptionalText"
+        @updateTimer="updateTimer"
         @updateResponseOptions="updateResponseOptions"
         @loading="loading = $event"
         @notify="notify = $event"
@@ -287,6 +311,8 @@
         :initial-item-data="item.options"
         :item-templates="itemTemplates"
         :has-prize-activity="hasPrizeActivity"
+        :timer="item.timer"
+        @updateTimer="updateTimer"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
       />
@@ -311,10 +337,12 @@
         :initial-response-options="item.responseOptions"
         :initial-is-optional-text="item.isOptionalText"
         :is-reviewer-activity="isReviewerActivity"
+        :timer="item.timer"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
+        @updateTimer="updateTimer"
         @loading="loading = $event"
         @notify="notify = $event"
       />
@@ -328,17 +356,23 @@
         @updateAllow="updateAllow"
         @loading="loading = $event"
         @notify="notify = $event"
+        :timer="item.timer"
+        @updateTimer="updateTimer"
       />
 
       <VideoBuilder
         v-if="item.inputType === 'video'"
         :key="`${baseKey}-video`"
         :initial-is-optional-text="item.isOptionalText"
+        :initial-item-data="item.options"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
+        :timer="item.timer"
         @updateOptionalText="updateOptionalText"
+        @updateOptions="updateOptions"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
+        @updateTimer="updateTimer"
       />
 
       <AgeSelectorBuilder
@@ -348,7 +382,7 @@
         :initial-item-data="item.options"
         :initial-response-options="item.responseOptions"
         :initial-is-optional-text="item.isOptionalText"
-        @updateOptions="updateAgeOptions"
+        @updateOptions="updateOptions"
         @updateAllow="updateAllow"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
@@ -359,49 +393,65 @@
       <PhotoBuilder
         v-if="item.inputType === 'photo'"
         :key="`${baseKey}-photo`"
+        :initial-item-data="item.options"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
+        :timer="item.timer"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
+        @updateTimer="updateTimer"
+        @updateOptions="updateOptions"
       />
 
       <TimeRangeBuilder
         v-if="item.inputType === 'timeRange'"
         :key="`${baseKey}-timeRange`"
+        :initial-item-data="item.options"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
+        :timer="item.timer"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
+        @updateTimer="updateTimer"
+        @updateOptions="updateOptions"
       />
 
       <DateBuilder
         v-if="item.inputType === 'date'"
         :key="`${baseKey}-date`"
+        :initial-item-data="item.options"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
+        :timer="item.timer"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
+        @updateTimer="updateTimer"
+        @updateOptions="updateOptions"
       />
 
       <DrawingBuilder
         v-if="item.inputType === 'drawing'"
         :key="`${baseKey}-drawing`"
+        :initial-item-data="item.options"
         :initial-item-response-options="item.responseOptions"
         :initial-item-input-options="item.inputOptions"
         :initial-is-optional-text="item.isOptionalText"
         :is-skippable-item="skippable"
+        @updateOptions="updateOptions"
+        :timer="item.timer"
         @updateResponseOptions="updateResponseOptions"
         @updateInputOptions="updateInputOptions"
         @updateOptionalText="updateOptionalText"
         @updateAllow="updateAllow"
         @loading="loading = $event"
         @notify="notify = $event"
+        @updateTimer="updateTimer"
       />
 
       <AudioRecordBuilder
@@ -411,10 +461,12 @@
         :initial-item-data="item.options"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
+        :timer="item.timer"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
+        @updateTimer="updateTimer"
       />
 
       <AudioImageRecordBuilder
@@ -428,19 +480,24 @@
         @updateAllow="updateAllow"
         @loading="loading = $event"
         @notify="notify = $event"
+        @updateOptions="updateOptions"
       />
 
       <GeolocationBuilder
         v-if="item.inputType === 'geolocation'"
         :key="`${baseKey}-geolocation`"
+        :initial-item-data="item.options"
         :initial-item-response-options="item.responseOptions"
         :initial-is-optional-text="item.isOptionalText"
         :is-skippable-item="skippable"
+        :timer="item.timer"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @loading="loading = $event"
         @notify="notify = $event"
         @updateAllow="updateAllow"
+        @updateTimer="updateTimer"
+        @updateOptions="updateOptions"
       />
 
       <AudioStimulusBuilder
@@ -448,14 +505,16 @@
         :key="`${baseKey}-audioStimulus`"
         :is-skippable-item="skippable"
         :initial-item-input-options="item.inputOptions"
+        :initial-item-response-options="item.responseOptions"
+        :initial-is-optional-text="item.isOptionalText"
         :initial-item-media="item.media"
         :initial-item-data="item.options"
         @updateAllow="updateAllow"
         @updateInputOptions="updateInputOptions"
         @updateMedia="updateMedia"
-        @validation="item.valid = $event"
         @loading="loading = $event"
         @notify="notify = $event"
+        @updateOptions="updateOptions"
       />
 
       <CumulativeScoreBuilder
@@ -509,7 +568,7 @@
                 :key="conditional.id + condition.ifValue.name"
               >
                 <v-list-item-content>
-                  <v-list-item-title v-text="condition.ifValue.name + ' ' + condition.stateValue.name + ' is ' + condition.answerValue.name" />
+                  <v-list-item-title v-text="condition.ifValue.name + ' ' + condition.stateValue.name + ' is ' + getConditionAnswer(condition)" />
                 </v-list-item-content>
               </v-list-item>
             </v-list-group>
@@ -608,6 +667,11 @@
     align-items: center;
   }
 
+  .card-expanded {
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
   .invalid {
     background-color: #d44c4c;
   }
@@ -640,6 +704,7 @@ import GeolocationBuilder from "./ItemBuilders/GeolocationBuilder.vue";
 import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
 import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
 import StackedSliderBuilder from "./ItemBuilders/StackedSliderBuilder";
+import ItemTimerOption from "../Partial/ItemTimerOption";
 
 import MarkDownEditor from "../MarkDownEditor";
 import Item from '../../../models/Item';
@@ -672,6 +737,7 @@ export default {
     StackedSliderBuilder,
     Notify,
     Loading,
+    ItemTimerOption,
   },
   props: {
     itemIndex: {
@@ -691,7 +757,6 @@ export default {
       itemConditionals: [],
       hasScoringItem: false,
       removeDialog: false,
-      markdownDialog: false,
       valid: false,
       largeText: '',
       headerImage: '',
@@ -701,6 +766,7 @@ export default {
       baseKey: 0,
       loading: false,
       notify: {},
+      isVis: false,
       responseIdentifierMessage: 'By using this option, the user will be required to enter response data identifier text into the field. The text entered will identify the response data collected at that point in time. The identifier used will be filterable on the user\'s data visualization tab.'
     }
   },
@@ -775,6 +841,7 @@ export default {
       isExpanded: !this.item.name.length
     });
 
+    this.isVis = !!this.item.isVis;
     this.setItemName();
 
   },
@@ -783,6 +850,8 @@ export default {
       [
         'updateItemMetaInfo',
         'duplicateItem',
+        'showOrHideItem',
+        'showItem',
         'deleteConditional',
         'deleteItem',
         'updateItemInputType',
@@ -797,6 +866,21 @@ export default {
 
     editItem () {
       this.isExpanded = !this.isExpanded;
+    },
+
+    hideItem (index) {
+      this.isVis = !this.isVis;
+      this.showOrHideItem(index);
+    },
+
+    getConditionAnswer (condition) {
+      if (condition.answerValue) {
+        return condition.answerValue.name;
+      }
+      if (condition.maxValue || condition.maxValue === 0) {
+        return condition.maxValue;
+      }
+      return condition.minValue;
     },
 
     onDeleteItem () {
@@ -827,6 +911,15 @@ export default {
       })
 
       this.removeDialog = false;
+    },
+
+    isConditionalItem (index) {
+      const res = this.conditionals.some(({ showValue }) => showValue === this.item.name);
+
+      if (res) {
+        this.showItem(index);
+      }
+      return res;
     },
 
     nameKeydown (e) {
@@ -908,6 +1001,13 @@ export default {
       this.updateItemMetaInfo({
         index: this.itemIndex,
         obj: { isOptionalText }
+      });
+    },
+
+    updateTimer(timer) {
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { timer }
       });
     },
 

@@ -11,7 +11,7 @@ const activityGetters = {
     return state.protocol.activities;
   },
 
-  currentActivity (state) {
+  currentActivity(state) {
     return state.currentActivity;
   },
 

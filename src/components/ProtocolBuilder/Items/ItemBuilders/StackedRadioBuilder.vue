@@ -436,7 +436,25 @@
             @change="update"
           />
         </v-col>
+        <v-col
+          class="d-flex align-center"
+          cols="12"
+          md="3"
+          sm="6"
+        >
+          <v-checkbox
+            v-model="removeBackOption"
+            label="Remove ability to go back to the previous item"
+            @change="update"
+          />
+        </v-col>
       </v-row>
+
+      <ItemTimerOption
+        colClasses="d-flex align-center py-0 px-3"
+        @update="updateTimerOption"
+        :responseTimeLimit="timer"
+      />
     </v-form>
 
     <v-dialog
@@ -551,11 +569,13 @@
 
 <script>
 import ImageUpldr from '../../../../models/ImageUploader';
+import ItemTimerOption from '../../Partial/ItemTimerOption';
 import TableEditor from './TableEditor';
 
 export default {
   components: {
     TableEditor,
+    ItemTimerOption,
   },
   props: {
     initialItemData: {
@@ -583,7 +603,11 @@ export default {
       type: Boolean,
       required: false,
       default: false
-    }
+    },
+    timer: {
+      type: Number,
+      required: false
+    },
   },
   data: function () {
     const imgUploader = new ImageUpldr();
@@ -655,6 +679,7 @@ export default {
 
       isTokenValue,
       hasScoreValue: this.initialItemData.hasScoreValue || false,
+      removeBackOption: this.initialItemData.removeBackOption,
       hasResponseAlert: this.initialItemData.hasResponseAlert || false,
       imgUploader,
       values,
@@ -689,6 +714,10 @@ export default {
   },
 
   methods: {
+    updateTimerOption(option) {
+      this.$emit('updateTimer', option.responseTimeLimit)
+    },
+
     addOption() {
       const nextOption = {
         'name': `Option ${this.options.length + 1}`,
@@ -774,6 +803,7 @@ export default {
         'valueType': this.isTokenValue ? 'xsd:token' : 'xsd:anyURI',
         'isMultipleChoice': this.isMultipleChoice,
         'isSkippableItem': this.isSkippable,
+        'removeBackOption': this.removeBackOption,
         'options': this.options,
         'itemList': this.itemList,
         'choices': (this.isTokenValue || this.hasScoreValue || this.hasResponseAlert) ? choices : [],

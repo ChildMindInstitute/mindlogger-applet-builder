@@ -15,11 +15,34 @@
       @onNotify="$emit('loading', false); $emit('notify', $event);"
     />
 
-    <v-checkbox
-      v-model="isSkippable"
-      label="Skippable Item"
-      :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
-    />
+    <v-row>
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="isSkippable"
+          label="Skippable Item"
+          :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
+          @change="update"
+        />
+      </v-col>
+
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="removeBackOption"
+          label="Remove ability to go back to the previous item"
+          @change="update"
+        />
+      </v-col>
+    </v-row>
     <OptionalItemText
       :colClasses="'d-flex align-center'"
       :cols="12"
@@ -30,22 +53,34 @@
       @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
       @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
     />
+
+    <ItemTimerOption
+      colClasses="d-flex align-center py-0 px-3"
+      @update="updateTimerOption"
+      :responseTimeLimit="timer"
+    />
   </div>
 </template>
 
 <script>
 import Uploader from '../../Uploader.vue';
 import OptionalItemText from '../../Partial/OptionalItemText.vue';
+import ItemTimerOption from '../../Partial/ItemTimerOption';
 
 export default {
   components: {
     Uploader,
     OptionalItemText,
+    ItemTimerOption,
   },
   props: {
     initialItemResponseOptions: {
       type: Object,
       required: true,
+    },
+    initialItemData: {
+      type: Object,
+      required: true
     },
     initialIsOptionalText: {
       type: Boolean,
@@ -54,6 +89,10 @@ export default {
     isSkippableItem: {
       type: Number,
       default: 0,
+    },
+    timer: {
+      type: Number,
+      required: false
     },
   },
   data() {
@@ -67,6 +106,7 @@ export default {
 
     return {
       isOptionalText: this.initialIsOptionalText,
+      removeBackOption: this.initialItemData.removeBackOption,
       responseOptions,
     }
   },
@@ -81,6 +121,9 @@ export default {
     }
   },
   methods: {
+    updateTimerOption(option) {
+      this.$emit('updateTimer', option.responseTimeLimit)
+    },
 
     onUpdateResponseOptions() {
       if (this.responseOptions.isOptionalTextRequired)
@@ -126,7 +169,13 @@ export default {
         duration: 3000,
       });
     },
-
+    update() {
+      const responseOptions = {
+        'isSkippableItem': this.isSkippable,
+        'removeBackOption': this.removeBackOption,
+      };
+      this.$emit('updateOptions', responseOptions);
+    },
   },
 }
 </script>

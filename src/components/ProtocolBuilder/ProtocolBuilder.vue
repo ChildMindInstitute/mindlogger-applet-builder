@@ -134,6 +134,19 @@
 
               <v-btn
                 icon
+                v-if="isThresholdActivity(activity)"
+                @click="showOrHideActivity(activities.findIndex(act => act == activity))"
+              >
+                <v-icon v-if="activity.isVis" color="grey lighten-1">
+                  mdi-eye-off-outline
+                </v-icon>
+                <v-icon v-else color="grey lighten-1">
+                  mdi-eye-outline
+                </v-icon>
+              </v-btn>
+
+              <v-btn
+                icon
                 @click="editActivity(index)"
               >
                 <v-icon color="grey lighten-1">
@@ -204,6 +217,7 @@ export default {
   data () {
     return {
       markdownDialog: false,
+      isVis: [],
       textRules: [(v) => !!v.trim() || "This field is required"],
     }
   },
@@ -284,6 +298,8 @@ export default {
         'updateProtocolMetaInfo',
         'duplicateActivity',
         'deleteActivity',
+        'showOrHideActivity',
+        'showActivity',
         'addActivity',
         'setCurrentActivity',
         'setCurrentScreen',
@@ -305,6 +321,28 @@ export default {
         message: `Applet watermark from URL is successfully added.`,
         duration: 3000,
       });
+    },
+    isThresholdActivity (activity) {
+      let res = true;
+
+      this.activities.forEach(({ items }) => {
+        items.forEach(({ cumulativeScores }) => {
+          cumulativeScores.forEach(({ messages }) => {
+            messages.forEach(message => {
+              if (message.nextActivity === activity.name) {
+                res = false;
+              }
+            });
+          })
+        })
+      })
+
+      if (!res) {
+        const index = this.activities.findIndex(act => act == activity);
+        this.showActivity(index);
+      }
+
+      return res;
     },
     async onAddWatermarkFromDevice (uploadFunction) {
       this.$emit('loading', true); 

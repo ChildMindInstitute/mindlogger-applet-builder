@@ -122,6 +122,17 @@
               />
               <v-btn
                 icon
+                @click="hideOption(index)"
+              >
+                <v-icon v-if="option.isVis">
+                  mdi-eye-off-outline
+                </v-icon>
+                <v-icon v-else>
+                  mdi-eye-outline
+                </v-icon>
+              </v-btn>
+              <v-btn
+                icon
                 @click="deleteOption(index)"
               >
                 <v-icon>delete</v-icon>
@@ -341,6 +352,18 @@
           sm="6"
         >
           <v-checkbox
+            v-model="removeBackOption"
+            label="Remove ability to go back to the previous item"
+            @change="update"
+          />
+        </v-col>
+        <v-col
+          class="d-flex align-center"
+          cols="12"
+          md="3"
+          sm="6"
+        >
+          <v-checkbox
             v-model="colorPalette"
             label="Set color palette"
             @change="update"
@@ -354,14 +377,20 @@
           />
         </v-col>
       </v-row>
-        <OptionalItemText
-          colClasses="d-flex align-center py-0 px-3"
+      <OptionalItemText
+        colClasses="d-flex align-center py-0 px-3"
 
-          :text="isOptionalText"
-          :required="responseOptions.isOptionalTextRequired"
-          @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
-          @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
-        />
+        :text="isOptionalText"
+        :required="responseOptions.isOptionalTextRequired"
+        @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
+        @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
+      />
+
+      <ItemTimerOption
+        colClasses="d-flex align-center py-0 px-3"
+        @update="updateTimerOption"
+        :responseTimeLimit="timer"
+      />
     </v-form>
 
     <v-dialog
@@ -558,13 +587,15 @@
 <script>
 import Uploader from '../../Uploader.vue';
 import OptionalItemText from '../../Partial/OptionalItemText.vue';
+import ItemTimerOption from '../../Partial/ItemTimerOption';
 import MarkDownEditor from '../../MarkDownEditor';
 
 export default {
   components: {
     Uploader,
     OptionalItemText,
-    MarkDownEditor
+    MarkDownEditor,
+    ItemTimerOption,
   },
   props: {
     initialItemData: {
@@ -600,7 +631,11 @@ export default {
     isReviewerActivity: {
       type: Boolean,
       default: false
-    }
+    },
+    timer: {
+      type: Number,
+      required: false
+    },
   },
   data: function () {
 
@@ -621,6 +656,7 @@ export default {
         value: option.value || 0,
         score: option.score || 0,
         image: option.image || '',
+        isVis: option.isVis || false,
         description: option.description || '',
         color: option.color || '',
         alert: option.alert || '',
@@ -653,6 +689,7 @@ export default {
       randomizeOptions: this.initialItemData.randomizeOptions,
       responseOptions: this.initialResponseOptions,
       isOptionalText: this.initialIsOptionalText,
+      removeBackOption: this.initialItemData.removeBackOption,
       currentOption: null,
       currentOptionColor: "",
       selectedPalette: null,
@@ -684,12 +721,17 @@ export default {
   },
 
   methods: {
+    updateTimerOption(option) {
+      this.$emit('updateTimer', option.responseTimeLimit)
+    },
+
     addOption() {
       let currentPalette = "";
       const nextOption = {
         'name': `Option ${this.options.length + 1}`,
         'value': 0,
         'score': 0,
+        'isVis': false,
         'description': '',
         'color': '',
         'expanded': false,
@@ -837,6 +879,7 @@ export default {
         'isSkippableItem': this.isSkippable,
         'colorPalette': this.colorPalette,
         'randomizeOptions': this.randomizeOptions,
+        'removeBackOption': this.removeBackOption,
         'valueType': this.isTokenValue ? 'xsd:token' : 'xsd:anyURI',
         'options': this.options.map(option => ({
           ...option,
@@ -858,6 +901,14 @@ export default {
         }
       }
 
+      this.update();
+    },
+
+    hideOption(index) {
+      const itemOptions = [...this.options];
+
+      itemOptions[index].isVis = !itemOptions[index].isVis;
+      this.options = [...itemOptions];
       this.update();
     },
 

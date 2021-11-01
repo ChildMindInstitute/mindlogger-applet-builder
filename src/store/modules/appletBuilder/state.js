@@ -87,6 +87,14 @@ export default {
       icon: baseImageURL + 'item-types/audio-stimulus-icon.png',
     },
     {
+      text: "pastBehaviorTracker",
+      icon: baseImageURL + 'item-types/past-behavior-tracker-icon.png'
+    },
+    {
+      text: "futureBehaviorTracker",
+      icon: baseImageURL + 'item-types/future-behavior-tracker-icon.png'
+    },
+    {
       text: "ageSelector",
       icon: baseImageURL + 'item-types/slider-icon.png',
     },
@@ -98,14 +106,6 @@ export default {
       text: "cumulativeScore",
       icon: baseImageURL + 'item-types/cumulative-icon.png',
     },
-    {
-      text: "pastBehaviorTracker",
-      icon: baseImageURL + 'item-types/past-behavior-tracker-icon.png'
-    },
-    {
-      text: "futureBehaviorTracker",
-      icon: baseImageURL + 'item-types/future-behavior-tracker-icon.png'
-    }
   ],
   templates: [],
   versions: null,

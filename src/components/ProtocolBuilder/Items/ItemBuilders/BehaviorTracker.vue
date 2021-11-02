@@ -107,7 +107,7 @@
                 <v-text-field
                   v-model="behavior.rate"
                   type="number"
-                  suffix="per minute"
+                  suffix="minutes"
                   @input="saveBehaviors('negative')"
                 />
               </th>

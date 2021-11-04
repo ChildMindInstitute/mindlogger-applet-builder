@@ -182,6 +182,24 @@
       @close="onCloseEditor"
       @submit="onSubmitEditor"
     />
+
+    <v-dialog
+      v-model="validFileDlg"
+      width="400"
+    >
+      <v-alert type="success">
+        <span>{{ fileSuccessMsg }}</span>
+      </v-alert>
+    </v-dialog>
+
+    <v-dialog
+      v-model="inValidFileDlg"
+      width="400"
+    >
+      <v-alert type="error">
+        <span>{{ fileErrorMsg }}</span>
+      </v-alert>
+    </v-dialog>
   </div>
 </template>
 
@@ -218,6 +236,10 @@ export default {
     return {
       markdownDialog: false,
       isVis: [],
+      inValidFileDlg: false,
+      fileErrorMsg: '',
+      validFileDlg: false,
+      fileSuccessMsg: '',
       textRules: [(v) => !!v.trim() || "This field is required"],
     }
   },
@@ -308,19 +330,13 @@ export default {
     ),
     onAddImageFromUrl (event) {
       this.appletImage = event;
-      this.$emit('notify', {
-        type: 'success',
-        message: `Applet image from URL is successfully added.`,
-        duration: 3000,
-      });
+      this.validFileDlg = true;
+      this.fileSuccessMsg = 'Applet image from URL is successfully added.';
     },
     onAddWatermarkFromUrl (event) {
       this.appletWatermark = event;
-      this.$emit('notify', {
-        type: 'success',
-        message: `Applet watermark from URL is successfully added.`,
-        duration: 3000,
-      });
+      this.validFileDlg = true;
+      this.fileSuccessMsg = 'Applet watermark from URL is successfully added.';
     },
     isThresholdActivity (activity) {
       let res = true;
@@ -349,17 +365,10 @@ export default {
       try {
         this.appletWatermark = await uploadFunction();
         this.$emit('loading', false);
-        this.$emit('notify', {
-          type: 'success',
-          message: `Applet watermark is successfully added.`,
-          duration: 3000,
-        });
+        this.validFileDlg = true;
+        this.fileSuccessMsg = 'Applet watermark is successfully added.';
       } catch (error) {
         this.$emit('loading', false);
-        this.$emit('notify', {
-          type: 'error',
-          message: `Something went wrong with uploading applet watermark.`,
-        });
       }
     },
     onRemoveWatermark () {
@@ -373,25 +382,19 @@ export default {
     },
     onWatermarkNotify (event) {
       this.$emit('loading', false); 
-      this.$emit('notify', event);
+      this.fileErrorMsg = event.message;
+      this.inValidFileDlg = true;
     },
-    async onAddImageFromDevice (uploadFunction) {
+    async onAddImageFromDevice (uploadData) {
       this.$emit('loading', true);
 
       try {
-        this.appletImage = await uploadFunction();
+        this.appletImage = await uploadData();
         this.$emit('loading', false);
-        this.$emit('notify', {
-          type: 'success',
-          message: `Applet image is successfully added.`,
-          duration: 3000,
-        });
+        this.validFileDlg = true;
+        this.fileSuccessMsg = 'Applet image is successfully added.';
       } catch (error) {
         this.$emit('loading', false);
-        this.$emit('notify', {
-          type: 'error',
-          message: `Something went wrong with uploading applet image.`,
-        });
       }
     },
     onRemoveImage () {
@@ -405,7 +408,8 @@ export default {
     },
     onEventNotify (event) {
       this.$emit('loading', false);
-      this.$emit('notify', event);
+      this.fileErrorMsg = event.message;
+      this.inValidFileDlg = true;
     },
     onSubmitEditor (markdownData) {
       this.markdownData = markdownData;

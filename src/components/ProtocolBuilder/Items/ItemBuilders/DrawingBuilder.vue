@@ -136,7 +136,6 @@ export default {
     },
   },
   data: function () {
-
     let responseOptions = {
       "schema:image": '',
       "isOptionalTextRequired": false,

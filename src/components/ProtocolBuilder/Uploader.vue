@@ -9,10 +9,10 @@
       <h5>Uploader types:</h5>
       <ul>
         <li
-          v-for="type in structureTypes"
-          :key="type"
+          v-for="structureType in structureTypes"
+          :key="structureType"
         >
-          {{ type }}
+          {{ structureType }}
         </li>
       </ul>
       <p class="mt-3">
@@ -32,35 +32,13 @@
           <v-expansion-panel-content>
             <div class="input-file-container">
               <input
-                v-if="initialType === 'audio'"
                 ref="fileInput"
                 class="file-input"
                 type="file"
-                accept="audio/mpeg, audio/ogg, audio/wav"
+                :accept="getFileFormats(initialType)"
                 @change="onAddFromDevice($event, null)"
               >
-              <!-- /if initialType === 'audio' -->
-
-              <input
-                v-if="initialType === 'image'"
-                ref="fileInput"
-                class="file-input"
-                type="file"
-                accept="image/jpeg, image/png, image/bmp"
-                @change="onAddFromDevice($event, null)"
-              >
-              <!-- /if initialType === 'image' -->
-
-              <input
-                v-if="initialType === 'video'"
-                ref="fileInput"
-                class="file-input"
-                type="file"
-                accept="video/*, image/gif"
-                @change="onAddFromDevice($event, null)"
-              >
-              <!-- /if initialType === 'video' -->
-
+             
               <v-btn @click="$refs.fileInput.click()">
                 Your computer
                 <v-icon right>
@@ -293,7 +271,7 @@ export default {
     }
   },
   data() {
-    const structureTypes = ['image', 'audio', 'video'];
+    const structureTypes = ['image', 'audio', 'video', 'video_or_image'];
     const uploader = new Uploader(this.initialType);
 
     return {
@@ -321,7 +299,6 @@ export default {
     }
   },
   methods: {
-
     async onAddFromUrl(url) {
       try {
         if(this.initialType === 'audio') await isAudioUrlValid(url);
@@ -369,6 +346,22 @@ export default {
             setTimeout(() => reject('Something went wrong with uploading.'), 1000);
           });
       });
+    },
+
+    getFileFormats (type) {
+      if (type === 'audio') {
+        return "audio/mpeg, audio/ogg, audio/wav";
+      }
+      if (type === 'image') {
+        return "image/jpeg, image/png, image/bmp"
+      }
+      if (type === 'video') {
+        return "video/*, image/gif"
+      }
+      if (type === 'video_or_image') {
+        return "video/*, image/gif, image/jpeg, image/png, image/bmp";
+      }
+      return "";
     },
 
     onClickRemove() {

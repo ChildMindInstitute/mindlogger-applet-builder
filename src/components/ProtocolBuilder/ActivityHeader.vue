@@ -44,7 +44,7 @@
       <Uploader
         class="mt-3 mb-4"
         style="max-width: 300px"
-        initialType="video"
+        initialType="video_or_image" 
         :initialData="splash"
         initialTitle="Splash Screen"
         @onAddFromUrl="onAddSplashFromUrl($event)"

@@ -99,8 +99,20 @@ export default {
       icon: baseImageURL + 'item-types/slider-icon.png',
     },
     {
+      text: "pastBehaviorTracker",
+      icon: baseImageURL + 'item-types/past-behavior-tracker-icon.png'
+    },
+    {
+      text: "futureBehaviorTracker",
+      icon: baseImageURL + 'item-types/future-behavior-tracker-icon.png'
+    },
+    {
       text: "markdownMessage",
       icon: baseImageURL + 'item-types/message-icon.png',
+    },
+    {
+      text: "tokenSummary",
+      icon: baseImageURL + 'item-types/token-summary.png'
     },
     {
       text: "cumulativeScore",

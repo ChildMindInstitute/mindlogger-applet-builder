@@ -187,7 +187,7 @@
                 v-on="on"
               >
                 <v-tooltip
-                  v-if="!hasScoringItem && item.text == 'cumulativeScore'"
+                  v-if="!hasScoringItem && item.text == 'cumulativeScore' || item.text == 'tokenSummary'"
                   top
                 >
                   <template
@@ -206,7 +206,8 @@
                       <span>{{ item.text }}</span>
                     </div>
                   </template>
-                  <span>Please create an item with scores before creating this page</span>
+                  <span v-if="item.text == 'cumulativeScore'">Please create an item with scores before creating this page</span>
+                  <span v-else>Please create future behavior tracker or past behavior tracker items</span>
                 </v-tooltip>
                 <div
                   v-else
@@ -700,6 +701,7 @@ import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
 import StackedSliderBuilder from "./ItemBuilders/StackedSliderBuilder";
 import BehaviorTracker from "./ItemBuilders/BehaviorTracker";
 import { timeScreen } from './ItemBuilders/timeScreen';
+import { tokenSummary } from './ItemBuilders/tokenSummary';
 
 import MarkDownEditor from "../MarkDownEditor";
 import Item from '../../../models/Item';
@@ -854,7 +856,8 @@ export default {
         'setTokenPrizeModalStatus',
         'insertTemplateUpdateRequest',
         'addTimeScreen',
-        'deleteTimeScreen'
+        'deleteTimeScreen',
+        'updateTokenSummary'
       ],
     ),
 
@@ -906,6 +909,8 @@ export default {
       if (inputType == 'futureBehaviorTracker') {
         this.deleteTimeScreen(this.itemIndex - 1)
       }
+
+      this.updateTokenSummary(tokenSummary);
 
       this.itemConditionals.forEach((conditional) => {
         const index = this.conditionals.findIndex(({ id }) => id === conditional.id);
@@ -969,6 +974,8 @@ export default {
           screen: timeScreen
         })
       }
+
+      this.updateTokenSummary(tokenSummary);
     },
 
     onUpdateName (name) {

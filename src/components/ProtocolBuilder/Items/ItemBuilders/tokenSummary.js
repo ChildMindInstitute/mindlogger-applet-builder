@@ -4,7 +4,7 @@ export const tokenSummary = {
 	"description": "",
 	"ui": {
 		"allow": [
-			"auto_advance"
+      "dont_know_answer"
 		],
 		"inputType": "tokenSummary"
 	},

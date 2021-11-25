@@ -11,7 +11,7 @@
             v-model="minSliderTick"
             label="Min Value"
             type="number"
-            min="1"
+            min="0"
             :max="maxSliderTick"
             @input="sliderRangeUpdate($event, 'min')"
           />
@@ -532,8 +532,8 @@ export default {
     update () {
       if (this.maxSliderTick > 12) {
         this.maxSliderTick = 12;
-      } else if (this.minSliderTick < 1) {
-        this.minSliderTick = 1;
+      } else if (this.minSliderTick < 0) {
+        this.minSliderTick = 0;
       }
 
       let responseOptions = {
@@ -568,15 +568,14 @@ export default {
 
     sliderRangeUpdate(ev, type) {
       if (Number(this.maxSliderTick) > 12) {
-        return false;
+        this.maxSliderTick = 12;
       }
       if (Number(this.minSliderTick) < 0) {
-        return false;
+        this.minSliderTick = 0
       }
       if (this.minSliderTick === '' || this.maxSliderTick === '' || Number(this.minSliderTick) > Number(this.maxSliderTick)) {
         return ;
       }
-
       this.scores = this.scores || [];
       this.alerts = this.alerts || [];
 
@@ -584,7 +583,6 @@ export default {
       if (tickCount < 0) {
         return;
       }
-
       if (type == 'max') {
         while (this.scores.length < tickCount) {
           this.scores.push(Number(this.minSliderTick) + this.scores.length);

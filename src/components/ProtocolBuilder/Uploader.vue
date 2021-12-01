@@ -96,6 +96,7 @@
                   <p>Image Requirements</p>
                   <ul>
                     <li>Size: less than 8MB</li>
+                    <li>Format: JPEG and PNG</li>
                     <li>Width: between 100px and 1920px</li>
                     <li>Height: between 100px and 1920px</li>
                   </ul>
@@ -122,6 +123,53 @@
                   <ul>
                     <li>Size: less than 8MB</li>
                     <li>700px * 1000px size is required</li>
+                  </ul>
+                </span>
+              </v-tooltip>
+            </div>
+            <div 
+              v-else-if="initialType === 'video'"
+              class="mt-4 text-right"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-icon
+                    color="primary"
+                    dark
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    mdi-information-outline
+                  </v-icon>
+                </template>
+                <span>
+                  <p>Requirements</p>
+                  <ul>
+                    <li>Size: less than 100MB</li>
+                    <li>Format: MP4 and GIF</li>
+                  </ul>
+                </span>
+              </v-tooltip>
+            </div>
+            <div 
+              v-else-if="initialType === 'audio'"
+              class="mt-4 text-right"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-icon
+                    color="primary"
+                    dark
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    mdi-information-outline
+                  </v-icon>
+                </template>
+                <span>
+                  <p>Requirements</p>
+                  <ul>
+                    <li>Format: MP3 and WAV</li>
                   </ul>
                 </span>
               </v-tooltip>
@@ -213,6 +261,7 @@
                 <p>Image Requirements</p>
                 <ul>
                   <li>Size: less than 8MB</li>
+                  <li>Format: JPEG and PNG</li>
                   <li>Width: between 100px and 1920px</li>
                   <li>Height: between 100px and 1920px</li>
                 </ul>

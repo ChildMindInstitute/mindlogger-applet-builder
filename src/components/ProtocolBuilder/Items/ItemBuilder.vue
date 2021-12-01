@@ -257,26 +257,15 @@
         label="Allow the user to see results"
       />
 
-      <div
+      <MarkDownBuilder
         v-if="item.inputType === 'markdownMessage'"
-      >
-        Message:
-
-        <MarkDownEditor
-          :value="item.markdownText"
-          @input="onUpdateMarkdownText"
-        />
-
-        <v-divider
-          class="my-4"
-        />
-
-        <ItemTimerOption
-          colClasses="d-flex align-center py-0 px-3"
-          @update="updateTimer($event.responseTimeLimit)"
-          :responseTimeLimit="item.timer"
-        />
-      </div>
+        :markdownText="item.markdownText"
+        :initial-item-data="item.options"
+        :timer="item.timer"
+        @onUpdateMarkdown="onUpdateMarkdownText"
+        @updateOptions="updateOptions"
+        @updateTimer="updateTimer"
+      />
 
       <RadioBuilder
         v-if="item.inputType === 'radio' || item.inputType === 'checkbox'"
@@ -689,6 +678,7 @@
 import Uploader from '../Uploader.vue';
 
 import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
+import MarkDownBuilder from "./ItemBuilders/MarkDownBuilder.vue";
 import StackedRadioBuilder from "./ItemBuilders/StackedRadioBuilder.vue";
 import TextBuilder from "./ItemBuilders/TextBuilder.vue";
 import SliderBuilder from "./ItemBuilders/SliderBuilder.vue";
@@ -704,7 +694,6 @@ import GeolocationBuilder from "./ItemBuilders/GeolocationBuilder.vue";
 import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
 import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
 import StackedSliderBuilder from "./ItemBuilders/StackedSliderBuilder";
-import ItemTimerOption from "../Partial/ItemTimerOption";
 
 import MarkDownEditor from "../MarkDownEditor";
 import Item from '../../../models/Item';
@@ -733,11 +722,11 @@ export default {
     AudioStimulusBuilder,
     CumulativeScoreBuilder,
     MarkDownEditor,
+    MarkDownBuilder,
     StackedRadioBuilder,
     StackedSliderBuilder,
     Notify,
     Loading,
-    ItemTimerOption,
   },
   props: {
     itemIndex: {

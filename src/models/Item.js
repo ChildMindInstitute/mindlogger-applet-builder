@@ -260,6 +260,7 @@ export default class Item {
       || this.ref.inputType === "geolocation"
       || this.ref.inputType === "audioStimulus"
       || this.ref.inputType === "photo"
+      || this.ref.inputType === "markdownMessage"
       || this.ref.inputType === "video"
       || this.ref.inputType === "timeRange") {
       return {
@@ -842,6 +843,12 @@ export default class Item {
         _.get(responseOptions, [0, 'reprolib:terms/itemList'], []);
       let options =
         _.get(responseOptions, [0, 'reprolib:terms/options'], []);
+      let drawingImage = 
+        _.get(responseOptions, [0, 'schema:image']);
+      
+      if (drawingImage) {
+        itemContent.responseOptions['schema:image'] = drawingImage;
+      }
 
       if (isOptionalTextRequired) {
         itemContent.responseOptions.isOptionalTextRequired =
@@ -1170,6 +1177,7 @@ export default class Item {
         || itemType === 'geolocation'
         || itemType === 'date'
         || itemType === 'video'
+        || itemType === 'markdownMessage'
         || itemType === 'photo'
         || itemType === 'timeRange') {
         itemContent.options = {

@@ -9,7 +9,7 @@
       <v-checkbox
         v-model="isText"
         label="Text Input Option"
-        @change="$emit('text', isText)"
+        @change="onChangeTextOption"
       />
     </v-col>
 
@@ -61,6 +61,17 @@ export default {
     return {
       isText: this.text,
       isRequired: this.required,
+    }
+  },
+
+  methods: {
+    onChangeTextOption () {
+      this.$emit('text', this.isText);
+
+      if (!this.isText && this.isRequired) {
+        this.isRequired = false;
+        this.$emit('required', this.isRequired);
+      }
     }
   }
 }

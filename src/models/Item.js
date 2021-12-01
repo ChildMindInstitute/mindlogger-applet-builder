@@ -843,6 +843,12 @@ export default class Item {
         _.get(responseOptions, [0, 'reprolib:terms/itemList'], []);
       let options =
         _.get(responseOptions, [0, 'reprolib:terms/options'], []);
+      let drawingImage = 
+        _.get(responseOptions, [0, 'schema:image']);
+      
+      if (drawingImage) {
+        itemContent.responseOptions['schema:image'] = drawingImage;
+      }
 
       if (isOptionalTextRequired) {
         itemContent.responseOptions.isOptionalTextRequired =

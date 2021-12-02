@@ -6,11 +6,24 @@ export default class Activity {
   }
 
   getActivityBuilderData(initialActivityData) {
+    const items = (initialActivityData.items || []).map(item => item);
+
     if (initialActivityData.visibilities && initialActivityData.visibilities.length) {
       initialActivityData.conditionalItems = this.getConditionalItems(initialActivityData, initialActivityData.items);
     }
 
-    const items = (initialActivityData.items || []).map(item => item);
+    if (initialActivityData.subScales && initialActivityData.subScales.length) {
+      const subScales = initialActivityData.subScales;
+
+      for (const subScale of subScales) {
+        const names = subScale.jsExpression.split('+').map(name => name.trim()).filter(name => name.length);
+
+        subScale.items = items.filter(item => names.includes(item.name));
+        subScale.items = subScale.items.concat(
+          subScales.filter(subScale => names.includes(`(${subScale.variableName})`))
+        );
+      }
+    }
 
     if (initialActivityData.compute && initialActivityData.compute.length) {
       const itemModel = new Item();
@@ -94,7 +107,7 @@ export default class Activity {
       if (typeof property.isVis === 'boolean') return;
 
       const conditionalItem = {
-        showValue: property.variableName,
+        showValue: items.find(item => item.name == property.variableName),
         conditions: [],
         operation: "ALL",
         id: Math.round(Date.now() * Math.random()),
@@ -337,7 +350,8 @@ export default class Activity {
       const currentItem = this.ref.items.find(({ name }) => name === item);
 
       if (currentItem.ui.inputType !== "cumulativeScore") {
-        const conditionalItem = this.ref.conditionalItems.find((cond) => cond.showValue === item);
+        const conditionalItem = this.ref.conditionalItems.find((cond) => cond.showValue && cond.showValue.name === item);
+
         let isVis = true;
 
         if (conditionalItem) {

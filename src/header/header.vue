@@ -306,10 +306,6 @@ export default {
       'resetProtocol',
     ]),
 
-    ...mapGetters(config.MODULE_NAME, [
-      'formattedProtocol',
-    ]),
-
     onBackToProtocolScreen () {
       this.setCurrentScreen(config.PROTOCOL_SCREEN);
       this.setCurrentActivity(-1);
@@ -320,7 +316,7 @@ export default {
         return;
       }
 
-      this.formattedProtocol().then((data) => {
+      Protocol.formattedProtocol(this.protocol).then((data) => {
         if (!this.formattedOriginalProtocol) {
           this.$emit("uploadProtocol", {
             applet: data,
@@ -458,7 +454,7 @@ export default {
         return ;
       }
 
-      this.formattedProtocol().then((current) => {
+      Protocol.formattedProtocol(this.protocol).then((current) => {
         const { log, upgrade } = Protocol.getChangeInfo(
           this.formattedOriginalProtocol,
           current

@@ -13,6 +13,8 @@
 
       <v-spacer />
 
+      <small style="margin-right: 10px" v-if="version">v{{ version }}</small>
+
       <v-tooltip
         v-if="currentActivity"
         bottom
@@ -244,6 +246,7 @@ import Protocol from '../models/Protocol';
 import Activity from '../models/Activity';
 import Item from '../models/Item';
 import util from '../utilities/util';
+import { getVersion } from "../utilities/util";
 import ChangeHistoryComponent from '../components/ProtocolBuilder/ChangeHistoryComponent';
 
 import { mapMutations, mapGetters } from 'vuex';
@@ -262,6 +265,7 @@ export default {
   },
   data () {
     return {
+      version: process.env.NODE_ENV !== 'production' ? getVersion() : undefined,
       changeHistoryDialog: {
         visibility: false,
         defaultVersion: null,

@@ -318,7 +318,7 @@
 </template>
 
 <script>
-import { Uploader, isAudioUrlValid, isImageValid, isVideoUrlValid } from '../../models/Uploader';
+import { Uploader, isSplashImageValid, isAudioUrlValid, isImageValid, isVideoUrlValid } from '../../models/Uploader';
 import AddFromUrl from './Additional/AddFromUrl.vue';
 
 export default {
@@ -327,6 +327,10 @@ export default {
   },
   props: {
     initialType: {
+      type: String,
+      default: '',
+    },
+    imageType: {
       type: String,
       default: '',
     },
@@ -395,7 +399,8 @@ export default {
       if(event) event.target.value = '';
 
       try {
-        if(this.initialType === 'image') await isImageValid(file);
+        if (this.initialType === 'image') await isImageValid(file);
+        if (this.imageType === 'splash') await isSplashImageValid(file);
 
         this.uploadData = file;
         this.$emit('onAddFromDevice', this.upload);

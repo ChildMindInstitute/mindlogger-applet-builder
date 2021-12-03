@@ -45,9 +45,10 @@
         class="mt-3 mb-4"
         style="max-width: 300px"
         initialType="video_or_image" 
+        imageType="splash"
         :initialData="splash"
-        initialTitle="Splash Screen"
-        @onAddFromUrl="onAddSplashFromUrl($event)"
+        initialTitle="Splash Screen" 
+        @onAddFromUrl="onAddSplashFromUrl($event, validateResolution)"
         @onAddFromDevice="loading = true; onAddSplashFromDevice($event);"
         @onRemove="onRemoveSplash()"
         @onNotify="loading = false; notify = $event;"
@@ -143,13 +144,30 @@ export default {
         this.$emit('onExpand');
       }
     },
-    onAddSplashFromUrl(url) {
+    onAddSplashFromUrl(url, validateResolution) {
+      let img = new Image();
+      let width = 0, height = 0;
+
+      img.src = url;
+      img.onload = function() { 
+        validateResolution(this.width, this.height);
+      }
       this.splash = url;
-      this.notify = {
-        type: 'success',
-        message: 'Splash screen from URL successfully added to Activity.',
-        duration: 3000,
-      };
+    },
+    validateResolution(width, height) {
+      if (width !== "700" || height !== "1000") {
+        this.splash = '';
+        this.notify = {
+          type: 'error',
+          message: 'Image size should be 700px * 1000px',
+        };
+      } else {
+        this.notify = {
+          type: 'success',
+          message: 'Splash screen from URL successfully added to Activity.',
+          duration: 3000,
+        };
+      }
     },
     async onAddSplashFromDevice(uploadFunction) {
       try {

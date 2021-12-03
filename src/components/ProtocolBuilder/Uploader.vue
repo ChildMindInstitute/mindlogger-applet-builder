@@ -264,6 +264,9 @@
                   <li>Format: JPEG and PNG</li>
                   <li>Width: between 100px and 1920px</li>
                   <li>Height: between 100px and 1920px</li>
+                  <li v-if="imageType === 'watermark'">
+                    Translucency of the image should already be completed prior to upload
+                  </li>
                 </ul>
               </span>
             </v-tooltip>

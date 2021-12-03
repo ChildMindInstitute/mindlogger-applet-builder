@@ -66,6 +66,7 @@
             <Uploader
               :initialType="'image'"
               :initialData="appletWatermark"
+              :imageType="'watermark'"
               :initialAdditionalType="'small-circle'"
               :initialTitle="'Applet Image'"
               @onAddFromUrl="onAddWatermarkFromUrl($event)"

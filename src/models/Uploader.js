@@ -24,7 +24,7 @@ export function isSplashImageValid(data, imageType) {
       resolve(data);
     };
 
-    img.onerror = () => reject('Please check if you use correct image url.');
+    img.onerror = () => reject('Please check if you use correct url.');
   });
 }
 
@@ -59,7 +59,7 @@ export function isImageValid(data, imageType) {
       resolve(data);
     };
 
-    img.onerror = () => reject('Please check if you use correct image url.');
+    img.onerror = () => reject('Please check if you use correct url.');
   });
 }
 
@@ -81,7 +81,7 @@ export function isVideoUrlValid(url) {
           reject('Please check if you use correct gif url.');
         }
       } catch (err) {
-        reject('Please check if you use correct video url.');
+        reject('Please check if you use correct url.');
       }
     }
   });

@@ -205,7 +205,7 @@
                 ref="fileInput"
                 class="file-input"
                 type="file"
-                accept="image/jpeg, image/png, image/bmp"
+                accept="image/jpeg, image/png, image/gif, image/bmp"
                 @change="onAddFromDevice($event, null)"
               >
               <v-list-item-title
@@ -382,8 +382,8 @@ export default {
     async onAddFromUrl(url) {
       try {
         if(this.initialType === 'audio') await isAudioUrlValid(url);
-        else if(this.initialType === 'image') await isImageValid(url);
-        else if(this.initialType === 'video') await isVideoUrlValid(url);
+        else if(url.match(/\.(jpeg|jpg|gif|png)$/) != null) await isImageValid(url);
+        else await isVideoUrlValid(url);
 
         this.uploadData = url;
         this.isAddingFromUrl = false;
@@ -403,7 +403,7 @@ export default {
 
       try {
         if (this.initialType === 'image') await isImageValid(file);
-        if (this.imageType === 'splash') await isSplashImageValid(file);
+        if (this.imageType === 'splash' && file.type.match(/(jpeg|jpg|png)$/) != null) await isSplashImageValid(file);
 
         this.uploadData = file;
         this.$emit('onAddFromDevice', this.upload);

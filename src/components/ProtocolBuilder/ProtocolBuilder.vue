@@ -68,7 +68,7 @@
               :initialData="appletWatermark"
               :imageType="'watermark'"
               :initialAdditionalType="'small-circle'"
-              :initialTitle="'Applet Image'"
+              :initialTitle="'Watermark'"
               @onAddFromUrl="onAddWatermarkFromUrl($event)"
               @onAddFromDevice="onAddWatermarkFromDevice($event)"
               @onRemove="onRemoveWatermark()"
@@ -201,6 +201,7 @@
         <span>{{ fileErrorMsg }}</span>
       </v-alert>
     </v-dialog>
+    <Notify :notify="notify" />
   </div>
 </template>
 
@@ -224,6 +225,7 @@ import Uploader from './Uploader.vue';
 import Protocol from '../../models/Protocol';
 import Activity from '../../models/Protocol';
 import Item from '../../models/Protocol';
+import Notify from './Additional/Notify.vue';
 import config from '../../config';
 
 import { mapMutations, mapGetters } from 'vuex';
@@ -231,6 +233,7 @@ import { mapMutations, mapGetters } from 'vuex';
 export default {
   components: {
     LandingPageEditor,
+    Notify,
     Uploader,
   },
   data () {
@@ -241,6 +244,7 @@ export default {
       fileErrorMsg: '',
       validFileDlg: false,
       fileSuccessMsg: '',
+      notify: {},
       textRules: [(v) => !!v.trim() || "This field is required"],
     }
   },
@@ -375,11 +379,11 @@ export default {
     onRemoveWatermark () {
       this.appletWatermark = '';
       // this.update();
-      this.$emit('notify', {
+      this.notify = {
         type: 'warning',
         message: `Applet watermark is successfully removed.`,
         duration: 3000,
-      });
+      };
     },
     onWatermarkNotify (event) {
       this.$emit('loading', false); 
@@ -401,11 +405,11 @@ export default {
     onRemoveImage () {
       this.appletImage = '';
       // this.update();
-      this.$emit('notify', {
+      this.notify = {
         type: 'warning',
         message: `Applet image is successfully removed.`,
         duration: 3000,
-      });
+      };
     },
     onEventNotify (event) {
       this.$emit('loading', false);

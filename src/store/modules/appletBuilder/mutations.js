@@ -339,4 +339,8 @@ export default {
   setVersions (state, versions) {
     state.versions = versions;
   },
+
+  setNodeEnv (state, nodeEnv) {
+    state.nodeEnv = nodeEnv;
+  },
 }

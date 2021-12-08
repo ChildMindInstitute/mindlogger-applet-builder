@@ -13,7 +13,7 @@
 
       <v-spacer />
 
-      <small style="margin-right: 10px" v-if="version">v{{ version }}</small>
+      <small style="margin-right: 10px" v-if="nodeEnv != 'production'">v{{ version }}</small>
 
       <v-tooltip
         v-if="currentActivity"
@@ -265,7 +265,7 @@ export default {
   },
   data () {
     return {
-      version: process.env.NODE_ENV !== 'production' ? getVersion() : undefined,
+      version: getVersion(),
       changeHistoryDialog: {
         visibility: false,
         defaultVersion: null,
@@ -290,6 +290,7 @@ export default {
       'currentActivity',
       'formattedOriginalProtocol',
       'versions',
+      'nodeEnv',
       'themeId',
       'originalThemeId'
     ]),

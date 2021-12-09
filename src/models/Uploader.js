@@ -68,7 +68,7 @@ export function isVideoUrlValid(url) {
   video.src = url;
 
   return new Promise((resolve, reject) => {
-    video.onload = () => {
+    video.onloadedmetadata = () => {
       resolve(url);
     }
 

@@ -259,7 +259,7 @@
               </template>
               <span>
                 <p>Image Requirements</p>
-                <ul>
+                <ul style="max-width: 248px">
                   <li>Size: less than 8MB</li>
                   <li>Format: JPEG and PNG</li>
                   <li>Width: between 100px and 1920px</li>

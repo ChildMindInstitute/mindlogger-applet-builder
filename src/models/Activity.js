@@ -58,6 +58,7 @@ export default class Activity {
       disableBack: initialActivityData.disableBack || false,
       allowSummary: initialActivityData.allowSummary !== undefined ? initialActivityData.allowSummary : true,
       isReviewerActivity: initialActivityData.isReviewerActivity || false,
+      isOnePageAssessment: initialActivityData.isOnePageAssessment || false,
       id: initialActivityData._id || null,
       textRules: [(v) => !!v || 'This field is required'],
       error: '',
@@ -448,6 +449,7 @@ export default class Activity {
       'schema:version': '0.0.1',
       preamble: this.ref.preamble,
       isReviewerActivity: this.ref.isReviewerActivity,
+      isOnePageAssessment: this.ref.isOnePageAssessment,
       scoringLogic: {},
       'repronim:timeUnit': 'yearmonthdate',
       isPrize: this.ref.isPrize,
@@ -531,6 +533,7 @@ export default class Activity {
       image: this.ref.image,
       preamble: this.ref.preamble,
       isReviewerActivity: this.ref.isReviewerActivity,
+      isOnePageAssessment: this.ref.isOnePageAssessment,
       shuffle: this.ref.shuffleActivityOrder,
       isSkippable: this.ref.isSkippable,
       disableBack: this.ref.disableBack,
@@ -647,6 +650,10 @@ export default class Activity {
       'isReviewerActivity': {
         updated: (field) =>
           `Reviewer activity option was ${_.get(newValue, field) ? 'enabled' : 'disabled'}`,
+      },
+      'isOnePageAssessment': {
+        updated: (field) =>
+          `Show all questions at once option was ${_.get(newValue, field) ? 'enabled' : 'disabled'}`
       },
       'subScales': {
         updated: (field) => {
@@ -899,6 +906,7 @@ export default class Activity {
       ['schema:image']: image,
       ['reprolib:terms/preamble']: activityPreamble,
       ['reprolib:terms/isReviewerActivity']: isReviewerActivity,
+      ['reprolib:terms/isOnePageAssessment']: isOnePageAssessment,
       ['reprolib:terms/shuffle']: shuffle,
       ['reprolib:terms/allow']: allow,
       ['reprolib:terms/addProperties']: addProperties,
@@ -980,6 +988,10 @@ export default class Activity {
         isReviewerActivity &&
         isReviewerActivity[0] &&
         isReviewerActivity[0]['@value'],
+      isOnePageAssessment:
+        isOnePageAssessment &&
+        isOnePageAssessment[0] &&
+        isOnePageAssessment[0]['@value'],
       shuffle: shuffle && shuffle[0] && shuffle[0]['@value'],
       visibilities,
       subScales: Array.isArray(subScales) && subScales.map((subScale, index) => {

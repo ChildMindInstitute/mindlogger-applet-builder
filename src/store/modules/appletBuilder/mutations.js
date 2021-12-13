@@ -331,6 +331,10 @@ const conditionalMutations = {
     conditionalItems.splice(index, 1);
     state.currentActivity.conditionalItems = [...conditionalItems];
   },
+
+  deleteConditionals (state) {
+    state.currentActivity.conditionalItems = [];
+  }
 }
 
 export default {

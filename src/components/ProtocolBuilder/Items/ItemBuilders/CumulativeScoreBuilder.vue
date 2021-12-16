@@ -367,6 +367,12 @@ export default {
     },
 
     onUpdateRule(rule) {
+      try {
+        if (rule.name && rule.name.match(/[&\/\\#,+()$~%.'":*?<>{}]/g)) {
+          rule.name = rule.name.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '');
+        }        
+      } catch (error) { }
+
       rule.compute = {
         jsExpression: rule.items
           .filter((item) => item.selected)

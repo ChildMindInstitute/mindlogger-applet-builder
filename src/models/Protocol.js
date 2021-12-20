@@ -65,6 +65,7 @@ export default class Protocol {
       "schema:version": this.ref.protocolVersion,
       "streamEnabled": this.ref.streamEnabled,
       landingPageContent: this.ref.markdownData, //point to the readme of protocol
+      landingPageType: this.ref.landingPageType,
       landingPage: "",
       // variableMap: variableMap,
       ui: {
@@ -305,7 +306,8 @@ export default class Protocol {
       watermark: _.get(applet, ['schema:watermark', 0, '@id']),
       streamEnabled: _.get(applet, ['reprolib:terms/streamEnabled', 0, '@value']),
       description: applet['schema:description'][0]['@value'],
-      protocolVersion: _.get(applet, 'schema:schemaVersion[0].@value', this.protocolVersion)
+      protocolVersion: _.get(applet, 'schema:schemaVersion[0].@value', this.protocolVersion),
+      landingPageType: _.get(applet, ['reprolib:terms/landingPageType', 0, '@value'], 'markdown')
     };
 
     const markdownData = _.get(applet, ["reprolib:terms/landingPage", 0, "@value"], "");

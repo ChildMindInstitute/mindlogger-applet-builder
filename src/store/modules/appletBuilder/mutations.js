@@ -8,9 +8,20 @@ const itemMutations = {
     if (!state.currentActivity) {
       return ;
     }
+    const item = state.currentActivity.items[index];
 
-    Object.assign(state.currentActivity.items[index], obj);
-    state.currentActivity.items[index].valid = Item.checkValidation(state.currentActivity.items[index]);
+    Object.assign(item, obj);
+    item.valid = Item.checkValidation(item);
+
+    if (obj.name) {
+      for (const subScale of state.currentActivity.subScales) {
+        if (subScale.items.includes(item)) {
+          subScale.jsExpression = subScale.items.map(
+            item => item.variableName ? `(${item.variableName})` : item.name
+          ).join(' + ');
+        }
+      }
+    }
   },
 
   addItem (state, obj) {
@@ -327,5 +338,9 @@ export default {
 
   setVersions (state, versions) {
     state.versions = versions;
+  },
+
+  setNodeEnv (state, nodeEnv) {
+    state.nodeEnv = nodeEnv;
   },
 }

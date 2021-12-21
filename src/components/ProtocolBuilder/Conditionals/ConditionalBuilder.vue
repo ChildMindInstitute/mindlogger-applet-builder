@@ -18,7 +18,7 @@
         >
           OF THE "IF" RULES ARE MATCHED, SHOW
         </span>
-        <span class="font-weight-bold">{{ showValue || 'XXX' }} </span>
+        <span class="font-weight-bold">{{ showValue && showValue.name || 'XXX' }} </span>
       </span>
 
       <v-spacer />
@@ -165,6 +165,7 @@
               class="ds-select-box ds-show-value"
               item-text="name"
               :items="items"
+              return-object
               dense
               outlined
               @change="onUpdate"

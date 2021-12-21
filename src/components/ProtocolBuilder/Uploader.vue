@@ -96,8 +96,80 @@
                   <p>Image Requirements</p>
                   <ul>
                     <li>Size: less than 8MB</li>
+                    <li>Format: JPEG and PNG</li>
                     <li>Width: between 100px and 1920px</li>
                     <li>Height: between 100px and 1920px</li>
+                  </ul>
+                </span>
+              </v-tooltip>
+            </div>
+            <div 
+              v-else-if="initialType === 'video_or_image'"
+              class="mt-4 text-right"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-icon
+                    color="primary"
+                    dark
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    mdi-information-outline
+                  </v-icon>
+                </template>
+                <span>
+                  <p>Image Requirements</p>
+                  <ul>
+                    <li>Size: less than 8MB</li>
+                    <li>700px * 1000px size is required</li>
+                  </ul>
+                </span>
+              </v-tooltip>
+            </div>
+            <div 
+              v-else-if="initialType === 'video'"
+              class="mt-4 text-right"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-icon
+                    color="primary"
+                    dark
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    mdi-information-outline
+                  </v-icon>
+                </template>
+                <span>
+                  <p>Requirements</p>
+                  <ul>
+                    <li>Size: less than 100MB</li>
+                    <li>Format: MP4 and GIF</li>
+                  </ul>
+                </span>
+              </v-tooltip>
+            </div>
+            <div 
+              v-else-if="initialType === 'audio'"
+              class="mt-4 text-right"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-icon
+                    color="primary"
+                    dark
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    mdi-information-outline
+                  </v-icon>
+                </template>
+                <span>
+                  <p>Requirements</p>
+                  <ul>
+                    <li>Format: MP3 and WAV</li>
                   </ul>
                 </span>
               </v-tooltip>
@@ -133,7 +205,7 @@
                 ref="fileInput"
                 class="file-input"
                 type="file"
-                accept="image/jpeg, image/png, image/bmp"
+                accept="image/jpeg, image/png, image/gif, image/bmp"
                 @change="onAddFromDevice($event, null)"
               >
               <v-list-item-title
@@ -187,10 +259,14 @@
               </template>
               <span>
                 <p>Image Requirements</p>
-                <ul>
+                <ul style="max-width: 248px">
                   <li>Size: less than 8MB</li>
+                  <li>Format: JPEG and PNG</li>
                   <li>Width: between 100px and 1920px</li>
                   <li>Height: between 100px and 1920px</li>
+                  <li v-if="imageType === 'watermark'">
+                    Translucency of the image should already be completed prior to upload
+                  </li>
                 </ul>
               </span>
             </v-tooltip>
@@ -245,7 +321,7 @@
 </template>
 
 <script>
-import { Uploader, isAudioUrlValid, isImageValid, isVideoUrlValid } from '../../models/Uploader';
+import { Uploader, isSplashImageValid, isAudioUrlValid, isImageValid, isVideoUrlValid } from '../../models/Uploader';
 import AddFromUrl from './Additional/AddFromUrl.vue';
 
 export default {
@@ -254,6 +330,10 @@ export default {
   },
   props: {
     initialType: {
+      type: String,
+      default: '',
+    },
+    imageType: {
       type: String,
       default: '',
     },
@@ -302,8 +382,8 @@ export default {
     async onAddFromUrl(url) {
       try {
         if(this.initialType === 'audio') await isAudioUrlValid(url);
-        else if(this.initialType === 'image') await isImageValid(url);
-        else if(this.initialType === 'video') await isVideoUrlValid(url);
+        else if(url.match(/\.(jpeg|jpg|gif|png)$/) != null) await isImageValid(url);
+        else await isVideoUrlValid(url);
 
         this.uploadData = url;
         this.isAddingFromUrl = false;
@@ -322,7 +402,8 @@ export default {
       if(event) event.target.value = '';
 
       try {
-        if(this.initialType === 'image') await isImageValid(file);
+        if (this.initialType === 'image') await isImageValid(file);
+        if (this.imageType === 'splash' && file.type.match(/(jpeg|jpg|png)$/) != null) await isSplashImageValid(file);
 
         this.uploadData = file;
         this.$emit('onAddFromDevice', this.upload);

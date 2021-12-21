@@ -101,6 +101,7 @@ export default {
   ],
   templates: [],
   versions: null,
+  nodeEnv: null,
   original: null,
   currentScreen: config.PROTOCOL_SCREEN,
   currentActivity: null,

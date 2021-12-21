@@ -44,10 +44,10 @@
       <Uploader
         class="mt-3 mb-4"
         style="max-width: 300px"
-        initialType="video_or_image" 
+        initialType="video_or_image"
         imageType="splash"
         :initialData="splash"
-        initialTitle="Splash Screen" 
+        initialTitle="Splash Screen"
         @onAddFromUrl="onAddSplashFromUrl($event, validateResolution)"
         @onAddFromDevice="loading = true; onAddSplashFromDevice($event);"
         @onRemove="onRemoveSplash()"
@@ -67,16 +67,28 @@
           />
         </v-col>
 
-        <v-col
-          class="py-0"
-          cols="12"
-          sm="4"
-        >
-          <v-checkbox
-            v-model="isReviewerActivity"
-            label="This activity will only be available to review a user's data on the user's detail page"
-          />
-        </v-col>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-col
+              class="py-0"
+              cols="12"
+              sm="4"
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-checkbox
+                v-model="isReviewerActivity"
+                :disabled="!hasOnlyRadioCheckSlider"
+                label="This activity will only be available to review a user's data on the user's detail page"
+              />
+            </v-col>
+          </template>
+
+          <span>
+            Reviewer dashboard assessment supports only radio/checkbox/slider items
+          </span>
+        </v-tooltip>
+
 
         <v-col
           class="py-0"
@@ -149,7 +161,7 @@ export default {
       let width = 0, height = 0;
 
       img.src = url;
-      img.onload = function() { 
+      img.onload = function() {
         validateResolution(this.width, this.height);
       }
       this.splash = url;
@@ -256,6 +268,16 @@ export default {
         this.updateActivityMetaInfo({ disableBack: isDisableResponseChanges });
       }
     },
+    hasOnlyRadioCheckSlider() {
+      for (let i = 0; i < this.currentActivity.items.length; i++) {
+        const inputType = this.currentActivity.items[i].inputType;
+
+        if (!['radio', 'checkbox', 'slider'].includes(inputType)) {
+          return false;
+        }
+      }
+      return true;
+    }
   },
   watch: {
     headerExpanded: {

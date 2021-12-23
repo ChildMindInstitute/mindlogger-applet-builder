@@ -539,9 +539,8 @@ export default class Activity {
       },
       'isVis': {
         updated: (field) =>
-          `Activity visibility is ${
-          _.get(newValue, field, false) ? 'disabled' : 'enabled'
-          }`,
+          `Activity visibility is ${_.get(newValue, field, false) ? 'disabled' : 'enabled'}`
+      },
       'schema:image': {
         updated: (field) =>
           `Activity image was changed to ${_.get(newValue, field)}`,

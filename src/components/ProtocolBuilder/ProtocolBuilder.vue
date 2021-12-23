@@ -41,7 +41,7 @@
               </v-icon>
             </v-btn>
           </v-col>
-          
+
           <v-col class="d-flex">
             <v-subheader class="ml-10">
               Applet Image
@@ -76,6 +76,16 @@
             />
           </v-col>
         </v-row>
+
+        <v-row class="mx-2">
+          <v-col>
+            <v-checkbox
+              v-model="streamEnabled"
+              label="Enable streaming of response data"
+            />
+          </v-col>
+        </v-row>
+
         <div>
           <v-subheader class="ml-10" v-if="themes && themes.length">
             Theme
@@ -296,6 +306,15 @@ export default {
       }
     },
 
+    streamEnabled: {
+      get: function () {
+        return this.protocol.streamEnabled;
+      },
+      set: function (streamEnabled) {
+        this.updateProtocolMetaInfo({ streamEnabled })
+      }
+    },
+
     selectedTheme: {
       get: function () {
         return this.themeId
@@ -366,7 +385,7 @@ export default {
       return res;
     },
     async onAddWatermarkFromDevice (uploadFunction) {
-      this.$emit('loading', true); 
+      this.$emit('loading', true);
       try {
         this.appletWatermark = await uploadFunction();
         this.$emit('loading', false);
@@ -386,7 +405,7 @@ export default {
       };
     },
     onWatermarkNotify (event) {
-      this.$emit('loading', false); 
+      this.$emit('loading', false);
       this.fileErrorMsg = event.message;
       this.inValidFileDlg = true;
     },

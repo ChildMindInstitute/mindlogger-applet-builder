@@ -302,7 +302,7 @@ export default class Protocol {
       name: _.get(prefLabel, [0, '@value'], 'applet'),
       appletId: applet['_id'].split("/").pop(),
       image: applet['schema:image'],
-      watermark: applet['schema:watermark'],
+      watermark: _.get(applet, ['schema:watermark', 0, '@id']),
       streamEnabled: _.get(applet, ['reprolib:terms/streamEnabled', 0, '@value']),
       description: applet['schema:description'][0]['@value'],
       protocolVersion: _.get(applet, 'schema:schemaVersion[0].@value', this.protocolVersion)

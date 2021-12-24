@@ -41,18 +41,11 @@
           @click="editItem"
         >
           <v-icon
-            v-if="!isExpanded && item.allowEdit"
+            v-if="!isExpanded"
             color="grey lighten-1"
           >
             edit
           </v-icon>
-          <v-icon
-            v-else-if="!isExpanded"
-            color="grey lighten-1"
-          >
-            mdi-eye
-          </v-icon>
-
           <v-icon
             v-else
             color="grey lighten-1"
@@ -194,7 +187,7 @@
                 v-on="on"
               >
                 <v-tooltip
-                  v-if="!hasScoringItem && item.text == 'cumulativeScore'"
+                  v-if="!hasScoringItem && item.text == 'cumulativeScore' || item.text == 'tokenSummary'"
                   top
                 >
                   <template
@@ -213,7 +206,8 @@
                       <span>{{ item.text }}</span>
                     </div>
                   </template>
-                  <span>Please create an item with scores before creating this page</span>
+                  <span v-if="item.text == 'cumulativeScore'">Please create an item with scores before creating this page</span>
+                  <span v-else>Please create future behavior tracker or past behavior tracker items</span>
                 </v-tooltip>
                 <div
                   v-else
@@ -506,6 +500,17 @@
         @updateOptions="updateOptions"
       />
 
+      <BehaviorTracker
+        v-if="item.inputType === 'pastBehaviorTracker' || item.inputType == 'futureBehaviorTracker'"
+        :key="`${baseKey}-${item.inputType}`"
+        :is-skippable-item="skippable"
+        :initial-item-data="item.options"
+        @notify="notify = $event"
+        @loading="loading = $event"
+        @updateOptions="updateOptions"
+        @updateAllow="updateAllow"
+      />
+
       <CumulativeScoreBuilder
         v-if="item.inputType === 'cumulativeScore'"
         :key="`${baseKey}-cumulativeScore`"
@@ -694,6 +699,9 @@ import GeolocationBuilder from "./ItemBuilders/GeolocationBuilder.vue";
 import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
 import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
 import StackedSliderBuilder from "./ItemBuilders/StackedSliderBuilder";
+import BehaviorTracker from "./ItemBuilders/BehaviorTracker";
+import { timeScreen } from './ItemBuilders/timeScreen';
+import { tokenSummary } from './ItemBuilders/tokenSummary';
 
 import MarkDownEditor from "../MarkDownEditor";
 import Item from '../../../models/Item';
@@ -727,6 +735,7 @@ export default {
     StackedSliderBuilder,
     Notify,
     Loading,
+    BehaviorTracker,
   },
   props: {
     itemIndex: {
@@ -846,6 +855,9 @@ export default {
         'updateItemInputType',
         'setTokenPrizeModalStatus',
         'insertTemplateUpdateRequest',
+        'addTimeScreen',
+        'deleteTimeScreen',
+        'updateTokenSummary'
       ],
     ),
 
@@ -890,7 +902,16 @@ export default {
     },
 
     removeConditionals () {
+      const inputType = this.item.inputType;
+
       this.deleteItem(this.itemIndex);
+
+      if (inputType == 'futureBehaviorTracker') {
+        this.deleteTimeScreen(this.itemIndex - 1)
+      }
+
+      this.updateTokenSummary(tokenSummary);
+
       this.itemConditionals.forEach((conditional) => {
         const index = this.conditionals.findIndex(({ id }) => id === conditional.id);
 
@@ -928,6 +949,8 @@ export default {
       updates.options = { options: [] };
       updates.allow = false;
 
+      const prev = this.item.inputType;
+
       this.updateItemMetaInfo({
         index: this.itemIndex,
         obj: updates
@@ -942,6 +965,17 @@ export default {
       })
 
       this.baseKey++;
+
+      if (prev == 'futureBehaviorTracker') {
+        this.deleteTimeScreen(this.itemIndex-1)
+      } else if (inputType == 'futureBehaviorTracker') {
+        let name = this.addTimeScreen({
+          index: this.itemIndex,
+          screen: timeScreen
+        })
+      }
+
+      this.updateTokenSummary(tokenSummary);
     },
 
     onUpdateName (name) {

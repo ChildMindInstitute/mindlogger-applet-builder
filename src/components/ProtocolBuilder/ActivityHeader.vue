@@ -41,17 +41,6 @@
         maxlength="230"
         label="Activity Description"
       />
-      <Uploader
-        class="mt-3 mb-4"
-        style="max-width: 300px"
-        initialType="video"
-        :initialData="splash"
-        initialTitle="Splash Screen"
-        @onAddFromUrl="onAddSplashFromUrl($event)"
-        @onAddFromDevice="loading = true; onAddSplashFromDevice($event);"
-        @onRemove="onRemoveSplash()"
-        @onNotify="loading = false; notify = $event;"
-      />
       <v-row
         class="align-center"
       >
@@ -66,16 +55,28 @@
           />
         </v-col>
 
-        <v-col
-          class="py-0"
-          cols="12"
-          sm="4"
-        >
-          <v-checkbox
-            v-model="isReviewerActivity"
-            label="This activity will only be available to review a user's data on the user's detail page"
-          />
-        </v-col>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-col
+              class="py-0"
+              cols="12"
+              sm="4"
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-checkbox
+                v-model="isReviewerActivity"
+                :disabled="!hasOnlyRadioCheckSlider"
+                label="This activity will only be available to review a user's data on the user's detail page"
+              />
+            </v-col>
+          </template>
+
+          <span>
+            Reviewer dashboard assessment supports only radio/checkbox/slider items
+          </span>
+        </v-tooltip>
+
 
         <v-col
           class="py-0"
@@ -88,6 +89,36 @@
           />
         </v-col>
       </v-row>
+
+
+      <div
+        class="d-flex justify-space-around"
+      >
+        <Uploader
+          class="mt-3 mb-4"
+          style="max-width: 300px"
+          initialType="video"
+          :initialData="splash"
+          initialTitle="Splash Screen"
+          @onAddFromUrl="onAddMediaFromUrl($event, 'splash')"
+          @onAddFromDevice="loading = true; onAddMediaFromDevice($event, 'splash');"
+          @onRemove="onRemoveMedia('splash')"
+          @onNotify="loading = false; notify = $event;"
+        />
+
+        <Uploader
+          class="mt-3 mb-4"
+          style="max-width: 300px"
+          :initialType="'image'"
+          :initialData="activityImage"
+          :initialTitle="'Activity Image'"
+          @onAddFromUrl="onAddMediaFromUrl($event, 'activityImage')"
+          @onAddFromDevice="loading = true; onAddMediaFromDevice($event, 'activityImage');"
+          @onRemove="onRemoveMedia('activityImage')"
+          @onNotify="loading = false; notify = $event;"
+        />
+      </div>
+
     </div>
     <Notify :notify="notify" />
     <Loading :loading="loading" />
@@ -143,37 +174,64 @@ export default {
         this.$emit('onExpand');
       }
     },
-    onAddSplashFromUrl(url) {
-      this.splash = url;
+    onAddMediaFromUrl(url, type) {
+      if (type == 'splash') {
+        this.splash = url;
+      } else {
+        this.activityImage = url;
+      }
+
       this.notify = {
         type: 'success',
-        message: 'Splash screen from URL successfully added to Activity.',
+        message: (type == 'splash' ?
+          'Splash screen from URL successfully added to Activity.' :
+          'Activity image has been added successfully.'
+        ),
         duration: 3000,
       };
     },
-    async onAddSplashFromDevice(uploadFunction) {
+    async onAddMediaFromDevice(uploadFunction, type) {
       try {
-        this.splash = await uploadFunction();
+        if (type == 'splash') {
+          this.splash = await uploadFunction();
+        } else {
+          this.activityImage = await uploadFunction();
+        }
+
         this.loading = false;
         this.notify = {
           type: 'success',
-          message: 'Splash screen successfully added to Activity.',
+          message: ( type == 'splash' ?
+            'Splash screen successfully added to Activity.' :
+            'Activity image has been added successfully.'
+          ),
           duration: 3000,
         };
       } catch (error) {
         this.loading = false;
         this.notify = {
           type: 'error',
-          message: 'Something went wrong with uploading Splash screen for Activity. Please try to upload again or just save Activity without changes for Splash screen.',
+          message: ( type == 'splash' ?
+              'Something went wrong with uploading Splash screen for Activity. Please try to upload again or just save Activity without changes for Splash screen.' :
+              'Something went wrong with uploading activity image. Please try to upload again or just save Activity without image.'
+            ),
         };
       }
     },
 
-    onRemoveSplash() {
-      this.splash = '';
+    onRemoveMedia(type) {
+      if (type == 'splash') {
+        this.splash = '';
+      } else {
+        this.activityImage = '';
+      }
+
       this.notify = {
         type: 'warning',
-        message: 'Splash screen successfully removed from Activity.',
+        message: (type == 'splash' ?
+          'Splash screen successfully removed from Activity.' :
+          'Activity image has been removed successfully.'
+        ),
         duration: 3000,
       };
     },
@@ -196,6 +254,14 @@ export default {
       },
       set: function (description) {
         this.updateActivityMetaInfo({ description });
+      }
+    },
+    activityImage: {
+      get: function () {
+        return this.currentActivity && this.currentActivity.image
+      },
+      set: function (activityImage) {
+        this.updateActivityMetaInfo({ image: activityImage })
       }
     },
     splash: {
@@ -238,6 +304,16 @@ export default {
         this.updateActivityMetaInfo({ disableBack: isDisableResponseChanges });
       }
     },
+    hasOnlyRadioCheckSlider() {
+      for (let i = 0; i < this.currentActivity.items.length; i++) {
+        const inputType = this.currentActivity.items[i].inputType;
+
+        if (!['radio', 'checkbox', 'slider'].includes(inputType)) {
+          return false;
+        }
+      }
+      return true;
+    }
   },
   watch: {
     headerExpanded: {

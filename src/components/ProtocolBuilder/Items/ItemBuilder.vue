@@ -41,18 +41,11 @@
           @click="editItem"
         >
           <v-icon
-            v-if="!isExpanded && item.allowEdit"
+            v-if="!isExpanded"
             color="grey lighten-1"
           >
             edit
           </v-icon>
-          <v-icon
-            v-else-if="!isExpanded"
-            color="grey lighten-1"
-          >
-            mdi-eye
-          </v-icon>
-
           <v-icon
             v-else
             color="grey lighten-1"
@@ -194,7 +187,7 @@
                 v-on="on"
               >
                 <v-tooltip
-                  v-if="!hasScoringItem && item.text == 'cumulativeScore'"
+                  v-if="!hasScoringItem && item.text == 'cumulativeScore' || item.text == 'tokenSummary'"
                   top
                 >
                   <template
@@ -213,7 +206,8 @@
                       <span>{{ item.text }}</span>
                     </div>
                   </template>
-                  <span>Please create an item with scores before creating this page</span>
+                  <span v-if="item.text == 'cumulativeScore'">Please create an item with scores before creating this page</span>
+                  <span v-else>Please create future behavior tracker or past behavior tracker items</span>
                 </v-tooltip>
                 <div
                   v-else
@@ -257,26 +251,15 @@
         label="Allow the user to see results"
       />
 
-      <div
+      <MarkDownBuilder
         v-if="item.inputType === 'markdownMessage'"
-      >
-        Message:
-
-        <MarkDownEditor
-          :value="item.markdownText"
-          @input="onUpdateMarkdownText"
-        />
-
-        <v-divider
-          class="my-4"
-        />
-
-        <ItemTimerOption
-          colClasses="d-flex align-center py-0 px-3"
-          @update="updateTimer($event.responseTimeLimit)"
-          :responseTimeLimit="item.timer"
-        />
-      </div>
+        :markdownText="item.markdownText"
+        :initial-item-data="item.options"
+        :timer="item.timer"
+        @onUpdateMarkdown="onUpdateMarkdownText"
+        @updateOptions="updateOptions"
+        @updateTimer="updateTimer"
+      />
 
       <RadioBuilder
         v-if="item.inputType === 'radio' || item.inputType === 'checkbox'"
@@ -517,6 +500,17 @@
         @updateOptions="updateOptions"
       />
 
+      <BehaviorTracker
+        v-if="item.inputType === 'pastBehaviorTracker' || item.inputType == 'futureBehaviorTracker'"
+        :key="`${baseKey}-${item.inputType}`"
+        :is-skippable-item="skippable"
+        :initial-item-data="item.options"
+        @notify="notify = $event"
+        @loading="loading = $event"
+        @updateOptions="updateOptions"
+        @updateAllow="updateAllow"
+      />
+
       <CumulativeScoreBuilder
         v-if="item.inputType === 'cumulativeScore'"
         :key="`${baseKey}-cumulativeScore`"
@@ -689,6 +683,7 @@
 import Uploader from '../Uploader.vue';
 
 import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
+import MarkDownBuilder from "./ItemBuilders/MarkDownBuilder.vue";
 import StackedRadioBuilder from "./ItemBuilders/StackedRadioBuilder.vue";
 import TextBuilder from "./ItemBuilders/TextBuilder.vue";
 import SliderBuilder from "./ItemBuilders/SliderBuilder.vue";
@@ -704,7 +699,9 @@ import GeolocationBuilder from "./ItemBuilders/GeolocationBuilder.vue";
 import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
 import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
 import StackedSliderBuilder from "./ItemBuilders/StackedSliderBuilder";
-import ItemTimerOption from "../Partial/ItemTimerOption";
+import BehaviorTracker from "./ItemBuilders/BehaviorTracker";
+import { timeScreen } from './ItemBuilders/timeScreen';
+import { tokenSummary } from './ItemBuilders/tokenSummary';
 
 import MarkDownEditor from "../MarkDownEditor";
 import Item from '../../../models/Item';
@@ -733,11 +730,12 @@ export default {
     AudioStimulusBuilder,
     CumulativeScoreBuilder,
     MarkDownEditor,
+    MarkDownBuilder,
     StackedRadioBuilder,
     StackedSliderBuilder,
     Notify,
     Loading,
-    ItemTimerOption,
+    BehaviorTracker,
   },
   props: {
     itemIndex: {
@@ -857,6 +855,9 @@ export default {
         'updateItemInputType',
         'setTokenPrizeModalStatus',
         'insertTemplateUpdateRequest',
+        'addTimeScreen',
+        'deleteTimeScreen',
+        'updateTokenSummary'
       ],
     ),
 
@@ -901,7 +902,16 @@ export default {
     },
 
     removeConditionals () {
+      const inputType = this.item.inputType;
+
       this.deleteItem(this.itemIndex);
+
+      if (inputType == 'futureBehaviorTracker') {
+        this.deleteTimeScreen(this.itemIndex - 1)
+      }
+
+      this.updateTokenSummary(tokenSummary);
+
       this.itemConditionals.forEach((conditional) => {
         const index = this.conditionals.findIndex(({ id }) => id === conditional.id);
 
@@ -939,6 +949,8 @@ export default {
       updates.options = { options: [] };
       updates.allow = false;
 
+      const prev = this.item.inputType;
+
       this.updateItemMetaInfo({
         index: this.itemIndex,
         obj: updates
@@ -953,6 +965,17 @@ export default {
       })
 
       this.baseKey++;
+
+      if (prev == 'futureBehaviorTracker') {
+        this.deleteTimeScreen(this.itemIndex-1)
+      } else if (inputType == 'futureBehaviorTracker') {
+        let name = this.addTimeScreen({
+          index: this.itemIndex,
+          screen: timeScreen
+        })
+      }
+
+      this.updateTokenSummary(tokenSummary);
     },
 
     onUpdateName (name) {

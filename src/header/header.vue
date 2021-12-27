@@ -13,6 +13,8 @@
 
       <v-spacer />
 
+      <small style="margin-right: 10px" v-if="nodeEnv != 'production'">v{{ version }}</small>
+
       <v-tooltip
         v-if="currentActivity"
         bottom
@@ -244,6 +246,7 @@ import Protocol from '../models/Protocol';
 import Activity from '../models/Activity';
 import Item from '../models/Item';
 import util from '../utilities/util';
+import { getVersion } from "../utilities/util";
 import ChangeHistoryComponent from '../components/ProtocolBuilder/ChangeHistoryComponent';
 
 import { mapMutations, mapGetters } from 'vuex';
@@ -262,6 +265,7 @@ export default {
   },
   data () {
     return {
+      version: getVersion(),
       changeHistoryDialog: {
         visibility: false,
         defaultVersion: null,
@@ -286,6 +290,7 @@ export default {
       'currentActivity',
       'formattedOriginalProtocol',
       'versions',
+      'nodeEnv',
       'themeId',
       'originalThemeId'
     ]),
@@ -306,10 +311,6 @@ export default {
       'resetProtocol',
     ]),
 
-    ...mapGetters(config.MODULE_NAME, [
-      'formattedProtocol',
-    ]),
-
     onBackToProtocolScreen () {
       this.setCurrentScreen(config.PROTOCOL_SCREEN);
       this.setCurrentActivity(-1);
@@ -320,7 +321,7 @@ export default {
         return;
       }
 
-      this.formattedProtocol().then((data) => {
+      Protocol.formattedProtocol(this.protocol).then((data) => {
         if (!this.formattedOriginalProtocol) {
           this.$emit("uploadProtocol", {
             applet: data,
@@ -458,7 +459,7 @@ export default {
         return ;
       }
 
-      this.formattedProtocol().then((current) => {
+      Protocol.formattedProtocol(this.protocol).then((current) => {
         const { log, upgrade } = Protocol.getChangeInfo(
           this.formattedOriginalProtocol,
           current

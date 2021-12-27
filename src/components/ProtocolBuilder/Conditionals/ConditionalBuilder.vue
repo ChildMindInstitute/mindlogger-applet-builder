@@ -18,7 +18,7 @@
         >
           OF THE "IF" RULES ARE MATCHED, SHOW
         </span>
-        <span class="font-weight-bold">{{ showValue || 'XXX' }} </span>
+        <span class="font-weight-bold">{{ showValue && showValue.name || 'XXX' }} </span>
       </span>
 
       <v-spacer />
@@ -81,7 +81,7 @@
             v-model="condition.ifValue"
             class="ds-select-box mb-3"
             item-text="name"
-            :items="filteredItems"
+            :items="ifOptions"
             return-object
             label="If"
             @change="onUpdate"
@@ -90,49 +90,53 @@
             v-model="condition.stateValue"
             class="ds-select-box"
             name="name"
-            :items="stateItems(condition.ifValue)"
+            :items="stateItems(condition)"
             item-text="name"
             return-object
             label="State"
             @change="onUpdate"
           />
 
-          <template v-if="condition.ifValue && condition.ifValue.inputType === 'slider'">
-            <v-text-field
-              v-model="condition.minValue"
-              class="ds-select-box"
-              label="Min value"
-              :min="minSliderTick(condition.ifValue)"
-              :max="maxSliderTick(condition.ifValue)"
-              type="number"
-              @input="onUpdate"
-            />
+          <template v-if="!condition.ifValue || !condition.ifValue.isActivity">
+            <template v-if="condition.ifValue && condition.ifValue.inputType === 'slider'">
+              <v-text-field
+                v-model="condition.minValue"
+                class="ds-select-box"
+                label="Min value"
+                :min="minSliderTick(condition.ifValue)"
+                :max="maxSliderTick(condition.ifValue)"
+                type="number"
+                @input="onUpdate"
+              />
 
-            <v-text-field
-              v-if="
-                condition.stateValue && (condition.stateValue.name === 'BETWEEN' ||
-                  condition.stateValue.name === 'OUTSIDE OF')
-              "
-              v-model="condition.maxValue"
-              class="ds-select-box"
-              label="Max value"
-              :min="minSliderTick(condition.ifValue)"
-              :max="maxSliderTick(condition.ifValue)"
-              type="number"
-              @input="onUpdate"
-            />
+              <v-text-field
+                v-if="
+                  condition.stateValue && (condition.stateValue.name === 'BETWEEN' ||
+                    condition.stateValue.name === 'OUTSIDE OF')
+                "
+                v-model="condition.maxValue"
+                class="ds-select-box"
+                label="Max value"
+                :min="minSliderTick(condition.ifValue)"
+                :max="maxSliderTick(condition.ifValue)"
+                type="number"
+                @input="onUpdate"
+              />
+            </template>
+
+            <template v-else>
+              <v-select
+                v-model="condition.answerValue"
+                class="ds-select-box"
+                item-text="name"
+                :items="answerItems(condition.ifValue)"
+                label="Answer"
+                return-object
+                @input="onUpdate"
+              />
+            </template>
           </template>
-          <template v-else>
-            <v-select
-              v-model="condition.answerValue"
-              class="ds-select-box"
-              item-text="name"
-              :items="answerItems(condition.ifValue)"
-              label="Answer"
-              return-object
-              @input="onUpdate"
-            />
-          </template>
+
           <v-btn
             v-if="conditions.length > 1"
             icon
@@ -165,6 +169,7 @@
               class="ds-select-box ds-show-value"
               item-text="name"
               :items="items"
+              return-object
               dense
               outlined
               @change="onUpdate"
@@ -227,7 +232,7 @@ export default {
   data () {
     return {
       isExpanded: !this.current.stateValue,
-      conditions: this.current.conditions || [],
+      conditions: (this.current.conditions || []).map(condition => ({ ...condition })),
       valid: this.current.valid || false,
       ifValue: this.current.ifValue || null,
       stateValue: this.current.stateValue || null,
@@ -251,7 +256,8 @@ export default {
     },
     ...mapGetters(config.MODULE_NAME,
       [
-        'currentActivity'
+        'currentActivity',
+        'activities'
       ]
     ),
 
@@ -262,10 +268,29 @@ export default {
     filteredItems () {
       return this.items.filter(item =>
         (item.inputType == 'radio' || item.inputType == 'checkbox' || item.inputType == 'slider' || item.inputType == 'prize') && item.allowEdit
-      );
+      )
+    },
+
+    ifOptions () {
+      return this.filteredItems.concat({
+        name: this.currentActivity.name,
+        isActivity: true
+      });
     },
   },
   beforeMount () {
+    const activityOption = this.ifOptions.find(option => option.isActivity);
+
+    for (const condition of this.conditions) {
+      if (condition.activityCondition) {
+        this.$set(
+          condition,
+          'ifValue',
+          activityOption
+        );
+      }
+    }
+
     if (!this.conditions.length) {
       this.conditions.push({ ...this.initialCondition });
     }
@@ -278,8 +303,23 @@ export default {
       ]
     ),
 
-    stateItems (ifValue) {
+    stateItems (condition) {
+      const { ifValue } = condition;
       if (!ifValue) return [];
+
+      if ( ifValue.isActivity ) {
+        return [
+          {
+            name: "is shown for the first time",
+            val: "isActivityShownFirstTime"
+          },
+          {
+            name: "is not shown for the first time",
+            val: "!isActivityShownFirstTime"
+          }
+        ]
+      }
+
       if ( ifValue.inputType === 'radio' || ifValue.inputType === 'checkbox' || ifValue.inputType === 'prize' ) {
         return ifValue.options && ifValue.options.isMultipleChoice
           ? [
@@ -302,16 +342,16 @@ export default {
     },
 
     minSliderTick (ifValue) {
-      if (!ifValue) return 0;
+      if (!ifValue || typeof ifValue != 'object') return 0;
       return ifValue.inputType === 'slider' && ifValue.options.minSliderTick || 0;
     },
     maxSliderTick (ifValue) {
-      if (!ifValue) return 0;
+      if (!ifValue || typeof ifValue != 'object') return 0;
       return ifValue.inputType === 'slider' && ifValue.options.maxSliderTick || 0;
     },
 
     answerItems (ifValue) {
-      if (!ifValue) return [];
+      if (!ifValue || typeof ifValue != 'object') return [];
 
       return ifValue.inputType !== 'slider' && ifValue.options.options || [];
     },
@@ -327,7 +367,7 @@ export default {
             return false;
           }
           if (!condition.minValue && condition.minValue !== 0) return false;
-        } else {
+        } else if (!condition.ifValue.isActivity) {
           if (!condition.answerValue && condition.answerValue !== 0) return false;
         }
       }
@@ -347,10 +387,24 @@ export default {
       const { conditions, operation, showValue } = this;
 
       this.valid = this.isValid();
+
       this.updateConditionalData({
         index: this.conditionalIndex,
         updates: {
-          conditions,
+          conditions: conditions.map(condition => {
+            if (condition.ifValue && condition.ifValue.isActivity) {
+              return {
+                ...condition,
+                ifValue: condition.ifValue.name.replaceAll(' ', '_'),
+                activityCondition: true
+              }
+            }
+
+            return {
+              ...condition,
+              activityCondition: false
+            };
+          }),
           operation,
           showValue,
           valid: this.valid,

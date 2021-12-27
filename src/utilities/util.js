@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { version } from "../../package.json";
 
 /** compare two objects by checking specified fields */
 const compareValues = (old, current, fields=[]) => {
@@ -78,6 +79,10 @@ const compareVersion = (version1, version2) => {
 
     return 0;
 }
+
+export const getVersion = () => {
+    return version;
+}  
 
 export default {
     compareValues,

@@ -463,7 +463,6 @@ export default {
         else await isVideoUrlValid(url);
 
         this.uploadData = url;
-        console.log('this.uploadData------------------------>', this.uploadData);
         this.isAddingFromUrl = false;
         this.$emit('onAddFromUrl', this.uploadData);
       } catch (error) {
@@ -484,7 +483,6 @@ export default {
         if (this.imageType === 'splash' && file.type.match(/(jpeg|jpg|png)$/) != null) await isSplashImageValid(file);
 
         this.uploadData = file;
-        console.log('this.uploadData------------------------>', this.uploadData);
         this.$emit('onAddFromDevice', this.upload);
       } catch (error) {
         this.$emit('onNotify', {

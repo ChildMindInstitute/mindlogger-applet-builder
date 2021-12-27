@@ -110,10 +110,6 @@ export default {
     ItemTimerOption,
   },
   props: {
-    initialItemData: {
-      type: Object,
-      required: true
-    },
     initialItemResponseOptions: {
       type: Object,
       required: true,
@@ -213,13 +209,6 @@ export default {
       this.onUpdateResponseOptions();
     },
 
-    update() {
-      const responseOptions = {
-        'topNavigationOption': this.topNavigationOption,
-      };
-      this.$emit('updateOptions', responseOptions);
-    },
-
     updateBackgroundImage(url) {
       const removingOptionImgUrl = this.inputBackgroundOption['schema:value'];
       const removingOptionIndex = this.inputOptions.indexOf(option => option['schema:value'] === removingOptionImgUrl);
@@ -273,6 +262,7 @@ export default {
         isSkippableItem: this.isSkippable,
         removeBackOption: this.removeBackOption,
         removeUndoOption: this.removeUndoOption,
+        topNavigationOption: this.topNavigationOption,
       };
       this.$emit('updateOptions', responseOptions);
     },

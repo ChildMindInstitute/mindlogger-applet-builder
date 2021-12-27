@@ -154,9 +154,18 @@ const activityMutations = {
 
       for (let i = 1; i <= 4; i += 1) {
         const inputType = 'trail';
+        let question = 'Sample A';
+
+        if (i === 2) {
+          question = 'Test A';
+        } else if (i === 3) {
+          question = 'Sample B';
+        } else if (i === 4) {
+          question = 'Test B';
+        }
         let trailsItem = {
           name: inputType + i,
-          question: inputType + i,
+          question,
           description: inputType + i,
           options: {
             options: [],
@@ -173,8 +182,11 @@ const activityMutations = {
       }
     }
 
+    // console.log('state.protocol.activities--->', state.protocol.activities);
+    const trailActivities = state.protocol.activities.filter(activity => activity["@type"].includes("ABTrails"));
+ 
     state.protocol.activities.push({
-      ...activityModel.getActivityBuilderData({ items, isABTrails }),
+      ...activityModel.getActivityBuilderData({ items, isABTrails, trailVersion: trailActivities.length + 1 }),
       index: state.protocol.activities.length,
     })
   },

@@ -6,7 +6,9 @@ export default class Activity {
   }
 
   getActivityBuilderData(initialActivityData) {
-    const name = initialActivityData.isABTrails ? 'A/B Trails' : initialActivityData.name;
+    const name = initialActivityData.isABTrails
+      ? 'A/B Trails v' + initialActivityData.trailVersion + '.0'
+      : initialActivityData.name;
     const description = initialActivityData.isABTrails ? 'A/B Trails' : initialActivityData.description;
     const valid = initialActivityData.isABTrails ? true : initialActivityData.valid;
 

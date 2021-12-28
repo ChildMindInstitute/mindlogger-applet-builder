@@ -208,6 +208,7 @@ const activityMutations = {
       finalSubScale: { ...activity.finalSubScale },
       subScales: [...activity.subScales],
       conditionalItems,
+      index: activities.length
     };
 
     // if (state.protocol.id && activity.id) {

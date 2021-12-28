@@ -948,6 +948,7 @@ export default {
 
       updates.options = { options: [] };
       updates.allow = false;
+      updates.timer = 0;
 
       const prev = this.item.inputType;
 

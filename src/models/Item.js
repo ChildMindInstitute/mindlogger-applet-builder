@@ -225,19 +225,28 @@ export default class Item {
       return responseOptions;
     }
 
-    if (this.ref.inputType === 'pastBehaviorTracker') {
-      return {
-        positiveBehaviors: this.ref.options.positiveBehaviors,
-        negativeBehaviors: this.ref.options.negativeBehaviors
+    if (this.ref.inputType === 'pastBehaviorTracker' || this.ref.inputType == 'futureBehaviorTracker') {
+      const data = {
+        positiveBehaviors: (this.ref.options.positiveBehaviors || []).map(option => ({
+          "schema:name": option.name,
+          "schema:image": option.image,
+          "schema:value": option.value
+        })),
+        negativeBehaviors: (this.ref.options.negativeBehaviors || []).map(option => ({
+          "schema:name": option.name,
+          "schema:image": option.image,
+          "schema:value": option.value,
+          "schema:rate": option.rate,
+          "schema:startTime": option.startTime,
+          "schema:endTime": option.endTime
+        }))
       }
-    }
 
-    if (this.ref.inputType == 'futureBehaviorTracker') {
-      return {
-        positiveBehaviors: this.ref.options.positiveBehaviors,
-        negativeBehaviors: this.ref.options.negativeBehaviors,
-        timeScreen: this.ref.options.timeScreen
+      if (this.ref.inputType == 'futureBehaviorTracker') {
+        data.timeScreen = this.ref.options.timeScreen;
       }
+
+      return data;
     }
 
     if (this.ref.inputType === "ageSelector") {

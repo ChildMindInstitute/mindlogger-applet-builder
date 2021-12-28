@@ -30,16 +30,60 @@
             <v-subheader class="ml-2">
               About Page
             </v-subheader>
-            <v-btn
-              class="ml-2"
-              fab
-              small
-              @click="onEditAboutPage"
+
+            <v-menu
+              bottom
+              :close-on-content-click="false"
+              offset-y
             >
-              <v-icon color="grey darken-1">
-                mdi-pencil
-              </v-icon>
-            </v-btn>
+              <template
+                v-slot:activator="{ on, attrs }"
+              >
+                <v-btn
+                  class="ml-2"
+                  fab
+                  small
+                  v-on="on"
+                  v-bind="attrs"
+                >
+                  <v-icon color="grey darken-1">
+                    mdi-pencil
+                  </v-icon>
+                </v-btn>
+              </template>
+
+              <v-list>
+                <v-list-item @click="openLandingPageEditor('markdown')">
+                  <v-list-item-action>
+                    <v-checkbox
+                      disabled
+                      :input-value="markdownData && landingPageType == 'markdown'"
+                    />
+                  </v-list-item-action>
+                  <v-list-item-title>Add Markdown</v-list-item-title>
+                </v-list-item>
+
+                <v-list-item @click="openLandingPageEditor('text')">
+                  <v-list-item-action>
+                    <v-checkbox
+                      disabled
+                      :input-value="markdownData && landingPageType == 'text'"
+                    />
+                  </v-list-item-action>
+                  <v-list-item-title>Add Text</v-list-item-title>
+                </v-list-item>
+
+                <Uploader
+                  :initialType="'image'"
+                  :initialData="landingPageType == 'image' ? markdownData : ''"
+                  :initialAdditionalType="'list'"
+                  @onAddFromUrl="onAddLandingImageFromUrl($event)"
+                  @onAddFromDevice="onAddLandingImageFromDevice($event)"
+                  @onRemove="onRemoveLandingImage()"
+                  @onNotify="onLandingImageNotify($event)"
+                />
+              </v-list>
+            </v-menu>
           </v-col>
 
           <v-col class="d-flex">
@@ -189,6 +233,7 @@
     <LandingPageEditor
       :visibility="markdownDialog"
       :markdownText="markdownData"
+      :inputType="landingPageInputType"
       headText="About Page"
       @close="onCloseEditor"
       @submit="onSubmitEditor"
@@ -249,6 +294,7 @@ export default {
   data () {
     return {
       markdownDialog: false,
+      landingPageInputType: 'markdown',
       isVis: [],
       inValidFileDlg: false,
       fileErrorMsg: '',
@@ -285,6 +331,15 @@ export default {
       },
       set: function (markdownData) {
         this.updateProtocolMetaInfo({ markdownData })
+      }
+    },
+
+    landingPageType: {
+      get: function () {
+        return this.protocol.landingPageType;
+      },
+      set: function (landingPageType) {
+        this.updateProtocolMetaInfo({ landingPageType });
       }
     },
 
@@ -352,6 +407,10 @@ export default {
         'updateThemeId'
       ]
     ),
+    openLandingPageEditor (pageType) {
+      this.landingPageInputType = pageType;
+      this.markdownDialog = true;
+    },
     onAddImageFromUrl (event) {
       this.appletImage = event;
       this.validFileDlg = true;
@@ -361,6 +420,12 @@ export default {
       this.appletWatermark = event;
       this.validFileDlg = true;
       this.fileSuccessMsg = 'Applet watermark from URL is successfully added.';
+    },
+    onAddLandingImageFromUrl (event) {
+      this.markdownData = event;
+      this.validFileDlg = true;
+      this.fileSuccessMsg = 'Applet landing image is successfully added.';
+      this.landingPageType = 'image';
     },
     isThresholdActivity (activity) {
       let res = true;
@@ -395,6 +460,18 @@ export default {
         this.$emit('loading', false);
       }
     },
+    async onAddLandingImageFromDevice (uploadFunction) {
+      this.$emit('loading', true);
+      try {
+        this.markdownData = await uploadFunction();
+        this.$emit('loading', false);
+        this.validFileDlg = true;
+        this.landingPageType = 'image';
+        this.fileSuccessMsg = 'Applet landing image is sucessfully added.';
+      } catch (error) {
+        this.$emit('loading', false);
+      }
+    },
     onRemoveWatermark () {
       this.appletWatermark = '';
       // this.update();
@@ -404,7 +481,21 @@ export default {
         duration: 3000,
       };
     },
+    onRemoveLandingImage () {
+      this.markdownData = '';
+      this.notify = {
+        type: 'warning',
+        message: 'Applet landing images is successfully removed.',
+        duration: 3000
+      }
+      this.landingPageType = 'markdown';
+    },
     onWatermarkNotify (event) {
+      this.$emit('loading', false);
+      this.fileErrorMsg = event.message;
+      this.inValidFileDlg = true;
+    },
+    onLandingImageNotify (event) {
       this.$emit('loading', false);
       this.fileErrorMsg = event.message;
       this.inValidFileDlg = true;
@@ -437,13 +528,11 @@ export default {
     },
     onSubmitEditor (markdownData) {
       this.markdownData = markdownData;
+      this.landingPageType = this.landingPageInputType;
       this.onCloseEditor();
     },
     onCloseEditor () {
       this.markdownDialog = false;
-    },
-    onEditAboutPage () {
-      this.markdownDialog = true;
     },
 
     editActivity (index, isNew = false) {

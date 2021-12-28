@@ -49,6 +49,7 @@ export default class Activity {
       name: initialActivityData.name || '',
       description: initialActivityData.description || '',
       splash: initialActivityData.splash || '',
+      image: initialActivityData.image || '',
       preamble: initialActivityData.preamble || '',
       shuffleActivityOrder: initialActivityData.shuffle || false,
       isSkippable: initialActivityData.isSkippable || false,
@@ -131,6 +132,9 @@ export default class Activity {
         const equalToValues = isVis.match(equalToRegExp);
         const notEqualToRegExp = /(\w+)!=(\d+)/;
         const notEqualToValues = isVis.match(notEqualToRegExp);
+        const activityRegExp = /(\!?)isActivityShownFirstTime\("(.*?)"\)/;
+        const activityValues = isVis.match(activityRegExp);
+
         const minIndex = Math.min(
           outsideValues ? outsideValues.index : isVis.length,
           withinValues ? withinValues.index : isVis.length,
@@ -139,7 +143,8 @@ export default class Activity {
           lessThanValues ? lessThanValues.index : isVis.length,
           greaterThanValues ? greaterThanValues.index : isVis.length,
           equalToValues ? equalToValues.index : isVis.length,
-          notEqualToValues ? notEqualToValues.index : isVis.length
+          notEqualToValues ? notEqualToValues.index : isVis.length,
+          activityValues ? activityValues.index : isVis.length,
         );
 
         if (outsideValues && minIndex === outsideValues.index && outsideValues[1] === outsideValues[3]) {
@@ -297,6 +302,28 @@ export default class Activity {
               });
             }
           }
+        } else if (activityValues && minIndex == activityValues.index) {
+          isVis = isVis.replace(activityRegExp, '');
+
+          if (activityValues[1]) {
+            conditionalItem.conditions.push({
+              ifValue: activityValues[2],
+              stateValue: {
+                name: "is not shown for the first time",
+                val: "!isActivityShownFirstTime"
+              },
+              activityCondition: true
+            })
+          } else {
+            conditionalItem.conditions.push({
+              ifValue: activityValues[2],
+              stateValue: {
+                name: "is shown for the first time",
+                val: "isActivityShownFirstTime"
+              },
+              activityCondition: true
+            })
+          }
         } else {
           isVis = isVis.split('()').join('');
 
@@ -357,7 +384,9 @@ export default class Activity {
         if (conditionalItem) {
           const operation = conditionalItem.operation === 'ANY' ? ' || ' : ' && ';
           const visibleItems = conditionalItem.conditions.map((cond) => {
-            if (cond.stateValue.val === 'between') {
+            if (cond.activityCondition) {
+              return `${cond.stateValue.val}("${cond.ifValue}")`;
+            } else if (cond.stateValue.val === 'between') {
               return `(${cond.ifValue.name} > ${cond.minValue} && ${cond.ifValue.name} < ${cond.maxValue})`;
             } else if (cond.stateValue.val === 'outsideof') {
               return `(${cond.ifValue.name} < ${cond.minValue} || ${cond.ifValue.name} > ${cond.maxValue})`;
@@ -384,6 +413,7 @@ export default class Activity {
         addProperties.push(property);
       }
     });
+
     return addProperties;
   }
 
@@ -413,6 +443,7 @@ export default class Activity {
       'skos:altLabel': this.ref.name,
       'schema:description': this.ref.description,
       'schema:splash': this.ref.splash,
+      'schema:image': this.ref.image,
       'schema:schemaVersion': '0.0.1',
       'schema:version': '0.0.1',
       preamble: this.ref.preamble,
@@ -497,6 +528,7 @@ export default class Activity {
       description: this.ref.description,
       isVis: this.ref.isVis,
       splash: this.ref.splash,
+      image: this.ref.image,
       preamble: this.ref.preamble,
       isReviewerActivity: this.ref.isReviewerActivity,
       shuffle: this.ref.shuffleActivityOrder,
@@ -536,9 +568,14 @@ export default class Activity {
       },
       'isVis': {
         updated: (field) =>
-          `Activity visibility is ${
-          _.get(newValue, field, false) ? 'disabled' : 'enabled'
-          }`,
+          `Activity visibility is ${_.get(newValue, field, false) ? 'disabled' : 'enabled'}`
+      },
+      'schema:image': {
+        updated: (field) =>
+          `Activity image was changed to ${_.get(newValue, field)}`,
+        removed: (field) => `Activity image was removed`,
+        inserted: (field) =>
+          `Activity image was added (${_.get(newValue, field)})`
       },
       'ui.shuffle': {
         updated: (field) =>
@@ -859,6 +896,7 @@ export default class Activity {
       ['schema:description']: description,
       ['reprolib:terms/isVis']: visibility,
       ['schema:splash']: splash,
+      ['schema:image']: image,
       ['reprolib:terms/preamble']: activityPreamble,
       ['reprolib:terms/isReviewerActivity']: isReviewerActivity,
       ['reprolib:terms/shuffle']: shuffle,
@@ -930,6 +968,8 @@ export default class Activity {
         visibility && visibility[0] && visibility[0]['@value'],
       splash:
         splash && splash[0] && splash[0]['@value'],
+      image:
+        image || '',
       isPrize:
         isPrize && isPrize[0] && isPrize[0]['@value'],
       preamble:

@@ -22,8 +22,84 @@
     <!-- Showing when user did not specify what type of uploader to show -->
 
     <div v-else>
+      <v-tooltip
+        right
+        v-if="initialAdditionalType === 'list'"
+      >
+        <template v-slot:activator="{ on }">
+          <v-list-group v-on="on">
+            <template v-slot:activator>
+              <v-list-item-action>
+                <v-checkbox
+                  disabled
+                  :input-value="initialData.length > 0"
+                />
+              </v-list-item-action>
+              <v-list-item-title>Add Image</v-list-item-title>
+            </template>
+
+            <v-list-item
+              class="v-file-input-list-item"
+            >
+              <div class="input-file-container">
+                <input
+                  ref="fileInput"
+                  class="file-input"
+                  type="file"
+                  accept="image/jpeg, image/png, image/gif, image/bmp"
+                  @change="onAddFromDevice($event, null)"
+                >
+                <v-list-item-title
+                  class="v-list-item-title d-flex align-center px-4"
+                >
+                  Your computer
+                  <v-icon right>
+                    mdi-monitor
+                  </v-icon>
+                </v-list-item-title>
+              </div>
+            </v-list-item>
+
+
+            <v-list-item>
+              <v-list-item-title
+                class="px-4"
+                @click="isAddingFromUrl = true"
+              >
+                From URL
+                <v-icon right>
+                  mdi-link-variant-plus
+                </v-icon>
+              </v-list-item-title>
+            </v-list-item>
+
+            <v-list-item
+              v-if="uploadData"
+              @click="removeConfirm = true"
+            >
+              <v-list-item-title
+                class="px-4"
+                style="color: #ff5252"
+              >
+                Remove
+              </v-list-item-title>
+            </v-list-item>
+          </v-list-group>
+        </template>
+
+        <span>
+          <p>Image Requirements</p>
+          <ul>
+            <li>Size: less than 8MB</li>
+            <li>Format: JPEG and PNG</li>
+            <li>Width: between 100px and 1920px</li>
+            <li>Height: between 100px and 1920px</li>
+          </ul>
+        </span>
+      </v-tooltip>
+
       <v-expansion-panels
-        v-if="initialAdditionalType !== 'small-circle'"
+        v-else-if="initialAdditionalType !== 'small-circle'"
       >
         <v-expansion-panel>
           <v-expansion-panel-header>
@@ -38,7 +114,7 @@
                 :accept="getFileFormats(initialType)"
                 @change="onAddFromDevice($event, null)"
               >
-             
+
               <v-btn @click="$refs.fileInput.click()">
                 Your computer
                 <v-icon right>
@@ -46,7 +122,7 @@
                 </v-icon>
               </v-btn>
             </div>
-            <v-btn 
+            <v-btn
               class="mt-4"
               @click="isAddingFromUrl = true"
             >
@@ -56,7 +132,7 @@
               </v-icon>
             </v-btn>
 
-            <v-btn 
+            <v-btn
               v-if="initialType === 'audio'"
               class="mt-4"
               @click="$emit('onRecordAudio')"
@@ -77,7 +153,7 @@
               Remove
             </v-btn>
 
-            <div 
+            <div
               v-if="initialType === 'image'"
               class="mt-4 text-right"
             >
@@ -103,7 +179,7 @@
                 </span>
               </v-tooltip>
             </div>
-            <div 
+            <div
               v-else-if="initialType === 'video_or_image'"
               class="mt-4 text-right"
             >
@@ -127,7 +203,7 @@
                 </span>
               </v-tooltip>
             </div>
-            <div 
+            <div
               v-else-if="initialType === 'video'"
               class="mt-4 text-right"
             >
@@ -151,7 +227,7 @@
                 </span>
               </v-tooltip>
             </div>
-            <div 
+            <div
               v-else-if="initialType === 'audio'"
               class="mt-4 text-right"
             >
@@ -305,8 +381,8 @@
             >
               Cancel
             </v-btn>
-            <v-btn 
-              class="ml-4" 
+            <v-btn
+              class="ml-4"
               color="error"
               @click="onClickRemove"
             >
@@ -370,7 +446,7 @@ export default {
       };
 
       const type = typeof this.initialData;
-     
+
       if(type === 'string' && this.initialData !== this.uploadData) {
         this.onAddFromUrl(this.initialData);
       } else if(type === 'object' && this.initialData.name !== this.uploadData.name) {
@@ -418,7 +494,7 @@ export default {
     async upload() {
       return new Promise((resolve, reject) => {
         this.uploader.upload(this.uploadData)
-          .then(response => { 
+          .then(response => {
             this.uploadData = response.location;
             resolve(this.uploadData);
           })

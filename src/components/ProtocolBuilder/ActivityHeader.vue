@@ -41,18 +41,6 @@
         maxlength="230"
         label="Activity Description"
       />
-      <Uploader
-        class="mt-3 mb-4"
-        style="max-width: 300px"
-        initialType="video_or_image"
-        imageType="splash"
-        :initialData="splash"
-        initialTitle="Splash Screen"
-        @onAddFromUrl="onAddSplashFromUrl($event, validateResolution)"
-        @onAddFromDevice="loading = true; onAddSplashFromDevice($event);"
-        @onRemove="onRemoveSplash()"
-        @onNotify="loading = false; notify = $event;"
-      />
       <v-row
         class="align-center"
       >
@@ -101,6 +89,36 @@
           />
         </v-col>
       </v-row>
+
+
+      <div
+        class="d-flex justify-space-around"
+      >
+        <Uploader
+          class="mt-3 mb-4"
+          style="max-width: 300px"
+          initialType="video"
+          :initialData="splash"
+          initialTitle="Splash Screen"
+          @onAddFromUrl="onAddMediaFromUrl($event, 'splash')"
+          @onAddFromDevice="loading = true; onAddMediaFromDevice($event, 'splash');"
+          @onRemove="onRemoveMedia('splash')"
+          @onNotify="loading = false; notify = $event;"
+        />
+
+        <Uploader
+          class="mt-3 mb-4"
+          style="max-width: 300px"
+          :initialType="'image'"
+          :initialData="activityImage"
+          :initialTitle="'Activity Image'"
+          @onAddFromUrl="onAddMediaFromUrl($event, 'activityImage')"
+          @onAddFromDevice="loading = true; onAddMediaFromDevice($event, 'activityImage');"
+          @onRemove="onRemoveMedia('activityImage')"
+          @onNotify="loading = false; notify = $event;"
+        />
+      </div>
+
     </div>
     <Notify :notify="notify" />
     <Loading :loading="loading" />
@@ -156,54 +174,64 @@ export default {
         this.$emit('onExpand');
       }
     },
-    onAddSplashFromUrl(url, validateResolution) {
-      let img = new Image();
-      let width = 0, height = 0;
-
-      img.src = url;
-      img.onload = function() {
-        validateResolution(this.width, this.height);
-      }
-      this.splash = url;
-    },
-    validateResolution(width, height) {
-      if (width !== "700" || height !== "1000") {
-        this.splash = '';
-        this.notify = {
-          type: 'error',
-          message: 'Image size should be 700px * 1000px',
-        };
+    onAddMediaFromUrl(url, type) {
+      if (type == 'splash') {
+        this.splash = url;
       } else {
-        this.notify = {
-          type: 'success',
-          message: 'Splash screen from URL successfully added to Activity.',
-          duration: 3000,
-        };
+        this.activityImage = url;
       }
+
+      this.notify = {
+        type: 'success',
+        message: (type == 'splash' ?
+          'Splash screen from URL successfully added to Activity.' :
+          'Activity image has been added successfully.'
+        ),
+        duration: 3000,
+      };
     },
-    async onAddSplashFromDevice(uploadFunction) {
+    async onAddMediaFromDevice(uploadFunction, type) {
       try {
-        this.splash = await uploadFunction();
+        if (type == 'splash') {
+          this.splash = await uploadFunction();
+        } else {
+          this.activityImage = await uploadFunction();
+        }
+
         this.loading = false;
         this.notify = {
           type: 'success',
-          message: 'Splash screen successfully added to Activity.',
+          message: ( type == 'splash' ?
+            'Splash screen successfully added to Activity.' :
+            'Activity image has been added successfully.'
+          ),
           duration: 3000,
         };
       } catch (error) {
         this.loading = false;
         this.notify = {
           type: 'error',
-          message: 'Something went wrong with uploading Splash screen for Activity. Please try to upload again or just save Activity without changes for Splash screen.',
+          message: ( type == 'splash' ?
+              'Something went wrong with uploading Splash screen for Activity. Please try to upload again or just save Activity without changes for Splash screen.' :
+              'Something went wrong with uploading activity image. Please try to upload again or just save Activity without image.'
+            ),
         };
       }
     },
 
-    onRemoveSplash() {
-      this.splash = '';
+    onRemoveMedia(type) {
+      if (type == 'splash') {
+        this.splash = '';
+      } else {
+        this.activityImage = '';
+      }
+
       this.notify = {
         type: 'warning',
-        message: 'Splash screen successfully removed from Activity.',
+        message: (type == 'splash' ?
+          'Splash screen successfully removed from Activity.' :
+          'Activity image has been removed successfully.'
+        ),
         duration: 3000,
       };
     },
@@ -226,6 +254,14 @@ export default {
       },
       set: function (description) {
         this.updateActivityMetaInfo({ description });
+      }
+    },
+    activityImage: {
+      get: function () {
+        return this.currentActivity && this.currentActivity.image
+      },
+      set: function (activityImage) {
+        this.updateActivityMetaInfo({ image: activityImage })
       }
     },
     splash: {

@@ -6,9 +6,11 @@ import config from '../config';
 import html5Embed from 'markdown-it-html5-embed';
 import markdownItImSize from 'markdown-it-imsize';
 import Protocol from '../models/Protocol';
+import MarkDownEditor from './ProtocolBuilder/MarkDownEditor';
 
 const Components = {
-  AppletSchemaBuilder
+  AppletSchemaBuilder,
+  MarkDownEditor
 };
 
 

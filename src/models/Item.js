@@ -837,10 +837,10 @@ export default class Item {
     if (responseOptions) {
       itemContent.responseOptions = {};
       let positiveBehaviors =
-        _.get(responseOptions, [0, 'reprolib:terms/positiveBehaviors']);
+        _.get(responseOptions, [0, 'reprolib:terms/positiveBehaviors'], []);
 
       let negativeBehaviors =
-        _.get(responseOptions, [0, 'reprolib:terms/negativeBehaviors']);
+        _.get(responseOptions, [0, 'reprolib:terms/negativeBehaviors'], []);
 
       let timeScreen =
         _.get(responseOptions, [0, 'reprolib:terms/timeScreen']);
@@ -889,9 +889,9 @@ export default class Item {
         _.get(responseOptions, [0, 'reprolib:terms/itemList'], []);
       let options =
         _.get(responseOptions, [0, 'reprolib:terms/options'], []);
-      let drawingImage = 
+      let drawingImage =
         _.get(responseOptions, [0, 'schema:image']);
-      
+
       if (drawingImage) {
         itemContent.responseOptions['schema:image'] = drawingImage;
       }
@@ -1389,6 +1389,16 @@ export default class Item {
       && (item.options.minAge === "" || item.options.maxAge === "")) {
       return false;
     }
+
+    if (item.inputType == "pastBehaviorTracker" || item.inputType == "futureBehaviorTracker") {
+      if (
+        (!item.options.positiveBehaviors || !item.options.positiveBehaviors.length) &&
+        (!item.options.negativeBehaviors || !item.options.negativeBehaviors.length)
+      ) {
+        return false;
+      }
+    }
+
     if (item.cumulativeScores) {
       for (let i = 0; i < item.cumulativeScores.length; i++) {
         if (!item.cumulativeScores[i].valid) {

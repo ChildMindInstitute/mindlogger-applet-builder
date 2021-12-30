@@ -316,6 +316,7 @@
               style="color: #ff5252"
             >
               Remove
+              <span v-if="uploadData.image"> {{ uploadData.image }} </span>
             </v-list-item-title>
           </v-list-item>
 

@@ -7,7 +7,7 @@
     <div>
       <ItemBuilder
         v-for="(item, index) in currentActivity.items"
-        :key="`${index}-${item.id || item.allowEdit}`"
+        :key="`${index}-${item.id || 0}-${item.name || ''}`"
         :item-index="index"
         class="ma-4"
       />

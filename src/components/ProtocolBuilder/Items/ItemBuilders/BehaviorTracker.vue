@@ -139,9 +139,9 @@
                     initialTitle="Option Image"
                     initialAdditionalType="small-circle"
                     :initialData="behavior.image"
-                    @onAddFromUrl="onAddBehaviorImageFromUrl(index, 'positive', $event)"
-                    @onAddFromDevice="onAddBehaviorImageFromDevice(index, 'positive', $event)"
-                    @onRemove="onRemoveBehaviorImage(index, 'positive')"
+                    @onAddFromUrl="onAddBehaviorImageFromUrl(index, 'negative', $event)"
+                    @onAddFromDevice="onAddBehaviorImageFromDevice(index, 'negative', $event)"
+                    @onRemove="onRemoveBehaviorImage(index, 'negative')"
                     @onNotify="$emit('loading', false); $emit('notify', $event);"
                   />
 

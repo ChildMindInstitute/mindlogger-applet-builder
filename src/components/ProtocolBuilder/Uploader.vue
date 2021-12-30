@@ -458,9 +458,17 @@ export default {
   methods: {
     async onAddFromUrl(url) {
       try {
-        if(this.initialType === 'audio') await isAudioUrlValid(url);
-        else if(url.match(/\.(jpeg|jpg|gif|png)$/) != null) await isImageValid(url);
-        else await isVideoUrlValid(url);
+        if (this.initialType === 'audio') {
+          await isAudioUrlValid(url);
+        } else if (url.match(/\.(jpeg|jpg|gif|png)$/) != null) {
+          if (this.imageType === 'splash') {
+            await isSplashImageValid(url);
+          } else {
+            await isImageValid(url);
+          }
+        } else {
+          await isVideoUrlValid(url);
+        }
 
         this.uploadData = url;
         this.isAddingFromUrl = false;

@@ -28,6 +28,8 @@
                 <v-text-field
                   v-model="behavior.value"
                   type="number"
+                  min="1"
+                  :rules="valueRules"
                   @input="saveBehaviors('positive')"
                 />
               </th>
@@ -100,6 +102,8 @@
                 <v-text-field
                   v-model="behavior.value"
                   type="number"
+                  min="1"
+                  :rules="valueRules"
                   @input="saveBehaviors('negative')"
                 />
               </th>
@@ -258,7 +262,10 @@ export default {
         value: '',
         behavior: null,
         type: 'startTime'
-      }
+      },
+      valueRules: [
+        v => (v > 0 && v % 1 === 0) || 'value must be a positive integer',
+      ],
     }
   },
 
@@ -291,6 +298,10 @@ export default {
 
     isValidBehavior (behavior, type = 'positive') {
       if (!behavior.name.length || !behavior.value) {
+        return false;
+      }
+
+      if (behavior.value <= 0 || behavior.value % 1 != 0) {
         return false;
       }
 

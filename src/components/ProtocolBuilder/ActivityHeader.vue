@@ -88,6 +88,15 @@
             label="Disable the users's ability to change the response"
           />
         </v-col>
+
+        <v-col>
+          <v-checkbox
+            @click="onSwitchAssessmentType"
+            v-model="isOnePageAssessment"
+            label="Show all questions at once"
+            readonly
+          />
+        </v-col>
       </v-row>
 
 
@@ -121,6 +130,36 @@
       </div>
 
     </div>
+
+      <v-dialog
+        v-model="assessmentTypeConfirmationDlg"
+        persistent
+        width="500"
+      >
+        <v-card>
+          <v-card-text class="pt-4">
+            A one page assessment is not available with conditional logic.
+            Are you sure you want to delete the conditional logic on this activity to have a one page assessment?
+          </v-card-text>
+
+          <v-card-actions
+            class="justify-space-around"
+          >
+            <v-btn
+              @click="deleteConditionals(); assessmentTypeConfirmationDlg = false; isOnePageAssessment = true;"
+            >
+              Yes
+            </v-btn>
+
+            <v-btn
+              @click="assessmentTypeConfirmationDlg = false"
+            >
+              No
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
     <Notify :notify="notify" />
     <Loading :loading="loading" />
   </v-card>
@@ -161,6 +200,7 @@ export default {
       isExpanded: true,
       loading: false,
       notify: {},
+      assessmentTypeConfirmationDlg: false
     }
   },
   mounted() {
@@ -168,7 +208,19 @@ export default {
   methods: {
     ...mapMutations(config.MODULE_NAME, [
       'updateActivityMetaInfo',
+      'deleteConditionals'
     ]),
+    onSwitchAssessmentType () {
+      if (!this.isOnePageAssessment) {
+        if (this.conditionals.length) {
+          this.assessmentTypeConfirmationDlg = true;
+        } else {
+          this.isOnePageAssessment = true;
+        }
+      } else {
+        this.isOnePageAssessment = false;
+      }
+    },
     editActivtiy () {
       this.isExpanded = !this.isExpanded;
       if (this.isExpanded) {
@@ -241,6 +293,11 @@ export default {
     ...mapGetters(config.MODULE_NAME, [
       'currentActivity'
     ]),
+
+    conditionals () {
+      return this.currentActivity.conditionalItems;
+    },
+
     name: {
       get: function () {
         return this.currentActivity && this.currentActivity.name;
@@ -314,6 +371,15 @@ export default {
         }
       }
       return true;
+    },
+    isOnePageAssessment: {
+      get: function () {
+        return this.currentActivity && this.currentActivity.isOnePageAssessment;
+      },
+
+      set: function (value) {
+        this.updateActivityMetaInfo({ isOnePageAssessment: value })
+      }
     }
   },
   watch: {

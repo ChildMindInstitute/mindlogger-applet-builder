@@ -52,8 +52,8 @@
           <v-btn
             :color="currentScreen == config.CONDITIONAL_SCREEN ? 'primary' : ''"
             class="mx-1"
-            :class="conditionalStatus ? '' : 'invalid'"
-            @click="viewConditionalLogic"
+            :class="onePageAssessment ? 'disabled' : conditionalStatus ? '' : 'invalid'"
+            @click="!onePageAssessment ? viewConditionalLogic() : ''"
             v-on="on"
           >
             <img
@@ -70,7 +70,12 @@
             >
           </v-btn>
         </template>
-        <span>Conditional Logic</span>
+        <span
+          v-if="!onePageAssessment"
+        >Conditional Logic</span>
+        <span
+          v-else
+        >Conditional logic is not available when the one-page activity is turned on</span>
       </v-tooltip>
 
       <v-tooltip
@@ -232,7 +237,10 @@
   .invalid {
     border-bottom: 4px solid red;
   }
-  .d-block{
+  .disabled {
+    background-color: rgb(224, 224, 224) !important;
+  }
+  .d-block {
     display: block !important;
   }
   .v-dialog .v-card .v-card__title {
@@ -302,6 +310,9 @@ export default {
     },
     conditionalStatus () {
       return this.currentActivity && this.currentActivity.conditionalItems.every(conditional => conditional.valid);
+    },
+    onePageAssessment () {
+      return this.currentActivity && this.currentActivity.isOnePageAssessment;
     }
   },
   methods: {

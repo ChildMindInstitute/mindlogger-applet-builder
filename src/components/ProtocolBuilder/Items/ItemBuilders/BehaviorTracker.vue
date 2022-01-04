@@ -264,7 +264,7 @@ export default {
         type: 'startTime'
       },
       valueRules: [
-        v => (v > 0 && v % 1 === 0) || 'value must be a positive integer',
+        v => (v > 0 && v % 1 === 0 && !v.startsWith('0')) || 'value must be a positive integer',
       ],
     }
   },
@@ -301,7 +301,7 @@ export default {
         return false;
       }
 
-      if (behavior.value <= 0 || behavior.value % 1 != 0) {
+      if (behavior.value <= 0 || behavior.value % 1 != 0 || behavior.value.startsWith('0')) {
         return false;
       }
 

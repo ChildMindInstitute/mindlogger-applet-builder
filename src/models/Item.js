@@ -230,12 +230,12 @@ export default class Item {
         positiveBehaviors: (this.ref.options.positiveBehaviors || []).map(option => ({
           "schema:name": option.name,
           "schema:image": option.image,
-          "schema:value": option.value
+          "schema:value": Number(option.value)
         })),
         negativeBehaviors: (this.ref.options.negativeBehaviors || []).map(option => ({
           "schema:name": option.name,
           "schema:image": option.image,
-          "schema:value": option.value,
+          "schema:value": Number(option.value),
           "schema:rate": option.rate,
           "schema:startTime": option.startTime,
           "schema:endTime": option.endTime

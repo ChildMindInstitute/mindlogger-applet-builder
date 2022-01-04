@@ -110,9 +110,7 @@
               <th>
                 <v-text-field
                   v-model="behavior.rate"
-                  type="number"
-                  suffix="minutes"
-                  @input="saveBehaviors('negative')"
+                  @click="openTimePicker(behavior, 'rate')"
                 />
               </th>
               <th class="pb-4">
@@ -182,6 +180,7 @@
       <v-time-picker
         v-model="timeDialog.value"
         full-width
+        :format="timeDialog.type == 'rate' ? '24hr' : 'ampm'"
       >
         <v-spacer></v-spacer>
         <v-btn
@@ -256,7 +255,10 @@ export default {
   data () {
     return {
       positiveBehaviors: this.initialItemData.positiveBehaviors || [],
-      negativeBehaviors: this.initialItemData.negativeBehaviors || [],
+      negativeBehaviors: (this.initialItemData.negativeBehaviors || []).map(behavior => ({
+        ...behavior,
+        rate: `${Math.floor(behavior.rate / 60).toString().padStart(2, '0')}:${Number(behavior.rate % 60).toString().padStart(2, '0')}`
+      })),
       timeDialog: {
         visible: false,
         value: '',
@@ -306,7 +308,7 @@ export default {
       }
 
       if (type == 'negative') {
-        if (!behavior.rate || behavior.rate <= 0 || !behavior.startTime || !behavior.endTime) {
+        if (!behavior.rate || !behavior.startTime || !behavior.endTime) {
           return false;
         }
       }
@@ -323,7 +325,7 @@ export default {
       } else {
         this.negativeBehaviors.push({
           name: '', value: '',
-          rate: 0,
+          rate: '',
           startTime: '', endTime: '',
           image: '',
         })
@@ -414,7 +416,10 @@ export default {
       this.$emit('updateOptions', {
         ...this.initialItemData,
         positiveBehaviors: this.positiveBehaviors,
-        negativeBehaviors: this.negativeBehaviors,
+        negativeBehaviors: this.negativeBehaviors.map(behavior => ({
+          ...behavior,
+          rate: behavior.rate && (Number(behavior.rate.slice(0, 2)) * 60 + Number(behavior.rate.slice(-2))) || ''
+        })),
         valid
       })
     },

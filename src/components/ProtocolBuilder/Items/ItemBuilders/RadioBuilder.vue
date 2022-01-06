@@ -95,7 +95,10 @@
 
             <v-spacer />
 
-            <div class="d-flex align-center justify-end">
+            <div
+              v-if="allowEdit"
+              class="d-flex align-center justify-end"
+            >
               <v-btn
                 icon
                 @click="option.expanded = !option.expanded"
@@ -270,6 +273,7 @@
           x-small
           color="primary"
           @click="addOption"
+          :disabled="!allowEdit"
         >
           <v-icon color="white">
             mdi-plus
@@ -636,6 +640,10 @@ export default {
       type: Number,
       required: false
     },
+    allowEdit: {
+      type: Boolean,
+      default: true
+    }
   },
   data: function () {
 

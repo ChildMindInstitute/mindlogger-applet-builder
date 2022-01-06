@@ -111,11 +111,28 @@
                   @input="saveBehaviors('negative')"
                 />
               </th>
-              <th>
-                <v-text-field
-                  v-model="behavior.rate"
-                  @click="openTimePicker(behavior, 'rate')"
-                />
+              <th class="pb-4">
+                <div class="d-flex align-center">
+                  <v-text-field
+                    class="rate-input"
+                    v-model="behavior.rate.hours"
+                    type="number"
+                    min="0"
+                    hide-details
+                    @input="saveBehaviors('negative')"
+                  />
+
+                  <span class="mx-2 pt-4">:</span>
+
+                  <v-text-field
+                    class="rate-input"
+                    v-model="behavior.rate.minutes"
+                    type="number"
+                    min="0"
+                    hide-details
+                    @input="saveBehaviors('negative')"
+                  />
+                </div>
               </th>
               <th class="pb-4">
                 <div class="d-flex align-center">
@@ -184,7 +201,6 @@
       <v-time-picker
         v-model="timeDialog.value"
         full-width
-        :format="timeDialog.type == 'rate' ? '24hr' : 'ampm'"
       >
         <v-spacer></v-spacer>
         <v-btn
@@ -235,6 +251,10 @@
   min-width: 50px;
   padding-top: 20px;
 }
+
+.rate-input {
+  width: 40px;
+}
 </style>
 
 <script>
@@ -261,7 +281,10 @@ export default {
       positiveBehaviors: this.initialItemData.positiveBehaviors || [],
       negativeBehaviors: (this.initialItemData.negativeBehaviors || []).map(behavior => ({
         ...behavior,
-        rate: `${Math.floor(behavior.rate / 60).toString().padStart(2, '0')}:${Number(behavior.rate % 60).toString().padStart(2, '0')}`
+        rate: {
+          hours: Math.floor(behavior.rate / 60),
+          minutes: Number(behavior.rate % 60)
+        }
       })),
       timeDialog: {
         visible: false,
@@ -270,7 +293,7 @@ export default {
         type: 'startTime'
       },
       valueRules: [
-        v => (v > 0 && v % 1 === 0 && !v.startsWith('0')) || 'value must be a positive integer',
+        v => (v > 0 && v % 1 === 0 && !v.toString().startsWith('0')) || 'value must be a positive integer',
       ],
       textRules: [
         v => !!v || 'This option cannot be empty',
@@ -311,12 +334,26 @@ export default {
         return false;
       }
 
-      if (behavior.value <= 0 || behavior.value % 1 != 0 || behavior.value.startsWith('0')) {
+      if (behavior.value <= 0 || behavior.value % 1 != 0 || behavior.value.toString().startsWith('0')) {
         return false;
       }
 
       if (type == 'negative') {
-        if (!behavior.rate || !behavior.startTime || !behavior.endTime) {
+        if (!behavior.startTime || !behavior.endTime) {
+          return false;
+        }
+
+        if (
+          behavior.rate.hours % 1 != 0 ||
+          behavior.rate.hours < 0 ||
+          behavior.rate.minutes % 1 != 0 ||
+          behavior.rate.minutes < 0 || behavior.rate.minutes > 59
+        ) {
+          return false;
+        }
+
+        const minutes = behavior.rate.hours * 60 + behavior.rate.minutes;
+        if (minutes <= 0 || minutes > 24 * 60) {
           return false;
         }
       }
@@ -333,7 +370,10 @@ export default {
       } else {
         this.negativeBehaviors.push({
           name: '', value: '',
-          rate: '',
+          rate: {
+            hours: 0,
+            minutes: 1
+          },
           startTime: '', endTime: '',
           image: '',
         })
@@ -426,7 +466,7 @@ export default {
         positiveBehaviors: this.positiveBehaviors,
         negativeBehaviors: this.negativeBehaviors.map(behavior => ({
           ...behavior,
-          rate: behavior.rate && (Number(behavior.rate.slice(0, 2)) * 60 + Number(behavior.rate.slice(-2))) || ''
+          rate: behavior.rate.hours * 60 + behavior.rate.minutes
         })),
         valid
       })

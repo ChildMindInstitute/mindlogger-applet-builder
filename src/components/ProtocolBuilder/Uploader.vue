@@ -30,10 +30,14 @@
           <v-list-group v-on="on">
             <template v-slot:activator>
               <v-list-item-action>
-                <v-checkbox
-                  disabled
-                  :input-value="initialData.length > 0"
-                />
+                <v-radio-group
+                  :value="initialData.length > 0 ? 'checked' : 'unchecked'"
+                >
+                  <v-radio
+                    disabled
+                    value="checked"
+                  />
+                </v-radio-group>
               </v-list-item-action>
               <v-list-item-title>Add Image</v-list-item-title>
             </template>

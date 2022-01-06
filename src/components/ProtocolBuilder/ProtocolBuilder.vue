@@ -55,20 +55,14 @@
               <v-list>
                 <v-list-item @click="openLandingPageEditor('markdown')">
                   <v-list-item-action>
-                    <v-checkbox
-                      disabled
-                      :input-value="markdownData && landingPageType == 'markdown'"
-                    />
-                  </v-list-item-action>
-                  <v-list-item-title>Add Markdown</v-list-item-title>
-                </v-list-item>
-
-                <v-list-item @click="openLandingPageEditor('text')">
-                  <v-list-item-action>
-                    <v-checkbox
-                      disabled
-                      :input-value="markdownData && landingPageType == 'text'"
-                    />
+                    <v-radio-group
+                      :value="markdownData && landingPageType == 'markdown' ? 'checked' : 'unchecked'"
+                    >
+                      <v-radio
+                        disabled
+                        value="checked"
+                      />
+                    </v-radio-group>
                   </v-list-item-action>
                   <v-list-item-title>Add Text</v-list-item-title>
                 </v-list-item>

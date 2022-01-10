@@ -6,10 +6,19 @@ export default class Activity {
   }
 
   getActivityBuilderData(initialActivityData) {
+    const name = initialActivityData.isABTrails
+      ? 'A/B Trails v' + initialActivityData.trailVersion + '.0'
+      : initialActivityData.name;
+    const description = initialActivityData.isABTrails ? 'A/B Trails' : initialActivityData.description;
+    const valid = initialActivityData.isABTrails ? true : initialActivityData.valid;
     const items = (initialActivityData.items || []).map(item => item);
 
     if (initialActivityData.visibilities && initialActivityData.visibilities.length) {
       initialActivityData.conditionalItems = this.getConditionalItems(initialActivityData, initialActivityData.items);
+    }
+
+    if (initialActivityData.activityType && initialActivityData.activityType.includes('ABTrails')) {
+      initialActivityData.isABTrails = true;
     }
 
     if (initialActivityData.subScales && initialActivityData.subScales.length) {
@@ -46,8 +55,8 @@ export default class Activity {
     }
 
     return {
-      name: initialActivityData.name || '',
-      description: initialActivityData.description || '',
+      name: name || '',
+      description: description || '',
       splash: initialActivityData.splash || '',
       image: initialActivityData.image || '',
       preamble: initialActivityData.preamble || '',
@@ -63,6 +72,7 @@ export default class Activity {
       textRules: [(v) => !!v || 'This field is required'],
       error: '',
       componentKey: 0,
+      '@type': initialActivityData.isABTrails ? 'reproschema:ABTrails' : 'reproschema:Activity',
       initialItemData: initialActivityData.isPrize && initialActivityData.items ? initialActivityData.items[0] : {},
       isItemEditable: true,
       editIndex: -1,
@@ -83,7 +93,7 @@ export default class Activity {
       allowEdit: true,
       isPrize: initialActivityData.isPrize || false,
       scoreOverview: initialActivityData.scoreOverview || '',
-      valid: initialActivityData.valid !== undefined ? initialActivityData.valid : true,
+      valid: valid !== undefined ? valid : true,
     };
   }
 
@@ -437,9 +447,9 @@ export default class Activity {
       '@context': [
         'https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json',
       ],
-      '@type': 'reproschema:Activity',
       _id: this.ref.id,
       '@id': this.ref.name,
+      '@type': this.ref['@type'],
       'skos:prefLabel': this.ref.name,
       'skos:altLabel': this.ref.name,
       'schema:description': this.ref.description,
@@ -917,6 +927,7 @@ export default class Activity {
       ['reprolib:terms/scoreOverview']: scoreOverview,
       ['reprolib:terms/isPrize']: isPrize,
       ['reprolib:terms/order']: orders,
+      ['@type']: activityType,
       ['_id']: id,
     } = activitiesObj;
 
@@ -984,6 +995,9 @@ export default class Activity {
         activityPreamble &&
         activityPreamble[0] &&
         activityPreamble[0]['@value'],
+      activityType:
+        activityType &&
+        activityType[0],
       isReviewerActivity:
         isReviewerActivity &&
         isReviewerActivity[0] &&

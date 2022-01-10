@@ -110,10 +110,6 @@ export default {
     ItemTimerOption,
   },
   props: {
-    initialItemData: {
-      type: Object,
-      required: true
-    },
     initialItemResponseOptions: {
       type: Object,
       required: true,

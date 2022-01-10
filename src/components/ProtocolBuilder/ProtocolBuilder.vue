@@ -153,17 +153,40 @@
         <v-card-title>
           Activities
           <v-spacer />
-          <v-btn
-            color="primary"
-            class="mt-2"
-            rounded
-            @click="newActivity"
+          <v-menu
+            right
           >
-            <v-icon>
-              add
-            </v-icon>
-            Add Activity
-          </v-btn>
+            <template
+              v-slot:activator="{ on, attrs }"
+            >
+              <v-btn
+                v-bind="attrs"
+                color="primary"
+                class="mt-2"
+                rounded
+                v-on="on"
+              >
+                <v-icon>
+                  add
+                </v-icon>
+                Add Activity
+              </v-btn>
+            </template>
+
+            <v-list>
+              <v-list-item
+                @click="newActivity(false)"
+              >
+                <v-list-item-title>Blank Activity</v-list-item-title>
+              </v-list-item>
+
+              <v-list-item
+                @click="newActivity(true)"
+              >
+                <v-list-item-title>A/B Trails</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
         </v-card-title>
 
         <v-card
@@ -201,8 +224,9 @@
               </v-btn>
 
               <v-btn
-                icon
+                v-if="activity['@type'] !== 'reproschema:ABTrails'"
                 @click="editActivity(index)"
+                icon
               >
                 <v-icon color="grey lighten-1">
                   edit
@@ -542,12 +566,14 @@ export default {
       this.setCurrentScreen(config.ITEM_SCREEN);
     },
 
-    newActivity () {
+    newActivity (isABTrails) {
       const activityCount = this.activities.length;
 
-      this.addActivity();
-      this.editActivity(activityCount, true);
+      this.addActivity(isABTrails);
+      if (!isABTrails) {
+        this.editActivity(activityCount, true);
+      }
     },
   }
-}
+} 
 </script>

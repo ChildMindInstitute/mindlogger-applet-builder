@@ -232,10 +232,48 @@ const activityMutations = {
     state.protocol.activities[index].isVis = false;
   },
 
-  addActivity (state) {
-    const model = new Activity;
+  addActivity(state, isABTrails) {
+    const activityModel = new Activity;
+    let items = [];
+
+    if (isABTrails) {
+      const itemModel = new Item();
+
+      for (let i = 1; i <= 4; i += 1) {
+        const inputType = 'trail';
+        let question = 'Sample A';
+
+        if (i === 2) {
+          question = 'Test A';
+        } else if (i === 3) {
+          question = 'Sample B';
+        } else if (i === 4) {
+          question = 'Test B';
+        }
+        let trailsItem = {
+          name: inputType + i,
+          question,
+          description: inputType + i,
+          options: {
+            options: [],
+          },
+          ui: {
+            inputType,
+            allow: []
+          }
+        };
+        const itemData = itemModel.getItemBuilderData(trailsItem);
+        itemData.valid = true;
+
+        items.push({ ...itemData });
+      }
+    }
+
+    // console.log('state.protocol.activities--->', state.protocol.activities);
+    const trailActivities = state.protocol.activities.filter(activity => activity["@type"].includes("ABTrails"));
+ 
     state.protocol.activities.push({
-      ...model.getActivityBuilderData({ items: [] }),
+      ...activityModel.getActivityBuilderData({ items, isABTrails, trailVersion: trailActivities.length + 1 }),
       index: state.protocol.activities.length,
     })
   },

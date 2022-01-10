@@ -104,6 +104,11 @@ export default {
       required: false,
       default: null,
     },
+    nodeEnv: {
+      type: String,
+      required: false,
+      default: 'development',
+    },
   },
   computed: {
     ...mapGetters(config.MODULE_NAME, [
@@ -145,6 +150,7 @@ export default {
     this.initThemeId(this.initialData);
 
     this.setVersions(this.versions);
+    this.setNodeEnv(this.nodeEnv);
     this.setCurrentScreen(config.PROTOCOL_SCREEN);
     this.setCurrentActivity(-1);
 
@@ -197,6 +203,7 @@ export default {
       'setTokenPrizeModalStatus',
       'updateTemplateRequestStatus',
       'setVersions',
+      'setNodeEnv',
       'resetProtocol',
     ]),
     ...mapGetters(config.MODULE_NAME, [

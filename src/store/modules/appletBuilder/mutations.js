@@ -8,9 +8,53 @@ const itemMutations = {
     if (!state.currentActivity) {
       return ;
     }
+    const item = state.currentActivity.items[index];
 
-    Object.assign(state.currentActivity.items[index], obj);
-    state.currentActivity.items[index].valid = Item.checkValidation(state.currentActivity.items[index]);
+    Object.assign(item, obj);
+    item.valid = Item.checkValidation(item);
+
+    if (obj.name) {
+      for (const subScale of state.currentActivity.subScales) {
+        if (subScale.items.includes(item)) {
+          subScale.jsExpression = subScale.items.map(
+            item => item.variableName ? `(${item.variableName})` : item.name
+          ).join(' + ');
+        }
+      }
+    }
+  },
+
+  addTimeScreen (state, { index, screen }) {
+    const obj = { ...screen };
+
+    for (let suffix = 0; ; suffix++) {
+      obj.name = `${screen.name}_${suffix}`;
+
+      let exists = false;
+      for (const item of state.currentActivity.items) {
+        if (item.name == obj.name) {
+          exists = true;
+          break;
+        }
+      }
+
+      if (!exists) break;
+    }
+
+    const model = new Item();
+    const itemData = model.getItemBuilderData(obj);
+    itemData.valid = Item.checkValidation(itemData);
+
+    state.currentActivity.items[index].options.timeScreen = obj.name;
+    state.currentActivity.items.splice(index, 0, itemData);
+  },
+
+  deleteTimeScreen (state, index) {
+    const item = state.currentActivity.items[index];
+
+    if (item.inputType == 'radio' && /time_screen/.test(item.name)) {
+      state.currentActivity.items.splice(index, 1);
+    }
   },
 
   addItem (state, obj) {
@@ -30,7 +74,9 @@ const itemMutations = {
       item = obj;
     }
 
-    let lastIndex = state.currentActivity.items.findIndex(item => !item.allowEdit || item.inputType == 'cumulativeScore');
+    let lastIndex = state.currentActivity.items.findIndex(
+      item => (!item.allowEdit && ['age_screen', 'gender_screen'].indexOf(item.name) >=0 ) || item.inputType == 'cumulativeScore' || item.inputType == 'tokenSummary'
+    );
 
     if (!obj) {
       item.name = `Screen${lastIndex >= 0 ? lastIndex + 1 : state.currentActivity.items.length + 1}`;
@@ -46,9 +92,45 @@ const itemMutations = {
     }
   },
 
+  updateTokenSummary (state, screen) {
+    let behaviorTrackers = 0, hasTokenSummary = false;
+
+    const itemData = new Item().getItemBuilderData(screen);
+    itemData.valid = Item.checkValidation(itemData);
+
+    for (const item of state.currentActivity.items) {
+      if (['futureBehaviorTracker', 'pastBehaviorTracker'].includes(item.inputType)) {
+        behaviorTrackers++;
+      }
+
+      if (item.inputType == 'tokenSummary') {
+        hasTokenSummary = true;
+      }
+    }
+
+    if (behaviorTrackers && !hasTokenSummary) {
+      const index = state.currentActivity.items.findIndex(item => item.inputType == 'cumulativeScore')
+
+      if (index >= 0) {
+        state.currentActivity.items.splice(index, 0, itemData);
+      } else {
+        state.currentActivity.items.push(itemData);
+      }
+    }
+
+    if (!behaviorTrackers && hasTokenSummary) {
+      const index = state.currentActivity.items.findIndex(item => item.inputType == 'tokenSummary');
+      state.currentActivity.items.splice(index, 1);
+    }
+  },
+
   showOrHideItem(state, index) {
     const isVis = !!state.currentActivity.items[index].isVis;
     state.currentActivity.items[index].isVis = !isVis;
+  },
+
+  showItem(state, index) {
+    state.currentActivity.items[index].isVis = false;
   },
 
   duplicateItem(state, index) {
@@ -72,7 +154,7 @@ const itemMutations = {
     //   newItem.baseItemId = item.id;
     // }
 
-    let lastIndex = state.currentActivity.items.findIndex(item => !item.allowEdit || item.inputType == 'cumulativeScore');
+    let lastIndex = state.currentActivity.items.findIndex(item => !item.allowEdit || item.inputType == 'cumulativeScore' || item.inputType == 'tokenSummary');
 
     if (lastIndex >= 0) {
       state.currentActivity.items.splice(lastIndex, 0, newItem);
@@ -126,6 +208,7 @@ const activityMutations = {
       finalSubScale: { ...activity.finalSubScale },
       subScales: [...activity.subScales],
       conditionalItems,
+      index: activities.length
     };
 
     // if (state.protocol.id && activity.id) {
@@ -143,6 +226,10 @@ const activityMutations = {
   showOrHideActivity(state, index) {
     const isVis = !!state.protocol.activities[index].isVis;
     state.protocol.activities[index].isVis = !isVis;
+  },
+
+  showActivity(state, index) {
+    state.protocol.activities[index].isVis = false;
   },
 
   addActivity(state, isABTrails) {
@@ -282,6 +369,10 @@ const conditionalMutations = {
     conditionalItems.splice(index, 1);
     state.currentActivity.conditionalItems = [...conditionalItems];
   },
+
+  deleteConditionals (state) {
+    state.currentActivity.conditionalItems = [];
+  }
 }
 
 export default {
@@ -357,5 +448,9 @@ export default {
 
   setVersions (state, versions) {
     state.versions = versions;
+  },
+
+  setNodeEnv (state, nodeEnv) {
+    state.nodeEnv = nodeEnv;
   },
 }

@@ -52,6 +52,18 @@
           :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
         />
       </v-col>
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="removeBackOption"
+          label="Remove ability to go back to the previous item"
+          @change="update"
+        />
+      </v-col>
     </v-row>
 
     <OptionalItemText
@@ -131,6 +143,7 @@ export default {
       /** continuous slider */
       isOptionalText: this.initialIsOptionalText,
       responseOptions: this.initialResponseOptions,
+      removeBackOption: this.initialItemData.removeBackOption,
     };
   },
 
@@ -150,36 +163,43 @@ export default {
   },
   methods: {
     update () {
+      let maxAge = this.maxAge;
+      let minAge = this.minAge;
       if (this.maxAge > 105) {
         this.$nextTick(() => {
           this.maxAge = 105;
         });
+        maxAge = 105;
       } else if (this.maxAge < 0) {
         this.$nextTick(() => {
           this.maxAge = 1;
         });
+        maxAge = 1;
       }
 
       if (this.minAge > 105) {
         this.$nextTick(() => {
           this.minAge = 105;
         });
+        minAge = 105;
       } else if (this.minAge < 0) {
         this.$nextTick(() => {
           this.minAge = 1;
         });
+        minAge = 1;
       }
 
-      if (Number(this.maxAge) <= Number(this.minAge)) {
+      if (Number(maxAge) <= Number(minAge)) {
         this.valid = false;
       } else {
         this.valid = true;
       }
 
       const responseOptions = {
-        'minAge': this.minAge,
-        'maxAge': this.maxAge,
+        'minAge': Number(minAge),
+        'maxAge': Number(maxAge),
         'valid': this.valid,
+        'removeBackOption': this.removeBackOption,
       };
 
       this.$emit('updateOptions', responseOptions);

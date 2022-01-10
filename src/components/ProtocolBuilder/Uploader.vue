@@ -9,10 +9,10 @@
       <h5>Uploader types:</h5>
       <ul>
         <li
-          v-for="type in structureTypes"
-          :key="type"
+          v-for="structureType in structureTypes"
+          :key="structureType"
         >
-          {{ type }}
+          {{ structureType }}
         </li>
       </ul>
       <p class="mt-3">
@@ -22,8 +22,84 @@
     <!-- Showing when user did not specify what type of uploader to show -->
 
     <div v-else>
+      <v-tooltip
+        right
+        v-if="initialAdditionalType === 'list'"
+      >
+        <template v-slot:activator="{ on }">
+          <v-list-group v-on="on">
+            <template v-slot:activator>
+              <v-list-item-action>
+                <v-checkbox
+                  disabled
+                  :input-value="initialData.length > 0"
+                />
+              </v-list-item-action>
+              <v-list-item-title>Add Image</v-list-item-title>
+            </template>
+
+            <v-list-item
+              class="v-file-input-list-item"
+            >
+              <div class="input-file-container">
+                <input
+                  ref="fileInput"
+                  class="file-input"
+                  type="file"
+                  accept="image/jpeg, image/png, image/gif, image/bmp"
+                  @change="onAddFromDevice($event, null)"
+                >
+                <v-list-item-title
+                  class="v-list-item-title d-flex align-center px-4"
+                >
+                  Your computer
+                  <v-icon right>
+                    mdi-monitor
+                  </v-icon>
+                </v-list-item-title>
+              </div>
+            </v-list-item>
+
+
+            <v-list-item>
+              <v-list-item-title
+                class="px-4"
+                @click="isAddingFromUrl = true"
+              >
+                From URL
+                <v-icon right>
+                  mdi-link-variant-plus
+                </v-icon>
+              </v-list-item-title>
+            </v-list-item>
+
+            <v-list-item
+              v-if="uploadData"
+              @click="removeConfirm = true"
+            >
+              <v-list-item-title
+                class="px-4"
+                style="color: #ff5252"
+              >
+                Remove
+              </v-list-item-title>
+            </v-list-item>
+          </v-list-group>
+        </template>
+
+        <span>
+          <p>Image Requirements</p>
+          <ul>
+            <li>Size: less than 8MB</li>
+            <li>Format: JPEG and PNG</li>
+            <li>Width: between 100px and 1920px</li>
+            <li>Height: between 100px and 1920px</li>
+          </ul>
+        </span>
+      </v-tooltip>
+
       <v-expansion-panels
-        v-if="initialAdditionalType !== 'small-circle'"
+        v-else-if="initialAdditionalType !== 'small-circle'"
       >
         <v-expansion-panel>
           <v-expansion-panel-header>
@@ -32,34 +108,12 @@
           <v-expansion-panel-content>
             <div class="input-file-container">
               <input
-                v-if="initialType === 'audio'"
                 ref="fileInput"
                 class="file-input"
                 type="file"
-                accept="audio/mpeg, audio/ogg, audio/wav"
+                :accept="getFileFormats(initialType)"
                 @change="onAddFromDevice($event, null)"
               >
-              <!-- /if initialType === 'audio' -->
-
-              <input
-                v-if="initialType === 'image'"
-                ref="fileInput"
-                class="file-input"
-                type="file"
-                accept="image/jpeg, image/png, image/bmp"
-                @change="onAddFromDevice($event, null)"
-              >
-              <!-- /if initialType === 'image' -->
-
-              <input
-                v-if="initialType === 'video'"
-                ref="fileInput"
-                class="file-input"
-                type="file"
-                accept="video/*, image/gif"
-                @change="onAddFromDevice($event, null)"
-              >
-              <!-- /if initialType === 'video' -->
 
               <v-btn @click="$refs.fileInput.click()">
                 Your computer
@@ -68,7 +122,7 @@
                 </v-icon>
               </v-btn>
             </div>
-            <v-btn 
+            <v-btn
               class="mt-4"
               @click="isAddingFromUrl = true"
             >
@@ -78,7 +132,7 @@
               </v-icon>
             </v-btn>
 
-            <v-btn 
+            <v-btn
               v-if="initialType === 'audio'"
               class="mt-4"
               @click="$emit('onRecordAudio')"
@@ -99,7 +153,7 @@
               Remove
             </v-btn>
 
-            <div 
+            <div
               v-if="initialType === 'image'"
               class="mt-4 text-right"
             >
@@ -118,8 +172,80 @@
                   <p>Image Requirements</p>
                   <ul>
                     <li>Size: less than 8MB</li>
+                    <li>Format: JPEG and PNG</li>
                     <li>Width: between 100px and 1920px</li>
                     <li>Height: between 100px and 1920px</li>
+                  </ul>
+                </span>
+              </v-tooltip>
+            </div>
+            <div
+              v-else-if="initialType === 'video_or_image'"
+              class="mt-4 text-right"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-icon
+                    color="primary"
+                    dark
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    mdi-information-outline
+                  </v-icon>
+                </template>
+                <span>
+                  <p>Image Requirements</p>
+                  <ul>
+                    <li>Size: less than 8MB</li>
+                    <li>700px * 1000px size is required</li>
+                  </ul>
+                </span>
+              </v-tooltip>
+            </div>
+            <div
+              v-else-if="initialType === 'video'"
+              class="mt-4 text-right"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-icon
+                    color="primary"
+                    dark
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    mdi-information-outline
+                  </v-icon>
+                </template>
+                <span>
+                  <p>Requirements</p>
+                  <ul>
+                    <li>Size: less than 100MB</li>
+                    <li>Format: MP4 and GIF</li>
+                  </ul>
+                </span>
+              </v-tooltip>
+            </div>
+            <div
+              v-else-if="initialType === 'audio'"
+              class="mt-4 text-right"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-icon
+                    color="primary"
+                    dark
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    mdi-information-outline
+                  </v-icon>
+                </template>
+                <span>
+                  <p>Requirements</p>
+                  <ul>
+                    <li>Format: MP3 and WAV</li>
                   </ul>
                 </span>
               </v-tooltip>
@@ -155,7 +281,7 @@
                 ref="fileInput"
                 class="file-input"
                 type="file"
-                accept="image/jpeg, image/png, image/bmp"
+                accept="image/jpeg, image/png, image/gif, image/bmp"
                 @change="onAddFromDevice($event, null)"
               >
               <v-list-item-title
@@ -190,6 +316,7 @@
               style="color: #ff5252"
             >
               Remove
+              <span v-if="uploadData.image"> {{ uploadData.image }} </span>
             </v-list-item-title>
           </v-list-item>
 
@@ -209,10 +336,14 @@
               </template>
               <span>
                 <p>Image Requirements</p>
-                <ul>
+                <ul style="max-width: 248px">
                   <li>Size: less than 8MB</li>
+                  <li>Format: JPEG and PNG</li>
                   <li>Width: between 100px and 1920px</li>
                   <li>Height: between 100px and 1920px</li>
+                  <li v-if="imageType === 'watermark'">
+                    Translucency of the image should already be completed prior to upload
+                  </li>
                 </ul>
               </span>
             </v-tooltip>
@@ -251,8 +382,8 @@
             >
               Cancel
             </v-btn>
-            <v-btn 
-              class="ml-4" 
+            <v-btn
+              class="ml-4"
               color="error"
               @click="onClickRemove"
             >
@@ -267,7 +398,7 @@
 </template>
 
 <script>
-import { Uploader, isAudioUrlValid, isImageValid, isVideoUrlValid } from '../../models/Uploader';
+import { Uploader, isSplashImageValid, isAudioUrlValid, isImageValid, isVideoUrlValid } from '../../models/Uploader';
 import AddFromUrl from './Additional/AddFromUrl.vue';
 
 export default {
@@ -276,6 +407,10 @@ export default {
   },
   props: {
     initialType: {
+      type: String,
+      default: '',
+    },
+    imageType: {
       type: String,
       default: '',
     },
@@ -293,7 +428,7 @@ export default {
     }
   },
   data() {
-    const structureTypes = ['image', 'audio', 'video'];
+    const structureTypes = ['image', 'audio', 'video', 'video_or_image'];
     const uploader = new Uploader(this.initialType);
 
     return {
@@ -312,7 +447,7 @@ export default {
       };
 
       const type = typeof this.initialData;
-     
+
       if(type === 'string' && this.initialData !== this.uploadData) {
         this.onAddFromUrl(this.initialData);
       } else if(type === 'object' && this.initialData.name !== this.uploadData.name) {
@@ -321,12 +456,19 @@ export default {
     }
   },
   methods: {
-
     async onAddFromUrl(url) {
       try {
-        if(this.initialType === 'audio') await isAudioUrlValid(url);
-        else if(this.initialType === 'image') await isImageValid(url);
-        else if(this.initialType === 'video') await isVideoUrlValid(url);
+        if (this.initialType === 'audio') {
+          await isAudioUrlValid(url);
+        } else if (url.match(/\.(jpeg|jpg|gif|png)$/) != null) {
+          if (this.imageType === 'splash') {
+            await isSplashImageValid(url);
+          } else {
+            await isImageValid(url);
+          }
+        } else {
+          await isVideoUrlValid(url);
+        }
 
         this.uploadData = url;
         this.isAddingFromUrl = false;
@@ -345,7 +487,8 @@ export default {
       if(event) event.target.value = '';
 
       try {
-        if(this.initialType === 'image') await isImageValid(file);
+        if (this.initialType === 'image') await isImageValid(file);
+        if (this.imageType === 'splash' && file.type.match(/(jpeg|jpg|png)$/) != null) await isSplashImageValid(file);
 
         this.uploadData = file;
         this.$emit('onAddFromDevice', this.upload);
@@ -360,7 +503,7 @@ export default {
     async upload() {
       return new Promise((resolve, reject) => {
         this.uploader.upload(this.uploadData)
-          .then(response => { 
+          .then(response => {
             this.uploadData = response.location;
             resolve(this.uploadData);
           })
@@ -369,6 +512,22 @@ export default {
             setTimeout(() => reject('Something went wrong with uploading.'), 1000);
           });
       });
+    },
+
+    getFileFormats (type) {
+      if (type === 'audio') {
+        return "audio/mpeg, audio/ogg, audio/wav";
+      }
+      if (type === 'image') {
+        return "image/jpeg, image/png, image/bmp"
+      }
+      if (type === 'video') {
+        return "video/*, image/gif"
+      }
+      if (type === 'video_or_image') {
+        return "video/*, image/gif, image/jpeg, image/png, image/bmp";
+      }
+      return "";
     },
 
     onClickRemove() {

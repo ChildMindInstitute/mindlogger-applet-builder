@@ -61,7 +61,7 @@
       >
         <v-checkbox
           v-model="removeBackOption"
-          label="Remove back button"
+          label="Remove ability to go back to the previous item"
           @change="update"
         />
       </v-col>
@@ -114,10 +114,6 @@ export default {
       type: Object,
       required: true,
     },
-    initialItemData: {
-      type: Object,
-      required: true
-    },
     initialItemInputOptions: {
       type: Array,
       required: true
@@ -136,7 +132,6 @@ export default {
     },
   },
   data: function () {
-
     let responseOptions = {
       "schema:image": '',
       "isOptionalTextRequired": false,
@@ -223,7 +218,7 @@ export default {
       else this.updateImage(url);
       this.$emit('notify', {
         type: 'success',
-        message: `${type} Image from URL successfully added to Geolocation Item.`,
+        message: `${type} Image from URL successfully added to Drawing Item.`,
         duration: 3000,
       });
     },

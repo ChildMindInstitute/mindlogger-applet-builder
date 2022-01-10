@@ -74,5 +74,9 @@ export default {
 
   versions (state) {
     return state.versions;
+  },
+
+  nodeEnv (state) {
+    return state.nodeEnv;
   }
 }

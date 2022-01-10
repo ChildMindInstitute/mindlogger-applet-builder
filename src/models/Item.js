@@ -193,6 +193,8 @@ export default class Item {
     if (this.ref.inputType === "drawing") {
       return {
         ...this.ref.responseOptions,
+        "removeBackOption": this.ref.options.removeBackOption,
+        "removeUndoOption": this.ref.options.removeUndoOption,
         "topNavigationOption": this.ref.options.topNavigationOption,
       }
     }
@@ -222,10 +224,36 @@ export default class Item {
 
       return responseOptions;
     }
+
+    if (this.ref.inputType === 'pastBehaviorTracker' || this.ref.inputType == 'futureBehaviorTracker') {
+      const data = {
+        positiveBehaviors: (this.ref.options.positiveBehaviors || []).map(option => ({
+          "schema:name": option.name,
+          "schema:image": option.image,
+          "schema:value": Number(option.value)
+        })),
+        negativeBehaviors: (this.ref.options.negativeBehaviors || []).map(option => ({
+          "schema:name": option.name,
+          "schema:image": option.image,
+          "schema:value": Number(option.value),
+          "schema:rate": option.rate,
+          "schema:startTime": option.startTime,
+          "schema:endTime": option.endTime
+        }))
+      }
+
+      if (this.ref.inputType == 'futureBehaviorTracker') {
+        data.timeScreen = this.ref.options.timeScreen;
+      }
+
+      return data;
+    }
+
     if (this.ref.inputType === "ageSelector") {
       return {
         "schema:minAge": this.ref.options.minAge,
         "schema:maxAge": this.ref.options.maxAge,
+        "removeBackOption": this.ref.options.removeBackOption,
       }
     }
     if (this.ref.inputType === 'stackedSlider') {
@@ -253,13 +281,13 @@ export default class Item {
         "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
       };
     }
-    if (this.ref.inputType === "drawing") {
-      return {
-        "removeBackOption": this.ref.options.removeBackOption,
-        "removeUndoOption": this.ref.options.removeUndoOption,
-      }
-    }
-    if (this.ref.inputType === "audioImageRecord" || this.ref.inputType === "geolocation" || this.ref.inputType === "photo" || this.ref.inputType === "video" || this.ref.inputType === "timeRange") {
+    if (this.ref.inputType === "audioImageRecord"
+      || this.ref.inputType === "geolocation"
+      || this.ref.inputType === "audioStimulus"
+      || this.ref.inputType === "photo"
+      || this.ref.inputType === "markdownMessage"
+      || this.ref.inputType === "video"
+      || this.ref.inputType === "timeRange") {
       return {
         "removeBackOption": this.ref.options.removeBackOption,
       }
@@ -400,6 +428,7 @@ export default class Item {
     }
 
     else if (this.ref.inputType === "audioStimulus") {
+      itemObj.responseOptions = itemObj.responseOptions || this.ref.responseOptions;
       itemObj.inputOptions = this.ref.inputOptions;
       itemObj.media = this.ref.media;
     }
@@ -664,11 +693,39 @@ export default class Item {
       'options.topNavigationOption': {
         updated: optionUpdate('Navigation Buttons'),
       },
+      'options.removeUndoOption': {
+        updated: optionUpdate('Remove Undo Option'),
+      },
+      'options.removeBackOption': {
+        updated: optionUpdate('Remove Back Option'),
+      },
       'options.continousSlider': {
         updated: valueUpdate('Continous Slider'),
       },
       'options.scores': {
         updated: scoreUpdate,
+      },
+      'options.positiveBehaviors': {
+        updated: (field) => {
+          const oldBehaviors = _.get(oldValue, field, []);
+          const newBehaviors = _.get(newValue, field, []);
+
+          if (JSON.stringify(oldBehaviors) != JSON.stringify(newBehaviors)) {
+            return ['positive behaviors were been updated']
+          }
+          return []
+        }
+      },
+      'options.negativeBehaviors': {
+        updated: (field) => {
+          const oldBehaviors = _.get(oldValue, field, []);
+          const newBehaviors = _.get(newValue, field, []);
+
+          if (JSON.stringify(oldBehaviors) != JSON.stringify(newBehaviors)) {
+            return ['negative behaviors were updated']
+          }
+          return []
+        }
       },
       'options.maxLength': {
         updated: valueUpdate('maxLength'),
@@ -788,6 +845,14 @@ export default class Item {
 
     if (responseOptions) {
       itemContent.responseOptions = {};
+      let positiveBehaviors =
+        _.get(responseOptions, [0, 'reprolib:terms/positiveBehaviors'], []);
+
+      let negativeBehaviors =
+        _.get(responseOptions, [0, 'reprolib:terms/negativeBehaviors'], []);
+
+      let timeScreen =
+        _.get(responseOptions, [0, 'reprolib:terms/timeScreen']);
 
       let isOptionalTextRequired =
         _.get(responseOptions, [0, 'reprolib:terms/isOptionalTextRequired']);
@@ -804,9 +869,12 @@ export default class Item {
         _.get(responseOptions, [0, 'reprolib:terms/scoring']);
       let randomizeOptions =
         _.get(responseOptions, [0, 'reprolib:terms/randomizeOptions']);
-      
+
       let removeBackOption =
         _.get(responseOptions, [0, 'reprolib:terms/removeBackOption']);
+
+      let removeUndoOption =
+        _.get(responseOptions, [0, 'reprolib:terms/removeUndoOption']);
 
       let continousSlider =
         _.get(responseOptions, [0, 'reprolib:terms/continousSlider']);
@@ -819,7 +887,7 @@ export default class Item {
 
       let colorPalette =
         _.get(responseOptions, [0, 'reprolib:terms/colorPalette']);
-      
+
       let topNavigationOption =
         _.get(responseOptions, [0, 'reprolib:terms/topNavigationOption']);
 
@@ -830,6 +898,12 @@ export default class Item {
         _.get(responseOptions, [0, 'reprolib:terms/itemList'], []);
       let options =
         _.get(responseOptions, [0, 'reprolib:terms/options'], []);
+      let drawingImage =
+        _.get(responseOptions, [0, 'schema:image']);
+
+      if (drawingImage) {
+        itemContent.responseOptions['schema:image'] = drawingImage;
+      }
 
       if (isOptionalTextRequired) {
         itemContent.responseOptions.isOptionalTextRequired =
@@ -945,10 +1019,31 @@ export default class Item {
         };
       }
 
-      if (itemType === 'drawing') {
+      if (itemType === 'pastBehaviorTracker' || itemType == 'futureBehaviorTracker') {
         itemContent.options = {
-          topNavigationOption: itemContent.topNavigationOption || false,
-        };
+          positiveBehaviors: positiveBehaviors.map(behavior => ({
+            image: _.get(behavior, ['schema:image'], ''),
+            name: _.get(behavior, ['schema:name', 0, '@value'], ''),
+            value: _.get(behavior, ['schema:value', 0, '@value'], ''),
+            valid: true
+          })),
+
+          negativeBehaviors: negativeBehaviors.map(behavior => ({
+            image: _.get(behavior, ['schema:image'], ''),
+            name: _.get(behavior, ['schema:name', 0, '@value'], ''),
+            value: _.get(behavior, ['schema:value', 0, '@value'], ''),
+            rate: _.get(behavior, ['schema:rate', 0, '@value'], 0),
+            startTime: _.get(behavior, ['schema:startTime', 0, '@value'], ''),
+            endTime: _.get(behavior, ['schema:endTime', 0, '@value'], ''),
+            valid: true
+          })),
+
+          valid: true
+        }
+
+        if (itemType == 'futureBehaviorTracker') {
+          itemContent.options.timeScreen = _.get(timeScreen, [0, '@value'])
+        }
       }
 
       if (itemType === 'stackedRadio') {
@@ -1048,6 +1143,7 @@ export default class Item {
       }
       if (itemType === 'ageSelector') {
         itemContent.options = {
+          removeBackOption: itemContent.removeBackOption || false,
           maxAge:
             _.get(responseOptions, [0, 'schema:maxAge', 0, '@value']),
           minAge:
@@ -1153,14 +1249,17 @@ export default class Item {
       }
       if (itemType === 'drawing') {
         itemContent.options = {
+          topNavigationOption: itemContent.topNavigationOption || false,
           removeBackOption: itemContent.removeBackOption || false,
           removeUndoOption: itemContent.removeUndoOption || false,
         };
       }
+
       if (itemType === 'audioStimulus'
         || itemType === 'geolocation'
         || itemType === 'date'
         || itemType === 'video'
+        || itemType === 'markdownMessage'
         || itemType === 'photo'
         || itemType === 'timeRange') {
         itemContent.options = {
@@ -1214,6 +1313,10 @@ export default class Item {
       const CONTENT_URL = 'schema:contentUrl';
 
       media.forEach(obj => {
+        if (!Object.keys(obj).length) {
+          return ;
+        }
+
         const mediaObj = Object.entries(obj)[0][1];
         const modifiedmMediaObj = {};
 
@@ -1241,17 +1344,6 @@ export default class Item {
 
     itemContent.valid = true;
 
-    // TODO: compare with new structure and delete !!!!!
-    const responseOptions2 = item['reprolib:terms/responseOptions'];
-    if(responseOptions2 && responseOptions2.length > 0) {
-      if(
-        itemType === 'audioImageRecord'
-        || itemType === 'drawing'
-        || itemType === 'geolocation'
-      ) {
-        itemContent.responseOptions = this.responseOptionsModifier(itemType, responseOptions2);
-      }
-    }
 
     return itemContent;
   }
@@ -1302,6 +1394,20 @@ export default class Item {
         && !item.question.text)) {
       return false;
     }
+    if (item.inputType === "ageSelector"
+      && (item.options.minAge === "" || item.options.maxAge === "")) {
+      return false;
+    }
+
+    if (item.inputType == "pastBehaviorTracker" || item.inputType == "futureBehaviorTracker") {
+      if (
+        (!item.options.positiveBehaviors || !item.options.positiveBehaviors.length) &&
+        (!item.options.negativeBehaviors || !item.options.negativeBehaviors.length)
+      ) {
+        return false;
+      }
+    }
+
     if (item.cumulativeScores) {
       for (let i = 0; i < item.cumulativeScores.length; i++) {
         if (!item.cumulativeScores[i].valid) {
@@ -1315,6 +1421,10 @@ export default class Item {
           return false;
         }
       }
+    }
+
+    if (item.timer && item.timer < 0 ) {
+      return false;
     }
 
     return true;

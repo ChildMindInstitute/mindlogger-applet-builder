@@ -26,7 +26,7 @@
         </v-btn>
         <v-btn
           icon
-          v-if="!isConditionalItem()"
+          v-if="!isConditionalItem(itemIndex)"
           @click="hideItem(itemIndex)"
         >
           <v-icon v-if="isVis" color="grey lighten-1">
@@ -41,18 +41,11 @@
           @click="editItem"
         >
           <v-icon
-            v-if="!isExpanded && item.allowEdit"
+            v-if="!isExpanded"
             color="grey lighten-1"
           >
             edit
           </v-icon>
-          <v-icon
-            v-else-if="!isExpanded"
-            color="grey lighten-1"
-          >
-            mdi-eye
-          </v-icon>
-
           <v-icon
             v-else
             color="grey lighten-1"
@@ -194,7 +187,7 @@
                 v-on="on"
               >
                 <v-tooltip
-                  v-if="!hasScoringItem && item.text == 'cumulativeScore'"
+                  v-if="!hasScoringItem && item.text == 'cumulativeScore' || item.text == 'tokenSummary'"
                   top
                 >
                   <template
@@ -213,7 +206,8 @@
                       <span>{{ item.text }}</span>
                     </div>
                   </template>
-                  <span>Please create an item with scores before creating this page</span>
+                  <span v-if="item.text == 'cumulativeScore'">Please create an item with scores before creating this page</span>
+                  <span v-else>Please create future behavior tracker or past behavior tracker items</span>
                 </v-tooltip>
                 <div
                   v-else
@@ -257,16 +251,15 @@
         label="Allow the user to see results"
       />
 
-      <div
+      <MarkDownBuilder
         v-if="item.inputType === 'markdownMessage'"
-      >
-        Message:
-
-        <MarkDownEditor
-          :value="item.markdownText"
-          @input="onUpdateMarkdownText"
-        />
-      </div>
+        :markdownText="item.markdownText"
+        :initial-item-data="item.options"
+        :timer="item.timer"
+        @onUpdateMarkdown="onUpdateMarkdownText"
+        @updateOptions="updateOptions"
+        @updateTimer="updateTimer"
+      />
 
       <RadioBuilder
         v-if="item.inputType === 'radio' || item.inputType === 'checkbox'"
@@ -359,6 +352,7 @@
         :is-skippable-item="skippable"
         :timer="item.timer"
         @updateOptionalText="updateOptionalText"
+        @updateOptions="updateOptions"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
         @updateTimer="updateTimer"
@@ -371,7 +365,7 @@
         :initial-item-data="item.options"
         :initial-response-options="item.responseOptions"
         :initial-is-optional-text="item.isOptionalText"
-        @updateOptions="updateAgeOptions"
+        @updateOptions="updateOptions"
         @updateAllow="updateAllow"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
@@ -494,15 +488,27 @@
         :key="`${baseKey}-audioStimulus`"
         :is-skippable-item="skippable"
         :initial-item-input-options="item.inputOptions"
+        :initial-item-response-options="item.responseOptions"
+        :initial-is-optional-text="item.isOptionalText"
         :initial-item-media="item.media"
         :initial-item-data="item.options"
         @updateAllow="updateAllow"
         @updateInputOptions="updateInputOptions"
         @updateMedia="updateMedia"
-        @validation="item.valid = $event"
         @loading="loading = $event"
         @notify="notify = $event"
         @updateOptions="updateOptions"
+      />
+
+      <BehaviorTracker
+        v-if="item.inputType === 'pastBehaviorTracker' || item.inputType == 'futureBehaviorTracker'"
+        :key="`${baseKey}-${item.inputType}`"
+        :is-skippable-item="skippable"
+        :initial-item-data="item.options"
+        @notify="notify = $event"
+        @loading="loading = $event"
+        @updateOptions="updateOptions"
+        @updateAllow="updateAllow"
       />
 
       <CumulativeScoreBuilder
@@ -556,7 +562,7 @@
                 :key="conditional.id + condition.ifValue.name"
               >
                 <v-list-item-content>
-                  <v-list-item-title v-text="condition.ifValue.name + ' ' + condition.stateValue.name + ' is ' + condition.answerValue.name" />
+                  <v-list-item-title v-text="condition.ifValue.name + ' ' + condition.stateValue.name + ' is ' + getConditionAnswer(condition)" />
                 </v-list-item-content>
               </v-list-item>
             </v-list-group>
@@ -677,6 +683,7 @@
 import Uploader from '../Uploader.vue';
 
 import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
+import MarkDownBuilder from "./ItemBuilders/MarkDownBuilder.vue";
 import StackedRadioBuilder from "./ItemBuilders/StackedRadioBuilder.vue";
 import TextBuilder from "./ItemBuilders/TextBuilder.vue";
 import SliderBuilder from "./ItemBuilders/SliderBuilder.vue";
@@ -692,6 +699,9 @@ import GeolocationBuilder from "./ItemBuilders/GeolocationBuilder.vue";
 import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
 import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
 import StackedSliderBuilder from "./ItemBuilders/StackedSliderBuilder";
+import BehaviorTracker from "./ItemBuilders/BehaviorTracker";
+import { timeScreen } from './ItemBuilders/timeScreen';
+import { tokenSummary } from './ItemBuilders/tokenSummary';
 
 import MarkDownEditor from "../MarkDownEditor";
 import Item from '../../../models/Item';
@@ -720,10 +730,12 @@ export default {
     AudioStimulusBuilder,
     CumulativeScoreBuilder,
     MarkDownEditor,
+    MarkDownBuilder,
     StackedRadioBuilder,
     StackedSliderBuilder,
     Notify,
     Loading,
+    BehaviorTracker,
   },
   props: {
     itemIndex: {
@@ -837,11 +849,15 @@ export default {
         'updateItemMetaInfo',
         'duplicateItem',
         'showOrHideItem',
+        'showItem',
         'deleteConditional',
         'deleteItem',
         'updateItemInputType',
         'setTokenPrizeModalStatus',
         'insertTemplateUpdateRequest',
+        'addTimeScreen',
+        'deleteTimeScreen',
+        'updateTokenSummary'
       ],
     ),
 
@@ -856,6 +872,16 @@ export default {
     hideItem (index) {
       this.isVis = !this.isVis;
       this.showOrHideItem(index);
+    },
+
+    getConditionAnswer (condition) {
+      if (condition.answerValue) {
+        return condition.answerValue.name;
+      }
+      if (condition.maxValue || condition.maxValue === 0) {
+        return condition.maxValue;
+      }
+      return condition.minValue;
     },
 
     onDeleteItem () {
@@ -876,7 +902,16 @@ export default {
     },
 
     removeConditionals () {
+      const inputType = this.item.inputType;
+
       this.deleteItem(this.itemIndex);
+
+      if (inputType == 'futureBehaviorTracker') {
+        this.deleteTimeScreen(this.itemIndex - 1)
+      }
+
+      this.updateTokenSummary(tokenSummary);
+
       this.itemConditionals.forEach((conditional) => {
         const index = this.conditionals.findIndex(({ id }) => id === conditional.id);
 
@@ -888,8 +923,13 @@ export default {
       this.removeDialog = false;
     },
 
-    isConditionalItem () {
-      return this.conditionals.some(({ showValue }) => showValue === this.item.name);
+    isConditionalItem (index) {
+      const res = this.conditionals.some(({ showValue }) => showValue === this.item.name);
+
+      if (res) {
+        this.showItem(index);
+      }
+      return res;
     },
 
     nameKeydown (e) {
@@ -908,6 +948,9 @@ export default {
 
       updates.options = { options: [] };
       updates.allow = false;
+      updates.timer = 0;
+
+      const prev = this.item.inputType;
 
       this.updateItemMetaInfo({
         index: this.itemIndex,
@@ -923,6 +966,17 @@ export default {
       })
 
       this.baseKey++;
+
+      if (prev == 'futureBehaviorTracker') {
+        this.deleteTimeScreen(this.itemIndex-1)
+      } else if (inputType == 'futureBehaviorTracker') {
+        let name = this.addTimeScreen({
+          index: this.itemIndex,
+          screen: timeScreen
+        })
+      }
+
+      this.updateTokenSummary(tokenSummary);
     },
 
     onUpdateName (name) {

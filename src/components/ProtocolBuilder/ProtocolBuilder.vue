@@ -30,18 +30,62 @@
             <v-subheader class="ml-2">
               About Page
             </v-subheader>
-            <v-btn
-              class="ml-2"
-              fab
-              small
-              @click="onEditAboutPage"
+
+            <v-menu
+              bottom
+              :close-on-content-click="false"
+              offset-y
             >
-              <v-icon color="grey darken-1">
-                mdi-pencil
-              </v-icon>
-            </v-btn>
+              <template
+                v-slot:activator="{ on, attrs }"
+              >
+                <v-btn
+                  class="ml-2"
+                  fab
+                  small
+                  v-on="on"
+                  v-bind="attrs"
+                >
+                  <v-icon color="grey darken-1">
+                    mdi-pencil
+                  </v-icon>
+                </v-btn>
+              </template>
+
+              <v-list>
+                <v-list-item @click="openLandingPageEditor('markdown')">
+                  <v-list-item-action>
+                    <v-checkbox
+                      disabled
+                      :input-value="markdownData && landingPageType == 'markdown'"
+                    />
+                  </v-list-item-action>
+                  <v-list-item-title>Add Markdown</v-list-item-title>
+                </v-list-item>
+
+                <v-list-item @click="openLandingPageEditor('text')">
+                  <v-list-item-action>
+                    <v-checkbox
+                      disabled
+                      :input-value="markdownData && landingPageType == 'text'"
+                    />
+                  </v-list-item-action>
+                  <v-list-item-title>Add Text</v-list-item-title>
+                </v-list-item>
+
+                <Uploader
+                  :initialType="'image'"
+                  :initialData="landingPageType == 'image' ? markdownData : ''"
+                  :initialAdditionalType="'list'"
+                  @onAddFromUrl="onAddLandingImageFromUrl($event)"
+                  @onAddFromDevice="onAddLandingImageFromDevice($event)"
+                  @onRemove="onRemoveLandingImage()"
+                  @onNotify="onLandingImageNotify($event)"
+                />
+              </v-list>
+            </v-menu>
           </v-col>
-          
+
           <v-col class="d-flex">
             <v-subheader class="ml-10">
               Applet Image
@@ -66,8 +110,9 @@
             <Uploader
               :initialType="'image'"
               :initialData="appletWatermark"
+              :imageType="'watermark'"
               :initialAdditionalType="'small-circle'"
-              :initialTitle="'Applet Image'"
+              :initialTitle="'Watermark'"
               @onAddFromUrl="onAddWatermarkFromUrl($event)"
               @onAddFromDevice="onAddWatermarkFromDevice($event)"
               @onRemove="onRemoveWatermark()"
@@ -75,6 +120,16 @@
             />
           </v-col>
         </v-row>
+
+        <v-row class="mx-2">
+          <v-col>
+            <v-checkbox
+              v-model="streamEnabled"
+              label="Enable streaming of response data"
+            />
+          </v-col>
+        </v-row>
+
         <div>
           <v-subheader class="ml-10" v-if="themes && themes.length">
             Theme
@@ -202,10 +257,30 @@
     <LandingPageEditor
       :visibility="markdownDialog"
       :markdownText="markdownData"
+      :inputType="landingPageInputType"
       headText="About Page"
       @close="onCloseEditor"
       @submit="onSubmitEditor"
     />
+
+    <v-dialog
+      v-model="validFileDlg"
+      width="400"
+    >
+      <v-alert type="success">
+        <span>{{ fileSuccessMsg }}</span>
+      </v-alert>
+    </v-dialog>
+
+    <v-dialog
+      v-model="inValidFileDlg"
+      width="400"
+    >
+      <v-alert type="error">
+        <span>{{ fileErrorMsg }}</span>
+      </v-alert>
+    </v-dialog>
+    <Notify :notify="notify" />
   </div>
 </template>
 
@@ -229,6 +304,7 @@ import Uploader from './Uploader.vue';
 import Protocol from '../../models/Protocol';
 import Activity from '../../models/Protocol';
 import Item from '../../models/Protocol';
+import Notify from './Additional/Notify.vue';
 import config from '../../config';
 
 import { mapMutations, mapGetters } from 'vuex';
@@ -236,12 +312,19 @@ import { mapMutations, mapGetters } from 'vuex';
 export default {
   components: {
     LandingPageEditor,
+    Notify,
     Uploader,
   },
   data () {
     return {
       markdownDialog: false,
+      landingPageInputType: 'markdown',
       isVis: [],
+      inValidFileDlg: false,
+      fileErrorMsg: '',
+      validFileDlg: false,
+      fileSuccessMsg: '',
+      notify: {},
       textRules: [(v) => !!v.trim() || "This field is required"],
     }
   },
@@ -275,6 +358,15 @@ export default {
       }
     },
 
+    landingPageType: {
+      get: function () {
+        return this.protocol.landingPageType;
+      },
+      set: function (landingPageType) {
+        this.updateProtocolMetaInfo({ landingPageType });
+      }
+    },
+
     appletWatermark: {
       get: function () {
         return this.protocol.watermark
@@ -290,6 +382,15 @@ export default {
       },
       set: function (appletImage) {
         this.updateProtocolMetaInfo({ image: appletImage })
+      }
+    },
+
+    streamEnabled: {
+      get: function () {
+        return this.protocol.streamEnabled;
+      },
+      set: function (streamEnabled) {
+        this.updateProtocolMetaInfo({ streamEnabled })
       }
     },
 
@@ -323,114 +424,139 @@ export default {
         'duplicateActivity',
         'deleteActivity',
         'showOrHideActivity',
+        'showActivity',
         'addActivity',
         'setCurrentActivity',
         'setCurrentScreen',
         'updateThemeId'
       ]
     ),
+    openLandingPageEditor (pageType) {
+      this.landingPageInputType = pageType;
+      this.markdownDialog = true;
+    },
     onAddImageFromUrl (event) {
       this.appletImage = event;
-      this.$emit('notify', {
-        type: 'success',
-        message: `Applet image from URL is successfully added.`,
-        duration: 3000,
-      });
+      this.validFileDlg = true;
+      this.fileSuccessMsg = 'Applet image from URL is successfully added.';
     },
     onAddWatermarkFromUrl (event) {
       this.appletWatermark = event;
-      this.$emit('notify', {
-        type: 'success',
-        message: `Applet watermark from URL is successfully added.`,
-        duration: 3000,
-      });
+      this.validFileDlg = true;
+      this.fileSuccessMsg = 'Applet watermark from URL is successfully added.';
+    },
+    onAddLandingImageFromUrl (event) {
+      this.markdownData = event;
+      this.validFileDlg = true;
+      this.fileSuccessMsg = 'Applet landing image is successfully added.';
+      this.landingPageType = 'image';
     },
     isThresholdActivity (activity) {
       let res = true;
+
       this.activities.forEach(({ items }) => {
         items.forEach(({ cumulativeScores }) => {
-          cumulativeScores.forEach(({ activityInRange, activityOutRange }) => {
-            if (activityInRange === activity.name || activityOutRange === activity.name) {
-              res = false;
-            }
+          cumulativeScores.forEach(({ messages }) => {
+            messages.forEach(message => {
+              if (message.nextActivity === activity.name) {
+                res = false;
+              }
+            });
           })
         })
       })
 
+      if (!res) {
+        const index = this.activities.findIndex(act => act == activity);
+        this.showActivity(index);
+      }
+
       return res;
     },
     async onAddWatermarkFromDevice (uploadFunction) {
-      this.$emit('loading', true); 
+      this.$emit('loading', true);
       try {
         this.appletWatermark = await uploadFunction();
         this.$emit('loading', false);
-        this.$emit('notify', {
-          type: 'success',
-          message: `Applet watermark is successfully added.`,
-          duration: 3000,
-        });
+        this.validFileDlg = true;
+        this.fileSuccessMsg = 'Applet watermark is successfully added.';
       } catch (error) {
         this.$emit('loading', false);
-        this.$emit('notify', {
-          type: 'error',
-          message: `Something went wrong with uploading applet watermark.`,
-        });
+      }
+    },
+    async onAddLandingImageFromDevice (uploadFunction) {
+      this.$emit('loading', true);
+      try {
+        this.markdownData = await uploadFunction();
+        this.$emit('loading', false);
+        this.validFileDlg = true;
+        this.landingPageType = 'image';
+        this.fileSuccessMsg = 'Applet landing image is sucessfully added.';
+      } catch (error) {
+        this.$emit('loading', false);
       }
     },
     onRemoveWatermark () {
       this.appletWatermark = '';
       // this.update();
-      this.$emit('notify', {
+      this.notify = {
         type: 'warning',
         message: `Applet watermark is successfully removed.`,
         duration: 3000,
-      });
+      };
+    },
+    onRemoveLandingImage () {
+      this.markdownData = '';
+      this.notify = {
+        type: 'warning',
+        message: 'Applet landing images is successfully removed.',
+        duration: 3000
+      }
+      this.landingPageType = 'markdown';
     },
     onWatermarkNotify (event) {
-      this.$emit('loading', false); 
-      this.$emit('notify', event);
+      this.$emit('loading', false);
+      this.fileErrorMsg = event.message;
+      this.inValidFileDlg = true;
     },
-    async onAddImageFromDevice (uploadFunction) {
+    onLandingImageNotify (event) {
+      this.$emit('loading', false);
+      this.fileErrorMsg = event.message;
+      this.inValidFileDlg = true;
+    },
+    async onAddImageFromDevice (uploadData) {
       this.$emit('loading', true);
 
       try {
-        this.appletImage = await uploadFunction();
+        this.appletImage = await uploadData();
         this.$emit('loading', false);
-        this.$emit('notify', {
-          type: 'success',
-          message: `Applet image is successfully added.`,
-          duration: 3000,
-        });
+        this.validFileDlg = true;
+        this.fileSuccessMsg = 'Applet image is successfully added.';
       } catch (error) {
         this.$emit('loading', false);
-        this.$emit('notify', {
-          type: 'error',
-          message: `Something went wrong with uploading applet image.`,
-        });
       }
     },
     onRemoveImage () {
       this.appletImage = '';
       // this.update();
-      this.$emit('notify', {
+      this.notify = {
         type: 'warning',
         message: `Applet image is successfully removed.`,
         duration: 3000,
-      });
+      };
     },
     onEventNotify (event) {
       this.$emit('loading', false);
-      this.$emit('notify', event);
+      this.fileErrorMsg = event.message;
+      this.inValidFileDlg = true;
     },
     onSubmitEditor (markdownData) {
       this.markdownData = markdownData;
+      this.landingPageType = this.landingPageInputType;
       this.onCloseEditor();
     },
     onCloseEditor () {
       this.markdownDialog = false;
-    },
-    onEditAboutPage () {
-      this.markdownDialog = true;
     },
 
     editActivity (index, isNew = false) {

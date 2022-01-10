@@ -321,9 +321,17 @@ export default {
   beforeMount() {
     let rules = this.initialItemData.cumulativeScores || [];
     rules = rules.map((rule) => ({ ...rule }));
-
+    
+    this.activityNames = this.activities && this.activities.filter(obj => obj.name !== this.currentActivity.name).map(act => act.name)
     for (let rule of rules) {
       Object.assign(rule, this.parseRuleData(rule));
+
+      if (!rule.activityOutRange || !this.activityNames.find(actName => actName === rule.activityOutRange)) {
+        rule.isActivityOutRange = false;
+      }
+      if (!rule.activityInRange || !this.activityNames.find(actName => actName === rule.activityInRange)) {
+        rule.isActivityInRange = false;
+      }
     }
 
     this.rules = rules;
@@ -332,8 +340,6 @@ export default {
       this.rules.push(this.parseRuleData());
       this.$emit("updateCumulativeScore", this.rules);
     }
-
-    this.activityNames = this.activities && this.activities.filter(obj => obj.name !== this.currentActivity.name).map(act => act.name)
   },
   methods: {
     nameKeydown(e) {
@@ -361,6 +367,12 @@ export default {
     },
 
     onUpdateRule(rule) {
+      try {
+        if (rule.name && rule.name.match(/[&\/\\#,+()$~%.'":*?<>{}]/g)) {
+          rule.name = rule.name.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '');
+        }        
+      } catch (error) { }
+
       rule.compute = {
         jsExpression: rule.items
           .filter((item) => item.selected)

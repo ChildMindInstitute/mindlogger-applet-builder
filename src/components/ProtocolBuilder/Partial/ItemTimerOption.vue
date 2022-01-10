@@ -9,7 +9,7 @@
       <v-checkbox
         v-model="timerOption"
         label="Set Response Timer"
-        @change="update"
+        @change="updateTimerOption"
       />
     </v-col>
 
@@ -50,13 +50,23 @@ export default {
     }
   },
   methods: {
-    update() {
+    updateTimerOption() {
       if (this.timerOption) {
-        this.timeLimit = this.timeLimit || 10;
+        this.timeLimit = 10;
+      }
+
+      this.update();
+    },
+
+    update() {
+      let limit = this.timeLimit;
+
+      if (this.timerOption && (!limit || Number(limit) === 0 )) {
+        limit = -1;
       }
 
       this.$emit('update', {
-        responseTimeLimit: Number(this.timerOption ? this.timeLimit * 1000 : 0)
+        responseTimeLimit: Number(this.timerOption ? limit * 1000 : 0)
       });
     }
   }

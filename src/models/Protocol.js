@@ -63,7 +63,9 @@ export default class Protocol {
       "schema:watermark": this.ref.watermark,
       "schema:schemaVersion": this.ref.protocolVersion,
       "schema:version": this.ref.protocolVersion,
+      "streamEnabled": this.ref.streamEnabled,
       landingPageContent: this.ref.markdownData, //point to the readme of protocol
+      landingPageType: this.ref.landingPageType,
       landingPage: "",
       // variableMap: variableMap,
       ui: {
@@ -147,6 +149,11 @@ export default class Protocol {
         updated: (field) => `Applet watermark was changed to ${_.get(newValue, field)}`,
         removed: (field) => `Applet watermark was removed`,
         inserted: (field) => `Applet watermark was added (${_.get(newValue, field)})`
+      },
+      'streamEnabled': {
+        updated: (field) => `streaming option was changed to ${_.get(newValue, field)}`,
+        inserted: (field) => `streaming option was enabled`,
+        removed: (field) => `streaming option was disabled`
       },
       'schema:description': {
         updated: (field) => `Applet description was changed to ${_.get(newValue, field)}`,
@@ -296,9 +303,11 @@ export default class Protocol {
       name: _.get(prefLabel, [0, '@value'], 'applet'),
       appletId: applet['_id'].split("/").pop(),
       image: applet['schema:image'],
-      watermark: applet['schema:watermark'],
+      watermark: _.get(applet, ['schema:watermark', 0, '@id']),
+      streamEnabled: _.get(applet, ['reprolib:terms/streamEnabled', 0, '@value']),
       description: applet['schema:description'][0]['@value'],
-      protocolVersion: _.get(applet, 'schema:schemaVersion[0].@value', this.protocolVersion)
+      protocolVersion: _.get(applet, 'schema:schemaVersion[0].@value', this.protocolVersion),
+      landingPageType: _.get(applet, ['reprolib:terms/landingPageType', 0, '@value'], 'markdown')
     };
 
     const markdownData = _.get(applet, ["reprolib:terms/landingPage", 0, "@value"], "");

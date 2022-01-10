@@ -267,6 +267,7 @@
         :is-multiple-choice="item.inputType === 'checkbox'"
         :is-skippable-item="skippable"
         :initial-response-options="item.responseOptions"
+        :allow-edit="item.allowEdit"
         :initial-item-data="item.options"
         :item-templates="itemTemplates"
         :has-prize-activity="hasPrizeActivity"

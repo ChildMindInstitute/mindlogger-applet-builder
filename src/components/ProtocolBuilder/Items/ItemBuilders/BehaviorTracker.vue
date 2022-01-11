@@ -22,7 +22,7 @@
                 <v-text-field
                   v-model="behavior.name"
                   :rules="textRules"
-                  counter="75"
+                  counter="32"
                   @input="saveBehaviors('positive')"
                 />
               </th>
@@ -98,7 +98,7 @@
                 <v-text-field
                   v-model="behavior.name"
                   :rules="textRules"
-                  counter="75"
+                  counter="32"
                   @input="saveBehaviors('negative')"
                 />
               </th>
@@ -297,7 +297,7 @@ export default {
       ],
       textRules: [
         v => !!v || 'This option cannot be empty',
-        v => v.length <= 75 || 'Visibility decreases over 75 characters',
+        v => v.length <= 32 || 'Visibility decreases over 32 characters',
       ],
     }
   },

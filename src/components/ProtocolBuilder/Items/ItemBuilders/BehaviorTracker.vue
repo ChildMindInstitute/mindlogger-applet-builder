@@ -466,7 +466,7 @@ export default {
         positiveBehaviors: this.positiveBehaviors,
         negativeBehaviors: this.negativeBehaviors.map(behavior => ({
           ...behavior,
-          rate: behavior.rate.hours * 60 + behavior.rate.minutes
+          rate: Number(behavior.rate.hours * 60) + Number(behavior.rate.minutes)
         })),
         valid
       })

@@ -339,7 +339,7 @@ export default {
       }
 
       if (type == 'negative') {
-        if (!behavior.startTime || !behavior.endTime) {
+        if (!behavior.startTime || !behavior.endTime || behavior.startTime >= behavior.endTime) {
           return false;
         }
 

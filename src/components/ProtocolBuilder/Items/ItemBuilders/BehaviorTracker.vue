@@ -374,7 +374,7 @@ export default {
             hours: 0,
             minutes: 1
           },
-          startTime: '', endTime: '',
+          startTime: '00:00', endTime: '23:59',
           image: '',
         })
       }

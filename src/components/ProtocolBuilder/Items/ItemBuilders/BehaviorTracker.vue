@@ -339,7 +339,7 @@ export default {
       }
 
       if (type == 'negative') {
-        if (!behavior.startTime || !behavior.endTime) {
+        if (!behavior.startTime || !behavior.endTime || behavior.startTime >= behavior.endTime) {
           return false;
         }
 
@@ -352,7 +352,7 @@ export default {
           return false;
         }
 
-        const minutes = behavior.rate.hours * 60 + behavior.rate.minutes;
+        const minutes = Number(behavior.rate.hours * 60) + Number(behavior.rate.minutes);
         if (minutes <= 0 || minutes > 24 * 60) {
           return false;
         }
@@ -374,7 +374,7 @@ export default {
             hours: 0,
             minutes: 1
           },
-          startTime: '', endTime: '',
+          startTime: '00:00', endTime: '23:59',
           image: '',
         })
       }
@@ -466,7 +466,7 @@ export default {
         positiveBehaviors: this.positiveBehaviors,
         negativeBehaviors: this.negativeBehaviors.map(behavior => ({
           ...behavior,
-          rate: behavior.rate.hours * 60 + behavior.rate.minutes
+          rate: Number(behavior.rate.hours * 60) + Number(behavior.rate.minutes)
         })),
         valid
       })

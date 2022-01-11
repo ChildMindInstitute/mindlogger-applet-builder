@@ -352,7 +352,7 @@ export default {
           return false;
         }
 
-        const minutes = behavior.rate.hours * 60 + behavior.rate.minutes;
+        const minutes = Number(behavior.rate.hours * 60) + Number(behavior.rate.minutes);
         if (minutes <= 0 || minutes > 24 * 60) {
           return false;
         }

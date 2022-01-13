@@ -320,13 +320,35 @@
               style="color: #ff5252"
             >
               Remove
-              <span v-if="uploadData.name"> ({{ uploadData.name }}) </span>
             </v-list-item-title>
           </v-list-item>
 
           <div
-            class="text-right px-2"
+            class="d-flex px-2"
+            :class="uploadData ? 'justify-space-between' : 'justify-end'"
           >
+            <v-tooltip v-if="uploadData" right>
+              <template v-slot:activator="{ on, attrs }">
+                <div
+                  class="d-flex"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  <v-icon
+                    color="primary"
+                    dark
+                    class="d-flex" 
+                  >
+                    mdi-image
+                  </v-icon>
+                  <div class="mr-4">{{ getFileName(uploadData, false) }}</div>
+                </div>
+              </template>
+              <span>
+                <div>{{ getFileName(uploadData) }}</div>
+              </span>
+            </v-tooltip>
+            
             <v-tooltip right>
               <template v-slot:activator="{ on, attrs }">
                 <v-icon
@@ -508,14 +530,27 @@ export default {
       return new Promise((resolve, reject) => {
         this.uploader.upload(this.uploadData)
           .then(response => {
-            this.uploadData = response.location;
-            resolve(this.uploadData);
+            resolve(response.location);
           })
           .catch(err => {
             this.uploadData = this.initialData;
             setTimeout(() => reject('Something went wrong with uploading.'), 1000);
           });
       });
+    },
+
+    getFileName (uploadData, isFullName = true) {
+      if (typeof uploadData === "string") {
+        const values = uploadData.split('/');
+        const fileName = values[values.length - 1];
+
+        if (isFullName || fileName.length <= 15) {
+          return fileName;
+        } else {
+          return fileName.slice(-14);
+        }
+      }
+      return uploadData.name;
     },
 
     getFileFormats (type) {

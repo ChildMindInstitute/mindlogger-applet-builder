@@ -7,7 +7,7 @@
     <div>
       <ItemBuilder
         v-for="(item, index) in currentActivity.items"
-        :key="`${index}-${item.id || 0}-${item.name || ''}`"
+        :key="`${index}-${item.id || 0}-${item.timestamp || ''}`"
         :item-index="index"
         class="ma-4"
       />

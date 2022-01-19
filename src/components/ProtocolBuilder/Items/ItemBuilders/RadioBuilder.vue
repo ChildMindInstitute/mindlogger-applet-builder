@@ -95,7 +95,10 @@
 
             <v-spacer />
 
-            <div class="d-flex align-center justify-end">
+            <div
+              v-if="allowEdit"
+              class="d-flex align-center justify-end"
+            >
               <v-btn
                 icon
                 @click="option.expanded = !option.expanded"
@@ -270,6 +273,7 @@
           x-small
           color="primary"
           @click="addOption"
+          :disabled="!allowEdit"
         >
           <v-icon color="white">
             mdi-plus
@@ -636,6 +640,10 @@ export default {
       type: Number,
       required: false
     },
+    allowEdit: {
+      type: Boolean,
+      default: true
+    }
   },
   data: function () {
 
@@ -678,9 +686,12 @@ export default {
 
       isTokenValue,
       colorPalettes: {
-        pastel: ["#b5feef", "#68e5a8", "#faf193", "#fabd93", "#f17688"],
-        retro: ["#9cc7bd", "#f6f2d4", "#f5bf77", "#f59797", "#988189"],
+        pastel: ["#b5feef", "#68e5a8", "#faf193", "#fabd93", "#f17688", "#fbe1e3", "#ece592"],
+        retro: ["#9cc7bd", "#f6f2d4", "#f5bf77", "#f59797", "#988189", "#fdeb21", "#9b4be0"],
         grayScale: ["#f2f2f2", "#e0e0e0", "#c6c6c6", "#a6a6a6", "#909090"],
+        "Grey & Lighter Grey": ["#e0e0e0", "#f2f2f2"],
+        "Blue & Light Blue": ["#cbedf4", "#E3F7FB"],
+        "Purple & Lighter Purple": ["#002973", "#004bd3"],
       },
       colorPalette: this.initialItemData.colorPalette || false,
       hasScoreValue: this.initialItemData.hasScoreValue || false,

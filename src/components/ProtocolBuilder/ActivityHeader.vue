@@ -41,18 +41,6 @@
         maxlength="230"
         label="Activity Description"
       />
-      <Uploader
-        class="mt-3 mb-4"
-        style="max-width: 300px"
-        initialType="video_or_image" 
-        imageType="splash"
-        :initialData="splash"
-        initialTitle="Splash Screen" 
-        @onAddFromUrl="onAddSplashFromUrl($event, validateResolution)"
-        @onAddFromDevice="loading = true; onAddSplashFromDevice($event);"
-        @onRemove="onRemoveSplash()"
-        @onNotify="loading = false; notify = $event;"
-      />
       <v-row
         class="align-center"
       >
@@ -67,16 +55,28 @@
           />
         </v-col>
 
-        <v-col
-          class="py-0"
-          cols="12"
-          sm="4"
-        >
-          <v-checkbox
-            v-model="isReviewerActivity"
-            label="This activity will only be available to review a user's data on the user's detail page"
-          />
-        </v-col>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-col
+              class="py-0"
+              cols="12"
+              sm="4"
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-checkbox
+                v-model="isReviewerActivity"
+                :disabled="!hasOnlyRadioCheckSlider"
+                label="This activity will only be available to review a user's data on the user's detail page"
+              />
+            </v-col>
+          </template>
+
+          <span>
+            Reviewer dashboard assessment supports only radio/checkbox/slider items
+          </span>
+        </v-tooltip>
+
 
         <v-col
           class="py-0"
@@ -88,8 +88,78 @@
             label="Disable the users's ability to change the response"
           />
         </v-col>
+
+        <v-col>
+          <v-checkbox
+            @click="onSwitchAssessmentType"
+            v-model="isOnePageAssessment"
+            label="Show all questions at once"
+            readonly
+          />
+        </v-col>
       </v-row>
+
+
+      <div
+        class="d-flex justify-space-around"
+      >
+        <Uploader
+          class="mt-3 mb-4"
+          style="max-width: 300px"
+          initialType="video_or_image"
+          :initialData="splash"
+          imageType="splash"
+          initialTitle="Splash Screen"
+          @onAddFromUrl="onAddMediaFromUrl($event, 'splash')"
+          @onAddFromDevice="loading = true; onAddMediaFromDevice($event, 'splash');"
+          @onRemove="onRemoveMedia('splash')"
+          @onNotify="loading = false; notify = $event;"
+        />
+
+        <Uploader
+          class="mt-3 mb-4"
+          style="max-width: 300px"
+          :initialType="'image'"
+          :initialData="activityImage"
+          :initialTitle="'Activity Image'"
+          @onAddFromUrl="onAddMediaFromUrl($event, 'activityImage')"
+          @onAddFromDevice="loading = true; onAddMediaFromDevice($event, 'activityImage');"
+          @onRemove="onRemoveMedia('activityImage')"
+          @onNotify="loading = false; notify = $event;"
+        />
+      </div>
+
     </div>
+
+      <v-dialog
+        v-model="assessmentTypeConfirmationDlg"
+        persistent
+        width="500"
+      >
+        <v-card>
+          <v-card-text class="pt-4">
+            A one page assessment is not available with conditional logic.
+            Are you sure you want to delete the conditional logic on this activity to have a one page assessment?
+          </v-card-text>
+
+          <v-card-actions
+            class="justify-space-around"
+          >
+            <v-btn
+              @click="deleteConditionals(); assessmentTypeConfirmationDlg = false; isOnePageAssessment = true;"
+            >
+              Yes
+            </v-btn>
+
+            <v-btn
+              @click="assessmentTypeConfirmationDlg = false"
+            >
+              No
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
     <Notify :notify="notify" />
     <Loading :loading="loading" />
   </v-card>
@@ -130,6 +200,7 @@ export default {
       isExpanded: true,
       loading: false,
       notify: {},
+      assessmentTypeConfirmationDlg: false
     }
   },
   mounted() {
@@ -137,61 +208,83 @@ export default {
   methods: {
     ...mapMutations(config.MODULE_NAME, [
       'updateActivityMetaInfo',
+      'deleteConditionals'
     ]),
+    onSwitchAssessmentType () {
+      if (!this.isOnePageAssessment) {
+        if (this.conditionals.length) {
+          this.assessmentTypeConfirmationDlg = true;
+        } else {
+          this.isOnePageAssessment = true;
+        }
+      } else {
+        this.isOnePageAssessment = false;
+      }
+    },
     editActivtiy () {
       this.isExpanded = !this.isExpanded;
       if (this.isExpanded) {
         this.$emit('onExpand');
       }
     },
-    onAddSplashFromUrl(url, validateResolution) {
-      let img = new Image();
-      let width = 0, height = 0;
-
-      img.src = url;
-      img.onload = function() { 
-        validateResolution(this.width, this.height);
-      }
-      this.splash = url;
-    },
-    validateResolution(width, height) {
-      if (width !== "700" || height !== "1000") {
-        this.splash = '';
-        this.notify = {
-          type: 'error',
-          message: 'Image size should be 700px * 1000px',
-        };
+    onAddMediaFromUrl(url, type) {
+      if (type == 'splash') {
+        this.splash = url;
       } else {
-        this.notify = {
-          type: 'success',
-          message: 'Splash screen from URL successfully added to Activity.',
-          duration: 3000,
-        };
+        this.activityImage = url;
       }
+
+      this.notify = {
+        type: 'success',
+        message: (type == 'splash' ?
+          'Splash screen from URL successfully added to Activity.' :
+          'Activity image has been added successfully.'
+        ),
+        duration: 3000,
+      };
     },
-    async onAddSplashFromDevice(uploadFunction) {
+    async onAddMediaFromDevice(uploadFunction, type) {
       try {
-        this.splash = await uploadFunction();
+        if (type == 'splash') {
+          this.splash = await uploadFunction();
+        } else {
+          this.activityImage = await uploadFunction();
+        }
+
         this.loading = false;
         this.notify = {
           type: 'success',
-          message: 'Splash screen successfully added to Activity.',
+          message: ( type == 'splash' ?
+            'Splash screen successfully added to Activity.' :
+            'Activity image has been added successfully.'
+          ),
           duration: 3000,
         };
       } catch (error) {
         this.loading = false;
         this.notify = {
           type: 'error',
-          message: 'Something went wrong with uploading Splash screen for Activity. Please try to upload again or just save Activity without changes for Splash screen.',
+          message: ( type == 'splash' ?
+              'Something went wrong with uploading Splash screen for Activity. Please try to upload again or just save Activity without changes for Splash screen.' :
+              'Something went wrong with uploading activity image. Please try to upload again or just save Activity without image.'
+            ),
         };
       }
     },
 
-    onRemoveSplash() {
-      this.splash = '';
+    onRemoveMedia(type) {
+      if (type == 'splash') {
+        this.splash = '';
+      } else {
+        this.activityImage = '';
+      }
+
       this.notify = {
         type: 'warning',
-        message: 'Splash screen successfully removed from Activity.',
+        message: (type == 'splash' ?
+          'Splash screen successfully removed from Activity.' :
+          'Activity image has been removed successfully.'
+        ),
         duration: 3000,
       };
     },
@@ -200,6 +293,11 @@ export default {
     ...mapGetters(config.MODULE_NAME, [
       'currentActivity'
     ]),
+
+    conditionals () {
+      return this.currentActivity.conditionalItems;
+    },
+
     name: {
       get: function () {
         return this.currentActivity && this.currentActivity.name;
@@ -214,6 +312,14 @@ export default {
       },
       set: function (description) {
         this.updateActivityMetaInfo({ description });
+      }
+    },
+    activityImage: {
+      get: function () {
+        return this.currentActivity && this.currentActivity.image
+      },
+      set: function (activityImage) {
+        this.updateActivityMetaInfo({ image: activityImage })
       }
     },
     splash: {
@@ -256,6 +362,25 @@ export default {
         this.updateActivityMetaInfo({ disableBack: isDisableResponseChanges });
       }
     },
+    hasOnlyRadioCheckSlider() {
+      for (let i = 0; i < this.currentActivity.items.length; i++) {
+        const inputType = this.currentActivity.items[i].inputType;
+
+        if (!['radio', 'checkbox', 'slider'].includes(inputType)) {
+          return false;
+        }
+      }
+      return true;
+    },
+    isOnePageAssessment: {
+      get: function () {
+        return this.currentActivity && this.currentActivity.isOnePageAssessment;
+      },
+
+      set: function (value) {
+        this.updateActivityMetaInfo({ isOnePageAssessment: value })
+      }
+    }
   },
   watch: {
     headerExpanded: {

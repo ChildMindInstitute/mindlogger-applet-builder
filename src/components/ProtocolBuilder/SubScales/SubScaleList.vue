@@ -156,7 +156,7 @@ export default {
         const itemCount = this.currentActivity.items.length;
 
         for (let i = itemCount - 1; i >= 0; i--) {
-          if (!this.currentActivity.items[i].allowEdit) {
+          if (!this.currentActivity.items[i].allowEdit && ['age_screen', 'gender_screen'].indexOf(this.currentActivity.items[i].name)) {
             this.deleteItem(i);
           }
         }

@@ -30,18 +30,56 @@
             <v-subheader class="ml-2">
               About Page
             </v-subheader>
-            <v-btn
-              class="ml-2"
-              fab
-              small
-              @click="onEditAboutPage"
+
+            <v-menu
+              bottom
+              :close-on-content-click="false"
+              offset-y
             >
-              <v-icon color="grey darken-1">
-                mdi-pencil
-              </v-icon>
-            </v-btn>
+              <template
+                v-slot:activator="{ on, attrs }"
+              >
+                <v-btn
+                  class="ml-2"
+                  fab
+                  small
+                  v-on="on"
+                  v-bind="attrs"
+                >
+                  <v-icon color="grey darken-1">
+                    mdi-pencil
+                  </v-icon>
+                </v-btn>
+              </template>
+
+              <v-list>
+                <v-list-item @click="openLandingPageEditor('markdown')">
+                  <v-list-item-action>
+                    <v-radio-group
+                      :value="markdownData && landingPageType == 'markdown' ? 'checked' : 'unchecked'"
+                    >
+                      <v-radio
+                        disabled
+                        value="checked"
+                      />
+                    </v-radio-group>
+                  </v-list-item-action>
+                  <v-list-item-title>Add Text</v-list-item-title>
+                </v-list-item>
+
+                <Uploader
+                  :initialType="'image'"
+                  :initialData="landingPageType == 'image' ? markdownData : ''"
+                  :initialAdditionalType="'list'"
+                  @onAddFromUrl="onAddLandingImageFromUrl($event)"
+                  @onAddFromDevice="onAddLandingImageFromDevice($event)"
+                  @onRemove="onRemoveLandingImage()"
+                  @onNotify="onLandingImageNotify($event)"
+                />
+              </v-list>
+            </v-menu>
           </v-col>
-          
+
           <v-col class="d-flex">
             <v-subheader class="ml-10">
               Applet Image
@@ -76,6 +114,16 @@
             />
           </v-col>
         </v-row>
+
+        <v-row class="mx-2">
+          <v-col>
+            <v-checkbox
+              v-model="streamEnabled"
+              label="Enable streaming of response data"
+            />
+          </v-col>
+        </v-row>
+
         <div>
           <v-subheader class="ml-10" v-if="themes && themes.length">
             Theme
@@ -99,17 +147,40 @@
         <v-card-title>
           Activities
           <v-spacer />
-          <v-btn
-            color="primary"
-            class="mt-2"
-            rounded
-            @click="newActivity"
+          <v-menu
+            right
           >
-            <v-icon>
-              add
-            </v-icon>
-            Add Activity
-          </v-btn>
+            <template
+              v-slot:activator="{ on, attrs }"
+            >
+              <v-btn
+                v-bind="attrs"
+                color="primary"
+                class="mt-2"
+                rounded
+                v-on="on"
+              >
+                <v-icon>
+                  add
+                </v-icon>
+                Add Activity
+              </v-btn>
+            </template>
+
+            <v-list>
+              <v-list-item
+                @click="newActivity(false)"
+              >
+                <v-list-item-title>Blank Activity</v-list-item-title>
+              </v-list-item>
+
+              <v-list-item
+                @click="newActivity(true)"
+              >
+                <v-list-item-title>A/B Trails</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
         </v-card-title>
 
         <v-card
@@ -147,8 +218,9 @@
               </v-btn>
 
               <v-btn
-                icon
+                v-if="activity['@type'] !== 'reproschema:ABTrails'"
                 @click="editActivity(index)"
+                icon
               >
                 <v-icon color="grey lighten-1">
                   edit
@@ -179,6 +251,7 @@
     <LandingPageEditor
       :visibility="markdownDialog"
       :markdownText="markdownData"
+      :inputType="landingPageInputType"
       headText="About Page"
       @close="onCloseEditor"
       @submit="onSubmitEditor"
@@ -239,6 +312,7 @@ export default {
   data () {
     return {
       markdownDialog: false,
+      landingPageInputType: 'markdown',
       isVis: [],
       inValidFileDlg: false,
       fileErrorMsg: '',
@@ -278,6 +352,15 @@ export default {
       }
     },
 
+    landingPageType: {
+      get: function () {
+        return this.protocol.landingPageType;
+      },
+      set: function (landingPageType) {
+        this.updateProtocolMetaInfo({ landingPageType });
+      }
+    },
+
     appletWatermark: {
       get: function () {
         return this.protocol.watermark
@@ -293,6 +376,15 @@ export default {
       },
       set: function (appletImage) {
         this.updateProtocolMetaInfo({ image: appletImage })
+      }
+    },
+
+    streamEnabled: {
+      get: function () {
+        return this.protocol.streamEnabled;
+      },
+      set: function (streamEnabled) {
+        this.updateProtocolMetaInfo({ streamEnabled })
       }
     },
 
@@ -333,6 +425,10 @@ export default {
         'updateThemeId'
       ]
     ),
+    openLandingPageEditor (pageType) {
+      this.landingPageInputType = pageType;
+      this.markdownDialog = true;
+    },
     onAddImageFromUrl (event) {
       this.appletImage = event;
       this.validFileDlg = true;
@@ -342,6 +438,12 @@ export default {
       this.appletWatermark = event;
       this.validFileDlg = true;
       this.fileSuccessMsg = 'Applet watermark from URL is successfully added.';
+    },
+    onAddLandingImageFromUrl (event) {
+      this.markdownData = event;
+      this.validFileDlg = true;
+      this.fileSuccessMsg = 'Applet landing image is successfully added.';
+      this.landingPageType = 'image';
     },
     isThresholdActivity (activity) {
       let res = true;
@@ -366,12 +468,24 @@ export default {
       return res;
     },
     async onAddWatermarkFromDevice (uploadFunction) {
-      this.$emit('loading', true); 
+      this.$emit('loading', true);
       try {
         this.appletWatermark = await uploadFunction();
         this.$emit('loading', false);
         this.validFileDlg = true;
         this.fileSuccessMsg = 'Applet watermark is successfully added.';
+      } catch (error) {
+        this.$emit('loading', false);
+      }
+    },
+    async onAddLandingImageFromDevice (uploadFunction) {
+      this.$emit('loading', true);
+      try {
+        this.markdownData = await uploadFunction();
+        this.$emit('loading', false);
+        this.validFileDlg = true;
+        this.landingPageType = 'image';
+        this.fileSuccessMsg = 'Applet landing image is sucessfully added.';
       } catch (error) {
         this.$emit('loading', false);
       }
@@ -385,8 +499,22 @@ export default {
         duration: 3000,
       };
     },
+    onRemoveLandingImage () {
+      this.markdownData = '';
+      this.notify = {
+        type: 'warning',
+        message: 'Applet landing images is successfully removed.',
+        duration: 3000
+      }
+      this.landingPageType = 'markdown';
+    },
     onWatermarkNotify (event) {
-      this.$emit('loading', false); 
+      this.$emit('loading', false);
+      this.fileErrorMsg = event.message;
+      this.inValidFileDlg = true;
+    },
+    onLandingImageNotify (event) {
+      this.$emit('loading', false);
       this.fileErrorMsg = event.message;
       this.inValidFileDlg = true;
     },
@@ -418,13 +546,11 @@ export default {
     },
     onSubmitEditor (markdownData) {
       this.markdownData = markdownData;
+      this.landingPageType = this.landingPageInputType;
       this.onCloseEditor();
     },
     onCloseEditor () {
       this.markdownDialog = false;
-    },
-    onEditAboutPage () {
-      this.markdownDialog = true;
     },
 
     editActivity (index, isNew = false) {
@@ -434,12 +560,14 @@ export default {
       this.setCurrentScreen(config.ITEM_SCREEN);
     },
 
-    newActivity () {
+    newActivity (isABTrails) {
       const activityCount = this.activities.length;
 
-      this.addActivity();
-      this.editActivity(activityCount, true);
+      this.addActivity(isABTrails);
+      if (!isABTrails) {
+        this.editActivity(activityCount, true);
+      }
     },
   }
-}
+} 
 </script>

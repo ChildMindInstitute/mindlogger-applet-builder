@@ -49,7 +49,7 @@
           v-model="topNavigationOption"
           label="Move navigation buttons to top of screen"
           @change="update"
-        
+
         />
       </v-col>
 
@@ -222,7 +222,7 @@ export default {
       else this.updateImage(url);
       this.$emit('notify', {
         type: 'success',
-        message: `${type} Image from URL successfully added to Geolocation Item.`,
+        message: `${type} Image from URL successfully added to Drawing Item.`,
         duration: 3000,
       });
     },

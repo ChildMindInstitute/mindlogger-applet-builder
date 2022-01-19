@@ -49,7 +49,7 @@
           v-model="topNavigationOption"
           label="Move navigation buttons to top of screen"
           @change="update"
-        
+
         />
       </v-col>
 
@@ -110,6 +110,10 @@ export default {
     ItemTimerOption,
   },
   props: {
+    initialItemData: {
+      type: Object,
+      required: true
+    },
     initialItemResponseOptions: {
       type: Object,
       required: true,

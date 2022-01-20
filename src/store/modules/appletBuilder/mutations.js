@@ -11,7 +11,8 @@ const itemMutations = {
     const item = state.currentActivity.items[index];
 
     Object.assign(item, obj);
-    item.valid = Item.checkValidation(item);
+    if (!Object.hasOwnProperty.call(obj, "valid"))
+      item.valid = Item.checkValidation(item);
 
     if (obj.name) {
       for (const subScale of state.currentActivity.subScales) {

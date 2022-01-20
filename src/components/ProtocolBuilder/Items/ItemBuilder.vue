@@ -145,6 +145,9 @@
           <div v-if="largeText.length === 0" class="error--text text-body-2 mt-2 ml-4">
             * This field is required
           </div>
+          <div v-if="invalidLargeText" class="error--text text-body-2 mt-2 ml-4">
+            * This item is not supported, please remove it.
+          </div>
           <div class="d-flex mt-2" :class="largeText.length > 75 ? 'justify-space-between' : 'justify-end'">
             <div
               v-if="largeText.length > 75 && isTextExpanded"
@@ -712,6 +715,7 @@ import Loading from '../Additional/Loading.vue';
 
 import { mapMutations, mapGetters } from 'vuex';
 import config from '../../../config';
+import { checkItemVariableName } from '../../../utilities/util';
 
 export default {
   components: {
@@ -766,6 +770,8 @@ export default {
       loading: false,
       notify: {},
       isVis: false,
+      invalidLargeText: false,
+      debounceTimer: undefined,
       responseIdentifierMessage: 'By using this option, the user will be required to enter response data identifier text into the field. The text entered will identify the response data collected at that point in time. The identifier used will be filterable on the user\'s data visualization tab.'
     }
   },
@@ -820,8 +826,16 @@ export default {
     largeText: function(text) {
       this.updateItemMetaInfo({
         index: this.itemIndex,
-        obj: { question: { text, image: this.headerImage } }
+        obj: { question: { text, image: this.headerImage } },
       });
+
+      this.debounce(function() {
+        this.invalidLargeText = checkItemVariableName(text, this.currentActivity);
+        this.updateItemMetaInfo({
+          index: this.itemIndex,
+          obj: { valid: !this.invalidLargeText },
+        });
+      }, 300)
     },
     headerImage: function(image) {
       this.updateItemMetaInfo({
@@ -861,6 +875,13 @@ export default {
         'updateTokenSummary'
       ],
     ),
+
+    debounce (func, delay) {
+      const context = this;
+      const args = arguments;
+      clearTimeout(this.debounceTimer);
+      this.debounceTimer = setTimeout(() => func.apply(context, args), delay);
+    },
 
     setItemName () {
       if(!this.item.name) this.onUpdateName(`Screen${this.itemIndex + 1}`);

@@ -22,6 +22,7 @@
                 <v-text-field
                   v-model="behavior.name"
                   :rules="textRules"
+                  maxlength="32"
                   counter="32"
                   @input="saveBehaviors('positive')"
                 />
@@ -98,6 +99,7 @@
                 <v-text-field
                   v-model="behavior.name"
                   :rules="textRules"
+                  maxlength="32"
                   counter="32"
                   @input="saveBehaviors('negative')"
                 />

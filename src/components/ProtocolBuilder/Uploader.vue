@@ -65,7 +65,7 @@
             </v-list-item>
 
 
-            <v-list-item>
+            <v-list-item class="from-url">
               <v-list-item-title
                 class="px-4"
                 @click="isAddingFromUrl = true"
@@ -337,7 +337,7 @@
                   <v-icon
                     color="primary"
                     dark
-                    class="d-flex" 
+                    class="d-flex"
                   >
                     mdi-image
                   </v-icon>
@@ -348,7 +348,7 @@
                 <div>{{ getFileName(uploadData) }}</div>
               </span>
             </v-tooltip>
-            
+
             <v-tooltip right>
               <template v-slot:activator="{ on, attrs }">
                 <v-icon
@@ -381,7 +381,7 @@
     <!-- Image/Audio Uploader Structure -->
 
     <AddFromUrl
-      :show="isAddingFromUrl"
+      v-model="isAddingFromUrl"
       @add="onAddFromUrl"
       @cancel="isAddingFromUrl = false"
     />
@@ -636,4 +636,11 @@ export default {
   background-color: rgba(0, 0, 0, 0.04);
 }
 
+.from-url {
+  cursor: pointer;
+}
+
+.from-url:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
 </style>

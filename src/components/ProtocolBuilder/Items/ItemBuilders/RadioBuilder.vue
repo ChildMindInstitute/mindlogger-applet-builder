@@ -450,7 +450,7 @@
         <v-card-actions>
           <small class="d-flex align-center ml-4">
             <v-icon class="mr-1">info</v-icon>
-            The patter repeats after the 5th option
+            The pattern repeats itself
           </small>
           <v-spacer></v-spacer>
           <v-btn

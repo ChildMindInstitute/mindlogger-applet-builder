@@ -475,14 +475,14 @@ export default {
       const type = typeof this.initialData;
 
       if(type === 'string' && this.initialData !== this.uploadData) {
-        this.onAddFromUrl(this.initialData);
+        this.onAddFromUrl(this.initialData, false);
       } else if(type === 'object' && this.initialData.name !== this.uploadData.name) {
-        this.onAddFromDevice(null, this.initialData);
+        this.onAddFromDevice(null, this.initialData, false);
       }
     }
   },
   methods: {
-    async onAddFromUrl(url) {
+    async onAddFromUrl(url, updateParent=true) {
       try {
         if (this.initialType === 'audio') {
           await isAudioUrlValid(url);
@@ -498,16 +498,21 @@ export default {
 
         this.uploadData = url;
         this.isAddingFromUrl = false;
-        this.$emit('onAddFromUrl', this.uploadData);
+
+        if (updateParent) {
+          this.$emit('onAddFromUrl', this.uploadData);
+        }
       } catch (error) {
-        this.$emit('onNotify', {
-          type: 'error',
-          message: error,
-        });
+        if (updateParent) {
+          this.$emit('onNotify', {
+            type: 'error',
+            message: error,
+          });
+        }
       }
     },
 
-    async onAddFromDevice(event, externalFile) {
+    async onAddFromDevice(event, externalFile, updateParent=true) {
       const file = event ? event.target.files[0] : externalFile;
       if(!file) return;
       if(event) event.target.value = '';
@@ -517,12 +522,17 @@ export default {
         if (this.imageType === 'splash' && file.type.match(/(jpeg|jpg|png)$/) != null) await isSplashImageValid(file);
 
         this.uploadData = file;
-        this.$emit('onAddFromDevice', this.upload);
+
+        if (updateParent) {
+          this.$emit('onAddFromDevice', this.upload);
+        }
       } catch (error) {
-        this.$emit('onNotify', {
-          type: 'error',
-          message: error,
-        });
+        if (updateParent) {
+          this.$emit('onNotify', {
+            type: 'error',
+            message: error,
+          });
+        }
       }
     },
 

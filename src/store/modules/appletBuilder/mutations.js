@@ -147,6 +147,7 @@ const itemMutations = {
       ...item,
       name: `${item.name}__${suffix}`,
       id: null,
+      timestamp: Date.now()
     };
 
     // if (state.protocol.id && item.id) {
@@ -271,7 +272,7 @@ const activityMutations = {
 
     // console.log('state.protocol.activities--->', state.protocol.activities);
     const trailActivities = state.protocol.activities.filter(activity => activity["@type"].includes("ABTrails"));
- 
+
     state.protocol.activities.push({
       ...activityModel.getActivityBuilderData({ items, isABTrails, trailVersion: trailActivities.length + 1 }),
       index: state.protocol.activities.length,

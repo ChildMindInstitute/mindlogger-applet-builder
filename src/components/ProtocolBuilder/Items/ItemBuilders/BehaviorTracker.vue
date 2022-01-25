@@ -156,6 +156,10 @@
                     readonly
                   />
                 </div>
+
+                <div class="d-flex align-center error-messages">
+                  {{ behavior.startTime == behavior.endTime ? 'Time cannot exceed 23 hours and 59 minutes or zero. Please reconfigure.' : '' }}
+                </div>
               </th>
               <th class="text-right">
                 <div class="d-flex justify-end">
@@ -256,6 +260,11 @@
 
 .rate-input {
   width: 40px;
+}
+
+.error-messages {
+  margin-top: 5px;
+  color: #F44038;
 }
 </style>
 

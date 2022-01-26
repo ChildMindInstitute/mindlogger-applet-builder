@@ -81,11 +81,11 @@ export default {
       }
 
       for (let item of this.currentActivity.items) {
-        if (item.allowEdit && item.inputType == 'radio' || item.inputType == 'checkbox' || item.inputType == 'prize' || item.inputType == 'slider') {
+        if (item.allowEdit && item.inputType) {
           return null;
         }
       }
-      return 'Please insert at least one slider/radio item to add conditional logic';
+      return 'Please insert at least one item to add conditional logic';
     },
 
     onAddConditional () {

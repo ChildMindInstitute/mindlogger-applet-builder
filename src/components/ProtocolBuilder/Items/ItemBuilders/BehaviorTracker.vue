@@ -113,14 +113,13 @@
                   @input="saveBehaviors('negative')"
                 />
               </th>
-              <th class="pb-4">
+              <th>
                 <div class="d-flex align-center">
                   <v-text-field
                     class="rate-input"
                     v-model="behavior.rate.hours"
                     type="number"
                     min="0"
-                    hide-details
                     @input="saveBehaviors('negative')"
                   />
 
@@ -131,7 +130,6 @@
                     v-model="behavior.rate.minutes"
                     type="number"
                     min="0"
-                    hide-details
                     @input="saveBehaviors('negative')"
                   />
                 </div>

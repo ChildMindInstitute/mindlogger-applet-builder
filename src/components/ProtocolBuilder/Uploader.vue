@@ -341,11 +341,11 @@
                   >
                     mdi-image
                   </v-icon>
-                  <div class="mr-4">{{ getFileName(uploadData, false) }}</div>
+                  <div @click="downloadImage" class="mr-4">{{ getFileName(fileName, false) }}</div>
                 </div>
               </template>
               <span>
-                <div>{{ getFileName(uploadData) }}</div>
+                <div>{{ getFileName(fileName) }}</div>
               </span>
             </v-tooltip>
 
@@ -461,6 +461,7 @@ export default {
       structureTypes,
       uploader,
       uploadData: this.initialData,
+      fileName: '',
       isAddingFromUrl: false,
       removeConfirm: false,
     };
@@ -497,6 +498,7 @@ export default {
         }
 
         this.uploadData = url;
+        this.fileName = url;
         this.isAddingFromUrl = false;
 
         if (updateParent) {
@@ -522,6 +524,7 @@ export default {
         if (this.imageType === 'splash' && file.type.match(/(jpeg|jpg|png)$/) != null) await isSplashImageValid(file);
 
         this.uploadData = file;
+        this.fileName = file;
 
         if (updateParent) {
           this.$emit('onAddFromDevice', this.upload);
@@ -547,6 +550,22 @@ export default {
             setTimeout(() => reject('Something went wrong with uploading.'), 1000);
           });
       });
+    },
+
+    downloadImage () {
+      const s3ImageURL = "https://mindlogger-applet-contents.s3.amazonaws.com/image/";
+      let imageUrl = typeof this.uploadData === 'string' ? this.uploadData : this.uploadData.name;
+
+      if (!imageUrl.includes('https://')) {
+        imageURL = s3ImageURL + imageURL;
+      }
+
+      fetch(imageUrl)
+        .then((response) => response.blob())
+        .then((blob) => {
+          saveAs(blob, this.getFileName(this.fileName));
+        });
+
     },
 
     getFileName (uploadData, isFullName = true) {

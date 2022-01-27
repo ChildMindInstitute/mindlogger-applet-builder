@@ -123,7 +123,7 @@
                     @input="saveBehaviors('negative')"
                   />
 
-                  <span class="mx-2 pt-4">:</span>
+                  <span class="mx-2 p2-4">:</span>
 
                   <v-text-field
                     class="rate-input"

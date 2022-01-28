@@ -1,6 +1,7 @@
 <template>
   <v-dialog
-    v-model="show"
+    :value="value"
+    @input="$emit('input', $event)"
     persistent
     width="800"
   >
@@ -25,7 +26,7 @@
       </v-card-text>
       <v-divider />
       <v-card-actions>
-        <v-btn 
+        <v-btn
           outlined
           color="primary"
           @click="$emit('cancel')"
@@ -33,7 +34,7 @@
           Cancel
         </v-btn>
         <v-spacer />
-        <v-btn 
+        <v-btn
           color="primary"
           :disabled="!url"
           @click="$emit('add', url)"
@@ -48,7 +49,7 @@
 <script>
 export default {
   props: {
-    show: {
+    value: {
       type: Boolean,
       default: false,
     }

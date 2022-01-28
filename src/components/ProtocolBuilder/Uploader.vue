@@ -65,7 +65,7 @@
             </v-list-item>
 
 
-            <v-list-item>
+            <v-list-item class="from-url">
               <v-list-item-title
                 class="px-4"
                 @click="isAddingFromUrl = true"
@@ -337,18 +337,18 @@
                   <v-icon
                     color="primary"
                     dark
-                    class="d-flex" 
+                    class="d-flex"
                   >
                     mdi-image
                   </v-icon>
-                  <div class="mr-4">{{ getFileName(uploadData, false) }}</div>
+                  <div @click="downloadImage" class="mr-4">{{ getFileName(fileName, false) }}</div>
                 </div>
               </template>
               <span>
-                <div>{{ getFileName(uploadData) }}</div>
+                <div>{{ getFileName(fileName) }}</div>
               </span>
             </v-tooltip>
-            
+
             <v-tooltip right>
               <template v-slot:activator="{ on, attrs }">
                 <v-icon
@@ -381,7 +381,7 @@
     <!-- Image/Audio Uploader Structure -->
 
     <AddFromUrl
-      :show="isAddingFromUrl"
+      v-model="isAddingFromUrl"
       @add="onAddFromUrl"
       @cancel="isAddingFromUrl = false"
     />
@@ -461,6 +461,7 @@ export default {
       structureTypes,
       uploader,
       uploadData: this.initialData,
+      fileName: '',
       isAddingFromUrl: false,
       removeConfirm: false,
     };
@@ -475,14 +476,14 @@ export default {
       const type = typeof this.initialData;
 
       if(type === 'string' && this.initialData !== this.uploadData) {
-        this.onAddFromUrl(this.initialData);
+        this.onAddFromUrl(this.initialData, false);
       } else if(type === 'object' && this.initialData.name !== this.uploadData.name) {
-        this.onAddFromDevice(null, this.initialData);
+        this.onAddFromDevice(null, this.initialData, false);
       }
     }
   },
   methods: {
-    async onAddFromUrl(url) {
+    async onAddFromUrl(url, updateParent=true) {
       try {
         if (this.initialType === 'audio') {
           await isAudioUrlValid(url);
@@ -497,17 +498,23 @@ export default {
         }
 
         this.uploadData = url;
+        this.fileName = url;
         this.isAddingFromUrl = false;
-        this.$emit('onAddFromUrl', this.uploadData);
+
+        if (updateParent) {
+          this.$emit('onAddFromUrl', this.uploadData);
+        }
       } catch (error) {
-        this.$emit('onNotify', {
-          type: 'error',
-          message: error,
-        });
+        if (updateParent) {
+          this.$emit('onNotify', {
+            type: 'error',
+            message: error,
+          });
+        }
       }
     },
 
-    async onAddFromDevice(event, externalFile) {
+    async onAddFromDevice(event, externalFile, updateParent=true) {
       const file = event ? event.target.files[0] : externalFile;
       if(!file) return;
       if(event) event.target.value = '';
@@ -517,12 +524,18 @@ export default {
         if (this.imageType === 'splash' && file.type.match(/(jpeg|jpg|png)$/) != null) await isSplashImageValid(file);
 
         this.uploadData = file;
-        this.$emit('onAddFromDevice', this.upload);
+        this.fileName = file;
+
+        if (updateParent) {
+          this.$emit('onAddFromDevice', this.upload);
+        }
       } catch (error) {
-        this.$emit('onNotify', {
-          type: 'error',
-          message: error,
-        });
+        if (updateParent) {
+          this.$emit('onNotify', {
+            type: 'error',
+            message: error,
+          });
+        }
       }
     },
 
@@ -537,6 +550,22 @@ export default {
             setTimeout(() => reject('Something went wrong with uploading.'), 1000);
           });
       });
+    },
+
+    downloadImage () {
+      const s3ImageURL = "https://mindlogger-applet-contents.s3.amazonaws.com/image/";
+      let imageUrl = typeof this.uploadData === 'string' ? this.uploadData : this.uploadData.name;
+
+      if (!imageUrl.includes('https://')) {
+        imageURL = s3ImageURL + imageURL;
+      }
+
+      fetch(imageUrl)
+        .then((response) => response.blob())
+        .then((blob) => {
+          saveAs(blob, this.getFileName(this.fileName));
+        });
+
     },
 
     getFileName (uploadData, isFullName = true) {
@@ -636,4 +665,11 @@ export default {
   background-color: rgba(0, 0, 0, 0.04);
 }
 
+.from-url {
+  cursor: pointer;
+}
+
+.from-url:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
 </style>

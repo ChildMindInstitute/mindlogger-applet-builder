@@ -442,7 +442,7 @@ export default {
     onAddLandingImageFromUrl (event) {
       this.markdownData = event;
       this.validFileDlg = true;
-      this.fileSuccessMsg = 'Applet landing image is successfully added.';
+      this.fileSuccessMsg = 'Applet About image is successfully added.';
       this.landingPageType = 'image';
     },
     isThresholdActivity (activity) {
@@ -485,7 +485,7 @@ export default {
         this.$emit('loading', false);
         this.validFileDlg = true;
         this.landingPageType = 'image';
-        this.fileSuccessMsg = 'Applet landing image is sucessfully added.';
+        this.fileSuccessMsg = 'Applet About image is sucessfully added.';
       } catch (error) {
         this.$emit('loading', false);
       }
@@ -503,7 +503,7 @@ export default {
       this.markdownData = '';
       this.notify = {
         type: 'warning',
-        message: 'Applet landing images is successfully removed.',
+        message: 'Applet About images is successfully removed.',
         duration: 3000
       }
       this.landingPageType = 'markdown';

@@ -58,6 +58,7 @@ export default class Item {
     model.updateReferenceObject(parsedData);
 
     parsedData.responseOptions = model.getResponseOptions()
+    parsedData.timestamp = Date.now();
 
     return parsedData;
   }

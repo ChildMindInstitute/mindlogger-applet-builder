@@ -161,6 +161,27 @@
               v-if="initialType === 'image'"
               class="mt-4 text-right"
             >
+              <v-tooltip v-if="uploadData" right>
+                <template v-slot:activator="{ on, attrs }">
+                  <div
+                    class="d-flex"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    <v-icon
+                      color="primary"
+                      dark
+                      class="d-flex"
+                    >
+                      mdi-image
+                    </v-icon>
+                    <div @click="downloadImage" class="mr-4">{{ getFileName(fileName, false) }}</div>
+                  </div>
+                </template>
+                <span>
+                  <div>{{ getFileName(fileName) }}</div>
+                </span>
+              </v-tooltip>
               <v-tooltip right>
                 <template v-slot:activator="{ on, attrs }">
                   <v-icon
@@ -557,10 +578,16 @@ export default {
       let imageUrl = typeof this.uploadData === 'string' ? this.uploadData : this.uploadData.name;
 
       if (!imageUrl.includes('https://')) {
-        imageURL = s3ImageURL + imageURL;
+        imageUrl = s3ImageURL + imageUrl;
       }
 
-      fetch(imageUrl)
+      fetch(imageUrl, { 
+        method: 'GET',
+        mode: 'cors',
+        cache: 'no-cache',
+        credentials: 'same-origin',
+        referrer: 'no-referrer',
+      })
         .then((response) => response.blob())
         .then((blob) => {
           saveAs(blob, this.getFileName(this.fileName));

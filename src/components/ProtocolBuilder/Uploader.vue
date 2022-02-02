@@ -88,6 +88,28 @@
                 Remove
               </v-list-item-title>
             </v-list-item>
+
+            <v-tooltip v-if="uploadData" right>
+              <template v-slot:activator="{ on, attrs }">
+                <div
+                  class="d-flex"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  <v-icon
+                    color="primary"
+                    dark
+                    class="mx-1 d-flex"
+                  >
+                    mdi-image
+                  </v-icon>
+                  <div @click="downloadImage" class="mr-4">{{ getFileName(fileName, false) }}</div>
+                </div>
+              </template>
+              <span>
+                <div>{{ getFileName(fileName) }}</div>
+              </span>
+            </v-tooltip>
           </v-list-group>
         </template>
 
@@ -206,8 +228,30 @@
             </div>
             <div
               v-else-if="initialType === 'video_or_image'"
-              class="mt-4 text-right"
+              class="mt-4 text-right d-flex px-2"
+              :class="uploadData ? 'justify-space-between' : 'justify-end'"
             >
+              <v-tooltip v-if="uploadData" right>
+                <template v-slot:activator="{ on, attrs }">
+                  <div
+                    class="d-flex"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    <v-icon
+                      color="primary"
+                      dark
+                      class="d-flex"
+                    >
+                      mdi-image
+                    </v-icon>
+                    <div @click="downloadImage" class="mr-4">{{ getFileName(fileName, false) }}</div>
+                  </div>
+                </template>
+                <span>
+                  <div>{{ getFileName(fileName) }}</div>
+                </span>
+              </v-tooltip>
               <v-tooltip right>
                 <template v-slot:activator="{ on, attrs }">
                   <v-icon
@@ -596,17 +640,20 @@ export default {
     },
 
     getFileName (uploadData, isFullName = true) {
-      if (typeof uploadData === "string") {
-        const values = uploadData.split('/');
-        const fileName = values[values.length - 1];
+      let fileName;
 
-        if (isFullName || fileName.length <= 15) {
-          return fileName;
-        } else {
-          return fileName.slice(-14);
-        }
+      if (typeof uploadData !== "string") {
+        fileName = uploadData.name;
+      } else {
+        const values = uploadData.split('/');
+        fileName = values[values.length - 1];
       }
-      return uploadData.name;
+
+      if (isFullName || fileName.length <= 15) {
+        return fileName;
+      } else {
+        return fileName.substring(0, 10) + '....' + fileName.slice(-3);
+      }
     },
 
     getFileFormats (type) {

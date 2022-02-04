@@ -526,7 +526,7 @@ export default {
       structureTypes,
       uploader,
       uploadData: this.initialData,
-      fileName: '',
+      fileName: this.initialData,
       isAddingFromUrl: false,
       removeConfirm: false,
     };
@@ -641,7 +641,6 @@ export default {
 
     getFileName (uploadData, isFullName = true) {
       let fileName;
-
       if (typeof uploadData !== "string") {
         fileName = uploadData.name;
       } else {

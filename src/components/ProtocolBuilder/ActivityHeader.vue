@@ -93,8 +93,8 @@
           <v-checkbox
             @click="onSwitchAssessmentType"
             v-model="isOnePageAssessment"
+            :disabled="!hasOnlyWebSupported"
             label="Show all questions at once"
-            readonly
           />
         </v-col>
       </v-row>
@@ -367,6 +367,16 @@ export default {
         const inputType = this.currentActivity.items[i].inputType;
 
         if (!['radio', 'checkbox', 'slider'].includes(inputType)) {
+          return false;
+        }
+      }
+      return true;
+    },
+    hasOnlyWebSupported() {
+      for (let i = 0; i < this.currentActivity.items.length; i++) {
+        const inputType = this.currentActivity.items[i].inputType;
+        if (!['radio', 'checkbox', 'slider', 'text', 'ageSelector', 'cumulativeScore'].includes(inputType)) {
+          this.updateActivityMetaInfo({ isOnePageAssessment: false })
           return false;
         }
       }

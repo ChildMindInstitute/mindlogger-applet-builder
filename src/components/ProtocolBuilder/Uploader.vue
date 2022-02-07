@@ -118,8 +118,8 @@
           <ul>
             <li>Size: less than 8MB</li>
             <li>Format: JPEG and PNG</li>
-            <li>Width: between 100px and 1920px</li>
-            <li>Height: between 100px and 1920px</li>
+            <li>Portrait-oriented and have at least 800px width for mobile users</li>
+            <li>At least 1000px width for tablet users</li>
           </ul>
         </span>
       </v-tooltip>
@@ -625,7 +625,7 @@ export default {
         imageUrl = s3ImageURL + imageUrl;
       }
 
-      fetch(imageUrl, { 
+      fetch(imageUrl, {
         method: 'GET',
         mode: 'cors',
         cache: 'no-cache',

@@ -65,7 +65,7 @@
             </v-list-item>
 
 
-            <v-list-item>
+            <v-list-item class="from-url">
               <v-list-item-title
                 class="px-4"
                 @click="isAddingFromUrl = true"
@@ -88,6 +88,28 @@
                 Remove
               </v-list-item-title>
             </v-list-item>
+
+            <v-tooltip v-if="uploadData" right>
+              <template v-slot:activator="{ on, attrs }">
+                <div
+                  class="d-flex"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  <v-icon
+                    color="primary"
+                    dark
+                    class="mx-1 d-flex"
+                  >
+                    mdi-image
+                  </v-icon>
+                  <div @click="downloadImage" class="mr-4">{{ getFileName(fileName, false) }}</div>
+                </div>
+              </template>
+              <span>
+                <div>{{ getFileName(fileName) }}</div>
+              </span>
+            </v-tooltip>
           </v-list-group>
         </template>
 
@@ -96,8 +118,8 @@
           <ul>
             <li>Size: less than 8MB</li>
             <li>Format: JPEG and PNG</li>
-            <li>Width: between 100px and 1920px</li>
-            <li>Height: between 100px and 1920px</li>
+            <li>Portrait-oriented and have at least 800px width for mobile users</li>
+            <li>At least 1000px width for tablet users</li>
           </ul>
         </span>
       </v-tooltip>
@@ -161,6 +183,27 @@
               v-if="initialType === 'image'"
               class="mt-4 text-right"
             >
+              <v-tooltip v-if="uploadData" right>
+                <template v-slot:activator="{ on, attrs }">
+                  <div
+                    class="d-flex"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    <v-icon
+                      color="primary"
+                      dark
+                      class="d-flex"
+                    >
+                      mdi-image
+                    </v-icon>
+                    <div @click="downloadImage" class="mr-4">{{ getFileName(fileName, false) }}</div>
+                  </div>
+                </template>
+                <span>
+                  <div>{{ getFileName(fileName) }}</div>
+                </span>
+              </v-tooltip>
               <v-tooltip right>
                 <template v-slot:activator="{ on, attrs }">
                   <v-icon
@@ -185,8 +228,30 @@
             </div>
             <div
               v-else-if="initialType === 'video_or_image'"
-              class="mt-4 text-right"
+              class="mt-4 text-right d-flex px-2"
+              :class="uploadData ? 'justify-space-between' : 'justify-end'"
             >
+              <v-tooltip v-if="uploadData" right>
+                <template v-slot:activator="{ on, attrs }">
+                  <div
+                    class="d-flex"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    <v-icon
+                      color="primary"
+                      dark
+                      class="d-flex"
+                    >
+                      mdi-image
+                    </v-icon>
+                    <div @click="downloadImage" class="mr-4">{{ getFileName(fileName, false) }}</div>
+                  </div>
+                </template>
+                <span>
+                  <div>{{ getFileName(fileName) }}</div>
+                </span>
+              </v-tooltip>
               <v-tooltip right>
                 <template v-slot:activator="{ on, attrs }">
                   <v-icon
@@ -341,11 +406,11 @@
                   >
                     mdi-image
                   </v-icon>
-                  <div class="mr-4">{{ getFileName(uploadData, false) }}</div>
+                  <div @click="downloadImage" class="mr-4">{{ getFileName(fileName, false) }}</div>
                 </div>
               </template>
               <span>
-                <div>{{ getFileName(uploadData) }}</div>
+                <div>{{ getFileName(fileName) }}</div>
               </span>
             </v-tooltip>
 
@@ -381,7 +446,7 @@
     <!-- Image/Audio Uploader Structure -->
 
     <AddFromUrl
-      :show="isAddingFromUrl"
+      v-model="isAddingFromUrl"
       @add="onAddFromUrl"
       @cancel="isAddingFromUrl = false"
     />
@@ -461,6 +526,7 @@ export default {
       structureTypes,
       uploader,
       uploadData: this.initialData,
+      fileName: this.initialData,
       isAddingFromUrl: false,
       removeConfirm: false,
     };
@@ -497,6 +563,7 @@ export default {
         }
 
         this.uploadData = url;
+        this.fileName = url;
         this.isAddingFromUrl = false;
 
         if (updateParent) {
@@ -522,6 +589,7 @@ export default {
         if (this.imageType === 'splash' && file.type.match(/(jpeg|jpg|png)$/) != null) await isSplashImageValid(file);
 
         this.uploadData = file;
+        this.fileName = file;
 
         if (updateParent) {
           this.$emit('onAddFromDevice', this.upload);
@@ -549,18 +617,42 @@ export default {
       });
     },
 
-    getFileName (uploadData, isFullName = true) {
-      if (typeof uploadData === "string") {
-        const values = uploadData.split('/');
-        const fileName = values[values.length - 1];
+    downloadImage () {
+      const s3ImageURL = "https://mindlogger-applet-contents.s3.amazonaws.com/image/";
+      let imageUrl = typeof this.uploadData === 'string' ? this.uploadData : this.uploadData.name;
 
-        if (isFullName || fileName.length <= 15) {
-          return fileName;
-        } else {
-          return fileName.slice(-14);
-        }
+      if (!imageUrl.includes('https://')) {
+        imageUrl = s3ImageURL + imageUrl;
       }
-      return uploadData.name;
+
+      fetch(imageUrl, {
+        method: 'GET',
+        mode: 'cors',
+        cache: 'no-cache',
+        credentials: 'same-origin',
+        referrer: 'no-referrer',
+      })
+        .then((response) => response.blob())
+        .then((blob) => {
+          saveAs(blob, this.getFileName(this.fileName));
+        });
+
+    },
+
+    getFileName (uploadData, isFullName = true) {
+      let fileName;
+      if (typeof uploadData !== "string") {
+        fileName = uploadData.name;
+      } else {
+        const values = uploadData.split('/');
+        fileName = values[values.length - 1];
+      }
+
+      if (isFullName || fileName.length <= 15) {
+        return fileName;
+      } else {
+        return fileName.substring(0, 10) + '....' + fileName.slice(-3);
+      }
     },
 
     getFileFormats (type) {
@@ -646,4 +738,11 @@ export default {
   background-color: rgba(0, 0, 0, 0.04);
 }
 
+.from-url {
+  cursor: pointer;
+}
+
+.from-url:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
 </style>

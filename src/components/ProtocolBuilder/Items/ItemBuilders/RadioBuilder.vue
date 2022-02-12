@@ -435,7 +435,7 @@
                       <div
                         v-for="(optionColor, index) in colorPalettes[value]"
                         class="d-flex justify-center align-center option-color"
-                        :style="{backgroundColor: optionColor}"
+                        :style="{backgroundColor: optionColor, color: invertColor(optionColor)}"
                         :key="optionColor"
                       >
                         Option {{index + 1}}
@@ -450,7 +450,7 @@
         <v-card-actions>
           <small class="d-flex align-center ml-4">
             <v-icon class="mr-1">info</v-icon>
-            The patter repeats after the 5th option
+            The pattern repeats itself
           </small>
           <v-spacer></v-spacer>
           <v-btn
@@ -688,7 +688,7 @@ export default {
       colorPalettes: {
         pastel: ["#b5feef", "#68e5a8", "#faf193", "#fabd93", "#f17688", "#fbe1e3", "#ece592"],
         retro: ["#9cc7bd", "#f6f2d4", "#f5bf77", "#f59797", "#988189", "#fdeb21", "#9b4be0"],
-        grayScale: ["#f2f2f2", "#e0e0e0", "#c6c6c6", "#a6a6a6", "#909090"],
+        grayScale: ["#f2f2f2", "#e0e0e0", "#c6c6c6", "#a6a6a6", "#909090", "#808080", "#707070"],
         "Grey & Lighter Grey": ["#e0e0e0", "#f2f2f2"],
         "Blue & Light Blue": ["#cbedf4", "#E3F7FB"],
         "Purple & Lighter Purple": ["#002973", "#004bd3"],
@@ -764,7 +764,8 @@ export default {
         }
       })
       if (currentPalette) {
-        nextOption.color = this.colorPalettes[currentPalette][this.options.length % 5];
+        const paletteLength = this.colorPalettes[currentPalette].length;
+        nextOption.color = this.colorPalettes[currentPalette][this.options.length % paletteLength];
       }
 
       if (this.hasScoreValue) {
@@ -779,6 +780,15 @@ export default {
       this.options.push(nextOption);
 
       this.update();
+    },
+
+    invertColor(hex) {
+      let hexcolor = hex.replace("#", "");
+      let r = parseInt(hexcolor.substr(0, 2), 16);
+      let g = parseInt(hexcolor.substr(2, 2), 16);
+      let b = parseInt(hexcolor.substr(4, 2), 16);
+      let yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+      return (yiq >= 128) ? '#333333' : 'white';
     },
 
     getTextColor(hex) {
@@ -819,7 +829,8 @@ export default {
     applyColorPalette() {
       this.colorPaletteDialog = false;
       this.options.forEach((option, index) => {
-        option.color = this.colorPalettes[this.selectedPalette][index % 5];
+        const paletteLength = this.colorPalettes[this.selectedPalette].length;
+        option.color = this.colorPalettes[this.selectedPalette][index % paletteLength];
       })
       this.update();
     },
@@ -875,7 +886,8 @@ export default {
       this.options.splice(index, 1);
       if (currentPalette) {
         this.options.forEach((option, index) => {
-          option.color = this.colorPalettes[this.selectedPalette][index % 5];
+          const paletteLength = this.colorPalettes[this.selectedPalette].length;
+          option.color = this.colorPalettes[this.selectedPalette][index % paletteLength];
         })
       }
       this.update();

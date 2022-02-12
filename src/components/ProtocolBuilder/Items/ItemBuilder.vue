@@ -554,7 +554,7 @@
             >
               <template v-slot:activator>
                 <v-list-item-content>
-                  <v-list-item-title v-text="'If ' + conditional.operation + ' of the `IF` rules are matched, show ' + conditional.showValue" />
+                  <v-list-item-title v-text="'If ' + conditional.operation + ' of the `IF` rules are matched, show ' + conditional.showValue.name" />
                 </v-list-item-content>
               </template>
 
@@ -563,7 +563,7 @@
                 :key="conditional.id + condition.ifValue.name"
               >
                 <v-list-item-content>
-                  <v-list-item-title v-text="condition.ifValue.name + ' ' + condition.stateValue.name + ' is ' + getConditionAnswer(condition)" />
+                  <v-list-item-title v-text="(condition.ifValue.name || condition.ifValue) + ' ' + condition.stateValue.name + ' is ' + getConditionAnswer(condition)" />
                 </v-list-item-content>
               </v-list-item>
             </v-list-group>
@@ -888,7 +888,7 @@ export default {
     onDeleteItem () {
       this.itemConditionals = [];
       this.conditionals.forEach(conditional => {
-        if (conditional.showValue === this.item.name) {
+        if (conditional.showValue.name === this.item.name) {
           this.itemConditionals.push(conditional);
         } else if(conditional.conditions.find(({ ifValue }) => ifValue.name === this.item.name)) {
           this.itemConditionals.push(conditional);

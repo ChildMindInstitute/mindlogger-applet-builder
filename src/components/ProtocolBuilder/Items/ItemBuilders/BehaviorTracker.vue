@@ -22,7 +22,8 @@
                 <v-text-field
                   v-model="behavior.name"
                   :rules="textRules"
-                  counter="32"
+                  maxlength="200"
+                  counter="200"
                   @input="saveBehaviors('positive')"
                 />
               </th>
@@ -98,7 +99,8 @@
                 <v-text-field
                   v-model="behavior.name"
                   :rules="textRules"
-                  counter="32"
+                  maxlength="200"
+                  counter="200"
                   @input="saveBehaviors('negative')"
                 />
               </th>
@@ -111,25 +113,23 @@
                   @input="saveBehaviors('negative')"
                 />
               </th>
-              <th class="pb-4">
+              <th>
                 <div class="d-flex align-center">
                   <v-text-field
                     class="rate-input"
                     v-model="behavior.rate.hours"
                     type="number"
                     min="0"
-                    hide-details
                     @input="saveBehaviors('negative')"
                   />
 
-                  <span class="mx-2 pt-4">:</span>
+                  <span class="mx-2 p2-4">:</span>
 
                   <v-text-field
                     class="rate-input"
                     v-model="behavior.rate.minutes"
                     type="number"
                     min="0"
-                    hide-details
                     @input="saveBehaviors('negative')"
                   />
                 </div>
@@ -153,6 +153,10 @@
                     hide-details
                     readonly
                   />
+                </div>
+
+                <div class="d-flex align-center error-messages">
+                  {{ behavior.startTime == behavior.endTime ? 'Time cannot exceed 23 hours and 59 minutes or zero. Please reconfigure.' : '' }}
                 </div>
               </th>
               <th class="text-right">
@@ -254,6 +258,11 @@
 
 .rate-input {
   width: 40px;
+}
+
+.error-messages {
+  margin-top: 5px;
+  color: #F44038;
 }
 </style>
 

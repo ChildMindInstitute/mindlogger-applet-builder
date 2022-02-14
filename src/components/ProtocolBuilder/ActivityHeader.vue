@@ -88,17 +88,26 @@
             label="Disable the users's ability to change the response"
           />
         </v-col>
-
-        <v-col>
-          <v-checkbox
-            @click="onSwitchAssessmentType"
-            v-model="isOnePageAssessment"
-            :disabled="!hasOnlyWebSupported"
-            label="Show all questions at once"
-          />
-        </v-col>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-col
+              class="py-0"
+              cols="12"
+              sm="4"
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-checkbox
+                @click="onSwitchAssessmentType"
+                v-model="isOnePageAssessment"
+                label="Show all questions at once"
+                readonly
+              />
+            </v-col>
+          </template>
+          <span>This feature is for webapp only</span>
+        </v-tooltip>
       </v-row>
-
 
       <div
         class="d-flex justify-space-around"

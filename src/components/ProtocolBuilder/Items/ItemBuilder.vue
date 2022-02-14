@@ -15,51 +15,128 @@
       </span>
       <v-spacer />
       <v-card-actions>
-        <v-btn
+        <v-tooltip
           v-if="item.allowEdit"
-          icon
-          @click="duplicateItem(itemIndex)"
+          top
         >
-          <v-icon color="grey lighten-1">
-            content_copy
-          </v-icon>
-        </v-btn>
-        <v-btn
-          icon
+          <template v-slot:activator="{ on }">
+            <v-btn
+              class="ml-4"
+              icon
+              v-on="on"
+              @click="$emit('addItem')"
+            >
+              <v-icon color="grey lighten-1">
+                mdi-plus-circle-outline
+              </v-icon>
+            </v-btn>
+          </template>
+
+          <span>New Item</span>
+        </v-tooltip>
+
+        <v-tooltip
+          v-if="item.allowEdit"
+          top
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              icon
+              v-on="on"
+              @click="duplicateItem(itemIndex)"
+            >
+              <v-icon color="grey lighten-1">
+                content_copy
+              </v-icon>
+            </v-btn>
+          </template>
+
+          <span>Duplicate Item</span>
+        </v-tooltip>
+
+        <v-tooltip
           v-if="!isConditionalItem(itemIndex)"
-          @click="hideItem(itemIndex)"
+          top
         >
-          <v-icon v-if="isVis" color="grey lighten-1">
-            mdi-eye-off-outline
-          </v-icon>
-          <v-icon v-else color="grey lighten-1">
-            mdi-eye-outline
-          </v-icon>
-        </v-btn>
-        <v-btn
-          icon
-          @click="editItem"
+          <template v-slot:activator="{ on }">
+            <v-btn
+              icon
+              v-on="on"
+              @click="hideItem(itemIndex)"
+            >
+              <v-icon v-if="isVis" color="grey lighten-1">
+                mdi-eye-off-outline
+              </v-icon>
+              <v-icon v-else color="grey lighten-1">
+                mdi-eye-outline
+              </v-icon>
+            </v-btn>
+          </template>
+
+          <span>{{ isVis ? 'Click to Show Item' : 'Click to Hide Item' }}</span>
+        </v-tooltip>
+
+        <v-tooltip
+          v-if="item.allowEdit"
+          top
         >
-          <v-icon
-            v-if="!isExpanded"
-            color="grey lighten-1"
-          >
-            edit
-          </v-icon>
-          <v-icon
-            v-else
-            color="grey lighten-1"
-          >
-            mdi-chevron-double-up
-          </v-icon>
-        </v-btn>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              icon
+              @click="editItem"
+              v-on="on"
+            >
+              <v-icon
+                v-if="!isExpanded && item.allowEdit"
+                color="grey lighten-1"
+              >
+                edit
+              </v-icon>
+              <v-icon
+                v-else-if="!isExpanded"
+                color="grey lighten-1"
+              >
+                mdi-eye
+              </v-icon>
+
+              <v-icon
+                v-else
+                color="grey lighten-1"
+              >
+                mdi-chevron-double-up
+              </v-icon>
+            </v-btn>
+          </template>
+
+          <span>Edit Item</span>
+        </v-tooltip>
+
+        <v-tooltip
+          v-if="item.allowEdit"
+          top
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              icon
+              v-on="on"
+              @click="onDeleteItem(item)"
+            >
+              <v-icon color="grey lighten-1">
+                mdi-delete
+              </v-icon>
+            </v-btn>
+          </template>
+
+          <span>Delete Item</span>
+        </v-tooltip>
+
         <v-btn
           v-if="item.allowEdit"
+          class="ml-4 move-icon dragging-handle"
           icon
-          @click="onDeleteItem(item)"
         >
           <v-icon color="grey lighten-1">
-            mdi-delete
+            mdi-dots-vertical
           </v-icon>
         </v-btn>
       </v-card-actions>
@@ -592,6 +669,9 @@
 </template>
 
 <style scoped>
+  .move-icon {
+    cursor: move;
+  }
 
   .item.not-editable {
     position: relative;
@@ -842,7 +922,6 @@ export default {
 
     this.isVis = !!this.item.isVis;
     this.setItemName();
-
   },
   methods: {
     ...mapMutations(config.MODULE_NAME,

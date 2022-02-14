@@ -169,82 +169,151 @@
 
             <v-list>
               <v-list-item
-                @click="newActivity(false)"
+                @click="newActivity(-1, false)"
               >
                 <v-list-item-title>Blank Activity</v-list-item-title>
               </v-list-item>
 
               <v-list-item
-                @click="newActivity(true)"
+                @click="newActivity(-1, true)"
               >
                 <v-list-item-title>A/B Trails</v-list-item-title>
               </v-list-item>
             </v-list>
           </v-menu>
         </v-card-title>
-
-        <v-card
-          v-for="(activity, index) in withoutPrize"
-          :key="`${activity._id}-${index}`"
-          class="ma-4"
+        <draggable
+          v-model="withoutPrize"
+          handle=".dragging-handle"
         >
-          <v-card-title
-            class="py-0"
-            :class="activityStatus[index] ? '' : 'invalid'"
-          >
-            {{ activity.name }}
-            <v-spacer />
-            <v-card-actions>
-              <v-btn
-                icon
-                @click="duplicateActivity(activities.findIndex(act => act == activity))"
+          <transition-group>
+            <v-card
+              v-for="(activity, index) in withoutPrize"
+              :key="`${activity._id}-${index}`"
+              class="ma-4"
+            >
+              <v-card-title
+                class="py-0"
+                :class="activityStatus[index] ? '' : 'invalid'"
               >
-                <v-icon color="grey lighten-1">
-                  content_copy
-                </v-icon>
-              </v-btn>
+                {{ activity.name }}
+                <v-spacer />
+                <v-card-actions>
+                  <v-tooltip
+                    top
+                  >
+                    <template v-slot:activator="{ on }">
+                      <v-btn
+                        class="ml-4"
+                        icon
+                        v-on="on"
+                        @click="newActivity(index+1)"
+                      >
+                        <v-icon color="grey lighten-1">
+                          mdi-plus-circle-outline
+                        </v-icon>
+                      </v-btn>
+                    </template>
 
-              <v-btn
-                icon
-                v-if="isThresholdActivity(activity)"
-                @click="showOrHideActivity(activities.findIndex(act => act == activity))"
-              >
-                <v-icon v-if="activity.isVis" color="grey lighten-1">
-                  mdi-eye-off-outline
-                </v-icon>
-                <v-icon v-else color="grey lighten-1">
-                  mdi-eye-outline
-                </v-icon>
-              </v-btn>
+                    <span>New Activity</span>
+                  </v-tooltip>
 
-              <v-btn
-                v-if="activity['@type'] !== 'reproschema:ABTrails'"
-                @click="editActivity(index)"
-                icon
-              >
-                <v-icon color="grey lighten-1">
-                  edit
-                </v-icon>
-              </v-btn>
+                  <v-tooltip
+                    top
+                  >
+                    <template v-slot:activator="{ on }">
+                      <v-btn
+                        icon
+                        v-on="on"
+                        @click="duplicateActivity(activities.findIndex(act => act == activity))"
+                      >
+                        <v-icon color="grey lighten-1">
+                          content_copy
+                        </v-icon>
+                      </v-btn>
+                    </template>
 
-              <v-btn
-                icon
-                @click="deleteActivity(activities.findIndex(act => act == activity))"
-              >
-                <v-icon color="grey lighten-1">
-                  delete
-                </v-icon>
-              </v-btn>
-            </v-card-actions>
-          </v-card-title>
+                    <span>Duplicate Activity</span>
+                  </v-tooltip>
 
-          <v-text-field
-            :value="activity.description"
-            label="Description"
-            class="px-4"
-            disabled
-          />
-        </v-card>
+                  <v-tooltip
+                    v-if="isThresholdActivity(activity)"
+                    top
+                  >
+                    <template v-slot:activator="{ on }">
+                      <v-btn
+                        icon
+                        v-on="on"
+                        @click="showOrHideActivity(activities.findIndex(act => act == activity))"
+                      >
+                        <v-icon v-if="activity.isVis" color="grey lighten-1">
+                          mdi-eye-off-outline
+                        </v-icon>
+                        <v-icon v-else color="grey lighten-1">
+                          mdi-eye-outline
+                        </v-icon>
+                      </v-btn>
+                    </template>
+
+                    <span>{{ activity.isVis ? 'Click to Show Activity' : 'Click to Hide Activity' }}</span>
+                  </v-tooltip>
+
+                  <v-tooltip
+                    top
+                  >
+                    <template v-slot:activator="{ on }">
+                      <v-btn
+                        icon
+                        v-on="on"
+                        @click="editActivity(index)"
+                      >
+                        <v-icon color="grey lighten-1">
+                          edit
+                        </v-icon>
+                      </v-btn>
+                    </template>
+
+                    <span>Edit Activity</span>
+                  </v-tooltip>
+
+                  <v-tooltip
+                    top
+                  >
+                    <template v-slot:activator="{ on }">
+                      <v-btn
+                        icon
+                        v-on="on"
+                        @click="deleteActivity(activities.findIndex(act => act == activity))"
+                      >
+                        <v-icon color="grey lighten-1">
+                          delete
+                        </v-icon>
+                      </v-btn>
+                    </template>
+
+                    <span>Delete Activity</span>
+                  </v-tooltip>
+
+                  <v-btn
+                    class="ml-4 move-icon dragging-handle"
+                    icon
+                  >
+                    <v-icon color="grey lighten-1">
+                      mdi-dots-vertical
+                    </v-icon>
+                  </v-btn>
+                </v-card-actions>
+              </v-card-title>
+
+              <v-text-field
+                :value="activity.description"
+                label="Description"
+                class="px-4"
+                disabled
+              />
+            </v-card>
+          </transition-group>
+        </draggable>
       </v-card>
     </v-form>
 
@@ -290,6 +359,10 @@
   .invalid {
     background-color: #d44c4c;
   }
+
+  .sortable-chosen {
+    border: 2px solid gray;
+  }
 </style>
 
 <script>
@@ -300,6 +373,7 @@ import Activity from '../../models/Protocol';
 import Item from '../../models/Protocol';
 import Notify from './Additional/Notify.vue';
 import config from '../../config';
+import draggable from 'vuedraggable'
 
 import { mapMutations, mapGetters } from 'vuex';
 
@@ -308,6 +382,7 @@ export default {
     LandingPageEditor,
     Notify,
     Uploader,
+    draggable,
   },
   data () {
     return {
@@ -397,8 +472,20 @@ export default {
       }
     },
 
-    withoutPrize () {
-      return this.activities.filter(activity => Boolean(activity['isPrize']) === false);
+    withoutPrize: {
+      get () {
+        return this.activities.filter(activity => Boolean(activity['isPrize']) === false);
+      },
+      set (value) {
+        const prizeIndex = this.activities.findIndex(activity => Boolean(activity['isPrize']) == true);
+        const newActivityList = [...value];
+
+        if (prizeIndex >= 0) {
+          newActivityList.splice(prizeIndex, 0, this.activities[prizeIndex]);
+        }
+
+        this.updateActivityList(newActivityList);
+      }
     },
 
     activityStatus () {
@@ -422,7 +509,8 @@ export default {
         'addActivity',
         'setCurrentActivity',
         'setCurrentScreen',
-        'updateThemeId'
+        'updateThemeId',
+        'updateActivityList'
       ]
     ),
     openLandingPageEditor (pageType) {
@@ -517,6 +605,7 @@ export default {
       this.$emit('loading', false);
       this.fileErrorMsg = event.message;
       this.inValidFileDlg = true;
+      this.$emit('notify', event);
     },
     async onAddImageFromDevice (uploadData) {
       this.$emit('loading', true);
@@ -560,14 +649,14 @@ export default {
       this.setCurrentScreen(config.ITEM_SCREEN);
     },
 
-    newActivity (isABTrails) {
+    newActivity (index = -1, isABTrails = false) {
       const activityCount = this.activities.length;
 
-      this.addActivity(isABTrails);
+      this.addActivity(index, isABTrails);
       if (!isABTrails) {
-        this.editActivity(activityCount, true);
+        this.editActivity(index >= 0 ? index : activityCount, true);
       }
     },
   }
-} 
+}
 </script>

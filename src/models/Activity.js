@@ -635,6 +635,18 @@ export default class Activity {
           ];
         }
       },
+      'ui.order': {
+        updated: (field) => {
+          const oldOrder = _.get(oldValue, field, []);
+          const newOrder = _.get(newValue, field, []);
+
+          if (oldOrder.length == newOrder.length && JSON.stringify(oldOrder) != JSON.stringify(newOrder)) {
+            return ['order of items has been updated']
+          }
+
+          return [];
+        }
+      },
       'preamble': {
         updated: (field) => `preamble was updated to ${_.get(newValue, field)}`,
         inserted: (field) => `preamble was set to ${_.get(newValue, field)}`,

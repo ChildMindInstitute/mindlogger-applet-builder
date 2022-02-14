@@ -88,7 +88,6 @@
             label="Disable the users's ability to change the response"
           />
         </v-col>
-
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-col
@@ -377,6 +376,16 @@ export default {
         const inputType = this.currentActivity.items[i].inputType;
 
         if (!['radio', 'checkbox', 'slider'].includes(inputType)) {
+          return false;
+        }
+      }
+      return true;
+    },
+    hasOnlyWebSupported() {
+      for (let i = 0; i < this.currentActivity.items.length; i++) {
+        const inputType = this.currentActivity.items[i].inputType;
+        if (!['radio', 'checkbox', 'slider', 'text', 'ageSelector', 'cumulativeScore'].includes(inputType)) {
+          this.updateActivityMetaInfo({ isOnePageAssessment: false })
           return false;
         }
       }

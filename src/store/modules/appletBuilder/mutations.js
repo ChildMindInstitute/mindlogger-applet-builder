@@ -57,7 +57,17 @@ const itemMutations = {
     }
   },
 
-  addItem (state, obj) {
+  transferItems (state, { target, items }) {
+    for (const item of items) {
+      state.protocol.activities[target].items.push(item);
+    }
+
+    state.currentActivity.items = state.currentActivity.items.filter(
+      item => items.indexOf(item) < 0
+    );
+  },
+
+  addItem (state, { index, obj }) {
     const model = new Item();
     let item = {
       options: {
@@ -74,12 +84,21 @@ const itemMutations = {
       item = obj;
     }
 
-    let lastIndex = state.currentActivity.items.findIndex(
+    let lastIndex = index >= 0 ? index : state.currentActivity.items.findIndex(
       item => (!item.allowEdit && ['age_screen', 'gender_screen'].indexOf(item.name) >=0 ) || item.inputType == 'cumulativeScore' || item.inputType == 'tokenSummary'
     );
 
     if (!obj) {
       item.name = `Screen${lastIndex >= 0 ? lastIndex + 1 : state.currentActivity.items.length + 1}`;
+
+      let suffix = 0, name = item.name;
+
+      while (state.currentActivity.items.find(obj => obj.name == name)) {
+        suffix++;
+        name = `${item.name}__${suffix}`;
+      }
+
+      item.name = name;
     }
 
     const itemData = model.getItemBuilderData(item);
@@ -150,23 +169,16 @@ const itemMutations = {
       timestamp: Date.now()
     };
 
-    // if (state.protocol.id && item.id) {
-    //   newItem.baseAppletId = state.protocol.appletId;
-    //   newItem.baseItemId = item.id;
-    // }
-
-    let lastIndex = state.currentActivity.items.findIndex(item => !item.allowEdit || item.inputType == 'cumulativeScore' || item.inputType == 'tokenSummary');
-
-    if (lastIndex >= 0) {
-      state.currentActivity.items.splice(lastIndex, 0, newItem);
-    } else {
-      state.currentActivity.items.push(newItem);
-    }
+    state.currentActivity.items.splice(index+1, 0, newItem);
   },
 
   deleteItem(state, index) {
     state.currentActivity.items.splice(index, 1);
   },
+
+  updateItemList(state, items) {
+    state.currentActivity.items = items;
+  }
 };
 
 const activityMutations = {
@@ -212,12 +224,7 @@ const activityMutations = {
       index: activities.length
     };
 
-    // if (state.protocol.id && activity.id) {
-    //   newActivity.baseAppletId = state.protocol.appletId
-    //   newActivity.baseActivityId = activity.id
-    // }
-
-    activities.push(newActivity);
+    activities.splice(index+1, 0, newActivity);
   },
 
   deleteActivity (state, index) {
@@ -233,7 +240,7 @@ const activityMutations = {
     state.protocol.activities[index].isVis = false;
   },
 
-  addActivity(state, isABTrails) {
+  addActivity(state, { index, isABTrails }) {
     const activityModel = new Activity;
     let items = [];
 
@@ -273,10 +280,20 @@ const activityMutations = {
     // console.log('state.protocol.activities--->', state.protocol.activities);
     const trailActivities = state.protocol.activities.filter(activity => activity["@type"].includes("ABTrails"));
 
-    state.protocol.activities.push({
+    const activity = {
       ...activityModel.getActivityBuilderData({ items, isABTrails, trailVersion: trailActivities.length + 1 }),
-      index: state.protocol.activities.length,
-    })
+      index: index < 0 ? state.protocol.activities.length : index,
+    };
+
+    if (index >= 0) {
+      state.protocol.activities.splice(index, 0, activity);
+
+      for (let i = index + 1; i < state.protocol.activities.length; i++) {
+        state.protocol.activities[i].index = i;
+      }
+    } else {
+      state.protocol.activities.push(activity);
+    }
   },
 
   updateActivityMetaInfo (state, obj) {
@@ -308,6 +325,10 @@ const activityMutations = {
     if (state.protocol.prizeActivity.index == index) {
       state.protocol.prizeActivity = state.protocol.activities[index];
     }
+  },
+
+  updateActivityList(state, activities) {
+    state.protocol.activities = activities;
   }
 };
 

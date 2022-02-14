@@ -182,7 +182,10 @@ export default {
 
       if (!this.currentActivity.subScales.find((subScale) => !!subScale['lookupTable'])) {
         for (let screen of [ageScreen, genderScreen]) {
-          this.addItem(screen);
+          this.addItem({
+            obj: screen,
+            index: -1,
+          });
         }
       }
 

@@ -240,7 +240,7 @@ const activityMutations = {
     state.protocol.activities[index].isVis = false;
   },
 
-  addActivity(state, index, isABTrails) {
+  addActivity(state, { index, isABTrails }) {
     const activityModel = new Activity;
     let items = [];
 

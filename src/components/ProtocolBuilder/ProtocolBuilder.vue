@@ -199,15 +199,17 @@
                 {{ activity.name }}
                 <v-spacer />
                 <v-card-actions>
-                  <v-tooltip
-                    top
+                  <v-menu
+                    right
                   >
-                    <template v-slot:activator="{ on }">
+                    <template
+                      v-slot:activator="{ on, attrs }"
+                    >
                       <v-btn
                         class="ml-4"
                         icon
                         v-on="on"
-                        @click="newActivity(index+1)"
+                        v-bind="attrs"
                       >
                         <v-icon color="grey lighten-1">
                           mdi-plus-circle-outline
@@ -215,8 +217,20 @@
                       </v-btn>
                     </template>
 
-                    <span>New Activity</span>
-                  </v-tooltip>
+                    <v-list>
+                      <v-list-item
+                        @click="newActivity(index+1, false)"
+                      >
+                        <v-list-item-title>Blank Activity</v-list-item-title>
+                      </v-list-item>
+
+                      <v-list-item
+                        @click="newActivity(index+1, true)"
+                      >
+                        <v-list-item-title>A/B Trails</v-list-item-title>
+                      </v-list-item>
+                    </v-list>
+                  </v-menu>
 
                   <v-tooltip
                     top
@@ -259,6 +273,7 @@
                   </v-tooltip>
 
                   <v-tooltip
+                    v-if="activity['@type'] !== 'reproschema:ABTrails'"
                     top
                   >
                     <template v-slot:activator="{ on }">
@@ -652,7 +667,7 @@ export default {
     newActivity (index = -1, isABTrails = false) {
       const activityCount = this.activities.length;
 
-      this.addActivity(index, isABTrails);
+      this.addActivity({ index, isABTrails });
       if (!isABTrails) {
         this.editActivity(index >= 0 ? index : activityCount, true);
       }

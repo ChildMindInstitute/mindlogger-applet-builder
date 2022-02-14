@@ -147,25 +147,6 @@
 
 
       <v-tooltip
-        bottom
-      >
-        <template v-slot:activator="{ on }">
-          <v-btn
-            class="mx-1"
-            @click="resetBuilder"
-            v-on="on"
-          >
-            <img
-              height="25"
-              alt=""
-              :src="baseImageURL + 'header-icons/black/refresh-icon.png'"
-            >
-          </v-btn>
-        </template>
-        <span>Reset Builder</span>
-      </v-tooltip>
-
-      <v-tooltip
         v-if="formattedOriginalProtocol"
         bottom
       >
@@ -416,12 +397,6 @@ export default {
       zip.generateAsync({ type: 'blob' }).then((blob) => {
         saveAs(blob, `${this.protocol.name}.zip`);
       });
-    },
-
-    resetBuilder () {
-      this.setCurrentScreen(config.PROTOCOL_SCREEN);
-      this.setCurrentActivity(-1);
-      this.resetProtocol();
     },
 
     viewItems () {

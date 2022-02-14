@@ -485,16 +485,58 @@
       </v-alert>
     </v-dialog>
     <!-- Delete Confirmation Popup -->
+
+    <!-- Image cropping tool -->
+    <v-dialog
+      v-model="cropper.visible"
+      max-width="500px"
+      persistent
+    >
+      <v-card>
+        <v-card-title
+          class="headline grey lighten-2"
+          primary-title
+        >
+          Please select area to show users
+        </v-card-title>
+
+          <Cropper
+            ref="cropper"
+            class="cropper"
+            :src="cropper.src"
+          />
+
+        <v-card-actions class="justify-space-around">
+          <v-btn
+            outlined
+            color="primary"
+            @click="saveOriginalImage"
+          >
+            Save Original Image
+          </v-btn>
+
+          <v-btn
+            color="primary"
+            @click="saveCroppedImage"
+          >
+            Save Cropped Image
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
 <script>
 import { Uploader, isSplashImageValid, isAudioUrlValid, isImageValid, isVideoUrlValid } from '../../models/Uploader';
 import AddFromUrl from './Additional/AddFromUrl.vue';
+import { Cropper } from 'vue-advanced-cropper';
+import "vue-advanced-cropper/dist/style.css";
 
 export default {
   components: {
     AddFromUrl,
+    Cropper,
   },
   props: {
     initialType: {
@@ -529,6 +571,10 @@ export default {
       fileName: this.initialData,
       isAddingFromUrl: false,
       removeConfirm: false,
+      cropper: {
+        src: '',
+        visible: false
+      }
     };
   },
   watch: {
@@ -564,11 +610,14 @@ export default {
 
         this.uploadData = url;
         this.fileName = url;
-        this.isAddingFromUrl = false;
-
         if (updateParent) {
-          this.$emit('onAddFromUrl', this.uploadData);
+          this.$set(this, 'cropper', {
+            src: url + '?' + Date.now(),
+            visible: true
+          })
         }
+
+        this.isAddingFromUrl = false;
       } catch (error) {
         if (updateParent) {
           this.$emit('onNotify', {
@@ -592,7 +641,10 @@ export default {
         this.fileName = file;
 
         if (updateParent) {
-          this.$emit('onAddFromDevice', this.upload);
+          this.$set(this, 'cropper', {
+            src: URL.createObjectURL(file),
+            visible: true
+          })
         }
       } catch (error) {
         if (updateParent) {
@@ -679,6 +731,25 @@ export default {
       this.removeConfirm = false;
     },
 
+    saveOriginalImage() {
+      if (typeof this.fileName == 'string') {
+        this.$emit('onAddFromUrl', this.uploadData);
+      } else {
+        this.$emit('onAddFromDevice', this.upload);
+      }
+      this.cropper.visible = false;
+    },
+
+    saveCroppedImage() {
+      const { coordinates, canvas, } = this.$refs.cropper.getResult();
+      const image = canvas.toBlob(blob => {
+        const file = new File([blob], { type: 'image/jpeg', lastModified: Date.now() });
+        this.uploadData = file;
+
+        this.$emit('onAddFromDevice', this.upload);
+      }, 'image/jpeg');
+      this.cropper.visible = false;
+    }
   },
 }
 </script>
@@ -744,5 +815,11 @@ export default {
 
 .from-url:hover {
   background-color: rgba(0, 0, 0, 0.04);
+}
+
+.cropper {
+  min-height: 300px;
+  width: 500px;
+  background: black;
 }
 </style>

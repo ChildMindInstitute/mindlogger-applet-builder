@@ -82,7 +82,43 @@ const compareVersion = (version1, version2) => {
 
 export const getVersion = () => {
     return version;
-}  
+}
+
+export const getTextBetweenBrackets = (str) => {
+  const reBrackets = /\[\[(.*?)\]]/g;
+  const listOfText = [];
+  let found;
+  while (found = reBrackets.exec(str)) {
+    listOfText.push(found[1]);
+  };
+  return listOfText;
+};
+
+const inputTypes = [
+    'radio',
+    'checkbox',
+    'slider',
+    'text',
+    'ageSelector',
+    'date',
+    'timeRange'
+]
+
+export const checkItemVariableName = (text, activity) => {
+  try {
+    const variableNames = getTextBetweenBrackets(text);
+    if (variableNames && variableNames.length) {
+    for (const variableName of variableNames) {            
+        const item = _.find(activity.items, { name: variableName });
+        if (item && !inputTypes.includes(item.inputType)) 
+            return true;
+      };
+    }
+  } catch (error) {
+    console.warn(error)
+  }
+  return false;
+}
 
 export default {
     compareValues,

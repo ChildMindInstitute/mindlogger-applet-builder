@@ -15,6 +15,39 @@
       </span>
       <v-spacer />
       <v-card-actions>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              v-if="item.allowEdit"
+              icon
+              v-bind="attrs"
+              v-on="on"
+              @click="addItemHeader(itemIndex)"
+            >
+              <v-icon color="grey lighten-1">
+                book
+              </v-icon>
+            </v-btn>
+          </template>
+          <span>Add Header</span>
+        </v-tooltip>
+
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              v-if="item.allowEdit"
+              icon
+              v-bind="attrs"
+              v-on="on"
+              @click="addItemSection(itemIndex)"
+            >
+              <v-icon color="grey lighten-1">
+                light
+              </v-icon>
+            </v-btn>
+          </template>
+          <span>Add Section</span>
+        </v-tooltip>        
         <v-tooltip
           v-if="item.allowEdit"
           top
@@ -724,7 +757,6 @@
     </v-dialog>
   </v-card>
 </template>
-
 <style scoped>
   .move-icon {
     cursor: move;
@@ -934,6 +966,10 @@ export default {
       ]
     ),
 
+    hasHeaderOrSection() {
+      return this.item.header !== undefined || this.item.section !== undefined;
+    },
+
     isReviewerActivity () {
       return this.currentActivity.isReviewerActivity;
     },
@@ -1046,6 +1082,8 @@ export default {
         'duplicateItem',
         'showOrHideItem',
         'showItem',
+        'addHeader',
+        'addSection',
         'deleteConditional',
         'deleteItem',
         'updateItemInputType',
@@ -1076,6 +1114,14 @@ export default {
     hideItem (index) {
       this.isVis = !this.isVis;
       this.showOrHideItem(index);
+    },
+
+    addItemHeader (index) {
+      this.addHeader(index);
+    },
+
+    addItemSection (index) {
+      this.addSection(index);
     },
 
     getConditionAnswer (condition) {

@@ -169,6 +169,14 @@ const itemMutations = {
     state.currentActivity.items[index].isVis = false;
   },
 
+  addHeader(state, index) {
+    state.currentActivity.items[index].header = 'Header1';
+  },
+
+  addSection(state, index) {
+    state.currentActivity.items[index].section = 'Section1';
+  },
+
   duplicateItem(state, index) {
     const item = JSON.parse(JSON.stringify(state.currentActivity.items[index]));
 

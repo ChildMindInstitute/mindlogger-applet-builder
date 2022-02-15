@@ -203,7 +203,18 @@ const activityMutations = {
     }
 
     const conditionalItems = activity.conditionalItems.map(conditionalItem => {
-      const conditions = conditionalItem.conditions.map(condition => ({ ...condition }));
+      const conditions = conditionalItem.conditions.map(condition => { 
+        let { ifValue } = condition;
+
+        if (ifValue === activity.name) {
+          ifValue = `${activity.name} (${suffix})`;
+        }
+
+        return {
+          ...condition,
+          ifValue
+        };
+      });
 
       return {
         ...conditionalItem,

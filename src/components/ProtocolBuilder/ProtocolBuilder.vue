@@ -203,18 +203,25 @@
                     right
                   >
                     <template
-                      v-slot:activator="{ on, attrs }"
+                      v-slot:activator="{ on: menu }"
                     >
-                      <v-btn
-                        class="ml-4"
-                        icon
-                        v-on="on"
-                        v-bind="attrs"
+                      <v-tooltip
+                        top
                       >
-                        <v-icon color="grey lighten-1">
-                          mdi-plus-circle-outline
-                        </v-icon>
-                      </v-btn>
+                        <template v-slot:activator="{ on: tooltip }">
+                          <v-btn
+                            class="ml-4"
+                            icon
+                            v-on="{ ...menu, ...tooltip }"
+                          >
+                            <v-icon color="grey lighten-1">
+                              mdi-plus-circle-outline
+                            </v-icon>
+                          </v-btn>
+                        </template>
+
+                        <span>Add Activity</span>
+                      </v-tooltip>
                     </template>
 
                     <v-list>
@@ -377,6 +384,10 @@
 
   .sortable-chosen {
     border: 2px solid gray;
+  }
+
+  .move-icon {
+    cursor: move;
   }
 </style>
 

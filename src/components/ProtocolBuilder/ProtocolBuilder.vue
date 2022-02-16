@@ -116,10 +116,17 @@
         </v-row>
 
         <v-row class="mx-2">
-          <v-col>
+          <v-col sm="4">
             <v-checkbox
               v-model="streamEnabled"
               label="Enable streaming of response data"
+            />
+          </v-col>
+
+          <v-col sm="4">
+            <v-checkbox
+              v-model="combineReports"
+              label="Combine reports on last activity"
             />
           </v-col>
         </v-row>
@@ -486,6 +493,15 @@ export default {
       },
       set: function (streamEnabled) {
         this.updateProtocolMetaInfo({ streamEnabled })
+      }
+    },
+
+    combineReports: {
+      get: function () {
+        return this.protocol.combineReports;
+      },
+      set: function (combineReports) {
+        this.updateProtocolMetaInfo({ combineReports })
       }
     },
 

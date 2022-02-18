@@ -45,6 +45,7 @@
       <draggable
         v-model="draggableItems"
         handle=".dragging-handle"
+        @change="handleChange($event)"
       >
         <transition-group>
           <div
@@ -120,6 +121,34 @@
       </v-card>
     </v-dialog>
 
+    <v-dialog
+        v-model="warningFlag"
+        persistent
+        width="500"
+      >
+        <v-card>
+          <v-card-text class="pt-4">
+            Moving this item will cause your conditional logic to fail.
+          </v-card-text>
+
+          <v-card-actions
+            class="justify-space-around"
+          >
+            <v-btn
+              @click="confirmChanges"
+            >
+              Continue
+            </v-btn>
+
+            <v-btn
+              @click="revertChanges"
+            >
+              Cancel
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
     <v-menu
       bottom
     >
@@ -178,13 +207,16 @@ export default {
     return {
       urlItemUploaderKey: 0,
       urlDialog: false,
+      warningFlag: false,
       baseKey: 0,
       selectingItems: false,
       transferItemDlg: {
         visible: false,
         index: -1,
       },
+      cachedItems: [],
       selectedItems: [],
+      movedItem: 0,
     }
   },
   computed: {
@@ -208,6 +240,7 @@ export default {
         return this.currentActivity.items;
       },
       set (value) {
+        this.cachedItems = this.draggableItems;
         this.updateItemList(value);
       }
     }
@@ -221,7 +254,55 @@ export default {
 
     importItem () {
       this.urlDialog = true;
-      this.urlItemUploaderKey++;
+      this.urlItemUploaderKey ++;
+    },
+
+    handleChange (evt) {
+      const { element, oldIndex, newIndex } = evt.moved;
+
+      this.movedItem = newIndex;
+      this.conditionals.map(conditional => {
+        if (conditional.showValue.name === element.name) {
+          conditional.conditions.map(condition => {
+            const itemIndex = this.cachedItems.findIndex(({ name }) => name === condition.ifValue.name);
+
+            if (itemIndex >= newIndex) {
+              this.warningFlag = true;
+            }
+          })
+        } else {
+          conditional.conditions.map(condition => {
+            if (condition.ifValue.name === element.name) {
+              const itemIndex = this.cachedItems.findIndex(({ name }) => name === conditional.showValue.name);
+
+              if (itemIndex <= newIndex) {
+                this.warningFlag = true;
+              }
+            }
+          })
+        }
+      });
+    },
+
+    revertChanges () {
+      this.draggableItems = this.cachedItems;
+      this.warningFlag = false
+    },
+
+    confirmChanges () {
+      const name = this.draggableItems[this.movedItem].name;
+
+      for (let i = this.conditionals.length - 1; i >= 0; i -= 1) {
+        const conditional = this.conditionals[i];
+
+        if (name === conditional.showValue.name) {
+          this.deleteConditional(i);
+        } else if(conditional.conditions.find(({ ifValue }) => name === ifValue.name)) {
+          this.deleteConditional(i);
+        }
+      }
+
+      this.warningFlag = false;
     },
 
     onUploadItem (response) {

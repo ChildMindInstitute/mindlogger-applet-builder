@@ -325,6 +325,8 @@ export default class Item {
         isVis: this.ref.isVis,
         "schema:schemaVersion": "0.0.1",
         "schema:version": "0.0.1",
+        "header": this.ref.header,
+        "section": this.ref.section,
         ui: {
           inputType: this.ref.inputType,
         },

@@ -847,6 +847,7 @@
   .disabled-option {
     color: grey;
   }
+  
 </style>
 
 <script>
@@ -917,6 +918,12 @@ export default {
     variablesItems: {
       type: Object,
       required: true
+    },
+    header: {
+      type: String,
+    },
+    section: {
+      type: String,
     }
   },
   data() {
@@ -950,6 +957,14 @@ export default {
       alertFlag: false,
       alertMsg: '',
       editVariableValid: true,
+      isUpdating: false,
+      deleteHeaderDialog: false,
+      isHeaderAdded: this.header ? true: false,
+      itemHeader: this.header || "",
+      itemHeaderText: this.header || "",
+      itemSection: this.section || "",
+      itemSectionText: this.section || "",
+      actionItemIndex: 0,
     }
   },
   computed: {
@@ -960,14 +975,30 @@ export default {
     ...mapGetters(config.MODULE_NAME,
       [
         'currentActivity',
+        'currentHeaders',
         'itemInputTypes',
         'itemTemplates',
         'prizeActivity',
       ]
     ),
 
-    hasHeaderOrSection() {
-      return this.item.header !== undefined || this.item.section !== undefined;
+    canAddHeader () {
+      if (this.itemHeader === "" && this.itemSection === "") {
+        return false;
+      }
+      return true;
+    },
+
+    canAddSection () {
+      if (this.itemHeader === "" && this.itemSection === "") {
+        return false;
+        // for (let i = this.itemIndex; i >= 0; i -= 1) {
+        //   if (this.currentHeaders[i]) {
+        //     return false;
+        //   }
+        // }
+      }
+      return true;
     },
 
     isReviewerActivity () {
@@ -993,6 +1024,8 @@ export default {
     },
 
     item () {
+      // this.itemHeader = this.currentActivity.items[this.itemIndex].header;
+      // this.itemSection = this.currentActivity.items[this.itemIndex].section;
       return this.currentActivity.items[this.itemIndex];
     },
     skippable() {
@@ -1082,8 +1115,8 @@ export default {
         'duplicateItem',
         'showOrHideItem',
         'showItem',
-        'addHeader',
-        'addSection',
+        'updateHeader',
+        'updateSection',
         'deleteConditional',
         'deleteItem',
         'updateItemInputType',
@@ -1115,13 +1148,84 @@ export default {
       this.isVis = !this.isVis;
       this.showOrHideItem(index);
     },
-
+ 
     addItemHeader (index) {
-      this.addHeader(index);
+      let headerIndex = 1;
+      this.currentActivity.items.forEach(item => {
+        if (item.header) {
+          const values = item.header.split(' ');
+
+          if (
+            values[0] === "Header" && 
+            values[1] && 
+            Number(values[1]) >= headerIndex
+          ) {
+            headerIndex = Number(values[1]) + 1
+          }
+        }
+      })
+
+      this.itemHeader = "Header " + headerIndex;
+      this.itemHeaderText = this.itemHeader;
+      this.isHeaderAdded = true;
+      this.updateHeader({ index, headerName: this.itemHeader });
+    },
+
+    editItemHeader (index) {
+      if (this.isUpdating) {
+        if (this.itemHeader) {
+          if (this.itemHeaderText) {
+            this.updateHeader({ index, headerName: this.itemHeaderText });
+            this.isUpdating = false;
+          }
+        } else {
+          if (this.itemSectionText) {
+            this.updateSection({ index, sectionName: this.itemSectionText });
+            this.isUpdating = false;
+          }
+        }
+      } else {
+        this.isUpdating = true;
+      }
+    },
+
+    openHeaderRemoveConfirmation (index) {
+      this.deleteHeaderDialog = true;
+      this.actionItemIndex = index;
+    },
+
+    removeItemHeader () {
+      if (this.itemHeader) {
+        this.updateHeader({ index: this.actionItemIndex, headerName: '' });
+        this.itemHeader = '';
+      } else {
+        this.updateSection({ index: this.actionItemIndex, sectionName: '' });
+        this.itemSection = '';
+      }
+      this.isHeaderAdded = false;
+      this.deleteHeaderDialog = false;
     },
 
     addItemSection (index) {
-      this.addSection(index);
+      let sectionIndex = 1;
+
+      this.currentActivity.items.forEach(item => {
+        if (item.section) {
+          const values = item.section.split(' ');
+
+          if (
+            values[0] === "Section" && 
+            values[1] && 
+            Number(values[1]) >= sectionIndex
+          ) {
+            sectionIndex = Number(values[1]) + 1
+          }
+        }
+      })
+
+      this.itemSection = "Section " + sectionIndex;
+      this.itemSectionText = this.itemSection;
+      this.updateSection({ index, sectionName: this.itemSection });
     },
 
     getConditionAnswer (condition) {
@@ -1439,7 +1543,6 @@ export default {
         duration: 3000,
       };
     },
-
   }
 }
 </script>

@@ -314,6 +314,7 @@ export default {
       }
 
       Protocol.formattedProtocol(this.protocol).then((data) => {
+        console.log('Data-------------------------->', data);
         if (!this.formattedOriginalProtocol) {
           this.$emit("uploadProtocol", {
             applet: data,

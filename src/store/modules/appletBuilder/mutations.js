@@ -169,12 +169,12 @@ const itemMutations = {
     state.currentActivity.items[index].isVis = false;
   },
 
-  addHeader(state, index) {
-    state.currentActivity.items[index].header = 'Header1';
+  updateHeader(state, {index, headerName}) {
+    state.currentActivity.items[index].header = headerName;
   },
 
-  addSection(state, index) {
-    state.currentActivity.items[index].section = 'Section1';
+  updateSection(state, { index, sectionName }) {
+    state.currentActivity.items[index].section = sectionName
   },
 
   duplicateItem(state, index) {

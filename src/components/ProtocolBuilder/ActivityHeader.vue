@@ -101,7 +101,7 @@
                 @click="onSwitchAssessmentType"
                 v-model="isOnePageAssessment"
                 label="Show all questions at once"
-                readonly
+                :disabled="!hasOnlyWebSupported"
               />
             </v-col>
           </template>

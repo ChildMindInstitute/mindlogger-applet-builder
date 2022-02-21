@@ -19,25 +19,33 @@
         <div class="flex-grow-1" />
 
         <v-btn
+          v-if="!selectingItems"
           class="ml-4"
           icon
           @click="selectingItems = !selectingItems"
           :disabled="activities.length == 1"
         >
-          <v-icon
-            v-if="!selectingItems"
-            color="lighten-1"
-          >
+          <v-icon color="lighten-1">
             mdi-cursor-move
           </v-icon>
-
-          <v-icon
-            v-else
-            color="lighten-1"
-          >
-            mdi-cancel
-          </v-icon>
         </v-btn>
+
+        <v-tooltip v-else bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              class="ml-4"
+              icon
+              @click="selectingItems = !selectingItems"
+              :disabled="activities.length == 1"
+              v-on="on"
+            >
+              <v-icon color="lighten-1">
+                mdi-cancel
+              </v-icon>
+            </v-btn>
+          </template>
+          <span>Cancel</span>
+        </v-tooltip>
       </div>
     </v-card-title>
 
@@ -80,6 +88,40 @@
     </v-dialog>
 
     <v-dialog
+      v-model="transferConfirmDlg"
+      max-width="600"
+    >
+      <v-card>
+        <v-card-title>
+          Do you want to continue?
+        </v-card-title>
+
+        <v-card-text>
+          <p>{{ targetActivity }}</p>
+          <ul class="list-group">
+            <li v-for="(errorMessage, index) in errorMessages" :key="index">
+              {{ errorMessage }}
+            </li>
+          </ul>
+        </v-card-text>
+
+        <v-card-actions class="justify-space-around">
+          <v-btn
+            @click="moveItemsToOtherActivity"
+          >
+            OK
+          </v-btn>
+
+          <v-btn
+            @click="cancelMovingItems"
+          >
+            Cancel
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
       v-model="transferItemDlg.visible"
       max-width="600"
     >
@@ -107,7 +149,7 @@
 
         <v-card-actions class="justify-space-around">
           <v-btn
-            @click="moveItemsToOtherActivity"
+            @click="confirmMovementOfItems"
           >
             OK
           </v-btn>
@@ -210,12 +252,16 @@ export default {
       warningFlag: false,
       baseKey: 0,
       selectingItems: false,
+      transferConfirmDlg: false,
       transferItemDlg: {
         visible: false,
         index: -1,
       },
       cachedItems: [],
       selectedItems: [],
+      errorMessages: [],
+      cumulativeData: [],
+      subScaleData: [],
       movedItem: 0,
     }
   },
@@ -235,6 +281,16 @@ export default {
       ]
     ),
 
+    targetActivity () {
+      const targetActivity = this.activities[this.transferItemDlg.index];
+
+      if (targetActivity) {
+        return `By moving these items to ${targetActivity}, it will result in the below`;
+      } else {
+        return '';
+      }
+    },
+
     draggableItems: {
       get () {
         return this.currentActivity.items;
@@ -243,12 +299,16 @@ export default {
         this.cachedItems = this.draggableItems;
         this.updateItemList(value);
       }
-    }
+    },
   },
   methods: {
     ...mapMutations(config.MODULE_NAME,
       [
-        'addItem', 'updateItemList', 'deleteConditional', 'transferItems',
+        'updateItemList', 
+        'deleteConditional', 
+        'transferItems',
+        'removeScoresAndSubScals',
+        'addItem',
       ]
     ),
 
@@ -328,6 +388,84 @@ export default {
       }
     },
 
+    confirmMovementOfItems () {
+      const cumulativeItem = this.currentActivity.items.find(({ name }) => name === "cumulatives");
+
+      this.selectedItems.forEach(item => {
+        if (cumulativeItem) {
+          this.cumulativeData = cumulativeItem.cumulativeScores.map(score => {
+            let { jsExpression } = score.compute;
+            if (jsExpression.includes(item.name)) {
+              const values = jsExpression.split(' + ');
+              
+              jsExpression = values.filter(value => value !== item.name).join(" + ");
+              this.errorMessages.push(`${item.name} is removed from ${score.name}`);
+            }
+
+            return {
+              ...score,
+              compute: {
+                ...score.compute,
+                jsExpression
+              }
+            };
+          })
+        }
+
+        this.currentActivity.subScales.forEach(subScale => {
+          const currentSubScale = this.subScaleData.find(({ variableName }) => variableName === subScale.variableName);
+          const items = currentSubScale 
+            ? currentSubScale.items.filter(({ name }) => name !== item.name)
+            : subScale.items.filter(({ name }) => name !== item.name);
+          let { jsExpression } = currentSubScale ? currentSubScale : subScale;
+
+          if (items.length !== subScale.items.length) {
+            const values = jsExpression.split(' + ');
+              
+            jsExpression = values.filter(value => value !== item.name).join(" + ");
+            this.errorMessages.push(`${item.name} is removed from your ${subScale.variableName}`);
+          }
+
+          this.subScaleData = this.subScaleData.filter(({ variableName }) => variableName !== subScale.variableName);
+
+          if (items.length) {
+            this.subScaleData.push({
+              ...subScale,
+              jsExpression,
+              items
+            });
+          }
+        });
+
+        for (let i = this.conditionals.length-1; i >= 0; i -= 1) {
+          const conditional = this.conditionals[i];
+
+          if (
+            item.name === conditional.showValue.name ||
+            conditional.conditions.find(({ ifValue }) => item.name === ifValue.name)
+          ) {
+            this.errorMessages.push(`${item.name} will cause your conditional logic to fail`);
+            break;
+          }
+        }
+      })
+
+      if (this.errorMessages.length) {
+        this.transferConfirmDlg = true;
+      } else {
+        this.transferItems({
+          target: this.transferItemDlg.index,
+          items: this.selectedItems
+        })
+      }
+      this.transferItemDlg.visible = false;
+    },
+
+    cancelMovingItems () {
+      this.errorMessages = [];
+      this.transferConfirmDlg = false;
+    },
+
     moveItemsToOtherActivity () {
       const itemConditionals = [];
       const names = this.selectedItems.map(item => item.name);
@@ -335,7 +473,7 @@ export default {
       for (let i = this.conditionals.length-1; i >= 0; i--) {
         const conditional = this.conditionals[i];
 
-        if (names.includes(conditional.showValue)) {
+        if (names.includes(conditional.showValue.name)) {
           this.deleteConditional(i);
         }
         else if(conditional.conditions.find(({ ifValue }) => names.includes(ifValue.name))) {
@@ -346,9 +484,15 @@ export default {
       this.transferItems({
         target: this.transferItemDlg.index,
         items: this.selectedItems
+      });
+      this.removeScoresAndSubScals({
+        scores: this.cumulativeData,
+        subScales: this.subScaleData,
       })
 
-      this.transferItemDlg.visible = false;
+      this.errorMessages = [];
+      this.subScaleData = [];
+      this.transferConfirmDlg = false;
     }
   }
 }

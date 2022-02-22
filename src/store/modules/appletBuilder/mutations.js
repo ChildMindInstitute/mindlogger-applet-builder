@@ -14,6 +14,13 @@ const itemMutations = {
     if (!Object.hasOwnProperty.call(obj, "valid"))
       item.valid = Item.checkValidation(item);
 
+    for (const existing of state.currentActivity.items) {
+      if (existing != item && existing.name == item.name && existing.valid) {
+        item.valid = false;
+        break;
+      }
+    }
+
     if (obj.name) {
       for (const subScale of state.currentActivity.subScales) {
         if (subScale.items.includes(item)) {
@@ -60,6 +67,10 @@ const itemMutations = {
 
   transferItems (state, { target, items }) {
     for (const item of items) {
+      if (state.protocol.activities[target].items.some(origin => origin.name == item.name)) {
+        item.valid = false;
+      }
+
       state.protocol.activities[target].items.push(item);
     }
 
@@ -203,7 +214,7 @@ const activityMutations = {
     }
 
     const conditionalItems = activity.conditionalItems.map(conditionalItem => {
-      const conditions = conditionalItem.conditions.map(condition => { 
+      const conditions = conditionalItem.conditions.map(condition => {
         let { ifValue } = condition;
 
         if (ifValue === activity.name) {

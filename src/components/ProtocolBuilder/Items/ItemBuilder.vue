@@ -131,7 +131,7 @@
         </v-tooltip>
 
         <v-btn
-          v-if="item.allowEdit"
+          v-if="item.allowEdit && !['cumulativeScore', 'futureBehaviorTracker', 'pastBehaviorTracker'].includes(item.inputType)"
           class="ml-4 move-icon dragging-handle"
           icon
         >

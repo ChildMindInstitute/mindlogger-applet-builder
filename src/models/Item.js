@@ -44,6 +44,8 @@ export default class Item {
         && (initialItemData.ui.allow.includes("dontKnow")
           || initialItemData.ui.allow.includes("dont_know_answer")),
       responseOptions: initialItemData.responseOptions || {},
+      header: initialItemData.header || "",
+      section: initialItemData.section || "",
       inputOptions: initialItemData.inputOptions || [],
       media: initialItemData.media || {},
       cumulativeScores: initialItemData.cumulativeScores  || [],
@@ -600,6 +602,12 @@ export default class Item {
       'correctAnswer': {
         updated: (field) => `Correct answer was changed`
       },
+      'header': {
+        updated: (field) => `Item header was changed`
+      },
+      'section': {
+        updated: (field) => `Item section was changed`
+      },
       'timer': {
         updated: field => {
           const newTimeLimit = _.get(newValue, field);
@@ -829,6 +837,8 @@ export default class Item {
       description:
         _.get(item, ['schema:description', 0, '@value']),
       isVis: _.get(item, ['reprolib:terms/isVis', 0, '@value']),
+      header: _.get(item, ['schema:header', 0, '@value']),
+      section: _.get(item, ['schema:section', 0, '@value']),
       ui: {
         allow,
         inputType:

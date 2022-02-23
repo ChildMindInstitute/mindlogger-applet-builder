@@ -903,6 +903,9 @@ export default {
     }
   },
   watch: {
+    item: function(newItem) {
+      this.largeText = newItem.question.text;
+    },
     largeText: function(text) {
       this.updateItemMetaInfo({
         index: this.itemIndex,

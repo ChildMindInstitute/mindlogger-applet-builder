@@ -421,6 +421,10 @@ export default class Item {
       itemObj.inputOptions = this.ref.inputOptions;
     }
 
+    else if (this.ref.inputType == "stabilityTracker" || this.ref.inputType == "visual-stimulus-response") {
+      itemObj.inputOptions = this.ref.inputOptions;
+    }
+
     else if(this.ref.inputType === "audioImageRecord") {
       if(!itemObj.responseOptions['schema:image']) {
         // default image
@@ -1278,6 +1282,7 @@ export default class Item {
       const VALUE = 'schema:value';
       const CONTENT_URL = 'schema:contentUrl';
       const TYPE = '@type';
+      const ITEM_LIST = "schema:itemListElement";
 
       inputOptions.forEach(option => {
         const modifiedOption = {};
@@ -1285,19 +1290,33 @@ export default class Item {
         const type = _.get(option, [TYPE, 0]);
         const name = _.get(option, [NAME, 0, '@value']);
         const value = _.get(option, [VALUE, 0, '@value']);
+        const itemList = _.get(option, [ITEM_LIST]);
+
         const contentUrl = option[CONTENT_URL];
 
-        if(name)
-          modifiedOption[NAME] = name;
+        if (name) modifiedOption[NAME] = name;
 
-        if(value)
-          modifiedOption[VALUE] = value;
+        if (value) modifiedOption[VALUE] = value;
 
-        if(contentUrl)
-          modifiedOption[CONTENT_URL] = contentUrl;
+        if (contentUrl) modifiedOption[CONTENT_URL] = contentUrl;
 
-        if (type)
-          modifiedOption[TYPE] = type;
+        if (type) modifiedOption[TYPE] = type;
+
+        if (itemList) {
+          modifiedOption[ITEM_LIST] = itemList.map(item => ({
+            name: _.get(item, ['schema:name', 0, '@value']),
+            value: _.get(item ['schema:value', 0, '@value']),
+            image: _.get(item, ['schema:image']),
+            '@type': _.get(item, ['@type', 0]),
+            responseOptions: {
+              "@type": "xsd:anyURI",
+              choices: _.get(item, ['reprolib:terms/responseOptions', 0, 'schema:itemListElement'], []).map(choice => ({
+                'schema:name': _.get(choice, ['schema:name', 0, '@value']),
+                'schema:value': _.get(choice, ['schema:value', 0, '@value'])
+              }))
+            }
+          }))
+        }
 
         if(!_.isEmpty(modifiedOption))
           itemContent.inputOptions.push(modifiedOption);

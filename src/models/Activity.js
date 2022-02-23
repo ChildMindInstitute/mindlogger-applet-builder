@@ -1,24 +1,28 @@
 import util from '../utilities/util';
 import Item from './Item';
+
+export const ACTIVITY_TYPES = [
+  "Activity",
+  "CST_GYRO",
+  "CST_TOUCH",
+  "FLANKER",
+  "TRAILS_IPAD",
+  "TRAILS_MOBILE"
+];
+
 export default class Activity {
   constructor() {
     this.ref = null;
   }
 
   getActivityBuilderData(initialActivityData) {
-    const name = initialActivityData.isABTrails
-      ? 'A/B Trails v' + initialActivityData.trailVersion + '.0'
-      : initialActivityData.name;
-    const description = initialActivityData.isABTrails ? 'A/B Trails' : initialActivityData.description;
-    const valid = initialActivityData.isABTrails ? true : initialActivityData.valid;
+    const name = initialActivityData.name;
+    const description = initialActivityData.description;
+    const valid = initialActivityData.valid;
     const items = (initialActivityData.items || []).map(item => item);
 
     if (initialActivityData.visibilities && initialActivityData.visibilities.length) {
       initialActivityData.conditionalItems = this.getConditionalItems(initialActivityData, initialActivityData.items);
-    }
-
-    if (initialActivityData.activityType && initialActivityData.activityType.includes('ABTrails')) {
-      initialActivityData.isABTrails = true;
     }
 
     if (initialActivityData.subScales && initialActivityData.subScales.length) {
@@ -72,7 +76,7 @@ export default class Activity {
       textRules: [(v) => !!v || 'This field is required'],
       error: '',
       componentKey: 0,
-      '@type': initialActivityData.isABTrails ? 'reproschema:ABTrails' : 'reproschema:Activity',
+      '@type': `reproschema:${initialActivityData.activityType}`,
       initialItemData: initialActivityData.isPrize && initialActivityData.items ? initialActivityData.items[0] : {},
       isItemEditable: true,
       editIndex: -1,
@@ -1009,7 +1013,7 @@ export default class Activity {
         activityPreamble[0]['@value'],
       activityType:
         activityType &&
-        activityType[0],
+        activityType[0].split('/').pop() || 'Activity',
       isReviewerActivity:
         isReviewerActivity &&
         isReviewerActivity[0] &&

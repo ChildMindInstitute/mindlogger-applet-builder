@@ -155,7 +155,8 @@
           Activities
           <v-spacer />
           <v-menu
-            right
+            top
+            :close-on-content-click="false"
           >
             <template
               v-slot:activator="{ on, attrs }"
@@ -176,16 +177,51 @@
 
             <v-list>
               <v-list-item
-                @click="newActivity(-1, false)"
+                @click="newActivity(-1)"
               >
                 <v-list-item-title>Blank Activity</v-list-item-title>
               </v-list-item>
 
-              <v-list-item
-                @click="newActivity(-1, true)"
-              >
-                <v-list-item-title>A/B Trails</v-list-item-title>
-              </v-list-item>
+              <v-list-group>
+                <template v-slot:activator>
+                  <v-list-item-title>Cognitive Activity</v-list-item-title>
+                </template>
+
+                <v-list-item
+                  class="ml-4"
+                  @click="newActivity(-1, 'TRAILS_IPAD')"
+                >
+                  <v-list-item-title>A/B Trails iPad</v-list-item-title>
+                </v-list-item>
+
+                <v-list-item
+                  class="ml-4"
+                  @click="newActivity(-1, 'TRAILS_MOBILE')"
+                >
+                  <v-list-item-title>A/B Trails Mobile</v-list-item-title>
+                </v-list-item>
+
+                <v-list-item
+                  class="ml-4"
+                  @click="newActivity(-1, 'FLANKER')"
+                >
+                  <v-list-item-title>Flanker</v-list-item-title>
+                </v-list-item>
+
+                <v-list-item
+                  class="ml-4"
+                  @click="newActivity(-1, 'CST_GYRO')"
+                >
+                  <v-list-item-title>CST Gyroscope</v-list-item-title>
+                </v-list-item>
+
+                <v-list-item
+                  class="ml-4"
+                  @click="newActivity(-1, 'CST_TOUCH')"
+                >
+                  <v-list-item-title>CST Touch</v-list-item-title>
+                </v-list-item>
+              </v-list-group>
             </v-list>
           </v-menu>
         </v-card-title>
@@ -207,7 +243,8 @@
                 <v-spacer />
                 <v-card-actions>
                   <v-menu
-                    right
+                    top
+                    :close-on-content-click="false"
                   >
                     <template
                       v-slot:activator="{ on: menu }"
@@ -233,16 +270,51 @@
 
                     <v-list>
                       <v-list-item
-                        @click="newActivity(index+1, false)"
+                        @click="newActivity(index+1)"
                       >
                         <v-list-item-title>Blank Activity</v-list-item-title>
                       </v-list-item>
 
-                      <v-list-item
-                        @click="newActivity(index+1, true)"
-                      >
-                        <v-list-item-title>A/B Trails</v-list-item-title>
-                      </v-list-item>
+                      <v-list-group>
+                        <template v-slot:activator>
+                          <v-list-item-title>Cognitive Activity</v-list-item-title>
+                        </template>
+
+                        <v-list-item
+                          class="ml-4"
+                          @click="newActivity(index+1, 'TRAILS_IPAD')"
+                        >
+                          <v-list-item-title>A/B Trails iPad</v-list-item-title>
+                        </v-list-item>
+
+                        <v-list-item
+                          class="ml-4"
+                          @click="newActivity(index+1, 'TRAILS_MOBILE')"
+                        >
+                          <v-list-item-title>A/B Trails Mobile</v-list-item-title>
+                        </v-list-item>
+
+                        <v-list-item
+                          class="ml-4"
+                          @click="newActivity(index+1, 'FLANKER')"
+                        >
+                          <v-list-item-title>Flanker</v-list-item-title>
+                        </v-list-item>
+
+                        <v-list-item
+                          class="ml-4"
+                          @click="newActivity(index+1, 'CST_GYRO')"
+                        >
+                          <v-list-item-title>CST Gyroscope</v-list-item-title>
+                        </v-list-item>
+
+                        <v-list-item
+                          class="ml-4"
+                          @click="newActivity(index+1, 'CST_TOUCH')"
+                        >
+                          <v-list-item-title>CST Touch</v-list-item-title>
+                        </v-list-item>
+                      </v-list-group>
                     </v-list>
                   </v-menu>
 
@@ -287,7 +359,7 @@
                   </v-tooltip>
 
                   <v-tooltip
-                    v-if="activity['@type'] !== 'reproschema:ABTrails'"
+                    v-if="activity['@type'] === 'reproschema:Activity'"
                     top
                   >
                     <template v-slot:activator="{ on }">
@@ -691,11 +763,11 @@ export default {
       this.setCurrentScreen(config.ITEM_SCREEN);
     },
 
-    newActivity (index = -1, isABTrails = false) {
+    newActivity (index = -1, type = null) {
       const activityCount = this.activities.length;
 
-      this.addActivity({ index, isABTrails });
-      if (!isABTrails) {
+      this.addActivity({ index, type });
+      if (!type) {
         this.editActivity(index >= 0 ? index : activityCount, true);
       }
     },

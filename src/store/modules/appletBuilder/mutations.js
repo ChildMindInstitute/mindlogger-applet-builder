@@ -14,6 +14,13 @@ const itemMutations = {
     if (!Object.hasOwnProperty.call(obj, "valid"))
       item.valid = Item.checkValidation(item);
 
+    for (const existing of state.currentActivity.items) {
+      if (existing != item && existing.name == item.name && existing.valid) {
+        item.valid = false;
+        break;
+      }
+    }
+
     if (obj.name) {
       for (const subScale of state.currentActivity.subScales) {
         if (subScale.items.includes(item)) {
@@ -60,12 +67,21 @@ const itemMutations = {
 
   transferItems (state, { target, items }) {
     for (const item of items) {
+      if (state.protocol.activities[target].items.some(origin => origin.name == item.name)) {
+        item.valid = false;
+      }
+
       state.protocol.activities[target].items.push(item);
     }
 
     state.currentActivity.items = state.currentActivity.items.filter(
       item => items.indexOf(item) < 0
     );
+  },
+
+  removeScoresAndSubScals(state, { scores, subScales }) {
+    state.currentActivity.items[state.currentActivity.items.length - 1].cumulativeScores = scores;
+    state.currentActivity.subScales = subScales;
   },
 
   addItem (state, { index, obj }) {
@@ -203,7 +219,7 @@ const activityMutations = {
     }
 
     const conditionalItems = activity.conditionalItems.map(conditionalItem => {
-      const conditions = conditionalItem.conditions.map(condition => { 
+      const conditions = conditionalItem.conditions.map(condition => {
         let { ifValue } = condition;
 
         if (ifValue === activity.name) {
@@ -289,9 +305,7 @@ const activityMutations = {
       }
     }
 
-    // console.log('state.protocol.activities--->', state.protocol.activities);
     const trailActivities = state.protocol.activities.filter(activity => activity["@type"].includes("ABTrails"));
-
     const activity = {
       ...activityModel.getActivityBuilderData({ items, isABTrails, trailVersion: trailActivities.length + 1 }),
       index: index < 0 ? state.protocol.activities.length : index,

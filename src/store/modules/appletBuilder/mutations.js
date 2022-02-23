@@ -79,6 +79,11 @@ const itemMutations = {
     );
   },
 
+  removeScoresAndSubScals(state, { scores, subScales }) {
+    state.currentActivity.items[state.currentActivity.items.length - 1].cumulativeScores = scores;
+    state.currentActivity.subScales = subScales;
+  },
+
   addItem (state, { index, obj }) {
     const model = new Item();
     let item = {
@@ -300,9 +305,7 @@ const activityMutations = {
       }
     }
 
-    // console.log('state.protocol.activities--->', state.protocol.activities);
     const trailActivities = state.protocol.activities.filter(activity => activity["@type"].includes("ABTrails"));
-
     const activity = {
       ...activityModel.getActivityBuilderData({ items, isABTrails, trailVersion: trailActivities.length + 1 }),
       index: index < 0 ? state.protocol.activities.length : index,

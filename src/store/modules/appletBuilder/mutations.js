@@ -186,7 +186,7 @@ const itemMutations = {
       timestamp: Date.now()
     };
 
-    state.currentActivity.items.splice(index+1, 0, newItem);
+    state.currentActivity.items.splice(index + 1, 0, newItem);
   },
 
   deleteItem(state, index) {

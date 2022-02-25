@@ -126,7 +126,7 @@
         </v-card-title>
 
         <v-card-text>
-          <p>{{ targetActivity }}</p>
+          <p>By moving these items to {{ targetActivity }}, it will result in the below</p>
           <ul class="list-group">
             <li v-for="(errorMessage, index) in errorMessages" :key="index">
               {{ errorMessage }}
@@ -427,9 +427,14 @@ export default {
             let { jsExpression } = score.compute;
             if (jsExpression.includes(item.name)) {
               const values = jsExpression.split(' + ');
+              let scoreName = score.name;
+
+              if (!scoreName) {
+                scoreName = score.compute.variableName;
+              }
               
               jsExpression = values.filter(value => value !== item.name).join(" + ");
-              this.errorMessages.push(`${item.name} is removed from ${score.name}`);
+              this.errorMessages.push(`${item.name} is removed from ${scoreName}`);
             }
 
             return {
@@ -525,7 +530,6 @@ export default {
       this.subScaleData = [];
       this.transferConfirmDlg = false;
       this.successDlg = true;
-      console.log('this.successDlg=--------------->', this.successDlg)
     }
   }
 }

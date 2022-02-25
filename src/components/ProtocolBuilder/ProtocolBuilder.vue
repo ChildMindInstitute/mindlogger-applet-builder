@@ -686,7 +686,8 @@ export default {
 
     editActivity (index, isNew = false) {
       const activity = this.withoutPrize[index];
-      const currentIndex = isNew ? index : this.activities.findIndex(({name}) => name === activity.name);
+      const currentIndex = isNew ? index : this.activities.indexOf(activity);
+
       this.setCurrentActivity(currentIndex);
       this.setCurrentScreen(config.ITEM_SCREEN);
     },

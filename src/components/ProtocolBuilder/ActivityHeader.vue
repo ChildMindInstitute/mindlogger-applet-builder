@@ -105,7 +105,8 @@
               />
             </v-col>
           </template>
-          <span>This feature is for webapp only</span>
+          <span v-if="currentActivity.hasVariable">This activity contains variables and cannot be a one page assessment.</span>
+          <span v-else>This feature is for webapp only.</span>
         </v-tooltip>
       </v-row>
 
@@ -169,6 +170,28 @@
         </v-card>
       </v-dialog>
 
+    <v-dialog
+      v-model="alertFlag"
+      persistent
+      width="500"
+    >
+      <v-card>
+        <v-card-text class="pt-4">
+          {{alertMsg}}
+        </v-card-text>
+
+        <v-card-actions
+          class="justify-space-around"
+        >
+          <v-btn
+            @click="alertFlag = false"
+          >
+            Ok
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <Notify :notify="notify" />
     <Loading :loading="loading" />
   </v-card>
@@ -190,6 +213,7 @@ import config from '../../config';
 import Uploader from './Uploader.vue';
 import Notify from './Additional/Notify.vue';
 import Loading from './Additional/Loading.vue';
+import { getTextBetweenBrackets } from '../../utilities/util';
 
 export default {
   components: {
@@ -209,7 +233,9 @@ export default {
       isExpanded: true,
       loading: false,
       notify: {},
-      assessmentTypeConfirmationDlg: false
+      assessmentTypeConfirmationDlg: false,
+      alertFlag: false,
+      alertMsg: '',
     }
   },
   mounted() {
@@ -220,6 +246,12 @@ export default {
       'deleteConditionals'
     ]),
     onSwitchAssessmentType () {
+      if (this.currentActivity.hasVariable && this.isOnePageAssessment) {
+        this.alertMsg = `This activity contains variables and cannot be a one page assessment.`;
+        this.alertFlag = true;
+        setTimeout(() => this.isOnePageAssessment = false, 100)
+        return;
+      }
       if (!this.isOnePageAssessment) {
         if (this.conditionals.length) {
           this.assessmentTypeConfirmationDlg = true;
@@ -228,6 +260,7 @@ export default {
         }
       } else {
         this.isOnePageAssessment = false;
+        this.updateActivityMetaInfo({ isOnePageAssessment: false })
       }
     },
     editActivtiy () {
@@ -306,7 +339,7 @@ export default {
     conditionals () {
       return this.currentActivity.conditionalItems;
     },
-
+  
     name: {
       get: function () {
         return this.currentActivity && this.currentActivity.name;
@@ -352,6 +385,18 @@ export default {
         return this.currentActivity && this.currentActivity.isSkippable;
       },
       set: function (isSkippable) {
+        if (isSkippable) {
+          for (const item of this.currentActivity.items) {
+            const variableNames = getTextBetweenBrackets(item.question.text);
+            if (variableNames && variableNames.length) {
+              this.alertMsg = `You are not allowed to mark this option.`;
+              this.alertFlag = true;
+              this.updateActivityMetaInfo({ isSkippable: false, valid: false });
+              setTimeout(() => this.isSkippable = false, 100)
+              return false;
+            }
+          }
+        }
         this.updateActivityMetaInfo({ isSkippable });
       }
     },
@@ -384,7 +429,7 @@ export default {
     hasOnlyWebSupported() {
       for (let i = 0; i < this.currentActivity.items.length; i++) {
         const inputType = this.currentActivity.items[i].inputType;
-        if (!['radio', 'checkbox', 'slider', 'text', 'ageSelector', 'cumulativeScore'].includes(inputType)) {
+        if (!['radio', 'checkbox', 'slider', 'text', 'ageSelector', 'cumulativeScore'].includes(inputType) || this.currentActivity.hasVariable) {
           this.updateActivityMetaInfo({ isOnePageAssessment: false })
           return false;
         }

@@ -10,7 +10,7 @@
           v-if="selectingItems && selectedItems.length"
           rounded
           color="green"
-          @click="transferItemDlg.visible = true"
+          @click="checkVariableNameOnMovement"
           dark
         >
           Move to ...
@@ -199,7 +199,7 @@
       >
         <v-card>
           <v-card-text class="pt-4">
-            Moving this item will cause your conditional logic to fail.
+            {{warningMsg}}
           </v-card-text>
 
           <v-card-actions
@@ -266,7 +266,7 @@ import config from '../../../config';
 import ItemBuilder from './ItemBuilder';
 import UrlItemUploader from './UrlItemUploader';
 import draggable from 'vuedraggable'
-
+import { checkItemVariableNameIndex } from '../../../utilities/util';
 
 export default {
   components: {
@@ -293,6 +293,7 @@ export default {
       cumulativeData: [],
       subScaleData: [],
       movedItem: 0,
+      warningMsg: 'Moving this item will cause your conditional logic to fail.'
     }
   },
   computed: {
@@ -350,6 +351,13 @@ export default {
     handleChange (evt) {
       const { element, oldIndex, newIndex } = evt.moved;
 
+      const invalidLargeTextIndex = checkItemVariableNameIndex(element.question.text, { items: this.cachedItems });
+      if (newIndex <= invalidLargeTextIndex ) {
+        this.warningMsg = "This item has been moved above the user's input. Please move it above  in order for the variable to work correctly.";
+        this.warningFlag = true;
+        return;
+      }
+
       this.movedItem = newIndex;
       this.conditionals.map(conditional => {
         if (conditional.showValue.name === element.name) {
@@ -375,11 +383,21 @@ export default {
     },
 
     revertChanges () {
+      if (this.warningMsg && this.warningMsg.includes('By moving')){
+        this.warningFlag = false
+        return;
+      }
+
       this.draggableItems = this.cachedItems;
       this.warningFlag = false
     },
 
     confirmChanges () {
+      if (this.warningMsg && this.warningMsg.includes('By moving')) {
+        this.transferItemDlg.visible = true
+        this.warningFlag = false
+        return;
+      }
       const name = this.draggableItems[this.movedItem].name;
 
       for (let i = this.conditionals.length - 1; i >= 0; i -= 1) {
@@ -416,6 +434,20 @@ export default {
       } else {
         this.selectedItems.push(item);
       }
+    },
+
+    checkVariableNameOnMovement() {
+      console.log(this.cachedItems);
+      console.log(this.selectedItems);
+      for (const item of this.selectedItems) {
+        const invalidLargeTextIndex = checkItemVariableNameIndex(item.question.text, { items: this.cachedItems });
+        if (invalidLargeTextIndex != -1) {
+          this.warningMsg = `By moving ${item.name}, to another activity will cause ${item.name} to fail. Do you want to continue? (Please fix ${item.name} if you choose to continue.)`;
+          this.warningFlag = true;
+          return;
+        }
+      }
+      this.transferItemDlg.visible = true
     },
 
     confirmMovementOfItems () {

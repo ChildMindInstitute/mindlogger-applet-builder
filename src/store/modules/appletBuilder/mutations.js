@@ -337,7 +337,8 @@ const activityMutations = {
 
     Object.assign(state.currentActivity, obj);
 
-    state.currentActivity.valid = Activity.checkValidation(state.currentActivity);
+    if (!obj.hasOwnProperty('valid'))
+      state.currentActivity.valid = Activity.checkValidation(state.currentActivity);
 
     for (const existing of state.protocol.activities) {
       if (existing != state.currentActivity && existing.name == state.currentActivity.name && existing.valid) {

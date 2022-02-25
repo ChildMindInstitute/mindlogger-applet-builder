@@ -186,7 +186,7 @@ const itemMutations = {
       timestamp: Date.now()
     };
 
-    state.currentActivity.items.splice(index+1, 0, newItem);
+    state.currentActivity.items.splice(index + 1, 0, newItem);
   },
 
   deleteItem(state, index) {
@@ -322,11 +322,30 @@ const activityMutations = {
     }
   },
 
-  updateActivityMetaInfo (state, obj = {}) {
+  updateActivityMetaInfo (state, obj) {
+    if (obj.name && state.currentActivity.valid) {
+      for (const existing of state.protocol.activities) {
+        if (existing != state.currentActivity && existing.name == state.currentActivity.name) {
+          existing.valid = Activity.checkValidation(existing);
+
+          if (existing.valid) {
+            break;
+          }
+        }
+      }
+    }
+
     Object.assign(state.currentActivity, obj);
 
     if (!obj.hasOwnProperty('valid'))
       state.currentActivity.valid = Activity.checkValidation(state.currentActivity);
+
+    for (const existing of state.protocol.activities) {
+      if (existing != state.currentActivity && existing.name == state.currentActivity.name && existing.valid) {
+        state.currentActivity.valid = false;
+        break;
+      }
+    }
   },
 
   setPrizeActivity (state, prizeActivity) {

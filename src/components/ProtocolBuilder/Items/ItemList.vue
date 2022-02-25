@@ -88,6 +88,35 @@
     </v-dialog>
 
     <v-dialog
+      v-model="successDlg"
+      max-width="600"
+    >
+      <v-card>
+        <v-card-title class="text-h5">
+          Successfully moved
+        </v-card-title>
+        <v-card-text>
+          <p>These items have been successfully moved to {{ targetActivity }}</p>
+          <ul class="list-group">
+            <li v-for="(name, index) in selectedItems.map(item => item.name)" :key="index">
+              {{ name }}
+            </li>
+          </ul>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="green darken-1"
+            text
+            @click="successDlg = false"
+          >
+            Ok
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
       v-model="transferConfirmDlg"
       max-width="600"
     >
@@ -97,7 +126,7 @@
         </v-card-title>
 
         <v-card-text>
-          <p>{{ targetActivity }}</p>
+          <p>By moving these items to {{ targetActivity }}, it will result in the below</p>
           <ul class="list-group">
             <li v-for="(errorMessage, index) in errorMessages" :key="index">
               {{ errorMessage }}
@@ -253,6 +282,7 @@ export default {
       baseKey: 0,
       selectingItems: false,
       transferConfirmDlg: false,
+      successDlg: false,
       transferItemDlg: {
         visible: false,
         index: -1,
@@ -286,7 +316,7 @@ export default {
       const targetActivity = this.activities[this.transferItemDlg.index];
 
       if (targetActivity) {
-        return `By moving these items to ${targetActivity}, it will result in the below`;
+        return targetActivity.name;
       } else {
         return '';
       }
@@ -429,9 +459,14 @@ export default {
             let { jsExpression } = score.compute;
             if (jsExpression.includes(item.name)) {
               const values = jsExpression.split(' + ');
+              let scoreName = score.name;
+
+              if (!scoreName) {
+                scoreName = score.compute.variableName;
+              }
               
               jsExpression = values.filter(value => value !== item.name).join(" + ");
-              this.errorMessages.push(`${item.name} is removed from ${score.name}`);
+              this.errorMessages.push(`${item.name} is removed from ${scoreName}`);
             }
 
             return {
@@ -485,6 +520,7 @@ export default {
       if (this.errorMessages.length) {
         this.transferConfirmDlg = true;
       } else {
+        this.successDlg = true;
         this.transferItems({
           target: this.transferItemDlg.index,
           items: this.selectedItems
@@ -525,6 +561,7 @@ export default {
       this.errorMessages = [];
       this.subScaleData = [];
       this.transferConfirmDlg = false;
+      this.successDlg = true;
     }
   }
 }

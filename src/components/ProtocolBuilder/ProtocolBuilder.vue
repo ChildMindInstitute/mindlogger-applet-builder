@@ -196,7 +196,7 @@
           <transition-group>
             <v-card
               v-for="(activity, index) in withoutPrize"
-              :key="`${activity._id}-${index}`"
+              :key="`${activity._id}-${index}_${activity.timestamp}`"
               class="ma-4"
             >
               <v-card-title

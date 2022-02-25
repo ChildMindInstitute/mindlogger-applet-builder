@@ -249,10 +249,15 @@ const activityMutations = {
       finalSubScale: { ...activity.finalSubScale },
       subScales: [...activity.subScales],
       conditionalItems,
-      index: activities.length
+      index: index+1,
+      timestamp: Date.now()
     };
 
     activities.splice(index+1, 0, newActivity);
+
+    for (let i = index+1; i < activities.length; i++) {
+      activities[i].index = i;
+    }
   },
 
   deleteActivity (state, index) {
@@ -375,6 +380,10 @@ const activityMutations = {
 
   updateActivityList(state, activities) {
     state.protocol.activities = activities;
+
+    for (let i = 0; i < state.protocol.activities.length; i++) {
+      state.protocol.activities[i].index = i;
+    }
   }
 };
 

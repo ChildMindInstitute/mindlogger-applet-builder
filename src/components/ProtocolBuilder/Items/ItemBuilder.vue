@@ -62,7 +62,7 @@
             <v-btn
               icon
               v-on="on"
-              @click="hideItem(itemIndex)"
+              @click="checkVariableNameOnAction(itemIndex, hideItem)"
             >
               <v-icon v-if="isVis" color="grey lighten-1">
                 mdi-eye-off-outline
@@ -119,7 +119,7 @@
             <v-btn
               icon
               v-on="on"
-              @click="onDeleteItem(item)"
+              @click="checkVariableNameOnAction(item, onDeleteItem)"
             >
               <v-icon color="grey lighten-1">
                 mdi-delete
@@ -223,7 +223,7 @@
             * This field is required
           </div>
           <div v-if="invalidLargeText" class="error--text text-body-2 mt-2 ml-4">
-            * This item is not supported, please remove it.
+            {{errorMsg}}
           </div>
           <div class="d-flex mt-2" :class="largeText.length > 75 ? 'justify-space-between' : 'justify-end'">
             <div
@@ -616,6 +616,56 @@
     <Loading :loading="loading" />
 
     <v-dialog
+      v-model="warningFlag"
+      persistent
+      width="500"
+    >
+      <v-card>
+        <v-card-text class="pt-4">
+          {{warningMsg}}
+        </v-card-text>
+
+        <v-card-actions
+          class="justify-space-around"
+        >
+          <v-btn
+            @click="handleWarningConfirm(item, itemIndex)"
+          >
+            Continue
+          </v-btn>
+
+          <v-btn
+            @click="warningFlag = false"
+          >
+            Cancel
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
+      v-model="alertFlag"
+      persistent
+      width="500"
+    >
+      <v-card>
+        <v-card-text class="pt-4">
+          {{alertMsg}}
+        </v-card-text>
+
+        <v-card-actions
+          class="justify-space-around"
+        >
+          <v-btn
+            @click="alertFlag = false"
+          >
+            Ok
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
       v-model="removeDialog"
       persistent
       max-width="720"
@@ -795,7 +845,7 @@ import Loading from '../Additional/Loading.vue';
 
 import { mapMutations, mapGetters } from 'vuex';
 import config from '../../../config';
-import { checkItemVariableName } from '../../../utilities/util';
+import { checkItemVariableName, checkItemVariableNameIndex, getTextBetweenBrackets } from '../../../utilities/util';
 
 export default {
   components: {
@@ -852,7 +902,12 @@ export default {
       isVis: false,
       invalidLargeText: false,
       debounceTimer: undefined,
-      responseIdentifierMessage: 'By using this option, the user will be required to enter response data identifier text into the field. The text entered will identify the response data collected at that point in time. The identifier used will be filterable on the user\'s data visualization tab.'
+      responseIdentifierMessage: 'By using this option, the user will be required to enter response data identifier text into the field. The text entered will identify the response data collected at that point in time. The identifier used will be filterable on the user\'s data visualization tab.',
+      warningFlag: false,
+      warningMsg: '',
+      errorMsg: '* This item is not supported, please remove it.',
+      alertFlag: false,
+      alertMsg: '',
     }
   },
   computed: {
@@ -865,7 +920,7 @@ export default {
         'currentActivity',
         'itemInputTypes',
         'itemTemplates',
-        'prizeActivity'
+        'prizeActivity',
       ]
     ),
 
@@ -910,7 +965,25 @@ export default {
       });
 
       this.debounce(function() {
-        this.invalidLargeText = checkItemVariableName(text, this.currentActivity);
+        const { valid, found } = checkItemVariableName(text, this.currentActivity, this.itemIndex);
+        this.invalidLargeText = valid;
+        if (typeof this.invalidLargeText === 'object') {
+          this.errorMsg = `* You cannot use ${this.currentActivity.items[this.itemIndex].name} in the same item. Please remove`
+          this.invalidLargeText = true;
+        } else {
+          this.errorMsg = '* This item is not supported, please remove it.'
+        }
+
+        if (found) {
+          if (this.currentActivity.isOnePageAssessment) {
+            this.alertFlag = true;
+            this.alertMsg = 'A one-page assessment cannot contain variables. This variable will automatically be removed.'
+          }
+          this.currentActivity.hasVariable = found;
+          this.currentActivity.isOnePageAssessment = false;
+          this.updateActivityMetaInfo({ isOnePageAssessment: false, hasVariable: found })
+        }
+
         this.updateItemMetaInfo({
           index: this.itemIndex,
           obj: { valid: !this.invalidLargeText },
@@ -951,7 +1024,8 @@ export default {
         'insertTemplateUpdateRequest',
         'addTimeScreen',
         'deleteTimeScreen',
-        'updateTokenSummary'
+        'updateTokenSummary',
+        'updateActivityMetaInfo',
       ],
     ),
 
@@ -983,6 +1057,37 @@ export default {
         return condition.maxValue;
       }
       return condition.minValue;
+    },
+
+    handleWarningConfirm(item, itemIndex) {
+      if (this.warningMsg.includes('By deleting'))
+        this.onDeleteItem(item)
+      else if (this.warningMsg.includes('By hiding')) {
+        this.hideItem(itemIndex)
+      }
+      this.warningFlag = false;
+    },
+
+    checkVariableNameOnAction(item, callBack) {
+      let index;
+      if (typeof item === 'number') {
+        index = item;
+        item = this.currentActivity.items[item];
+      }
+      if (item && !item.isVis) {
+        for (const citem of this.currentActivity.items) {
+          const invalidLargeTextIndex = checkItemVariableNameIndex(citem.question.text, { items: [item] });
+          if (invalidLargeTextIndex != -1) {
+            if (index > -1) {
+              this.warningMsg = `By hiding ${item.name}, it will cause ${citem.name} to fail. Do you want to continue? (Please fix ${citem.name} if you choose to continue.)`;
+            } else
+              this.warningMsg = `By deleting ${item.name}, it will cause ${citem.name} to fail. Do you want to continue? (Please fix ${citem.name} if you choose to continue.)`;
+            this.warningFlag = true;
+            return;
+          }
+        }
+      }
+      callBack(index > -1 ? index : item);
     },
 
     onDeleteItem () {
@@ -1116,6 +1221,22 @@ export default {
     },
 
     updateAllow(allowItem) {
+      if (allowItem) {
+        const item = this.currentActivity.items[this.itemIndex];
+        for (const citem of this.currentActivity.items) {
+          const invalidLargeTextIndex = checkItemVariableNameIndex(citem.question.text, { items: [item] });
+          if (invalidLargeTextIndex != -1) {
+            this.updateItemMetaInfo({
+              index: this.itemIndex,
+              obj: { allow: false, valid: false }
+            })
+            this.alertMsg = `By skipping ${item.name}, it will cause ${citem.name} to fail.`;
+            this.alertFlag = true;
+            return;
+          }
+        }
+      }
+
       this.updateItemMetaInfo({
         index: this.itemIndex,
         obj: { allow: allowItem }

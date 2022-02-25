@@ -322,10 +322,11 @@ const activityMutations = {
     }
   },
 
-  updateActivityMetaInfo (state, obj) {
+  updateActivityMetaInfo (state, obj = {}) {
     Object.assign(state.currentActivity, obj);
 
-    state.currentActivity.valid = Activity.checkValidation(state.currentActivity);
+    if (!obj.hasOwnProperty('valid'))
+      state.currentActivity.valid = Activity.checkValidation(state.currentActivity);
   },
 
   setPrizeActivity (state, prizeActivity) {

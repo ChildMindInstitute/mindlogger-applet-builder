@@ -362,12 +362,13 @@ export default class Protocol {
       activities: [],
       tokenPrizeModal: false,
     };
-
+    
     const activityModel = new Activity();
     const itemModel = new Item();
+    const activityIds = Object.keys(activities);
 
-    initialStoreData.order.map(id => {
-      const act = activities[id];
+    initialStoreData.order.map((id, i) => {
+      const act = activities[id] || activities[activityIds[i]];
 
       const activityInfo = Activity.parseJSONLD(act)
       const activityItems = activityInfo.orderList.filter(key => items[key]).map((key) => {

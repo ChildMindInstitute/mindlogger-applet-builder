@@ -427,6 +427,16 @@ export default {
         }
       }
 
+      const names = [];
+      for (let activity of this.protocol.activities) {
+        if (names.includes(activity.name)) {
+          this.dataAlertDialog.message = 'Activity names cannot be the same. Please update each activity to have a unique name.';
+        }
+
+        names.push(activity.name);
+      }
+
+
       this.dataAlertDialog.visibility = (this.dataAlertDialog.message.length !== 0);
 
       return !this.dataAlertDialog.visibility;

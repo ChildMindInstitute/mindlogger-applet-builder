@@ -94,6 +94,7 @@ export default class Activity {
       isPrize: initialActivityData.isPrize || false,
       scoreOverview: initialActivityData.scoreOverview || '',
       valid: valid !== undefined ? valid : true,
+      timestamp: Date.now()
     };
   }
 

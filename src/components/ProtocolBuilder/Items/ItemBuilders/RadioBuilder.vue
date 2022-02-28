@@ -160,6 +160,9 @@
                   counter="75"
                   @change="updateOption(option)"
                 />
+                <div v-if="!option.valid" class="error--text text-body-2 mt-2 ml-4">
+                  {{errorMsg}}
+                </div>
               </v-col>
               <v-col
                 v-if="isTokenValue"
@@ -593,6 +596,7 @@ import Uploader from '../../Uploader.vue';
 import OptionalItemText from '../../Partial/OptionalItemText.vue';
 import ItemTimerOption from '../../Partial/ItemTimerOption';
 import MarkDownEditor from '../../MarkDownEditor';
+import { checkItemVariableName } from '../../../../utilities/util';
 
 export default {
   components: {
@@ -605,6 +609,14 @@ export default {
     initialItemData: {
       type: Object,
       required: true
+    },
+    currentActivity: {
+      type: Object,
+      required: false
+    },
+    itemIndex: {
+      type: Number,
+      default: -1,
     },
     isSkippableItem: {
       type: Number,
@@ -708,6 +720,7 @@ export default {
       colorPickerDialog: false,
       colorPaletteDialog: false,
       mode: "hex",
+      errorMsg: "This item is not supported, please remove it.",
     };
   },
 
@@ -947,6 +960,11 @@ export default {
       }
       if (this.isTokenValue && isNaN(option.value) || this.hasScoreValue && isNaN(option.score)) {
         return false;
+      }
+
+      if (option.name) {
+        const { valid, found } = checkItemVariableName(option.name, this.currentActivity, this.itemIndex);
+        if (found) return typeof valid === 'object' ? false : !valid;
       }
 
       return true;

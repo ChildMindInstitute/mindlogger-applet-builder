@@ -354,6 +354,8 @@
         :is-reviewer-activity="isReviewerActivity"
         :initial-is-optional-text="item.isOptionalText"
         :timer="item.timer"
+        :current-activity="currentActivity"
+        :item-index="itemIndex"
         @openPrize="setTokenPrizeModalStatus(true)"
         @removeTemplate="onRemoveTemplate"
         @updateTemplates="onUpdateTemplates"

@@ -50,7 +50,9 @@
           sm="4"
         >
           <v-checkbox
+            @click="onSwitchSkipAllItems"
             v-model="isSkippable"
+            :disabled="currentActivity.hasVariable"
             label="Allow user to skip all items"
           />
         </v-col>
@@ -101,7 +103,7 @@
                 @click="onSwitchAssessmentType"
                 v-model="isOnePageAssessment"
                 label="Show all questions at once"
-                :disabled="!hasOnlyWebSupported"
+                :disabled="!hasOnlyWebSupported || currentActivity.hasVariable"
               />
             </v-col>
           </template>
@@ -249,18 +251,37 @@ export default {
       if (this.currentActivity.hasVariable && this.isOnePageAssessment) {
         this.alertMsg = `This activity contains variables and cannot be a one page assessment.`;
         this.alertFlag = true;
-        setTimeout(() => this.isOnePageAssessment = false, 100)
+        setTimeout(() => {
+          this.isOnePageAssessment = false;
+          this.updateActivityMetaInfo({ isOnePageAssessment: false })
+        }, 100)
         return;
       }
-      if (!this.isOnePageAssessment) {
-        if (this.conditionals.length) {
-          this.assessmentTypeConfirmationDlg = true;
-        } else {
-          this.isOnePageAssessment = true;
+      setTimeout(() => {
+        if (this.isOnePageAssessment) {
+          if (this.conditionals.length) {
+            this.assessmentTypeConfirmationDlg = true;
+          } else {
+            this.isOnePageAssessment = true;
+            this.updateActivityMetaInfo({ isOnePageAssessment: true })
+          }
         }
-      } else {
-        this.isOnePageAssessment = false;
-        this.updateActivityMetaInfo({ isOnePageAssessment: false })
+      }, 100)
+    },
+    onSwitchSkipAllItems () {
+      if (this.isSkippable) {
+        for (const item of this.currentActivity.items) {
+          const variableNames = getTextBetweenBrackets(item.question.text);
+          if (variableNames && variableNames.length) {
+            this.alertMsg = `By skipping all the items it will cause some items to fail`;
+            this.alertFlag = true;
+            setTimeout(() => {
+              this.isSkippable = false;
+              this.updateActivityMetaInfo({ isSkippable: false, valid: false });
+            }, 100)
+            return false;
+          }
+        }
       }
     },
     editActivtiy () {
@@ -385,18 +406,6 @@ export default {
         return this.currentActivity && this.currentActivity.isSkippable;
       },
       set: function (isSkippable) {
-        if (isSkippable) {
-          for (const item of this.currentActivity.items) {
-            const variableNames = getTextBetweenBrackets(item.question.text);
-            if (variableNames && variableNames.length) {
-              this.alertMsg = `You are not allowed to mark this option.`;
-              this.alertFlag = true;
-              this.updateActivityMetaInfo({ isSkippable: false, valid: false });
-              setTimeout(() => this.isSkippable = false, 100)
-              return false;
-            }
-          }
-        }
         this.updateActivityMetaInfo({ isSkippable });
       }
     },
@@ -429,7 +438,7 @@ export default {
     hasOnlyWebSupported() {
       for (let i = 0; i < this.currentActivity.items.length; i++) {
         const inputType = this.currentActivity.items[i].inputType;
-        if (!['radio', 'checkbox', 'slider', 'text', 'ageSelector', 'cumulativeScore'].includes(inputType) || this.currentActivity.hasVariable) {
+        if (!['radio', 'checkbox', 'slider', 'text', 'ageSelector', 'cumulativeScore'].includes(inputType)) {
           this.updateActivityMetaInfo({ isOnePageAssessment: false })
           return false;
         }

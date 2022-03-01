@@ -122,15 +122,23 @@ export const checkItemVariableName = (text, activity, itemIndex) => {
   return { valid: false, found };
 }
 
-export const checkItemVariableNameIndex = (text, activity) => {
+export const checkItemVariableNameIndex = (text, activity, loop) => {
   try {
     const variableNames = getTextBetweenBrackets(text);
     if (variableNames && variableNames.length) {
+      let lastIndex = -1;
       for (const variableName of variableNames) {
         const index = _.findIndex(activity.items, { name: variableName });
-        if (index > -1 && inputTypes.includes(activity.items[index].inputType))
-          return index;
+        if (index > -1 && inputTypes.includes(activity.items[index].inputType)) {
+          if (loop) {
+            if (lastIndex < index)
+              lastIndex = index;
+          } else {
+            return index;
+          }
+        }
       };
+      return lastIndex;
     }
   } catch (error) {
     console.warn(error)

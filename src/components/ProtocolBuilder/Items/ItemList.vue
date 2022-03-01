@@ -351,7 +351,7 @@ export default {
     handleChange (evt) {
       const { element, oldIndex, newIndex } = evt.moved;
 
-      const invalidLargeTextIndex = checkItemVariableNameIndex(element.question.text, { items: this.cachedItems });
+      const invalidLargeTextIndex = checkItemVariableNameIndex(element.question.text, { items: this.cachedItems }, true);
       if (newIndex <= invalidLargeTextIndex ) {
         this.warningMsg = "This item has been moved above the user's input. Please move it above  in order for the variable to work correctly.";
         this.warningFlag = true;
@@ -437,14 +437,22 @@ export default {
     },
 
     checkVariableNameOnMovement() {
-      console.log(this.cachedItems);
-      console.log(this.selectedItems);
+      const items = this.cachedItems.length ? this.cachedItems : this.draggableItems;
       for (const item of this.selectedItems) {
-        const invalidLargeTextIndex = checkItemVariableNameIndex(item.question.text, { items: this.cachedItems });
+        const invalidLargeTextIndex = checkItemVariableNameIndex(item.question.text, { items });
         if (invalidLargeTextIndex != -1) {
           this.warningMsg = `By moving ${item.name}, to another activity will cause ${item.name} to fail. Do you want to continue? (Please fix ${item.name} if you choose to continue.)`;
           this.warningFlag = true;
           return;
+        } else {
+          for (const cachedItem of items) {
+            const invalidLargeTextIndex = checkItemVariableNameIndex(cachedItem.question.text, { items: [item] });
+            if (invalidLargeTextIndex != -1) {
+              this.warningMsg = `By moving ${item.name}, to another activity will cause ${cachedItem.name} to fail. Do you want to continue? (Please fix ${cachedItem.name} if you choose to continue.)`;
+              this.warningFlag = true;
+              return;
+            }
+          }
         }
       }
       this.transferItemDlg.visible = true

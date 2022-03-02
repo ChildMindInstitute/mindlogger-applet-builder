@@ -123,12 +123,20 @@
             />
           </v-col>
 
-          <v-col sm="4">
-            <v-checkbox
-              v-model="combineReports"
-              label="Combine reports on last activity"
-            />
-          </v-col>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-col sm="4" 
+                v-bind="attrs"
+                v-on="on"
+              >
+                <v-checkbox
+                  v-model="combineReports"
+                  label="Combine reports on last activity"
+                />
+              </v-col>
+            </template>
+            <span>This feature only impacts mobile and the web-app. The admin report will remain unchanged.</span>
+          </v-tooltip>
         </v-row>
 
         <div>

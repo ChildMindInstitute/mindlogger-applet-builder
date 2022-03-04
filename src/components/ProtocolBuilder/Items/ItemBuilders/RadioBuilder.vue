@@ -513,6 +513,27 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog
+      v-model="alertFlag"
+      persistent
+      width="500"
+    >
+      <v-card>
+        <v-card-text class="pt-4">
+          {{alertMsg}}
+        </v-card-text>
+
+        <v-card-actions
+          class="justify-space-around"
+        >
+          <v-btn
+            @click="alertFlag = false"
+          >
+            Ok
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -592,11 +613,13 @@
 
 
 <script>
+import { mapMutations } from 'vuex';
 import Uploader from '../../Uploader.vue';
 import OptionalItemText from '../../Partial/OptionalItemText.vue';
 import ItemTimerOption from '../../Partial/ItemTimerOption';
 import MarkDownEditor from '../../MarkDownEditor';
 import { checkItemVariableName } from '../../../../utilities/util';
+import config from '../../../../config';
 
 export default {
   components: {
@@ -655,6 +678,9 @@ export default {
     allowEdit: {
       type: Boolean,
       default: true
+    },
+    variablesItems: {
+      type: Object
     }
   },
   data: function () {
@@ -721,6 +747,8 @@ export default {
       colorPaletteDialog: false,
       mode: "hex",
       errorMsg: "This item is not supported, please remove it.",
+      alertFlag: false,
+      alertMsg: '',
     };
   },
 
@@ -745,6 +773,12 @@ export default {
   },
 
   methods: {
+    ...mapMutations(config.MODULE_NAME,
+      [
+        'updateActivityMetaInfo',
+      ],
+    ),
+
     updateTimerOption(option) {
       this.$emit('updateTimer', option.responseTimeLimit)
     },
@@ -963,7 +997,33 @@ export default {
       }
 
       if (option.name) {
-        const { valid, found } = checkItemVariableName(option.name, this.currentActivity, this.itemIndex);
+        const { valid, found, variableNames = [] } = checkItemVariableName(option.name, this.currentActivity, this.itemIndex);
+        if (found) {
+          if (this.currentActivity.isOnePageAssessment) {
+            this.alertFlag = true;
+            this.alertMsg = 'A one-page assessment cannot contain variables. This variable will automatically be removed.'
+            setTimeout(()=> {
+              variableNames.forEach(variable => {
+                option.name = option.name.replace(variable, '');
+              });
+              this.update();
+              this.currentActivity.isOnePageAssessment = false;
+              this.updateActivityMetaInfo({ isOnePageAssessment: false })
+            }, 200);
+          } else {
+            this.currentActivity.hasVariable = found;
+            this.updateActivityMetaInfo({ hasVariable: found })
+          }
+        }
+        try {
+          Object.assign(this.variablesItems, { [`${[this.currentActivity.items[this.itemIndex].name]}-options`]: variableNames })
+        } catch (error) { }
+
+        if (_.concat([], ...Object.values(this.variablesItems)).length < 1) {
+          this.currentActivity.hasVariable = false;
+          this.updateActivityMetaInfo({ hasVariable: false })
+        }
+
         if (found) return typeof valid === 'object' ? false : !valid;
       }
 

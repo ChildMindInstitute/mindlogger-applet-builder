@@ -170,6 +170,7 @@
           @blur="isItemNameEditing = false"
           @input="onUpdateName"
           @keydown="nameKeydown($event)"
+          @mouseup="onMouseup($event, item)"
         />
       </div>
       <template
@@ -355,6 +356,7 @@
         :initial-is-optional-text="item.isOptionalText"
         :timer="item.timer"
         :current-activity="currentActivity"
+        :variables-items="variablesItems"
         :item-index="itemIndex"
         @openPrize="setTokenPrizeModalStatus(true)"
         @removeTemplate="onRemoveTemplate"
@@ -816,6 +818,7 @@
 </style>
 
 <script>
+import _ from 'lodash';
 import Uploader from '../Uploader.vue';
 
 import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
@@ -879,6 +882,10 @@ export default {
       type: Number,
       required: true,
     },
+    variablesItems: {
+      type: Object,
+      required: true
+    }
   },
   data() {
     return {
@@ -910,6 +917,7 @@ export default {
       errorMsg: '* This item is not supported, please remove it.',
       alertFlag: false,
       alertMsg: '',
+      editVariableValid: true,
     }
   },
   computed: {
@@ -970,7 +978,10 @@ export default {
       });
 
       this.debounce(function() {
-        const { valid, found } = checkItemVariableName(text, this.currentActivity, this.itemIndex);
+        const { valid, found, variableNames = [] } = checkItemVariableName(text, this.currentActivity, this.itemIndex);
+        try {
+          Object.assign(this.variablesItems, { [this.currentActivity.items[this.itemIndex].name]: variableNames })
+        } catch (error) { }
         this.invalidLargeText = valid;
         if (typeof this.invalidLargeText === 'object') {
           this.errorMsg = `* You cannot use ${this.currentActivity.items[this.itemIndex].name} in the same item. Please remove`
@@ -983,10 +994,24 @@ export default {
           if (this.currentActivity.isOnePageAssessment) {
             this.alertFlag = true;
             this.alertMsg = 'A one-page assessment cannot contain variables. This variable will automatically be removed.'
+            setTimeout(()=> {
+              variableNames.forEach(variable => {
+                text = text.replace(variable, '');
+              });
+              this.largeText = text;
+              this.updateItemMetaInfo({
+                index: this.itemIndex,
+                obj: { question: { text, image: this.headerImage } },
+              });
+            }, 200);
           }
           this.currentActivity.hasVariable = found;
           this.currentActivity.isOnePageAssessment = false;
           this.updateActivityMetaInfo({ isOnePageAssessment: false, hasVariable: found })
+        }
+
+        if (_.concat([], ...Object.values(this.variablesItems)).length < 1) {
+          this.currentActivity.hasVariable = false;
         }
 
         this.updateItemMetaInfo({
@@ -1144,8 +1169,22 @@ export default {
     },
 
     nameKeydown (e) {
+      if (!this.editVariableValid) {
+        this.alertMsg = `You cannot edit this item name, since it is using as a variable.`;
+        this.alertFlag = true;
+        e.preventDefault();
+      }
+
       if (!/^[a-zA-Z0-9-_]+$/.test(e.key)) {
         e.preventDefault();
+      }
+    },
+
+    onMouseup (event, item) {
+      if (_.concat([], ...Object.values(this.variablesItems)).includes(item.name)) {
+        this.editVariableValid = false;
+      } else {
+        this.editVariableValid = true;
       }
     },
 

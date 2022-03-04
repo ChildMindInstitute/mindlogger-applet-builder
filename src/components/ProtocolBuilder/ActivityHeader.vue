@@ -98,6 +98,8 @@
               sm="4"
               v-bind="attrs"
               v-on="on"
+              @mouseover="show = true"
+              @mouseleave="show = false"
             >
               <v-checkbox
                 @click="onSwitchAssessmentType"
@@ -107,8 +109,10 @@
               />
             </v-col>
           </template>
-          <span v-if="currentActivity.hasVariable">This activity contains variables and cannot be a one page assessment.</span>
-          <span v-else>This feature is for webapp only.</span>
+          <span v-if="show">
+            <span v-if="currentActivity.hasVariable">This activity contains variables and cannot be a one page assessment.</span>
+            <span v-else>This feature is for webapp only.</span>
+          </span>
         </v-tooltip>
       </v-row>
 
@@ -238,6 +242,7 @@ export default {
       assessmentTypeConfirmationDlg: false,
       alertFlag: false,
       alertMsg: '',
+      show: false
     }
   },
   mounted() {
@@ -272,7 +277,7 @@ export default {
       if (this.isSkippable) {
         for (const item of this.currentActivity.items) {
           const variableNames = getTextBetweenBrackets(item.question.text);
-          if (variableNames && variableNames.length) {
+          if ((variableNames && variableNames.length) || this.currentActivity.hasVariable) {
             this.alertMsg = `By skipping all the items it will cause some items to fail`;
             this.alertFlag = true;
             setTimeout(() => {

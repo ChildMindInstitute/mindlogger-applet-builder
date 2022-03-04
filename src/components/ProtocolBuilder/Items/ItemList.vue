@@ -70,6 +70,7 @@
 
             <ItemBuilder
               :item-index="index"
+              :variablesItems="variablesItems"
               class="ma-4 flex-grow-1 item-builder"
               @addItem="addBlankItem(index+1)"
             />
@@ -293,7 +294,8 @@ export default {
       cumulativeData: [],
       subScaleData: [],
       movedItem: 0,
-      warningMsg: 'Moving this item will cause your conditional logic to fail.'
+      warningMsg: 'Moving this item will cause your conditional logic to fail.',
+      variablesItems: {},
     }
   },
   computed: {
@@ -441,14 +443,20 @@ export default {
       for (const item of this.selectedItems) {
         const invalidLargeTextIndex = checkItemVariableNameIndex(item.question.text, { items });
         if (invalidLargeTextIndex != -1) {
-          this.warningMsg = `By moving ${item.name}, to another activity will cause ${item.name} to fail. Do you want to continue? (Please fix ${item.name} if you choose to continue.)`;
+          if (this.selectedItems.length > 1)
+            this.warningMsg = `By moving these items, to another activity will cause some items to fail. Do you want to continue? (Please fix those items if you choose to continue.)`;
+          else
+            this.warningMsg = `By moving ${item.name}, to another activity will cause ${item.name} to fail. Do you want to continue? (Please fix ${item.name} if you choose to continue.)`;
           this.warningFlag = true;
           return;
         } else {
           for (const cachedItem of items) {
             const invalidLargeTextIndex = checkItemVariableNameIndex(cachedItem.question.text, { items: [item] });
             if (invalidLargeTextIndex != -1) {
-              this.warningMsg = `By moving ${item.name}, to another activity will cause ${cachedItem.name} to fail. Do you want to continue? (Please fix ${cachedItem.name} if you choose to continue.)`;
+              if (this.selectedItems.length > 1)
+                this.warningMsg = `By moving these items, to another activity will cause some items to fail. Do you want to continue? (Please fix those items if you choose to continue.)`;
+              else
+                this.warningMsg = `By moving ${item.name}, to another activity will cause ${cachedItem.name} to fail. Do you want to continue? (Please fix ${cachedItem.name} if you choose to continue.)`;
               this.warningFlag = true;
               return;
             }

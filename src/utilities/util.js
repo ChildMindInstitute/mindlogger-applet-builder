@@ -105,21 +105,21 @@ const inputTypes = [
 ]
 
 export const checkItemVariableName = (text, activity, itemIndex) => {
-  let found = false;
+  let found = false, variableNames = [];
   try {
-    const variableNames = getTextBetweenBrackets(text);
+    variableNames = getTextBetweenBrackets(text);
     if (variableNames && variableNames.length) {
       for (const variableName of variableNames) {
         const item = _.findIndex(activity.items, { name: variableName });
         found = item > -1;
         if (item > -1 && (!inputTypes.includes(activity.items[item].inputType) || item === itemIndex))
-          return { valid: item === itemIndex ? {} : true, found };
+          return { valid: item === itemIndex ? {} : true, found, variableNames };
       };
     }
   } catch (error) {
     console.warn(error)
   }
-  return { valid: false, found };
+  return { valid: false, found, variableNames };
 }
 
 export const checkItemVariableNameIndex = (text, activity, loop) => {

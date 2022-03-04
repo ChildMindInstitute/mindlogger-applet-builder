@@ -222,7 +222,7 @@ const activityMutations = {
       const conditions = conditionalItem.conditions.map(condition => {
         let { ifValue } = condition;
 
-        if (ifValue === activity.name) {
+        if (ifValue.replace(/ /g, '_') === activity.name.replace(/ /g, '_')) {
           ifValue = `${activity.name} (${suffix})`;
         }
 

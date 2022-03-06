@@ -164,7 +164,7 @@
             </v-btn>
 
             <v-btn
-              @click="assessmentTypeConfirmationDlg = false"
+              @click="isOnePageAssessment = false; assessmentTypeConfirmationDlg = false"
             >
               No
             </v-btn>

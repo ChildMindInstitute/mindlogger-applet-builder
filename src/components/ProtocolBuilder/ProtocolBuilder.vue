@@ -359,7 +359,7 @@
                   </v-tooltip>
 
                   <v-tooltip
-                    v-if="activity['@type'] === 'reproschema:Activity'"
+                    v-if="activity.activityType === 'NORMAL'"
                     top
                   >
                     <template v-slot:activator="{ on }">

@@ -1280,6 +1280,7 @@ export default class Item {
 
       const NAME = 'schema:name';
       const VALUE = 'schema:value';
+      const IMAGE = 'schema:image';
       const CONTENT_URL = 'schema:contentUrl';
       const TYPE = '@type';
       const ITEM_LIST = "schema:itemListElement";
@@ -1304,15 +1305,15 @@ export default class Item {
 
         if (itemList) {
           modifiedOption[ITEM_LIST] = itemList.map(item => ({
-            name: _.get(item, ['schema:name', 0, '@value']),
-            value: _.get(item ['schema:value', 0, '@value']),
-            image: _.get(item, ['schema:image']),
-            '@type': _.get(item, ['@type', 0]),
+            [NAME]: _.get(item, [NAME, 0, '@value']),
+            [VALUE]: _.get(item, [VALUE, 0, '@value']),
+            [IMAGE]: _.get(item, [IMAGE]),
+            [TYPE]: _.get(item, [TYPE, 0]),
             responseOptions: {
-              "@type": "xsd:anyURI",
+              [TYPE]: "xsd:anyURI",
               choices: _.get(item, ['reprolib:terms/responseOptions', 0, 'schema:itemListElement'], []).map(choice => ({
-                'schema:name': _.get(choice, ['schema:name', 0, '@value']),
-                'schema:value': _.get(choice, ['schema:value', 0, '@value'])
+                [NAME]: _.get(choice, [NAME, 0, '@value']),
+                [VALUE]: _.get(choice, [VALUE, 0, '@value'])
               }))
             }
           }))

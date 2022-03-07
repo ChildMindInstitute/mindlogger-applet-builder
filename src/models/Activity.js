@@ -2,7 +2,7 @@ import util from '../utilities/util';
 import Item from './Item';
 
 export const ACTIVITY_TYPES = [
-  "Activity",
+  "NORMAL",
   "CST_GYRO",
   "CST_TOUCH",
   "FLANKER",
@@ -76,7 +76,7 @@ export default class Activity {
       textRules: [(v) => !!v || 'This field is required'],
       error: '',
       componentKey: 0,
-      '@type': `reproschema:${initialActivityData.activityType}`,
+      activityType: initialActivityData.activityType,
       initialItemData: initialActivityData.isPrize && initialActivityData.items ? initialActivityData.items[0] : {},
       isItemEditable: true,
       editIndex: -1,
@@ -453,7 +453,8 @@ export default class Activity {
       ],
       _id: this.ref.id,
       '@id': this.ref.name,
-      '@type': this.ref['@type'],
+      '@type': 'reproschema:Activity',
+      'activityType': this.ref.activityType,
       'skos:prefLabel': this.ref.name,
       'skos:altLabel': this.ref.name,
       'schema:description': this.ref.description,
@@ -943,7 +944,7 @@ export default class Activity {
       ['reprolib:terms/scoreOverview']: scoreOverview,
       ['reprolib:terms/isPrize']: isPrize,
       ['reprolib:terms/order']: orders,
-      ['@type']: activityType,
+      ['reprolib:terms/activityType']: activityType,
       ['_id']: id,
     } = activitiesObj;
 
@@ -1013,7 +1014,8 @@ export default class Activity {
         activityPreamble[0]['@value'],
       activityType:
         activityType &&
-        activityType[0].split('/').pop() || 'Activity',
+        activityType[0] &&
+        activityType[0]['@value'] || 'NORMAL',
       isReviewerActivity:
         isReviewerActivity &&
         isReviewerActivity[0] &&

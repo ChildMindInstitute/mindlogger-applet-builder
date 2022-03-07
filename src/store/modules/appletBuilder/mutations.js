@@ -272,7 +272,7 @@ const activityMutations = {
   addActivity(state, { index, type }) {
     const activityModel = new Activity;
 
-    let content = { activityType: "Activity" };
+    let content = { activityType: "NORMAL" };
 
     if (type) {
       const itemModel = new Item();

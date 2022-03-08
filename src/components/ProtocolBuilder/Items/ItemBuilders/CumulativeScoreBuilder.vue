@@ -360,10 +360,11 @@ export default {
     activitySelect(v, rule, key) {
       if(!v) {
         rule[key] = null;
-        this.onUpdateRule(rule)
       } else {
+        rule.valid = false;
         this.update();
       }
+      this.onUpdateRule(rule)
     },
 
     onUpdateRule(rule) {

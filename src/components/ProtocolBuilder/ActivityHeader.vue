@@ -111,7 +111,7 @@
           </template>
           <span v-if="show">
             <span v-if="currentActivity.hasVariable">This activity contains variables and cannot be a one page assessment.</span>
-            <span v-else>This feature is for webapp only.</span>
+            <span v-else>This feature is for webapp(radio, checkbox, slider, cumulative, text, and age) only.</span>
           </span>
         </v-tooltip>
       </v-row>

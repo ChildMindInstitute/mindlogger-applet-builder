@@ -337,8 +337,8 @@ export default {
   methods: {
     ...mapMutations(config.MODULE_NAME,
       [
-        'updateItemList', 
-        'deleteConditional', 
+        'updateItemList',
+        'deleteConditional',
         'transferItems',
         'removeScoresAndSubScals',
         'addItem',
@@ -480,7 +480,7 @@ export default {
               if (!scoreName) {
                 scoreName = score.compute.variableName;
               }
-              
+
               jsExpression = values.filter(value => value !== item.name).join(" + ");
               this.errorMessages.push(`${item.name} is removed from ${scoreName}`);
             }
@@ -497,14 +497,14 @@ export default {
 
         this.currentActivity.subScales.forEach(subScale => {
           const currentSubScale = this.subScaleData.find(({ variableName }) => variableName === subScale.variableName);
-          const items = currentSubScale 
+          const items = currentSubScale
             ? currentSubScale.items.filter(({ name }) => name !== item.name)
             : subScale.items.filter(({ name }) => name !== item.name);
           let { jsExpression } = currentSubScale ? currentSubScale : subScale;
 
           if (items.length !== subScale.items.length) {
             const values = jsExpression.split(' + ');
-              
+
             jsExpression = values.filter(value => value !== item.name).join(" + ");
             this.errorMessages.push(`${item.name} is removed from your ${subScale.variableName}`);
           }

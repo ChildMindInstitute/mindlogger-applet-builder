@@ -1160,7 +1160,7 @@ export default {
     },
 
     isConditionalItem (index) {
-      const res = this.conditionals.some(({ showValue }) => showValue === this.item.name);
+      const res = this.conditionals.some(({ showValue }) => showValue === this.item);
 
       if (res) {
         this.showItem(index);

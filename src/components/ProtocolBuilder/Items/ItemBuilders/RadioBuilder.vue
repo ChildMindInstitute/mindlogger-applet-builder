@@ -230,7 +230,7 @@
                 <MarkDownEditor
                   v-if="isTooltipOpen"
                   v-model="option.description"
-                  @input="updateOption(option)"
+                  @input="updateOption(option, true)"
                 />
               </v-col>
             </v-row>
@@ -982,13 +982,13 @@ export default {
       this.update();
     },
 
-    updateOption(option) {
-      option.valid = this.isValidOption(option);
+    updateOption(option, isDescription) {
+      option.valid = this.isValidOption(option, isDescription);
 
       this.update();
     },
 
-    isValidOption(option) {
+    isValidOption(option, isDescription) {
       if (option.name.length == 0) {
         return false;
       }
@@ -996,20 +996,23 @@ export default {
         return false;
       }
 
-      if (option.name) {
-        const { valid, found, variableNames = [] } = checkItemVariableName(option.name, this.currentActivity, this.itemIndex);
+      if (option.name || option.description) {
+        let text = isDescription ? option.description : option.name;
+        const { valid, found, variableNames = [] } = checkItemVariableName(text, this.currentActivity, this.itemIndex);
         if (found) {
           if (this.currentActivity.isOnePageAssessment) {
             this.alertFlag = true;
             this.alertMsg = 'A one-page assessment cannot contain variables. This variable will automatically be removed.'
             setTimeout(()=> {
               variableNames.forEach(variable => {
-                option.name = option.name.replace(variable, '');
+                text = text.replace(`[[${variable}]]`, '');
               });
+              if (isDescription) 
+                option.description = text;
+              else
+                option.name = text
               this.update();
-              this.currentActivity.isOnePageAssessment = false;
-              this.updateActivityMetaInfo({ isOnePageAssessment: false })
-            }, 200);
+            }, 250);
           } else {
             this.currentActivity.hasVariable = found;
             this.updateActivityMetaInfo({ hasVariable: found })

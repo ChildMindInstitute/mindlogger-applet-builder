@@ -996,7 +996,7 @@ export default {
             this.alertMsg = 'A one-page assessment cannot contain variables. This variable will automatically be removed.'
             setTimeout(()=> {
               variableNames.forEach(variable => {
-                text = text.replace(variable, '');
+                text = text.replace(`[[${variable}]]`, '');
               });
               this.largeText = text;
               this.updateItemMetaInfo({
@@ -1006,8 +1006,7 @@ export default {
             }, 200);
           }
           this.currentActivity.hasVariable = found;
-          this.currentActivity.isOnePageAssessment = false;
-          this.updateActivityMetaInfo({ isOnePageAssessment: false, hasVariable: found })
+          this.updateActivityMetaInfo({ hasVariable: found })
         }
 
         if (_.concat([], ...Object.values(this.variablesItems)).length < 1) {

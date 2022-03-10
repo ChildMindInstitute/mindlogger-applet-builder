@@ -44,10 +44,30 @@
       <v-row
         class="align-center"
       >
+        <v-tooltip bottom v-if="currentActivity.hasVariable">
+          <template v-slot:activator="{ on, attrs }">
+            <v-col
+              class="py-0"
+              cols="12"
+              sm="4"
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-checkbox
+                @click="onSwitchSkipAllItems"
+                v-model="isSkippable"
+                :disabled="currentActivity.hasVariable"
+                label="Allow user to skip all items"
+              />
+            </v-col>
+          </template>
+          <span>This activity contains variables and cannot skip all items.</span>
+        </v-tooltip>
         <v-col
           class="py-0"
           cols="12"
           sm="4"
+          v-else
         >
           <v-checkbox
             @click="onSwitchSkipAllItems"

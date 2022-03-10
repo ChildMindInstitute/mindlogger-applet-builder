@@ -991,9 +991,9 @@ export default {
         }
 
         if (found) {
-          if (this.currentActivity.isOnePageAssessment) {
+          if (this.currentActivity.isOnePageAssessment || this.currentActivity.isSkippable) {
             this.alertFlag = true;
-            this.alertMsg = 'A one-page assessment cannot contain variables. This variable will automatically be removed.'
+            this.alertMsg = `${this.currentActivity.isSkippable ? 'Skipping all the items' : 'A one-page assessment'} cannot contain variables. This variable will automatically be removed.`
             setTimeout(()=> {
               variableNames.forEach(variable => {
                 text = text.replace(`[[${variable}]]`, '');

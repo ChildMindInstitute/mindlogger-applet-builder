@@ -251,7 +251,7 @@ export default {
         orders.forEach((key) => {
           const act = activities[key];
 
-          if (act.isPrize) {
+          if (!act || act.isPrize) {
             return;
           }
 

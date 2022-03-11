@@ -372,6 +372,10 @@ export default class Activity {
         "isVis": true
       }];
 
+      if (!prizeItem.options.options) {
+        return propertiesArr;
+      }
+
       prizeItem.options.options.forEach((option, index) => {
         const confirmItem = this.ref.items[index + 1];
 

@@ -434,10 +434,10 @@ const conditionalMutations = {
 
   updateConditionalData(state, { index, updates }) {
     const conditional = state.currentActivity.conditionalItems[index];
-    state.currentActivity.conditionalItems[index] = {
+    state.currentActivity.conditionalItems.splice(index, 1, {
       ...conditional,
       ...updates
-    };
+    });
   },
 
   deleteConditional(state, index) {

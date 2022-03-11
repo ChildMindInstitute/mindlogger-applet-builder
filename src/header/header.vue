@@ -408,6 +408,8 @@ export default {
 
       if (!this.protocol.name) {
         this.dataAlertDialog.message = 'Please input applet name.';
+      } else if (!this.protocol.description) {
+        this.dataAlertDialog.message = 'Please input applet description.';
       } else if (!this.activities.length) {
         this.dataAlertDialog.message = 'Please add more than one activity.';
       }

@@ -44,13 +44,35 @@
       <v-row
         class="align-center"
       >
+        <v-tooltip bottom v-if="currentActivity.hasVariable">
+          <template v-slot:activator="{ on, attrs }">
+            <v-col
+              class="py-0"
+              cols="12"
+              sm="4"
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-checkbox
+                @click="onSwitchSkipAllItems"
+                v-model="isSkippable"
+                :disabled="currentActivity.hasVariable"
+                label="Allow user to skip all items"
+              />
+            </v-col>
+          </template>
+          <span>This activity contains variables and cannot skip all items.</span>
+        </v-tooltip>
         <v-col
           class="py-0"
           cols="12"
           sm="4"
+          v-else
         >
           <v-checkbox
+            @click="onSwitchSkipAllItems"
             v-model="isSkippable"
+            :disabled="currentActivity.hasVariable"
             label="Allow user to skip all items"
           />
         </v-col>
@@ -88,17 +110,31 @@
             label="Disable the users's ability to change the response"
           />
         </v-col>
-
-        <v-col>
-          <v-checkbox
-            @click="onSwitchAssessmentType"
-            v-model="isOnePageAssessment"
-            label="Show all questions at once"
-            readonly
-          />
-        </v-col>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-col
+              class="py-0"
+              cols="12"
+              sm="4"
+              v-bind="attrs"
+              v-on="on"
+              @mouseover="show = true"
+              @mouseleave="show = false"
+            >
+              <v-checkbox
+                @click="onSwitchAssessmentType"
+                v-model="isOnePageAssessment"
+                label="Show all questions at once"
+                :disabled="!hasOnlyWebSupported || currentActivity.hasVariable"
+              />
+            </v-col>
+          </template>
+          <span v-if="show">
+            <span v-if="currentActivity.hasVariable">This activity contains variables and cannot be a one page assessment.</span>
+            <span v-else>This feature is for webapp only.</span>
+          </span>
+        </v-tooltip>
       </v-row>
-
 
       <div
         class="d-flex justify-space-around"
@@ -152,13 +188,35 @@
             </v-btn>
 
             <v-btn
-              @click="assessmentTypeConfirmationDlg = false"
+              @click="isOnePageAssessment = false; assessmentTypeConfirmationDlg = false"
             >
               No
             </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
+
+    <v-dialog
+      v-model="alertFlag"
+      persistent
+      width="500"
+    >
+      <v-card>
+        <v-card-text class="pt-4">
+          {{alertMsg}}
+        </v-card-text>
+
+        <v-card-actions
+          class="justify-space-around"
+        >
+          <v-btn
+            @click="alertFlag = false"
+          >
+            Ok
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <Notify :notify="notify" />
     <Loading :loading="loading" />
@@ -181,6 +239,7 @@ import config from '../../config';
 import Uploader from './Uploader.vue';
 import Notify from './Additional/Notify.vue';
 import Loading from './Additional/Loading.vue';
+import { getTextBetweenBrackets } from '../../utilities/util';
 
 export default {
   components: {
@@ -200,7 +259,10 @@ export default {
       isExpanded: true,
       loading: false,
       notify: {},
-      assessmentTypeConfirmationDlg: false
+      assessmentTypeConfirmationDlg: false,
+      alertFlag: false,
+      alertMsg: '',
+      show: false
     }
   },
   mounted() {
@@ -211,14 +273,40 @@ export default {
       'deleteConditionals'
     ]),
     onSwitchAssessmentType () {
-      if (!this.isOnePageAssessment) {
-        if (this.conditionals.length) {
-          this.assessmentTypeConfirmationDlg = true;
-        } else {
-          this.isOnePageAssessment = true;
+      if (this.currentActivity.hasVariable && this.isOnePageAssessment) {
+        this.alertMsg = `This activity contains variables and cannot be a one page assessment.`;
+        this.alertFlag = true;
+        setTimeout(() => {
+          this.isOnePageAssessment = false;
+          this.updateActivityMetaInfo({ isOnePageAssessment: false })
+        }, 100)
+        return;
+      }
+      setTimeout(() => {
+        if (this.isOnePageAssessment) {
+          if (this.conditionals.length) {
+            this.assessmentTypeConfirmationDlg = true;
+          } else {
+            this.isOnePageAssessment = true;
+            this.updateActivityMetaInfo({ isOnePageAssessment: true })
+          }
         }
-      } else {
-        this.isOnePageAssessment = false;
+      }, 100)
+    },
+    onSwitchSkipAllItems () {
+      if (this.isSkippable) {
+        for (const item of this.currentActivity.items) {
+          const variableNames = getTextBetweenBrackets(item.question.text);
+          if ((variableNames && variableNames.length) || this.currentActivity.hasVariable) {
+            this.alertMsg = `By skipping all the items it will cause some items to fail`;
+            this.alertFlag = true;
+            setTimeout(() => {
+              this.isSkippable = false;
+              this.updateActivityMetaInfo({ isSkippable: false, valid: false });
+            }, 100)
+            return false;
+          }
+        }
       }
     },
     editActivtiy () {
@@ -297,7 +385,7 @@ export default {
     conditionals () {
       return this.currentActivity.conditionalItems;
     },
-
+  
     name: {
       get: function () {
         return this.currentActivity && this.currentActivity.name;
@@ -367,6 +455,16 @@ export default {
         const inputType = this.currentActivity.items[i].inputType;
 
         if (!['radio', 'checkbox', 'slider'].includes(inputType)) {
+          return false;
+        }
+      }
+      return true;
+    },
+    hasOnlyWebSupported() {
+      for (let i = 0; i < this.currentActivity.items.length; i++) {
+        const inputType = this.currentActivity.items[i].inputType;
+        if (!['radio', 'checkbox', 'slider', 'text', 'ageSelector', 'cumulativeScore'].includes(inputType)) {
+          this.updateActivityMetaInfo({ isOnePageAssessment: false })
           return false;
         }
       }

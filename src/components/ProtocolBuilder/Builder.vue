@@ -243,8 +243,15 @@ export default {
       Object.entries(basketApplets).map(([appletId, appletData]) => {
         const { applet, activities, items, protocol } = appletData;
 
-        Object.values(activities).forEach((act) => {
-          if (act.isPrize) {
+        let orders = _.get(applet, ['reprolib:terms/order', 0, '@list'], []).map(orderItem => orderItem['@id']);
+        if (!orders.length) {
+          orders = Object.keys(activities);
+        }
+
+        orders.forEach((key) => {
+          const act = activities[key];
+
+          if (!act || act.isPrize) {
             return;
           }
 

@@ -64,6 +64,7 @@ export default class Protocol {
       "schema:schemaVersion": this.ref.protocolVersion,
       "schema:version": this.ref.protocolVersion,
       "streamEnabled": this.ref.streamEnabled,
+      "combineReports": this.ref.combineReports,
       landingPageContent: this.ref.markdownData, //point to the readme of protocol
       landingPageType: this.ref.landingPageType,
       landingPage: "",
@@ -155,11 +156,28 @@ export default class Protocol {
         inserted: (field) => `streaming option was enabled`,
         removed: (field) => `streaming option was disabled`
       },
+      'combineReports': {
+        updated: (field) => `combine reports was changed to ${_.get(newValue, field)}`,
+        inserted: (field) => `combine reports option was enabled`,
+        removed: (field) => `combine reports option was disabled`
+      },
       'schema:description': {
         updated: (field) => `Applet description was changed to ${_.get(newValue, field)}`,
         removed: (field) => `Applet description was removed`,
         inserted: (field) => `Applet description was added (${_.get(newValue, field)})`
       },
+      'ui.order': {
+        updated: (field) => {
+          const newOrder = _.get(newValue, field, []);
+          const oldOrder = _.get(oldValue, field, []);
+
+          if (oldOrder.length == newOrder.length && JSON.stringify(oldOrder) != JSON.stringify(newOrder)) {
+            return 'order of activities has been updated'
+          }
+
+          return [];
+        }
+      }
     }
   }
 
@@ -182,11 +200,20 @@ export default class Protocol {
     const metaInfoChanges = util.compareValues(oldData, currentData, Object.keys(logTemplates));
     const activityChanges = util.compareIDs(oldActivities, currentActivities, 'data._id');
 
-    const changeLog = Object.keys(metaInfoChanges).map(key => {
-      return {
-        name: logTemplates[key][metaInfoChanges[key]](key),
-        type: metaInfoChanges[key],
+    const changeLog = [];
+    Object.keys(metaInfoChanges).forEach(key => {
+      let logs = logTemplates[key][metaInfoChanges[key]](key);
+
+      if (!Array.isArray(logs)) {
+        logs = [logs];
       }
+
+      logs.forEach(log => {
+        changeLog.push({
+          name: log,
+          type: metaInfoChanges[key],
+        })
+      })
     });
 
     const result = [];
@@ -305,9 +332,11 @@ export default class Protocol {
       image: applet['schema:image'],
       watermark: _.get(applet, ['schema:watermark', 0, '@id']),
       streamEnabled: _.get(applet, ['reprolib:terms/streamEnabled', 0, '@value']),
+      combineReports: _.get(applet, ['reprolib:terms/combineReports', 0, '@value']),
       description: applet['schema:description'][0]['@value'],
       protocolVersion: _.get(applet, 'schema:schemaVersion[0].@value', this.protocolVersion),
-      landingPageType: _.get(applet, ['reprolib:terms/landingPageType', 0, '@value'], 'markdown')
+      landingPageType: _.get(applet, ['reprolib:terms/landingPageType', 0, '@value'], 'markdown'),
+      order: _.get(applet, ['reprolib:terms/order', 0, '@list']).map(orderItem => orderItem['@id'])
     };
 
     const markdownData = _.get(applet, ["reprolib:terms/landingPage", 0, "@value"], "");
@@ -333,11 +362,14 @@ export default class Protocol {
       activities: [],
       tokenPrizeModal: false,
     };
-
+    
     const activityModel = new Activity();
     const itemModel = new Item();
+    const activityIds = Object.keys(activities);
 
-    Object.values(activities).forEach((act) => {
+    initialStoreData.order.map((id, i) => {
+      const act = activities[id] || activities[activityIds[i]];
+
       const activityInfo = Activity.parseJSONLD(act)
       const activityItems = activityInfo.orderList.filter(key => items[key]).map((key) => {
         return itemModel.getItemBuilderData(Item.parseJSONLD(items[key]));
@@ -350,7 +382,7 @@ export default class Protocol {
       builderData.index = initialStoreData.activities.length;
 
       initialStoreData.activities.push(builderData);
-    });
+    })
 
     initialStoreData.prizeActivity = initialStoreData.activities.find(activity => activity.isPrize);
 

@@ -160,6 +160,9 @@
                   counter="75"
                   @change="updateOption(option)"
                 />
+                <div v-if="!option.valid" class="error--text text-body-2 mt-2 ml-4">
+                  {{errorMsg}}
+                </div>
               </v-col>
               <v-col
                 v-if="isTokenValue"
@@ -227,7 +230,7 @@
                 <MarkDownEditor
                   v-if="isTooltipOpen"
                   v-model="option.description"
-                  @input="updateOption(option)"
+                  @input="updateOption(option, true)"
                 />
               </v-col>
             </v-row>
@@ -510,6 +513,27 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog
+      v-model="alertFlag"
+      persistent
+      width="500"
+    >
+      <v-card>
+        <v-card-text class="pt-4">
+          {{alertMsg}}
+        </v-card-text>
+
+        <v-card-actions
+          class="justify-space-around"
+        >
+          <v-btn
+            @click="alertFlag = false"
+          >
+            Ok
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -589,10 +613,13 @@
 
 
 <script>
+import { mapMutations } from 'vuex';
 import Uploader from '../../Uploader.vue';
 import OptionalItemText from '../../Partial/OptionalItemText.vue';
 import ItemTimerOption from '../../Partial/ItemTimerOption';
 import MarkDownEditor from '../../MarkDownEditor';
+import { checkItemVariableName } from '../../../../utilities/util';
+import config from '../../../../config';
 
 export default {
   components: {
@@ -605,6 +632,14 @@ export default {
     initialItemData: {
       type: Object,
       required: true
+    },
+    currentActivity: {
+      type: Object,
+      required: false
+    },
+    itemIndex: {
+      type: Number,
+      default: -1,
     },
     isSkippableItem: {
       type: Number,
@@ -643,6 +678,9 @@ export default {
     allowEdit: {
       type: Boolean,
       default: true
+    },
+    variablesItems: {
+      type: Object
     }
   },
   data: function () {
@@ -708,6 +746,9 @@ export default {
       colorPickerDialog: false,
       colorPaletteDialog: false,
       mode: "hex",
+      errorMsg: "This item is not supported, please remove it.",
+      alertFlag: false,
+      alertMsg: '',
     };
   },
 
@@ -732,6 +773,12 @@ export default {
   },
 
   methods: {
+    ...mapMutations(config.MODULE_NAME,
+      [
+        'updateActivityMetaInfo',
+      ],
+    ),
+
     updateTimerOption(option) {
       this.$emit('updateTimer', option.responseTimeLimit)
     },
@@ -935,18 +982,52 @@ export default {
       this.update();
     },
 
-    updateOption(option) {
-      option.valid = this.isValidOption(option);
+    updateOption(option, isDescription) {
+      option.valid = this.isValidOption(option, isDescription);
 
       this.update();
     },
 
-    isValidOption(option) {
+    isValidOption(option, isDescription) {
       if (option.name.length == 0) {
         return false;
       }
       if (this.isTokenValue && isNaN(option.value) || this.hasScoreValue && isNaN(option.score)) {
         return false;
+      }
+
+      if (option.name || option.description) {
+        let text = isDescription ? option.description : option.name;
+        const { valid, found, variableNames = [] } = checkItemVariableName(text, this.currentActivity, this.itemIndex);
+        if (found) {
+          if (this.currentActivity.isOnePageAssessment || this.currentActivity.isSkippable) {
+            this.alertFlag = true;
+            this.alertMsg = `${this.currentActivity.isSkippable ? 'Skipping all the items' : 'A one-page assessment'} cannot contain variables. This variable will automatically be removed.`
+            setTimeout(()=> {
+              variableNames.forEach(variable => {
+                text = text.replace(`[[${variable}]]`, '');
+              });
+              if (isDescription) 
+                option.description = text;
+              else
+                option.name = text
+              this.update();
+            }, 250);
+          } else {
+            this.currentActivity.hasVariable = found;
+            this.updateActivityMetaInfo({ hasVariable: found })
+          }
+        }
+        try {
+          Object.assign(this.variablesItems, { [`${[this.currentActivity.items[this.itemIndex].name]}-options`]: variableNames })
+        } catch (error) { }
+
+        if (_.concat([], ...Object.values(this.variablesItems)).length < 1) {
+          this.currentActivity.hasVariable = false;
+          this.updateActivityMetaInfo({ hasVariable: false })
+        }
+
+        if (found) return typeof valid === 'object' ? false : !valid;
       }
 
       return true;

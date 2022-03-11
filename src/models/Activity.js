@@ -94,6 +94,7 @@ export default class Activity {
       isPrize: initialActivityData.isPrize || false,
       scoreOverview: initialActivityData.scoreOverview || '',
       valid: valid !== undefined ? valid : true,
+      timestamp: Date.now()
     };
   }
 
@@ -371,6 +372,10 @@ export default class Activity {
         "isVis": true
       }];
 
+      if (!prizeItem.options.options) {
+        return propertiesArr;
+      }
+
       prizeItem.options.options.forEach((option, index) => {
         const confirmItem = this.ref.items[index + 1];
 
@@ -633,6 +638,18 @@ export default class Activity {
             ...insertedOptions.map(option => `conditional logic for ${option.variableName} was set to ${option.isVis.toString()}`),
             ...updatedOptions.map(option => `conditional logic for ${option.variableName} was updated to ${option.isVis.toString()}`)
           ];
+        }
+      },
+      'ui.order': {
+        updated: (field) => {
+          const oldOrder = _.get(oldValue, field, []);
+          const newOrder = _.get(newValue, field, []);
+
+          if (oldOrder.length == newOrder.length && JSON.stringify(oldOrder) != JSON.stringify(newOrder)) {
+            return ['order of items has been updated']
+          }
+
+          return [];
         }
       },
       'preamble': {

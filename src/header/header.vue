@@ -147,25 +147,6 @@
 
 
       <v-tooltip
-        bottom
-      >
-        <template v-slot:activator="{ on }">
-          <v-btn
-            class="mx-1"
-            @click="resetBuilder"
-            v-on="on"
-          >
-            <img
-              height="25"
-              alt=""
-              :src="baseImageURL + 'header-icons/black/refresh-icon.png'"
-            >
-          </v-btn>
-        </template>
-        <span>Reset Builder</span>
-      </v-tooltip>
-
-      <v-tooltip
         v-if="formattedOriginalProtocol"
         bottom
       >
@@ -418,12 +399,6 @@ export default {
       });
     },
 
-    resetBuilder () {
-      this.setCurrentScreen(config.PROTOCOL_SCREEN);
-      this.setCurrentActivity(-1);
-      this.resetProtocol();
-    },
-
     viewItems () {
       this.setCurrentScreen(config.ITEM_SCREEN);
     },
@@ -451,6 +426,16 @@ export default {
           break;
         }
       }
+
+      const names = [];
+      for (let activity of this.protocol.activities) {
+        if (names.includes(activity.name)) {
+          this.dataAlertDialog.message = 'Activity names cannot be the same. Please update each activity to have a unique name.';
+        }
+
+        names.push(activity.name);
+      }
+
 
       this.dataAlertDialog.visibility = (this.dataAlertDialog.message.length !== 0);
 

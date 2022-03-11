@@ -15,51 +15,128 @@
       </span>
       <v-spacer />
       <v-card-actions>
-        <v-btn
+        <v-tooltip
           v-if="item.allowEdit"
-          icon
-          @click="duplicateItem(itemIndex)"
+          top
         >
-          <v-icon color="grey lighten-1">
-            content_copy
-          </v-icon>
-        </v-btn>
-        <v-btn
-          icon
+          <template v-slot:activator="{ on }">
+            <v-btn
+              class="ml-4"
+              icon
+              v-on="on"
+              @click="$emit('addItem')"
+            >
+              <v-icon color="grey lighten-1">
+                mdi-plus-circle-outline
+              </v-icon>
+            </v-btn>
+          </template>
+
+          <span>New Item</span>
+        </v-tooltip>
+
+        <v-tooltip
+          v-if="item.allowEdit"
+          top
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              icon
+              v-on="on"
+              @click="duplicateItem(itemIndex)"
+            >
+              <v-icon color="grey lighten-1">
+                content_copy
+              </v-icon>
+            </v-btn>
+          </template>
+
+          <span>Duplicate Item</span>
+        </v-tooltip>
+
+        <v-tooltip
           v-if="!isConditionalItem(itemIndex)"
-          @click="hideItem(itemIndex)"
+          top
         >
-          <v-icon v-if="isVis" color="grey lighten-1">
-            mdi-eye-off-outline
-          </v-icon>
-          <v-icon v-else color="grey lighten-1">
-            mdi-eye-outline
-          </v-icon>
-        </v-btn>
-        <v-btn
-          icon
-          @click="editItem"
-        >
-          <v-icon
-            v-if="!isExpanded"
-            color="grey lighten-1"
-          >
-            edit
-          </v-icon>
-          <v-icon
-            v-else
-            color="grey lighten-1"
-          >
-            mdi-chevron-double-up
-          </v-icon>
-        </v-btn>
-        <v-btn
+          <template v-slot:activator="{ on }">
+            <v-btn
+              icon
+              v-on="on"
+              @click="checkVariableNameOnAction(itemIndex, hideItem)"
+            >
+              <v-icon v-if="isVis" color="grey lighten-1">
+                mdi-eye-off-outline
+              </v-icon>
+              <v-icon v-else color="grey lighten-1">
+                mdi-eye-outline
+              </v-icon>
+            </v-btn>
+          </template>
+
+          <span>{{ isVis ? 'Click to Show Item' : 'Click to Hide Item' }}</span>
+        </v-tooltip>
+
+        <v-tooltip
           v-if="item.allowEdit"
+          top
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              icon
+              @click="editItem"
+              v-on="on"
+            >
+              <v-icon
+                v-if="!isExpanded && item.allowEdit"
+                color="grey lighten-1"
+              >
+                edit
+              </v-icon>
+              <v-icon
+                v-else-if="!isExpanded"
+                color="grey lighten-1"
+              >
+                mdi-eye
+              </v-icon>
+
+              <v-icon
+                v-else
+                color="grey lighten-1"
+              >
+                mdi-chevron-double-up
+              </v-icon>
+            </v-btn>
+          </template>
+
+          <span>Edit Item</span>
+        </v-tooltip>
+
+        <v-tooltip
+          v-if="item.allowEdit"
+          top
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              icon
+              v-on="on"
+              @click="checkVariableNameOnAction(item, onDeleteItem)"
+            >
+              <v-icon color="grey lighten-1">
+                mdi-delete
+              </v-icon>
+            </v-btn>
+          </template>
+
+          <span>Delete Item</span>
+        </v-tooltip>
+
+        <v-btn
+          v-if="item.allowEdit && !['cumulativeScore', 'futureBehaviorTracker', 'pastBehaviorTracker'].includes(item.inputType)"
+          class="ml-4 move-icon dragging-handle"
           icon
-          @click="onDeleteItem(item)"
         >
           <v-icon color="grey lighten-1">
-            mdi-delete
+            mdi-dots-vertical
           </v-icon>
         </v-btn>
       </v-card-actions>
@@ -93,6 +170,7 @@
           @blur="isItemNameEditing = false"
           @input="onUpdateName"
           @keydown="nameKeydown($event)"
+          @mouseup="onMouseup($event, item)"
         />
       </div>
       <template
@@ -144,6 +222,9 @@
 
           <div v-if="largeText.length === 0" class="error--text text-body-2 mt-2 ml-4">
             * This field is required
+          </div>
+          <div v-if="invalidLargeText" class="error--text text-body-2 mt-2 ml-4">
+            {{errorMsg}}
           </div>
           <div class="d-flex mt-2" :class="largeText.length > 75 ? 'justify-space-between' : 'justify-end'">
             <div
@@ -274,6 +355,9 @@
         :is-reviewer-activity="isReviewerActivity"
         :initial-is-optional-text="item.isOptionalText"
         :timer="item.timer"
+        :current-activity="currentActivity"
+        :variables-items="variablesItems"
+        :item-index="itemIndex"
         @openPrize="setTokenPrizeModalStatus(true)"
         @removeTemplate="onRemoveTemplate"
         @updateTemplates="onUpdateTemplates"
@@ -536,6 +620,56 @@
     <Loading :loading="loading" />
 
     <v-dialog
+      v-model="warningFlag"
+      persistent
+      width="500"
+    >
+      <v-card>
+        <v-card-text class="pt-4">
+          {{warningMsg}}
+        </v-card-text>
+
+        <v-card-actions
+          class="justify-space-around"
+        >
+          <v-btn
+            @click="handleWarningConfirm(item, itemIndex)"
+          >
+            Continue
+          </v-btn>
+
+          <v-btn
+            @click="warningFlag = false"
+          >
+            Cancel
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
+      v-model="alertFlag"
+      persistent
+      width="500"
+    >
+      <v-card>
+        <v-card-text class="pt-4">
+          {{alertMsg}}
+        </v-card-text>
+
+        <v-card-actions
+          class="justify-space-around"
+        >
+          <v-btn
+            @click="alertFlag = false"
+          >
+            Ok
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
       v-model="removeDialog"
       persistent
       max-width="720"
@@ -592,6 +726,9 @@
 </template>
 
 <style scoped>
+  .move-icon {
+    cursor: move;
+  }
 
   .item.not-editable {
     position: relative;
@@ -681,6 +818,7 @@
 </style>
 
 <script>
+import _ from 'lodash';
 import Uploader from '../Uploader.vue';
 
 import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
@@ -712,6 +850,7 @@ import Loading from '../Additional/Loading.vue';
 
 import { mapMutations, mapGetters } from 'vuex';
 import config from '../../../config';
+import { checkItemVariableName, checkItemVariableNameIndex, getTextBetweenBrackets } from '../../../utilities/util';
 
 export default {
   components: {
@@ -743,6 +882,10 @@ export default {
       type: Number,
       required: true,
     },
+    variablesItems: {
+      type: Object,
+      required: true
+    }
   },
   data() {
     return {
@@ -766,7 +909,15 @@ export default {
       loading: false,
       notify: {},
       isVis: false,
-      responseIdentifierMessage: 'By using this option, the user will be required to enter response data identifier text into the field. The text entered will identify the response data collected at that point in time. The identifier used will be filterable on the user\'s data visualization tab.'
+      invalidLargeText: false,
+      debounceTimer: undefined,
+      responseIdentifierMessage: 'By using this option, the user will be required to enter response data identifier text into the field. The text entered will identify the response data collected at that point in time. The identifier used will be filterable on the user\'s data visualization tab.',
+      warningFlag: false,
+      warningMsg: '',
+      errorMsg: '* This item is not supported, please remove it.',
+      alertFlag: false,
+      alertMsg: '',
+      editVariableValid: true,
     }
   },
   computed: {
@@ -779,7 +930,7 @@ export default {
         'currentActivity',
         'itemInputTypes',
         'itemTemplates',
-        'prizeActivity'
+        'prizeActivity',
       ]
     ),
 
@@ -817,11 +968,56 @@ export default {
     }
   },
   watch: {
+    item: function(newItem) {
+      this.largeText = newItem.question.text;
+    },
     largeText: function(text) {
       this.updateItemMetaInfo({
         index: this.itemIndex,
-        obj: { question: { text, image: this.headerImage } }
+        obj: { question: { text, image: this.headerImage } },
       });
+
+      this.debounce(function() {
+        const { valid, found, variableNames = [] } = checkItemVariableName(text, this.currentActivity, this.itemIndex);
+        try {
+          Object.assign(this.variablesItems, { [this.currentActivity.items[this.itemIndex].name]: variableNames })
+        } catch (error) { }
+        this.invalidLargeText = valid;
+        if (typeof this.invalidLargeText === 'object') {
+          this.errorMsg = `* You cannot use ${this.currentActivity.items[this.itemIndex].name} in the same item. Please remove`
+          this.invalidLargeText = true;
+        } else {
+          this.errorMsg = '* This item is not supported, please remove it.'
+        }
+
+        if (found) {
+          if (this.currentActivity.isOnePageAssessment || this.currentActivity.isSkippable) {
+            this.alertFlag = true;
+            this.alertMsg = `${this.currentActivity.isSkippable ? 'Skipping all the items' : 'A one-page assessment'} cannot contain variables. This variable will automatically be removed.`
+            setTimeout(()=> {
+              variableNames.forEach(variable => {
+                text = text.replace(`[[${variable}]]`, '');
+              });
+              this.largeText = text;
+              this.updateItemMetaInfo({
+                index: this.itemIndex,
+                obj: { question: { text, image: this.headerImage } },
+              });
+            }, 200);
+          }
+          this.currentActivity.hasVariable = found;
+          this.updateActivityMetaInfo({ hasVariable: found })
+        }
+
+        if (_.concat([], ...Object.values(this.variablesItems)).length < 1) {
+          this.currentActivity.hasVariable = false;
+        }
+
+        this.updateItemMetaInfo({
+          index: this.itemIndex,
+          obj: { valid: !this.invalidLargeText },
+        });
+      }, 300)
     },
     headerImage: function(image) {
       this.updateItemMetaInfo({
@@ -842,7 +1038,6 @@ export default {
 
     this.isVis = !!this.item.isVis;
     this.setItemName();
-
   },
   methods: {
     ...mapMutations(config.MODULE_NAME,
@@ -858,9 +1053,17 @@ export default {
         'insertTemplateUpdateRequest',
         'addTimeScreen',
         'deleteTimeScreen',
-        'updateTokenSummary'
+        'updateTokenSummary',
+        'updateActivityMetaInfo',
       ],
     ),
+
+    debounce (func, delay) {
+      const context = this;
+      const args = arguments;
+      clearTimeout(this.debounceTimer);
+      this.debounceTimer = setTimeout(() => func.apply(context, args), delay);
+    },
 
     setItemName () {
       if(!this.item.name) this.onUpdateName(`Screen${this.itemIndex + 1}`);
@@ -883,6 +1086,37 @@ export default {
         return condition.maxValue;
       }
       return condition.minValue;
+    },
+
+    handleWarningConfirm(item, itemIndex) {
+      if (this.warningMsg.includes('By deleting'))
+        this.onDeleteItem(item)
+      else if (this.warningMsg.includes('By hiding')) {
+        this.hideItem(itemIndex)
+      }
+      this.warningFlag = false;
+    },
+
+    checkVariableNameOnAction(item, callBack) {
+      let index;
+      if (typeof item === 'number') {
+        index = item;
+        item = this.currentActivity.items[item];
+      }
+      if (item && !item.isVis) {
+        for (const citem of this.currentActivity.items) {
+          const invalidLargeTextIndex = checkItemVariableNameIndex(citem.question.text, { items: [item] });
+          if (invalidLargeTextIndex != -1) {
+            if (index > -1) {
+              this.warningMsg = `By hiding ${item.name}, it will cause ${citem.name} to fail. Do you want to continue? (Please fix ${citem.name} if you choose to continue.)`;
+            } else
+              this.warningMsg = `By deleting ${item.name}, it will cause ${citem.name} to fail. Do you want to continue? (Please fix ${citem.name} if you choose to continue.)`;
+            this.warningFlag = true;
+            return;
+          }
+        }
+      }
+      callBack(index > -1 ? index : item);
     },
 
     onDeleteItem () {
@@ -925,7 +1159,7 @@ export default {
     },
 
     isConditionalItem (index) {
-      const res = this.conditionals.some(({ showValue }) => showValue === this.item.name);
+      const res = this.conditionals.some(({ showValue }) => showValue === this.item);
 
       if (res) {
         this.showItem(index);
@@ -934,8 +1168,22 @@ export default {
     },
 
     nameKeydown (e) {
+      if (!this.editVariableValid) {
+        this.alertMsg = `You cannot edit this item name, since it is using as a variable.`;
+        this.alertFlag = true;
+        e.preventDefault();
+      }
+
       if (!/^[a-zA-Z0-9-_]+$/.test(e.key)) {
         e.preventDefault();
+      }
+    },
+
+    onMouseup (event, item) {
+      if (_.concat([], ...Object.values(this.variablesItems)).includes(item.name)) {
+        this.editVariableValid = false;
+      } else {
+        this.editVariableValid = true;
       }
     },
 
@@ -1016,6 +1264,22 @@ export default {
     },
 
     updateAllow(allowItem) {
+      if (allowItem) {
+        const item = this.currentActivity.items[this.itemIndex];
+        for (const citem of this.currentActivity.items) {
+          const invalidLargeTextIndex = checkItemVariableNameIndex(citem.question.text, { items: [item] });
+          if (invalidLargeTextIndex != -1) {
+            this.updateItemMetaInfo({
+              index: this.itemIndex,
+              obj: { allow: false, valid: false }
+            })
+            this.alertMsg = `By skipping ${item.name}, it will cause ${citem.name} to fail.`;
+            this.alertFlag = true;
+            return;
+          }
+        }
+      }
+
       this.updateItemMetaInfo({
         index: this.itemIndex,
         obj: { allow: allowItem }

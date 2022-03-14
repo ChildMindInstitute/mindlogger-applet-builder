@@ -139,12 +139,12 @@
           </v-tooltip>
         </v-row>
 
-        <div>
-          <v-subheader class="ml-10" v-if="themes && themes.length">
+        <div v-if="themes && themes.length">
+          <v-subheader class="ml-10">
             Theme
           </v-subheader>
 
-          <v-select v-if="themes && themes.length"
+          <v-select
               v-model="selectedTheme"
               :items="themes"
               :label="'Select theme'"

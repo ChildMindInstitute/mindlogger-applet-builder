@@ -181,12 +181,15 @@ export default class Protocol {
         inserted: (field) => `Applet description was added (${_.get(newValue, field)})`
       },
       'ui.order': {
-        updated: (field) => {
-          const newOrder = _.get(newValue, field, []);
-          const oldOrder = _.get(oldValue, field, []);
+        updated: (field, mapping) => {
+          let newOrder = _.get(newValue, field, []);
+          let oldOrder = _.get(oldValue, field, []).map(key => mapping[key] || key);
 
-          if (oldOrder.length == newOrder.length && JSON.stringify(oldOrder) != JSON.stringify(newOrder)) {
-            return 'order of activities has been updated'
+          newOrder = newOrder.filter(order => oldOrder.includes(order));
+          oldOrder = oldOrder.filter(order => newOrder.includes(order));
+
+          if (JSON.stringify(oldOrder) != JSON.stringify(newOrder)) {
+            return 'order of activities has been updated';
           }
 
           return [];
@@ -216,7 +219,7 @@ export default class Protocol {
 
     const changeLog = [];
     Object.keys(metaInfoChanges).forEach(key => {
-      let logs = logTemplates[key][metaInfoChanges[key]](key);
+      let logs = logTemplates[key][metaInfoChanges[key]](key, activityChanges.keyReferences);
 
       if (!Array.isArray(logs)) {
         logs = [logs];
@@ -376,7 +379,7 @@ export default class Protocol {
       activities: [],
       tokenPrizeModal: false,
     };
-    
+
     const activityModel = new Activity();
     const itemModel = new Item();
     const activityIds = Object.keys(activities);

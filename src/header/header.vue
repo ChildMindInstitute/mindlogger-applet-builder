@@ -353,44 +353,56 @@ export default {
       const protocolModel = new Protocol();
       protocolModel.updateReferenceObject(this.protocol);
 
-      const schemaObj = protocolModel.getCompressedSchema();
-      const contextObj = protocolModel.getContext();
-
       var JSZip = require('jszip');
       var zip = new JSZip();
 
       zip
         .folder('protocols')
-        .file('schema', JSON.stringify(schemaObj, null, 2));
+        .file('schema', JSON.stringify(protocolModel.getCompressedSchema(true), null, 2));
       zip
         .folder('protocols')
-        .file('context', JSON.stringify(contextObj, null, 2));
+        .file('context', JSON.stringify(protocolModel.getContext(true), null, 2));
 
-      this.activities.forEach(function(activity) {
+      this.protocol.activities.forEach(function(activity) {
+        const name = Protocol.getConvertedActivityName(activity.name);
+
         const activityModel = new Activity();
-        activityModel.updateReferenceObject(activity);
 
-        const activityData = activityModel.getActivityData();
+        activityModel.updateReferenceObject({
+          ...activity,
+          items: activity.items.map(item => {
+            const itemModel = new Item();
+
+            itemModel.updateReferenceObject(item);
+            return itemModel.getItemData()
+          })
+        });
 
         zip
-          .folder(`activities/${activity.name}`)
+          .folder(`activities/${name}`)
           .file(
-            `${activity.name}_schema`,
-            JSON.stringify(activityData.schema, null, 2)
+            `${name}_schema`,
+            JSON.stringify(activityModel.getCompressedSchema(), null, 2)
           );
         zip
-          .folder(`activities/${activity.name}`)
+          .folder(`activities/${name}`)
           .file(
-            `${activity.name}_context`,
-            JSON.stringify(activityData.context, null, 2)
+            `${name}_context`,
+            JSON.stringify(activityModel.getContext(name), null, 2)
           );
-        activity.items.forEach(function(item) {
-          const itemModel = new Item();
-          itemModel.updateReferenceObject(item);
+
+        activityModel.ref.items.forEach(function(item) {
+          if (item.ui.inputType == 'cumulativeScore') {
+            return ;
+          }
+
+          if (item['options'] && item.ui.inputType != 'stackedRadio') {
+            delete item['options'];
+          }
 
           zip
-            .folder(`activities/${activity.name}/items`)
-            .file(`${item.name}`, JSON.stringify(itemModel.getCompressedSchema(), null, 2));
+            .folder(`activities/${name}/items`)
+            .file(`${item.name}`, JSON.stringify(item, null, 2));
         });
       });
 

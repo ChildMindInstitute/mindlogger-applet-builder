@@ -13,19 +13,27 @@ export default class Protocol {
     this.ref = ref;
   }
 
-  getVariableMap() {
-    const variableMap = this.ref.activities.map((activity) => ({
-      variableName: `${activity.name}_schema`,
-      isAbout: `${activity.name}_schema`,
-      prefLabel: activity.name,
-      isVis: true,
-    }));
+  static getConvertedActivityName(name) {
+    return name.replace(/\s/g, '__').replace(/[()]/g, '');
+  }
+
+  getVariableMap(convertNames=false) {
+    const variableMap = this.ref.activities.map((activity) => {
+      const name = convertNames ? Protocol.getConvertedActivityName(activity.name) : activity.name;
+      return {
+        variableName: `${name}`,
+        isAbout: `${name}`,
+        prefLabel: activity.name,
+        isVis: true,
+      }
+    })
+
     return variableMap;
   }
 
-  getActivityOrder() {
+  getActivityOrder(convertNames=false) {
     const activityNamesArray = this.ref.activities.map(
-      (activity) => activity.name
+      (activity) => convertNames ? Protocol.getConvertedActivityName(activity.name) : activity.name
     );
     return activityNamesArray;
   }
@@ -46,9 +54,9 @@ export default class Protocol {
     return visibilityObj;
   }
 
-  getCompressedSchema() {
-    const variableMap = this.getVariableMap();
-    const activityOrder = this.getActivityOrder();
+  getCompressedSchema(convertNames = false) {
+    const variableMap = this.getVariableMap(convertNames);
+    const activityOrder = this.getActivityOrder(convertNames);
     const schema = {
       "@context": [
         "https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json",
@@ -78,18 +86,24 @@ export default class Protocol {
     return schema;
   }
 
-  getContext() {
+  getContext(includeActivityPath = false) {
     const contextObj = {
       "@version": 1.1,
       activity_path:
       "https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/",
     };
-    // this.ref.activities.forEach(function(activity) {
-    //   contextObj[activity.name] = {
-    //     "@id": `activity_path:${activity.name}/${activity.name}_schema`,
-    //     "@type": "@id",
-    //   };
-    // });
+
+    if (includeActivityPath) {
+      this.ref.activities.forEach(function(activity) {
+        const name = Protocol.getConvertedActivityName(activity.name);
+
+        contextObj[name] = {
+          "@id": `activity_path:${name}/${name}_schema`,
+          "@type": "@id",
+        };
+      });
+    }
+
     return {
       "@context": contextObj,
     };

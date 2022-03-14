@@ -484,8 +484,7 @@ export default class Activity {
     };
   }
 
-  getContext() {
-    const activityName = this.ref.name;
+  getContext(activityName = this.ref.name) {
     const contextObj = {
       '@version': 1.1,
     };

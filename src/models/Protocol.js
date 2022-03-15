@@ -13,19 +13,27 @@ export default class Protocol {
     this.ref = ref;
   }
 
-  getVariableMap() {
-    const variableMap = this.ref.activities.map((activity) => ({
-      variableName: `${activity.name}_schema`,
-      isAbout: `${activity.name}_schema`,
-      prefLabel: activity.name,
-      isVis: true,
-    }));
+  static getConvertedActivityName(name) {
+    return name.replace(/\s/g, '__').replace(/[()]/g, '');
+  }
+
+  getVariableMap(convertNames=false) {
+    const variableMap = this.ref.activities.map((activity) => {
+      const name = convertNames ? Protocol.getConvertedActivityName(activity.name) : activity.name;
+      return {
+        variableName: `${name}`,
+        isAbout: `${name}`,
+        prefLabel: activity.name,
+        isVis: true,
+      }
+    })
+
     return variableMap;
   }
 
-  getActivityOrder() {
+  getActivityOrder(convertNames=false) {
     const activityNamesArray = this.ref.activities.map(
-      (activity) => activity.name
+      (activity) => convertNames ? Protocol.getConvertedActivityName(activity.name) : activity.name
     );
     return activityNamesArray;
   }
@@ -46,9 +54,9 @@ export default class Protocol {
     return visibilityObj;
   }
 
-  getCompressedSchema() {
-    const variableMap = this.getVariableMap();
-    const activityOrder = this.getActivityOrder();
+  getCompressedSchema(convertNames = false) {
+    const variableMap = this.getVariableMap(convertNames);
+    const activityOrder = this.getActivityOrder(convertNames);
     const schema = {
       "@context": [
         "https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json",
@@ -63,7 +71,10 @@ export default class Protocol {
       "schema:watermark": this.ref.watermark,
       "schema:schemaVersion": this.ref.protocolVersion,
       "schema:version": this.ref.protocolVersion,
+      "streamEnabled": this.ref.streamEnabled,
+      "combineReports": this.ref.combineReports,
       landingPageContent: this.ref.markdownData, //point to the readme of protocol
+      landingPageType: this.ref.landingPageType,
       landingPage: "",
       // variableMap: variableMap,
       ui: {
@@ -75,18 +86,24 @@ export default class Protocol {
     return schema;
   }
 
-  getContext() {
+  getContext(includeActivityPath = false) {
     const contextObj = {
       "@version": 1.1,
       activity_path:
       "https://raw.githubusercontent.com/ReproNim/reproschema/master/activities/",
     };
-    // this.ref.activities.forEach(function(activity) {
-    //   contextObj[activity.name] = {
-    //     "@id": `activity_path:${activity.name}/${activity.name}_schema`,
-    //     "@type": "@id",
-    //   };
-    // });
+
+    if (includeActivityPath) {
+      this.ref.activities.forEach(function(activity) {
+        const name = Protocol.getConvertedActivityName(activity.name);
+
+        contextObj[name] = {
+          "@id": `activity_path:${name}/${name}_schema`,
+          "@type": "@id",
+        };
+      });
+    }
+
     return {
       "@context": contextObj,
     };
@@ -148,11 +165,36 @@ export default class Protocol {
         removed: (field) => `Applet watermark was removed`,
         inserted: (field) => `Applet watermark was added (${_.get(newValue, field)})`
       },
+      'streamEnabled': {
+        updated: (field) => `streaming option was changed to ${_.get(newValue, field)}`,
+        inserted: (field) => `streaming option was enabled`,
+        removed: (field) => `streaming option was disabled`
+      },
+      'combineReports': {
+        updated: (field) => `combine reports was changed to ${_.get(newValue, field)}`,
+        inserted: (field) => `combine reports option was enabled`,
+        removed: (field) => `combine reports option was disabled`
+      },
       'schema:description': {
         updated: (field) => `Applet description was changed to ${_.get(newValue, field)}`,
         removed: (field) => `Applet description was removed`,
         inserted: (field) => `Applet description was added (${_.get(newValue, field)})`
       },
+      'ui.order': {
+        updated: (field, mapping) => {
+          let newOrder = _.get(newValue, field, []);
+          let oldOrder = _.get(oldValue, field, []).map(key => mapping[key] || key);
+
+          newOrder = newOrder.filter(order => oldOrder.includes(order));
+          oldOrder = oldOrder.filter(order => newOrder.includes(order));
+
+          if (JSON.stringify(oldOrder) != JSON.stringify(newOrder)) {
+            return 'order of activities has been updated';
+          }
+
+          return [];
+        }
+      }
     }
   }
 
@@ -175,11 +217,20 @@ export default class Protocol {
     const metaInfoChanges = util.compareValues(oldData, currentData, Object.keys(logTemplates));
     const activityChanges = util.compareIDs(oldActivities, currentActivities, 'data._id');
 
-    const changeLog = Object.keys(metaInfoChanges).map(key => {
-      return {
-        name: logTemplates[key][metaInfoChanges[key]](key),
-        type: metaInfoChanges[key],
+    const changeLog = [];
+    Object.keys(metaInfoChanges).forEach(key => {
+      let logs = logTemplates[key][metaInfoChanges[key]](key, activityChanges.keyReferences);
+
+      if (!Array.isArray(logs)) {
+        logs = [logs];
       }
+
+      logs.forEach(log => {
+        changeLog.push({
+          name: log,
+          type: metaInfoChanges[key],
+        })
+      })
     });
 
     const result = [];
@@ -296,9 +347,13 @@ export default class Protocol {
       name: _.get(prefLabel, [0, '@value'], 'applet'),
       appletId: applet['_id'].split("/").pop(),
       image: applet['schema:image'],
-      watermark: applet['schema:watermark'],
+      watermark: _.get(applet, ['schema:watermark', 0, '@id']),
+      streamEnabled: _.get(applet, ['reprolib:terms/streamEnabled', 0, '@value']),
+      combineReports: _.get(applet, ['reprolib:terms/combineReports', 0, '@value']),
       description: applet['schema:description'][0]['@value'],
-      protocolVersion: _.get(applet, 'schema:schemaVersion[0].@value', this.protocolVersion)
+      protocolVersion: _.get(applet, 'schema:schemaVersion[0].@value', this.protocolVersion),
+      landingPageType: _.get(applet, ['reprolib:terms/landingPageType', 0, '@value'], 'markdown'),
+      order: _.get(applet, ['reprolib:terms/order', 0, '@list']).map(orderItem => orderItem['@id'])
     };
 
     const markdownData = _.get(applet, ["reprolib:terms/landingPage", 0, "@value"], "");
@@ -327,8 +382,11 @@ export default class Protocol {
 
     const activityModel = new Activity();
     const itemModel = new Item();
+    const activityIds = Object.keys(activities);
 
-    Object.values(activities).forEach((act) => {
+    initialStoreData.order.map((id, i) => {
+      const act = activities[id] || activities[activityIds[i]];
+
       const activityInfo = Activity.parseJSONLD(act)
       const activityItems = activityInfo.orderList.filter(key => items[key]).map((key) => {
         return itemModel.getItemBuilderData(Item.parseJSONLD(items[key]));
@@ -341,7 +399,7 @@ export default class Protocol {
       builderData.index = initialStoreData.activities.length;
 
       initialStoreData.activities.push(builderData);
-    });
+    })
 
     initialStoreData.prizeActivity = initialStoreData.activities.find(activity => activity.isPrize);
 

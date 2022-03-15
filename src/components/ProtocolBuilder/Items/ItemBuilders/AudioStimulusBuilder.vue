@@ -29,18 +29,55 @@
     />
     <!-- Audio Uploader -->
 
-    <v-checkbox
-      v-model="isSkippable"
-      label="Skippable Item"
-      :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
+    <v-row>
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="isSkippable"
+          label="Skippable Item"
+          :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
+          @change="update"
+        />
+      </v-col>
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="replayInputOption['schema:value']"
+          label="Media Replay Allowed"
+          @change="onUpdateInputOptions"
+        />
+      </v-col>
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="removeBackOption"
+          label="Remove ability to go back to the previous item"
+          @change="update"
+        />
+      </v-col>
+    </v-row>
+    <OptionalItemText
+      :colClasses="'d-flex align-center'"
+      :cols="12"
+      :md="3"
+      :sm="6"
+      :text="isOptionalText"
+      :required="responseOptions.isOptionalTextRequired"
+      @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
+      @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
     />
-
-    <v-checkbox
-      v-model="replayInputOption['schema:value']"
-      label="Media Replay Allowed"
-      @change="onUpdateInputOptions"
-    />
-
     <v-dialog
       v-model="isRecordProcess"
       persistent
@@ -99,6 +136,7 @@
 <script>
 import Vue from 'vue';
 import Uploader from '../../Uploader.vue';
+import OptionalItemText from '../../Partial/OptionalItemText.vue';
 import AudioRecorder from 'vue-audio-recorder';
 
 Vue.use(AudioRecorder);
@@ -106,6 +144,7 @@ Vue.use(AudioRecorder);
 export default {
   components: {
     Uploader,
+    OptionalItemText,
     AudioRecorder: AudioRecorder.AudioRecorder,
     AudioPlayer: AudioRecorder.AudioPlayer,
   },
@@ -113,6 +152,14 @@ export default {
     initialItemInputOptions: {
       type: Array,
       default: new Array(),
+    },
+    initialItemResponseOptions: {
+      type: Object,
+      required: true,
+    },
+    initialItemData: {
+      type: Object,
+      required: true
     },
     initialItemMedia: {
       type: Object,
@@ -127,6 +174,11 @@ export default {
 
     const inputOptions = this.initialItemInputOptions;
     const media = this.initialItemMedia;
+
+    let responseOptions = {
+      "isOptionalTextRequired": false,
+    };
+    responseOptions = Object.assign(responseOptions, this.initialItemResponseOptions);
 
     let asInputOption = {
       '@type': "schema:URL",
@@ -157,14 +209,15 @@ export default {
     return {
       inputOptions,
       media,
-
+      responseOptions,
       asInputOption,
       replayInputOption,
 
       mediaObj,
 
       audio: asInputOption['schema:value'],
-
+      isOptionalText: this.initialIsOptionalText,
+      removeBackOption: this.initialItemData.removeBackOption,
       isRecordProcess: false,
       isRecordProcessVisible: false,
       recordedAudioData: null,
@@ -197,6 +250,12 @@ export default {
         options.push(inputOptionSchema);
         return inputOptionSchema;
       }
+    },
+
+    onUpdateResponseOptions() {
+      if (this.responseOptions.isOptionalTextRequired)
+        this.$emit('updateAllow', false);
+      this.$emit('updateResponseOptions', this.responseOptions);
     },
 
     getMediaObject(mediaUrl, media, mediaSchema) {
@@ -307,8 +366,14 @@ export default {
       this.onUpdateInputOptions();
       this.onUpdateMedia();
       this.onValidate();
-    }
-
+    },
+    update() {
+      const responseOptions = {
+        'isSkippableItem': this.isSkippable,
+        'removeBackOption': this.removeBackOption,
+      };
+      this.$emit('updateOptions', responseOptions);
+    },
   }
 };
 </script>

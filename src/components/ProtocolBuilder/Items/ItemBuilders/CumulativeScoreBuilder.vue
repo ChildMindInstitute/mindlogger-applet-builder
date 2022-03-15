@@ -4,6 +4,11 @@
       v-model="panels"
       multiple
     >
+      <MarkDownEditor
+        v-model="scoreOverview"
+        class="score-overview"
+        placeholder="Overview"
+      />
       <v-expansion-panel
         v-for="(rule, id) in rules"
         :key="id"
@@ -28,7 +33,41 @@
             @input="onUpdateRule(rule)"
             @keydown="nameKeydown($event)"
           />
-
+          <MarkDownEditor
+            v-model="rule.description"
+            class="mb-4"
+            placeholder="Cumulative Score Description"
+            @input="onUpdateRule(rule)"
+          />
+          <v-card class="mb-4">
+            <v-card-title>Which direction should be used in the report</v-card-title>
+            <v-card-text>
+              <v-radio-group
+                v-model="rule.direction"
+                class="mt-0"
+                color="primary"
+                row
+                @change="onUpdateRule(rule)"
+              >
+                <v-radio :value="true">
+                  <template v-slot:label>
+                    <img
+                      :src="baseImageURL + 'score_bar.png'"
+                      class="score-bar"
+                    >
+                  </template>
+                </v-radio>
+                <v-radio :value="false">
+                  <template v-slot:label>
+                    <img
+                      :src="baseImageURL + 'score_bar.png'"
+                      class="score-bar reverse"
+                    >
+                  </template>
+                </v-radio>
+              </v-radio-group>
+            </v-card-text>
+          </v-card>
           <div class="item-list">
             <div class="list-title">
               Items within cumulative score
@@ -96,12 +135,12 @@
           </div>
 
           <div class="d-flex align-baseline mt-2">
-            <v-switch 
-              v-model="rule.isActivityInRange" 
+            <v-switch
+              v-model="rule.isActivityInRange"
               class="mt-0 pt-0"
-              inset 
-              type="text" 
-              @change="(v) => activitySelect(v, rule, 'activityInRange')" 
+              inset
+              type="text"
+              @change="(v) => activitySelect(v, rule, 'activityInRange')"
             />
             <div v-if="rule.isActivityInRange" class="d-flex align-baseline">
               <div class="mr-2"> SHOW </div>
@@ -116,6 +155,12 @@
                 @change="onUpdateRule(rule)"
               />
               <div class="ml-2 text-uppercase">IF THE USER'S SCORE OF {{rule.operator.text || 'X'}} IS {{rule.score || 'Y'}}</div>
+              <v-checkbox
+                class="ml-4"
+                label="Hide this activity until user meets threshold"
+                v-model="rule.hideActivityInRange"
+                @change="onUpdateRule(rule)"
+              />
             </div>
             <div v-else>
               <div>Show an activity based on the score the user achieves</div>
@@ -132,12 +177,12 @@
           </div>
 
           <div class="d-flex align-baseline mt-2">
-            <v-switch 
-              v-model="rule.isActivityOutRange" 
+            <v-switch
+              v-model="rule.isActivityOutRange"
               class="mt-0 pt-0"
-              inset 
-              type="text" 
-              @change="(v) => activitySelect(v, rule, 'activityOutRange')" 
+              inset
+              type="text"
+              @change="(v) => activitySelect(v, rule, 'activityOutRange')"
             />
 
             <div v-if="rule.isActivityOutRange" class="d-flex align-baseline">
@@ -153,6 +198,12 @@
                 @change="onUpdateRule(rule)"
               />
               <div class="ml-2">IF THE USER'S SCORE OUT OF RANGE</div>
+              <v-checkbox
+                class="ml-4"
+                label="Hide this activity until user meets threshold"
+                v-model="rule.hideActivityOutRange"
+                @change="onUpdateRule(rule)"
+              />
             </div>
             <div v-else>
               <div>Show an activity based on the score the user achieves</div>
@@ -202,6 +253,17 @@
   font-weight: 600;
   font-size: 20px;
 }
+
+.score-overview {
+  width: 100%
+}
+.score-bar {
+  width: 200px;
+}
+.score-bar.reverse{
+  -webkit-transform: scaleX(-1);
+  transform: scaleX(-1);
+}
 </style>
 
 <script>
@@ -220,6 +282,10 @@ export default {
     },
     items: {
       type: Array,
+      required: true,
+    },
+    activity: {
+      type: Object,
       required: true,
     },
   },
@@ -254,14 +320,30 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(config.MODULE_NAME, ['activities', 'currentActivity']),
+    ...mapGetters(config.MODULE_NAME, ['activities', 'currentActivity', 'baseImageURL']),
+    scoreOverview: {
+      get() {
+        return this.activity.scoreOverview;
+      },
+      set(value) {
+        this.activity.scoreOverview = value;
+      }
+    }
   },
   beforeMount() {
     let rules = this.initialItemData.cumulativeScores || [];
     rules = rules.map((rule) => ({ ...rule }));
-
+    
+    this.activityNames = this.activities && this.activities.filter(obj => obj.name !== this.currentActivity.name).map(act => act.name)
     for (let rule of rules) {
       Object.assign(rule, this.parseRuleData(rule));
+
+      if (!rule.activityOutRange || !this.activityNames.find(actName => actName === rule.activityOutRange)) {
+        rule.isActivityOutRange = false;
+      }
+      if (!rule.activityInRange || !this.activityNames.find(actName => actName === rule.activityInRange)) {
+        rule.isActivityInRange = false;
+      }
     }
 
     this.rules = rules;
@@ -270,8 +352,6 @@ export default {
       this.rules.push(this.parseRuleData());
       this.$emit("updateCumulativeScore", this.rules);
     }
-
-    this.activityNames = this.activities && this.activities.filter(obj => obj.name !== this.currentActivity.name).map(act => act.name)
   },
   methods: {
     nameKeydown(e) {
@@ -280,6 +360,10 @@ export default {
       }
     },
     update() {
+      this.$emit("updateCumulativeScore", this.rules);
+    },
+
+    handleActivityHide(key, value) {
       this.$emit("updateCumulativeScore", this.rules);
     },
 
@@ -292,19 +376,28 @@ export default {
     activitySelect(v, rule, key) {
       if(!v) {
         rule[key] = null;
-        this.onUpdateRule(rule)
       } else {
+        rule.valid = false;
         this.update();
       }
+      this.onUpdateRule(rule)
     },
 
     onUpdateRule(rule) {
+      try {
+        if (rule.name && rule.name.match(/[&\/\\#,+()$~%.'":*?<>{}]/g)) {
+          rule.name = rule.name.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '');
+        }        
+      } catch (error) { }
+
       rule.compute = {
         jsExpression: rule.items
           .filter((item) => item.selected)
           .map((item) => item.name)
           .join(" + "),
         variableName: rule.name,
+        direction: rule.direction,
+        description: rule.description,
       };
 
       rule.messages = [
@@ -313,20 +406,23 @@ export default {
             rule.name + (rule.operator.value ? " >= " : " <= ") + rule.score,
           message: rule.messageInRange,
           outputType: rule.outputType.value,
-          nextActivity: rule.activityInRange
+          nextActivity: rule.activityInRange,
+          hideActivity: rule.hideActivityInRange,
         },
         {
           jsExpression:
             rule.name + (rule.operator.value ? " < " : " > ") + rule.score,
           message: rule.messageOutRange,
           outputType: rule.outputType.value,
-          nextActivity: rule.activityOutRange
+          nextActivity: rule.activityOutRange,
+          hideActivity: rule.hideActivityOutRange,
         },
       ];
 
       rule.valid =
         rule.messageInRange.length &&
         rule.messageOutRange.length &&
+        rule.name !== "" &&
         rule.score !== "" &&
         (rule.isActivityInRange ? rule.isActivityInRange && rule.activityInRange : true) &&
         (rule.isActivityOutRange ? rule.isActivityOutRange && rule.activityOutRange : true) &&
@@ -339,6 +435,8 @@ export default {
       if (!rule) {
         return {
           name: "",
+          description: "",
+          direction: true,
           items: this.items
             .filter((item) => item.options && item.options.hasScoreValue)
             .map((item) => ({
@@ -349,7 +447,9 @@ export default {
           score: "",
           outputType: this.outputTypes[0],
           messageInRange: "",
+          hideActivityInRange: true,
           messageOutRange: "",
+          hideActivityOutRange: true,
           valid: false,
         };
       }
@@ -370,6 +470,8 @@ export default {
 
       return {
         name: rule.compute.variableName,
+        description: rule.compute.description,
+        direction: rule.compute.direction,
         items: this.items
           .filter((item) => item.options && item.options.hasScoreValue)
           .map((item) => ({
@@ -388,8 +490,10 @@ export default {
         valid: true,
         isActivityInRange: Boolean(message && message.nextActivity),
         activityInRange: message && message.nextActivity,
+        hideActivityInRange: message && message.hasOwnProperty('hideActivity') && message.hideActivity !== undefined ? message.hideActivity : true,
         isActivityOutRange: Boolean(messageOutRange && messageOutRange.nextActivity),
-        activityOutRange: messageOutRange && messageOutRange.nextActivity
+        activityOutRange: messageOutRange && messageOutRange.nextActivity,
+        hideActivityOutRange: messageOutRange && messageOutRange.hasOwnProperty('hideActivity') && messageOutRange.hideActivity !== undefined ? messageOutRange.hideActivity : true,
       };
     },
 

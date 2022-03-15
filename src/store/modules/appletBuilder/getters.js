@@ -11,7 +11,7 @@ const activityGetters = {
     return state.protocol.activities;
   },
 
-  currentActivity (state) {
+  currentActivity(state) {
     return state.currentActivity;
   },
 
@@ -74,5 +74,9 @@ export default {
 
   versions (state) {
     return state.versions;
+  },
+
+  nodeEnv (state) {
+    return state.nodeEnv;
   }
 }

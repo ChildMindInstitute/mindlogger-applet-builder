@@ -18,11 +18,34 @@
       :rules="maxValueRules"
       @change="update"
     />
-    <v-checkbox
-      v-model="isSkippable"
-      label="Skippable Item"
-      :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
-    />
+    <v-row>
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="isSkippable"
+          label="Skippable Item"
+          :disabled="isSkippableItem == 2 || isOptionalText && responseOptions.isOptionalTextRequired"
+          @change="update"
+        />
+      </v-col>
+
+      <v-col
+        class="d-flex align-center"
+        cols="12"
+        md="3"
+        sm="6"
+      >
+        <v-checkbox
+          v-model="removeBackOption"
+          label="Remove ability to go back to the previous item"
+          @change="update"
+        />
+      </v-col>
+    </v-row>
 
     <OptionalItemText
       :colClasses="'d-flex align-center'"
@@ -34,15 +57,23 @@
       @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
       @required="updateRequired"
     />
+
+    <ItemTimerOption
+      colClasses="d-flex align-center py-0 px-3"
+      @update="updateTimerOption"
+      :responseTimeLimit="timer"
+    />
   </v-form>
 </template>
 
 <script>
 import OptionalItemText from '../../Partial/OptionalItemText.vue';
+import ItemTimerOption from '../../Partial/ItemTimerOption';
 
 export default {
   components: {
     OptionalItemText,
+    ItemTimerOption,
   },
   props: {
     initialItemData: {
@@ -61,6 +92,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    timer: {
+      type: Number,
+      required: false
+    },
   },
   data: function () {
     return {
@@ -73,6 +108,7 @@ export default {
       maxValueRules: [
         v => (v > 0 && v % 1 === 0) || 'Max response length must be a positive integer',
       ],
+      removeBackOption: this.initialItemData.removeBackOption,
       responseOptions: this.initialItemResponseOptions,
       isOptionalText: this.initialIsOptionalText,
     };
@@ -88,8 +124,12 @@ export default {
     }
   },
   methods: {
+    updateTimerOption(option) {
+      this.$emit('updateTimer', option.responseTimeLimit)
+    },
+
     updateRequired(event) {
-      // disable the skippable button if item is required 
+      // disable the skippable button if item is required
       if (event) {
         this.isSkippable = false
         this.isSkippableItem=2
@@ -104,6 +144,8 @@ export default {
       const responseOptions = {
         'schema:minValue': this.minValue,
         'schema:maxValue': this.maxValue,
+        'isSkippableItem': this.isSkippable,
+        'removeBackOption': this.removeBackOption,
       };
       this.$emit('updateOptions', responseOptions);
     },

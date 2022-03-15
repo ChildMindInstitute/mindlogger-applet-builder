@@ -11,20 +11,26 @@
         </v-card-title>
         <v-card-text>
           <v-container>
-            <MarkDownEditor 
+            <MarkDownEditor
+              v-if="inputType == 'markdown'"
               v-model="markdownData"
             />
+            <v-textarea
+              v-else
+              v-model="markdownData"
+              solo
+            ></v-textarea>
           </v-container>
           <div v-if="headText === 'Text'" class="text-right mr-4">
-            {{markdownData.length}} / 75
+            {{ markdownData.length }} / 75
           </div>
         </v-card-text>
         <v-card-actions>
-          <div 
+          <div
             v-if="markdownData.length > 75 && headText === 'Text'"
             class="ml-4 text-caption red--text"
           >
-            * Visibility decreases over 75 characters 
+            * Visibility decreases over 75 characters
           </div>
           <v-spacer />
           <v-btn
@@ -68,6 +74,10 @@ export default {
     markdownText: {
       type: String,
       default: "",
+    },
+    inputType: {
+      type: String,
+      default: 'markdown'
     }
   },
   data() {
@@ -88,7 +98,7 @@ export default {
     /**
      * Submit markdown dialog
      * @param {}
-     * @returns {void} 
+     * @returns {void}
      */
     onSubmit() {
       this.$emit("submit", this.markdownData);
@@ -97,7 +107,7 @@ export default {
     /**
      * Close form dialog
      * @param {}
-     * @returns {void} 
+     * @returns {void}
      */
     closeDialog(status = false) {
       this.dialog = false;

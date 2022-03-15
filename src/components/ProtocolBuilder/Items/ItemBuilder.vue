@@ -15,46 +15,128 @@
       </span>
       <v-spacer />
       <v-card-actions>
-        <v-btn
+        <v-tooltip
           v-if="item.allowEdit"
-          icon
-          @click="duplicateItem(itemIndex)"
+          top
         >
-          <v-icon color="grey lighten-1">
-            content_copy
-          </v-icon>
-        </v-btn>
-        <v-btn
-          icon
-          @click="editItem"
-        >
-          <v-icon
-            v-if="!isExpanded && item.allowEdit"
-            color="grey lighten-1"
-          >
-            edit
-          </v-icon>
-          <v-icon
-            v-else-if="!isExpanded"
-            color="grey lighten-1"
-          >
-            mdi-eye
-          </v-icon>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              class="ml-4"
+              icon
+              v-on="on"
+              @click="$emit('addItem')"
+            >
+              <v-icon color="grey lighten-1">
+                mdi-plus-circle-outline
+              </v-icon>
+            </v-btn>
+          </template>
 
-          <v-icon
-            v-else
-            color="grey lighten-1"
-          >
-            mdi-chevron-double-up
-          </v-icon>
-        </v-btn>
-        <v-btn
+          <span>New Item</span>
+        </v-tooltip>
+
+        <v-tooltip
           v-if="item.allowEdit"
+          top
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              icon
+              v-on="on"
+              @click="duplicateItem(itemIndex)"
+            >
+              <v-icon color="grey lighten-1">
+                content_copy
+              </v-icon>
+            </v-btn>
+          </template>
+
+          <span>Duplicate Item</span>
+        </v-tooltip>
+
+        <v-tooltip
+          v-if="!isConditionalItem(itemIndex)"
+          top
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              icon
+              v-on="on"
+              @click="checkVariableNameOnAction(itemIndex, hideItem)"
+            >
+              <v-icon v-if="isVis" color="grey lighten-1">
+                mdi-eye-off-outline
+              </v-icon>
+              <v-icon v-else color="grey lighten-1">
+                mdi-eye-outline
+              </v-icon>
+            </v-btn>
+          </template>
+
+          <span>{{ isVis ? 'Click to Show Item' : 'Click to Hide Item' }}</span>
+        </v-tooltip>
+
+        <v-tooltip
+          v-if="item.allowEdit"
+          top
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              icon
+              @click="editItem"
+              v-on="on"
+            >
+              <v-icon
+                v-if="!isExpanded && item.allowEdit"
+                color="grey lighten-1"
+              >
+                edit
+              </v-icon>
+              <v-icon
+                v-else-if="!isExpanded"
+                color="grey lighten-1"
+              >
+                mdi-eye
+              </v-icon>
+
+              <v-icon
+                v-else
+                color="grey lighten-1"
+              >
+                mdi-chevron-double-up
+              </v-icon>
+            </v-btn>
+          </template>
+
+          <span>Edit Item</span>
+        </v-tooltip>
+
+        <v-tooltip
+          v-if="item.allowEdit"
+          top
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              icon
+              v-on="on"
+              @click="checkVariableNameOnAction(item, onDeleteItem)"
+            >
+              <v-icon color="grey lighten-1">
+                mdi-delete
+              </v-icon>
+            </v-btn>
+          </template>
+
+          <span>Delete Item</span>
+        </v-tooltip>
+
+        <v-btn
+          v-if="item.allowEdit && !['cumulativeScore', 'futureBehaviorTracker', 'pastBehaviorTracker'].includes(item.inputType)"
+          class="ml-4 move-icon dragging-handle"
           icon
-          @click="onDeleteItem(item)"
         >
           <v-icon color="grey lighten-1">
-            mdi-delete
+            mdi-dots-vertical
           </v-icon>
         </v-btn>
       </v-card-actions>
@@ -88,6 +170,7 @@
           @blur="isItemNameEditing = false"
           @input="onUpdateName"
           @keydown="nameKeydown($event)"
+          @mouseup="onMouseup($event, item)"
         />
       </div>
       <template
@@ -105,9 +188,9 @@
           @onNotify="loading = false; notify = $event;"
         />
         <div v-if="item.inputType !== 'cumulativeScore'">
-          <v-card 
-            v-if="isTextExpanded" 
-            elevation="2" 
+          <v-card
+            v-if="isTextExpanded"
+            elevation="2"
             class="d-flex justify-space-between grey white--text px-6 py-2 card-expanded"
             @click="isTextExpanded = !isTextExpanded"
           >
@@ -118,9 +201,9 @@
               </v-icon>
             </div>
           </v-card>
-          <v-card 
-            v-else 
-            elevation="2" 
+          <v-card
+            v-else
+            elevation="2"
             class="d-flex justify-space-between px-6 py-2"
             @click="isTextExpanded = !isTextExpanded"
           >
@@ -132,20 +215,23 @@
             </div>
           </v-card>
           <v-container v-if="isTextExpanded" class="pa-0">
-            <MarkDownEditor 
+            <MarkDownEditor
               v-model="largeText"
             />
           </v-container>
 
-          <div v-if="largeText.length === 0" class="error--text text-body-2 mt-2 ml-4"> 
+          <div v-if="largeText.length === 0" class="error--text text-body-2 mt-2 ml-4">
             * This field is required
           </div>
+          <div v-if="invalidLargeText" class="error--text text-body-2 mt-2 ml-4">
+            {{errorMsg}}
+          </div>
           <div class="d-flex mt-2" :class="largeText.length > 75 ? 'justify-space-between' : 'justify-end'">
-            <div 
+            <div
               v-if="largeText.length > 75 && isTextExpanded"
               class="ml-4 text-body-2 red--text text-left"
             >
-              Visibility decreases over 75 characters 
+              Visibility decreases over 75 characters
             </div>
             <div v-if="isTextExpanded" class="text-right mr-4">
               {{largeText.length}} / 75
@@ -168,7 +254,7 @@
           <v-select
             class="mt-4"
             :value="item.inputType"
-            :items="itemInputTypes"
+            :items="inputTypes"
             label="Input Type"
             outlined
             hide-details
@@ -182,7 +268,7 @@
                 v-on="on"
               >
                 <v-tooltip
-                  v-if="!hasScoringItem && item.text == 'cumulativeScore'"
+                  v-if="!hasScoringItem && item.text == 'cumulativeScore' || item.text == 'tokenSummary'"
                   top
                 >
                   <template
@@ -201,7 +287,8 @@
                       <span>{{ item.text }}</span>
                     </div>
                   </template>
-                  <span>Please create an item with scores before creating this page</span>
+                  <span v-if="item.text == 'cumulativeScore'">Please create an item with scores before creating this page</span>
+                  <span v-else>Please create future behavior tracker or past behavior tracker items</span>
                 </v-tooltip>
                 <div
                   v-else
@@ -232,7 +319,7 @@
           </v-select>
         </v-col>
         <v-col
-          v-if="item.inputType !== 'radio' && item.inputType !== 'checkbox' && item.inputType !== 'slider' && item.inputType !== 'text'"
+          v-if="item.inputType !== 'radio' && item.inputType !== 'checkbox' && item.inputType !== 'slider' && item.inputType !== 'text' && item.inputType !== 'cumulativeScore' && item.inputType !== 'ageSelector'"
           class="d-flex align-center red--text"
         >
           This item is only available for use in mobile version of MindLogger.
@@ -245,16 +332,15 @@
         label="Allow the user to see results"
       />
 
-      <div
+      <MarkDownBuilder
         v-if="item.inputType === 'markdownMessage'"
-      >
-        Message:
-
-        <MarkDownEditor
-          :value="item.markdownText"
-          @input="onUpdateMarkdownText"
-        />
-      </div>
+        :markdownText="item.markdownText"
+        :initial-item-data="item.options"
+        :timer="item.timer"
+        @onUpdateMarkdown="onUpdateMarkdownText"
+        @updateOptions="updateOptions"
+        @updateTimer="updateTimer"
+      />
 
       <RadioBuilder
         v-if="item.inputType === 'radio' || item.inputType === 'checkbox'"
@@ -262,16 +348,23 @@
         :is-multiple-choice="item.inputType === 'checkbox'"
         :is-skippable-item="skippable"
         :initial-response-options="item.responseOptions"
+        :allow-edit="item.allowEdit"
         :initial-item-data="item.options"
         :item-templates="itemTemplates"
         :has-prize-activity="hasPrizeActivity"
+        :is-reviewer-activity="isReviewerActivity"
         :initial-is-optional-text="item.isOptionalText"
+        :timer="item.timer"
+        :current-activity="currentActivity"
+        :variables-items="variablesItems"
+        :item-index="itemIndex"
         @openPrize="setTokenPrizeModalStatus(true)"
         @removeTemplate="onRemoveTemplate"
         @updateTemplates="onUpdateTemplates"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
         @updateOptionalText="updateOptionalText"
+        @updateTimer="updateTimer"
         @updateResponseOptions="updateResponseOptions"
         @loading="loading = $event"
         @notify="notify = $event"
@@ -286,6 +379,8 @@
         :initial-item-data="item.options"
         :item-templates="itemTemplates"
         :has-prize-activity="hasPrizeActivity"
+        :timer="item.timer"
+        @updateTimer="updateTimer"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
       />
@@ -309,10 +404,13 @@
         :initial-item-data="item.options"
         :initial-response-options="item.responseOptions"
         :initial-is-optional-text="item.isOptionalText"
+        :is-reviewer-activity="isReviewerActivity"
+        :timer="item.timer"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
+        @updateTimer="updateTimer"
         @loading="loading = $event"
         @notify="notify = $event"
       />
@@ -326,28 +424,53 @@
         @updateAllow="updateAllow"
         @loading="loading = $event"
         @notify="notify = $event"
+        :timer="item.timer"
+        @updateTimer="updateTimer"
       />
 
       <VideoBuilder
         v-if="item.inputType === 'video'"
         :key="`${baseKey}-video`"
         :initial-is-optional-text="item.isOptionalText"
+        :initial-item-data="item.options"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
+        :timer="item.timer"
         @updateOptionalText="updateOptionalText"
+        @updateOptions="updateOptions"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
+        @updateTimer="updateTimer"
+      />
+
+      <AgeSelectorBuilder
+        v-if="item.inputType === 'ageSelector'"
+        :key="`${baseKey}-ageSelector`"
+        :is-skippable-item="skippable"
+        :initial-item-data="item.options"
+        :initial-response-options="item.responseOptions"
+        :initial-is-optional-text="item.isOptionalText"
+        @updateOptions="updateOptions"
+        @updateAllow="updateAllow"
+        @updateOptionalText="updateOptionalText"
+        @updateResponseOptions="updateResponseOptions"
+        @loading="loading = $event"
+        @notify="notify = $event"
       />
 
       <PhotoBuilder
         v-if="item.inputType === 'photo'"
         :key="`${baseKey}-photo`"
+        :initial-item-data="item.options"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
+        :timer="item.timer"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
+        @updateTimer="updateTimer"
+        @updateOptions="updateOptions"
       />
 
       <DurationPicker
@@ -366,38 +489,50 @@
       <TimeRangeBuilder
         v-if="item.inputType === 'timeRange'"
         :key="`${baseKey}-timeRange`"
+        :initial-item-data="item.options"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
+        :timer="item.timer"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
+        @updateTimer="updateTimer"
+        @updateOptions="updateOptions"
       />
 
       <DateBuilder
         v-if="item.inputType === 'date'"
         :key="`${baseKey}-date`"
+        :initial-item-data="item.options"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
         :is-skippable-item="skippable"
+        :timer="item.timer"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
+        @updateTimer="updateTimer"
+        @updateOptions="updateOptions"
       />
 
       <DrawingBuilder
         v-if="item.inputType === 'drawing'"
         :key="`${baseKey}-drawing`"
+        :initial-item-data="item.options"
         :initial-item-response-options="item.responseOptions"
         :initial-item-input-options="item.inputOptions"
         :initial-is-optional-text="item.isOptionalText"
         :is-skippable-item="skippable"
+        @updateOptions="updateOptions"
+        :timer="item.timer"
         @updateResponseOptions="updateResponseOptions"
         @updateInputOptions="updateInputOptions"
         @updateOptionalText="updateOptionalText"
         @updateAllow="updateAllow"
         @loading="loading = $event"
         @notify="notify = $event"
+        @updateTimer="updateTimer"
       />
 
       <AudioRecordBuilder
@@ -407,10 +542,12 @@
         :initial-item-data="item.options"
         :initial-is-optional-text="item.isOptionalText"
         :initial-item-response-options="item.responseOptions"
+        :timer="item.timer"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
+        @updateTimer="updateTimer"
       />
 
       <AudioImageRecordBuilder
@@ -424,19 +561,24 @@
         @updateAllow="updateAllow"
         @loading="loading = $event"
         @notify="notify = $event"
+        @updateOptions="updateOptions"
       />
 
       <GeolocationBuilder
         v-if="item.inputType === 'geolocation'"
         :key="`${baseKey}-geolocation`"
+        :initial-item-data="item.options"
         :initial-item-response-options="item.responseOptions"
         :initial-is-optional-text="item.isOptionalText"
         :is-skippable-item="skippable"
+        :timer="item.timer"
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @loading="loading = $event"
         @notify="notify = $event"
         @updateAllow="updateAllow"
+        @updateTimer="updateTimer"
+        @updateOptions="updateOptions"
       />
 
       <AudioStimulusBuilder
@@ -444,20 +586,34 @@
         :key="`${baseKey}-audioStimulus`"
         :is-skippable-item="skippable"
         :initial-item-input-options="item.inputOptions"
+        :initial-item-response-options="item.responseOptions"
+        :initial-is-optional-text="item.isOptionalText"
         :initial-item-media="item.media"
         :initial-item-data="item.options"
         @updateAllow="updateAllow"
         @updateInputOptions="updateInputOptions"
         @updateMedia="updateMedia"
-        @validation="item.valid = $event"
         @loading="loading = $event"
         @notify="notify = $event"
+        @updateOptions="updateOptions"
+      />
+
+      <BehaviorTracker
+        v-if="item.inputType === 'pastBehaviorTracker' || item.inputType == 'futureBehaviorTracker'"
+        :key="`${baseKey}-${item.inputType}`"
+        :is-skippable-item="skippable"
+        :initial-item-data="item.options"
+        @notify="notify = $event"
+        @loading="loading = $event"
+        @updateOptions="updateOptions"
+        @updateAllow="updateAllow"
       />
 
       <CumulativeScoreBuilder
         v-if="item.inputType === 'cumulativeScore'"
         :key="`${baseKey}-cumulativeScore`"
         :items="currentActivity.items"
+        :activity="currentActivity"
         :initial-item-data="item"
         @updateCumulativeScore="updateCumulativeScore"
       />
@@ -475,6 +631,56 @@
 
     <Notify :notify="notify" />
     <Loading :loading="loading" />
+
+    <v-dialog
+      v-model="warningFlag"
+      persistent
+      width="500"
+    >
+      <v-card>
+        <v-card-text class="pt-4">
+          {{warningMsg}}
+        </v-card-text>
+
+        <v-card-actions
+          class="justify-space-around"
+        >
+          <v-btn
+            @click="handleWarningConfirm(item, itemIndex)"
+          >
+            Continue
+          </v-btn>
+
+          <v-btn
+            @click="warningFlag = false"
+          >
+            Cancel
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
+      v-model="alertFlag"
+      persistent
+      width="500"
+    >
+      <v-card>
+        <v-card-text class="pt-4">
+          {{alertMsg}}
+        </v-card-text>
+
+        <v-card-actions
+          class="justify-space-around"
+        >
+          <v-btn
+            @click="alertFlag = false"
+          >
+            Ok
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <v-dialog
       v-model="removeDialog"
@@ -495,7 +701,7 @@
             >
               <template v-slot:activator>
                 <v-list-item-content>
-                  <v-list-item-title v-text="'If ' + conditional.operation + ' of the `IF` rules are matched, show ' + conditional.showValue" />
+                  <v-list-item-title v-text="'If ' + conditional.operation + ' of the `IF` rules are matched, show ' + conditional.showValue.name" />
                 </v-list-item-content>
               </template>
 
@@ -504,7 +710,7 @@
                 :key="conditional.id + condition.ifValue.name"
               >
                 <v-list-item-content>
-                  <v-list-item-title v-text="condition.ifValue.name + ' ' + condition.stateValue.name + ' is ' + condition.answerValue.name" />
+                  <v-list-item-title v-text="(condition.ifValue.name || condition.ifValue) + ' ' + condition.stateValue.name + ' is ' + getConditionAnswer(condition)" />
                 </v-list-item-content>
               </v-list-item>
             </v-list-group>
@@ -533,6 +739,9 @@
 </template>
 
 <style scoped>
+  .move-icon {
+    cursor: move;
+  }
 
   .item.not-editable {
     position: relative;
@@ -603,6 +812,11 @@
     align-items: center;
   }
 
+  .card-expanded {
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
   .invalid {
     background-color: #d44c4c;
   }
@@ -617,13 +831,16 @@
 </style>
 
 <script>
+import _ from 'lodash';
 import Uploader from '../Uploader.vue';
 
 import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
+import MarkDownBuilder from "./ItemBuilders/MarkDownBuilder.vue";
 import StackedRadioBuilder from "./ItemBuilders/StackedRadioBuilder.vue";
 import TextBuilder from "./ItemBuilders/TextBuilder.vue";
 import SliderBuilder from "./ItemBuilders/SliderBuilder.vue";
 import VideoBuilder from "./ItemBuilders/VideoBuilder.vue";
+import AgeSelectorBuilder from "./ItemBuilders/AgeSelectorBuilder.vue";
 import PhotoBuilder from "./ItemBuilders/PhotoBuilder.vue";
 import DurationPicker from "./ItemBuilders/DurationPicker.vue";
 import TimeRangeBuilder from "./ItemBuilders/TimeRangeBuilder.vue";
@@ -635,6 +852,9 @@ import GeolocationBuilder from "./ItemBuilders/GeolocationBuilder.vue";
 import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
 import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
 import StackedSliderBuilder from "./ItemBuilders/StackedSliderBuilder";
+import BehaviorTracker from "./ItemBuilders/BehaviorTracker";
+import { timeScreen } from './ItemBuilders/timeScreen';
+import { tokenSummary } from './ItemBuilders/tokenSummary';
 
 import MarkDownEditor from "../MarkDownEditor";
 import Item from '../../../models/Item';
@@ -644,6 +864,7 @@ import Loading from '../Additional/Loading.vue';
 
 import { mapMutations, mapGetters } from 'vuex';
 import config from '../../../config';
+import { checkItemVariableName, checkItemVariableNameIndex, getTextBetweenBrackets } from '../../../utilities/util';
 
 export default {
   components: {
@@ -652,6 +873,7 @@ export default {
     TextBuilder,
     SliderBuilder,
     VideoBuilder,
+    AgeSelectorBuilder,
     PhotoBuilder,
     TimeRangeBuilder,
     DateBuilder,
@@ -663,16 +885,22 @@ export default {
     AudioStimulusBuilder,
     CumulativeScoreBuilder,
     MarkDownEditor,
+    MarkDownBuilder,
     StackedRadioBuilder,
     StackedSliderBuilder,
     Notify,
     Loading,
+    BehaviorTracker,
   },
   props: {
     itemIndex: {
       type: Number,
       required: true,
     },
+    variablesItems: {
+      type: Object,
+      required: true
+    }
   },
   data() {
     return {
@@ -686,7 +914,6 @@ export default {
       itemConditionals: [],
       hasScoringItem: false,
       removeDialog: false,
-      markdownDialog: false,
       valid: false,
       largeText: '',
       headerImage: '',
@@ -696,7 +923,16 @@ export default {
       baseKey: 0,
       loading: false,
       notify: {},
-      responseIdentifierMessage: 'By using this option, the user will be required to enter response data identifier text into the field. The text entered will identify the response data collected at that point in time. The identifier used will be filterable on the user\'s data visualization tab.'
+      isVis: false,
+      invalidLargeText: false,
+      debounceTimer: undefined,
+      responseIdentifierMessage: 'By using this option, the user will be required to enter response data identifier text into the field. The text entered will identify the response data collected at that point in time. The identifier used will be filterable on the user\'s data visualization tab.',
+      warningFlag: false,
+      warningMsg: '',
+      errorMsg: '* This item is not supported, please remove it.',
+      alertFlag: false,
+      alertMsg: '',
+      editVariableValid: true,
     }
   },
   computed: {
@@ -709,9 +945,23 @@ export default {
         'currentActivity',
         'itemInputTypes',
         'itemTemplates',
-        'prizeActivity'
+        'prizeActivity',
       ]
     ),
+
+    isReviewerActivity () {
+      return this.currentActivity.isReviewerActivity;
+    },
+
+    inputTypes () {
+      if (this.isReviewerActivity) {
+        return this.itemInputTypes.filter(
+          type => type.text == 'radio' || type.text == 'checkbox' || type.text == 'slider'
+        )
+      }
+
+      return this.itemInputTypes;
+    },
 
     conditionals () {
       return this.currentActivity.conditionalItems;
@@ -733,11 +983,56 @@ export default {
     }
   },
   watch: {
+    item: function(newItem) {
+      this.largeText = newItem.question.text;
+    },
     largeText: function(text) {
       this.updateItemMetaInfo({
         index: this.itemIndex,
-        obj: { question: { text, image: this.headerImage } }
+        obj: { question: { text, image: this.headerImage } },
       });
+
+      this.debounce(function() {
+        const { valid, found, variableNames = [] } = checkItemVariableName(text, this.currentActivity, this.itemIndex);
+        try {
+          Object.assign(this.variablesItems, { [this.currentActivity.items[this.itemIndex].name]: variableNames })
+        } catch (error) { }
+        this.invalidLargeText = valid;
+        if (typeof this.invalidLargeText === 'object') {
+          this.errorMsg = `* You cannot use ${this.currentActivity.items[this.itemIndex].name} in the same item. Please remove`
+          this.invalidLargeText = true;
+        } else {
+          this.errorMsg = '* This item is not supported, please remove it.'
+        }
+
+        if (found) {
+          if (this.currentActivity.isOnePageAssessment || this.currentActivity.isSkippable) {
+            this.alertFlag = true;
+            this.alertMsg = `${this.currentActivity.isSkippable ? 'Skipping all the items' : 'A one-page assessment'} cannot contain variables. This variable will automatically be removed.`
+            setTimeout(()=> {
+              variableNames.forEach(variable => {
+                text = text.replace(`[[${variable}]]`, '');
+              });
+              this.largeText = text;
+              this.updateItemMetaInfo({
+                index: this.itemIndex,
+                obj: { question: { text, image: this.headerImage } },
+              });
+            }, 200);
+          }
+          this.currentActivity.hasVariable = found;
+          this.updateActivityMetaInfo({ hasVariable: found })
+        }
+
+        if (_.concat([], ...Object.values(this.variablesItems)).length < 1) {
+          this.currentActivity.hasVariable = false;
+        }
+
+        this.updateItemMetaInfo({
+          index: this.itemIndex,
+          obj: { valid: !this.invalidLargeText },
+        });
+      }, 300)
     },
     headerImage: function(image) {
       this.updateItemMetaInfo({
@@ -756,21 +1051,34 @@ export default {
       isExpanded: !this.item.name.length
     });
 
+    this.isVis = !!this.item.isVis;
     this.setItemName();
-
   },
   methods: {
     ...mapMutations(config.MODULE_NAME,
       [
         'updateItemMetaInfo',
         'duplicateItem',
+        'showOrHideItem',
+        'showItem',
         'deleteConditional',
         'deleteItem',
         'updateItemInputType',
         'setTokenPrizeModalStatus',
         'insertTemplateUpdateRequest',
+        'addTimeScreen',
+        'deleteTimeScreen',
+        'updateTokenSummary',
+        'updateActivityMetaInfo',
       ],
     ),
+
+    debounce (func, delay) {
+      const context = this;
+      const args = arguments;
+      clearTimeout(this.debounceTimer);
+      this.debounceTimer = setTimeout(() => func.apply(context, args), delay);
+    },
 
     setItemName () {
       if(!this.item.name) this.onUpdateName(`Screen${this.itemIndex + 1}`);
@@ -780,10 +1088,56 @@ export default {
       this.isExpanded = !this.isExpanded;
     },
 
+    hideItem (index) {
+      this.isVis = !this.isVis;
+      this.showOrHideItem(index);
+    },
+
+    getConditionAnswer (condition) {
+      if (condition.answerValue) {
+        return condition.answerValue.name;
+      }
+      if (condition.maxValue || condition.maxValue === 0) {
+        return condition.maxValue;
+      }
+      return condition.minValue;
+    },
+
+    handleWarningConfirm(item, itemIndex) {
+      if (this.warningMsg.includes('By deleting'))
+        this.onDeleteItem(item)
+      else if (this.warningMsg.includes('By hiding')) {
+        this.hideItem(itemIndex)
+      }
+      this.warningFlag = false;
+    },
+
+    checkVariableNameOnAction(item, callBack) {
+      let index;
+      if (typeof item === 'number') {
+        index = item;
+        item = this.currentActivity.items[item];
+      }
+      if (item && !item.isVis) {
+        for (const citem of this.currentActivity.items) {
+          const invalidLargeTextIndex = checkItemVariableNameIndex(citem.question.text, { items: [item] });
+          if (invalidLargeTextIndex != -1) {
+            if (index > -1) {
+              this.warningMsg = `By hiding ${item.name}, it will cause ${citem.name} to fail. Do you want to continue? (Please fix ${citem.name} if you choose to continue.)`;
+            } else
+              this.warningMsg = `By deleting ${item.name}, it will cause ${citem.name} to fail. Do you want to continue? (Please fix ${citem.name} if you choose to continue.)`;
+            this.warningFlag = true;
+            return;
+          }
+        }
+      }
+      callBack(index > -1 ? index : item);
+    },
+
     onDeleteItem () {
       this.itemConditionals = [];
       this.conditionals.forEach(conditional => {
-        if (conditional.showValue === this.item.name) {
+        if (conditional.showValue.name === this.item.name) {
           this.itemConditionals.push(conditional);
         } else if(conditional.conditions.find(({ ifValue }) => ifValue.name === this.item.name)) {
           this.itemConditionals.push(conditional);
@@ -798,7 +1152,16 @@ export default {
     },
 
     removeConditionals () {
+      const inputType = this.item.inputType;
+
       this.deleteItem(this.itemIndex);
+
+      if (inputType == 'futureBehaviorTracker') {
+        this.deleteTimeScreen(this.itemIndex - 1)
+      }
+
+      this.updateTokenSummary(tokenSummary);
+
       this.itemConditionals.forEach((conditional) => {
         const index = this.conditionals.findIndex(({ id }) => id === conditional.id);
 
@@ -810,9 +1173,32 @@ export default {
       this.removeDialog = false;
     },
 
+    isConditionalItem (index) {
+      const res = this.conditionals.some(({ showValue }) => showValue === this.item);
+
+      if (res) {
+        this.showItem(index);
+      }
+      return res;
+    },
+
     nameKeydown (e) {
+      if (!this.editVariableValid) {
+        this.alertMsg = `You cannot edit this item name, since it is using as a variable.`;
+        this.alertFlag = true;
+        e.preventDefault();
+      }
+
       if (!/^[a-zA-Z0-9-_]+$/.test(e.key)) {
         e.preventDefault();
+      }
+    },
+
+    onMouseup (event, item) {
+      if (_.concat([], ...Object.values(this.variablesItems)).includes(item.name)) {
+        this.editVariableValid = false;
+      } else {
+        this.editVariableValid = true;
       }
     },
 
@@ -826,6 +1212,9 @@ export default {
 
       updates.options = { options: [] };
       updates.allow = false;
+      updates.timer = 0;
+
+      const prev = this.item.inputType;
 
       this.updateItemMetaInfo({
         index: this.itemIndex,
@@ -841,6 +1230,17 @@ export default {
       })
 
       this.baseKey++;
+
+      if (prev == 'futureBehaviorTracker') {
+        this.deleteTimeScreen(this.itemIndex-1)
+      } else if (inputType == 'futureBehaviorTracker') {
+        let name = this.addTimeScreen({
+          index: this.itemIndex,
+          screen: timeScreen
+        })
+      }
+
+      this.updateTokenSummary(tokenSummary);
     },
 
     onUpdateName (name) {
@@ -879,6 +1279,22 @@ export default {
     },
 
     updateAllow(allowItem) {
+      if (allowItem) {
+        const item = this.currentActivity.items[this.itemIndex];
+        for (const citem of this.currentActivity.items) {
+          const invalidLargeTextIndex = checkItemVariableNameIndex(citem.question.text, { items: [item] });
+          if (invalidLargeTextIndex != -1) {
+            this.updateItemMetaInfo({
+              index: this.itemIndex,
+              obj: { allow: false, valid: false }
+            })
+            this.alertMsg = `By skipping ${item.name}, it will cause ${citem.name} to fail.`;
+            this.alertFlag = true;
+            return;
+          }
+        }
+      }
+
       this.updateItemMetaInfo({
         index: this.itemIndex,
         obj: { allow: allowItem }
@@ -889,6 +1305,13 @@ export default {
       this.updateItemMetaInfo({
         index: this.itemIndex,
         obj: { isOptionalText }
+      });
+    },
+
+    updateTimer(timer) {
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { timer }
       });
     },
 
@@ -917,6 +1340,21 @@ export default {
       this.updateItemMetaInfo({
         index: this.itemIndex,
         obj: { options: newOptions }
+      })
+
+      const model = new Item();
+      model.updateReferenceObject(this.item);
+
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { responseOptions: model.getResponseOptions() }
+      })
+    },
+
+    updateAgeOptions (newOptions) {
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { options: newOptions, valid: newOptions.valid }
       })
 
       const model = new Item();

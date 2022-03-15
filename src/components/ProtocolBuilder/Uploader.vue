@@ -9,10 +9,10 @@
       <h5>Uploader types:</h5>
       <ul>
         <li
-          v-for="type in structureTypes"
-          :key="type"
+          v-for="structureType in structureTypes"
+          :key="structureType"
         >
-          {{ type }}
+          {{ structureType }}
         </li>
       </ul>
       <p class="mt-3">
@@ -22,8 +22,110 @@
     <!-- Showing when user did not specify what type of uploader to show -->
 
     <div v-else>
+      <v-tooltip
+        right
+        v-if="initialAdditionalType === 'list'"
+      >
+        <template v-slot:activator="{ on }">
+          <v-list-group v-on="on">
+            <template v-slot:activator>
+              <v-list-item-action>
+                <v-radio-group
+                  :value="initialData.length > 0 ? 'checked' : 'unchecked'"
+                >
+                  <v-radio
+                    disabled
+                    value="checked"
+                  />
+                </v-radio-group>
+              </v-list-item-action>
+              <v-list-item-title>Add Image</v-list-item-title>
+            </template>
+
+            <v-list-item
+              class="v-file-input-list-item"
+            >
+              <div class="input-file-container">
+                <input
+                  ref="fileInput"
+                  class="file-input"
+                  type="file"
+                  accept="image/jpeg, image/png, image/gif, image/bmp"
+                  @change="onAddFromDevice($event, null)"
+                >
+                <v-list-item-title
+                  class="v-list-item-title d-flex align-center px-4"
+                >
+                  Your computer
+                  <v-icon right>
+                    mdi-monitor
+                  </v-icon>
+                </v-list-item-title>
+              </div>
+            </v-list-item>
+
+
+            <v-list-item class="from-url">
+              <v-list-item-title
+                class="px-4"
+                @click="isAddingFromUrl = true"
+              >
+                From URL
+                <v-icon right>
+                  mdi-link-variant-plus
+                </v-icon>
+              </v-list-item-title>
+            </v-list-item>
+
+            <v-list-item
+              v-if="uploadData"
+              @click="removeConfirm = true"
+            >
+              <v-list-item-title
+                class="px-4"
+                style="color: #ff5252"
+              >
+                Remove
+              </v-list-item-title>
+            </v-list-item>
+
+            <v-tooltip v-if="uploadData" right>
+              <template v-slot:activator="{ on, attrs }">
+                <div
+                  class="d-flex"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  <v-icon
+                    color="primary"
+                    dark
+                    class="mx-1 d-flex"
+                  >
+                    mdi-image
+                  </v-icon>
+                  <div @click="downloadImage" class="mr-4">{{ getFileName(fileName, false) }}</div>
+                </div>
+              </template>
+              <span>
+                <div>{{ getFileName(fileName) }}</div>
+              </span>
+            </v-tooltip>
+          </v-list-group>
+        </template>
+
+        <span>
+          <p>Image Requirements</p>
+          <ul>
+            <li>Size: less than 8MB</li>
+            <li>Format: JPEG and PNG</li>
+            <li>Portrait-oriented and have at least 800px width for mobile users</li>
+            <li>At least 1000px width for tablet users</li>
+          </ul>
+        </span>
+      </v-tooltip>
+
       <v-expansion-panels
-        v-if="initialAdditionalType !== 'small-circle'"
+        v-else-if="initialAdditionalType !== 'small-circle'"
       >
         <v-expansion-panel>
           <v-expansion-panel-header>
@@ -32,34 +134,12 @@
           <v-expansion-panel-content>
             <div class="input-file-container">
               <input
-                v-if="initialType === 'audio'"
                 ref="fileInput"
                 class="file-input"
                 type="file"
-                accept="audio/mpeg, audio/ogg, audio/wav"
+                :accept="getFileFormats(initialType)"
                 @change="onAddFromDevice($event, null)"
               >
-              <!-- /if initialType === 'audio' -->
-
-              <input
-                v-if="initialType === 'image'"
-                ref="fileInput"
-                class="file-input"
-                type="file"
-                accept="image/jpeg, image/png, image/bmp"
-                @change="onAddFromDevice($event, null)"
-              >
-              <!-- /if initialType === 'image' -->
-
-              <input
-                v-if="initialType === 'video'"
-                ref="fileInput"
-                class="file-input"
-                type="file"
-                accept="video/*, image/gif"
-                @change="onAddFromDevice($event, null)"
-              >
-              <!-- /if initialType === 'video' -->
 
               <v-btn @click="$refs.fileInput.click()">
                 Your computer
@@ -68,7 +148,7 @@
                 </v-icon>
               </v-btn>
             </div>
-            <v-btn 
+            <v-btn
               class="mt-4"
               @click="isAddingFromUrl = true"
             >
@@ -78,7 +158,7 @@
               </v-icon>
             </v-btn>
 
-            <v-btn 
+            <v-btn
               v-if="initialType === 'audio'"
               class="mt-4"
               @click="$emit('onRecordAudio')"
@@ -99,10 +179,31 @@
               Remove
             </v-btn>
 
-            <div 
+            <div
               v-if="initialType === 'image'"
               class="mt-4 text-right"
             >
+              <v-tooltip v-if="uploadData" right>
+                <template v-slot:activator="{ on, attrs }">
+                  <div
+                    class="d-flex"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    <v-icon
+                      color="primary"
+                      dark
+                      class="d-flex"
+                    >
+                      mdi-image
+                    </v-icon>
+                    <div @click="downloadImage" class="mr-4">{{ getFileName(fileName, false) }}</div>
+                  </div>
+                </template>
+                <span>
+                  <div>{{ getFileName(fileName) }}</div>
+                </span>
+              </v-tooltip>
               <v-tooltip right>
                 <template v-slot:activator="{ on, attrs }">
                   <v-icon
@@ -118,8 +219,102 @@
                   <p>Image Requirements</p>
                   <ul>
                     <li>Size: less than 8MB</li>
+                    <li>Format: JPEG and PNG</li>
                     <li>Width: between 100px and 1920px</li>
                     <li>Height: between 100px and 1920px</li>
+                  </ul>
+                </span>
+              </v-tooltip>
+            </div>
+            <div
+              v-else-if="initialType === 'video_or_image'"
+              class="mt-4 text-right d-flex px-2"
+              :class="uploadData ? 'justify-space-between' : 'justify-end'"
+            >
+              <v-tooltip v-if="uploadData" right>
+                <template v-slot:activator="{ on, attrs }">
+                  <div
+                    class="d-flex"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    <v-icon
+                      color="primary"
+                      dark
+                      class="d-flex"
+                    >
+                      mdi-image
+                    </v-icon>
+                    <div @click="downloadImage" class="mr-4">{{ getFileName(fileName, false) }}</div>
+                  </div>
+                </template>
+                <span>
+                  <div>{{ getFileName(fileName) }}</div>
+                </span>
+              </v-tooltip>
+              <v-tooltip right>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-icon
+                    color="primary"
+                    dark
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    mdi-information-outline
+                  </v-icon>
+                </template>
+                <span>
+                  <p>Image Requirements</p>
+                  <ul>
+                    <li>Size: less than 8MB</li>
+                    <li>700px * 1000px size is required</li>
+                  </ul>
+                </span>
+              </v-tooltip>
+            </div>
+            <div
+              v-else-if="initialType === 'video'"
+              class="mt-4 text-right"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-icon
+                    color="primary"
+                    dark
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    mdi-information-outline
+                  </v-icon>
+                </template>
+                <span>
+                  <p>Requirements</p>
+                  <ul>
+                    <li>Size: less than 100MB</li>
+                    <li>Format: MP4 and GIF</li>
+                  </ul>
+                </span>
+              </v-tooltip>
+            </div>
+            <div
+              v-else-if="initialType === 'audio'"
+              class="mt-4 text-right"
+            >
+              <v-tooltip right>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-icon
+                    color="primary"
+                    dark
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    mdi-information-outline
+                  </v-icon>
+                </template>
+                <span>
+                  <p>Requirements</p>
+                  <ul>
+                    <li>Format: MP3 and WAV</li>
                   </ul>
                 </span>
               </v-tooltip>
@@ -155,7 +350,7 @@
                 ref="fileInput"
                 class="file-input"
                 type="file"
-                accept="image/jpeg, image/png, image/bmp"
+                accept="image/jpeg, image/png, image/gif, image/bmp"
                 @change="onAddFromDevice($event, null)"
               >
               <v-list-item-title
@@ -194,8 +389,31 @@
           </v-list-item>
 
           <div
-            class="text-right px-2"
+            class="d-flex px-2"
+            :class="uploadData ? 'justify-space-between' : 'justify-end'"
           >
+            <v-tooltip v-if="uploadData" right>
+              <template v-slot:activator="{ on, attrs }">
+                <div
+                  class="d-flex"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  <v-icon
+                    color="primary"
+                    dark
+                    class="d-flex"
+                  >
+                    mdi-image
+                  </v-icon>
+                  <div @click="downloadImage" class="mr-4">{{ getFileName(fileName, false) }}</div>
+                </div>
+              </template>
+              <span>
+                <div>{{ getFileName(fileName) }}</div>
+              </span>
+            </v-tooltip>
+
             <v-tooltip right>
               <template v-slot:activator="{ on, attrs }">
                 <v-icon
@@ -209,10 +427,14 @@
               </template>
               <span>
                 <p>Image Requirements</p>
-                <ul>
+                <ul style="max-width: 248px">
                   <li>Size: less than 8MB</li>
+                  <li>Format: JPEG and PNG</li>
                   <li>Width: between 100px and 1920px</li>
                   <li>Height: between 100px and 1920px</li>
+                  <li v-if="imageType === 'watermark'">
+                    Translucency of the image should already be completed prior to upload
+                  </li>
                 </ul>
               </span>
             </v-tooltip>
@@ -224,7 +446,7 @@
     <!-- Image/Audio Uploader Structure -->
 
     <AddFromUrl
-      :show="isAddingFromUrl"
+      v-model="isAddingFromUrl"
       @add="onAddFromUrl"
       @cancel="isAddingFromUrl = false"
     />
@@ -251,8 +473,8 @@
             >
               Cancel
             </v-btn>
-            <v-btn 
-              class="ml-4" 
+            <v-btn
+              class="ml-4"
               color="error"
               @click="onClickRemove"
             >
@@ -267,7 +489,7 @@
 </template>
 
 <script>
-import { Uploader, isAudioUrlValid, isImageValid, isVideoUrlValid } from '../../models/Uploader';
+import { Uploader, isSplashImageValid, isAudioUrlValid, isImageValid, isVideoUrlValid } from '../../models/Uploader';
 import AddFromUrl from './Additional/AddFromUrl.vue';
 
 export default {
@@ -276,6 +498,10 @@ export default {
   },
   props: {
     initialType: {
+      type: String,
+      default: '',
+    },
+    imageType: {
       type: String,
       default: '',
     },
@@ -293,13 +519,14 @@ export default {
     }
   },
   data() {
-    const structureTypes = ['image', 'audio', 'video'];
+    const structureTypes = ['image', 'audio', 'video', 'video_or_image'];
     const uploader = new Uploader(this.initialType);
 
     return {
       structureTypes,
       uploader,
       uploadData: this.initialData,
+      fileName: this.initialData,
       isAddingFromUrl: false,
       removeConfirm: false,
     };
@@ -312,63 +539,136 @@ export default {
       };
 
       const type = typeof this.initialData;
-     
+
       if(type === 'string' && this.initialData !== this.uploadData) {
-        this.onAddFromUrl(this.initialData);
+        this.onAddFromUrl(this.initialData, false);
       } else if(type === 'object' && this.initialData.name !== this.uploadData.name) {
-        this.onAddFromDevice(null, this.initialData);
+        this.onAddFromDevice(null, this.initialData, false);
       }
     }
   },
   methods: {
-
-    async onAddFromUrl(url) {
+    async onAddFromUrl(url, updateParent=true) {
       try {
-        if(this.initialType === 'audio') await isAudioUrlValid(url);
-        else if(this.initialType === 'image') await isImageValid(url);
-        else if(this.initialType === 'video') await isVideoUrlValid(url);
+        if (this.initialType === 'audio') {
+          await isAudioUrlValid(url);
+        } else if (url.match(/\.(jpeg|jpg|gif|png)$/) != null) {
+          if (this.imageType === 'splash') {
+            await isSplashImageValid(url);
+          } else {
+            await isImageValid(url);
+          }
+        } else {
+          await isVideoUrlValid(url);
+        }
 
         this.uploadData = url;
+        this.fileName = url;
         this.isAddingFromUrl = false;
-        this.$emit('onAddFromUrl', this.uploadData);
+
+        if (updateParent) {
+          this.$emit('onAddFromUrl', this.uploadData);
+        }
       } catch (error) {
-        this.$emit('onNotify', {
-          type: 'error',
-          message: error,
-        });
+        if (updateParent) {
+          this.$emit('onNotify', {
+            type: 'error',
+            message: error,
+          });
+        }
       }
     },
 
-    async onAddFromDevice(event, externalFile) {
+    async onAddFromDevice(event, externalFile, updateParent=true) {
       const file = event ? event.target.files[0] : externalFile;
       if(!file) return;
       if(event) event.target.value = '';
 
       try {
-        if(this.initialType === 'image') await isImageValid(file);
+        if (this.initialType === 'image') await isImageValid(file);
+        if (this.imageType === 'splash' && file.type.match(/(jpeg|jpg|png)$/) != null) await isSplashImageValid(file);
 
         this.uploadData = file;
-        this.$emit('onAddFromDevice', this.upload);
+        this.fileName = file;
+
+        if (updateParent) {
+          this.$emit('onAddFromDevice', this.upload);
+        }
       } catch (error) {
-        this.$emit('onNotify', {
-          type: 'error',
-          message: error,
-        });
+        if (updateParent) {
+          this.$emit('onNotify', {
+            type: 'error',
+            message: error,
+          });
+        }
       }
     },
 
     async upload() {
       return new Promise((resolve, reject) => {
         this.uploader.upload(this.uploadData)
-          .then(response => { 
-            this.uploadData = response.location;
-            resolve(this.uploadData);
+          .then(response => {
+            resolve(response.location);
           })
           .catch(err => {
             this.uploadData = this.initialData;
             setTimeout(() => reject('Something went wrong with uploading.'), 1000);
           });
       });
+    },
+
+    downloadImage () {
+      const s3ImageURL = "https://mindlogger-applet-contents.s3.amazonaws.com/image/";
+      let imageUrl = typeof this.uploadData === 'string' ? this.uploadData : this.uploadData.name;
+
+      if (!imageUrl.includes('https://')) {
+        imageUrl = s3ImageURL + imageUrl;
+      }
+
+      fetch(imageUrl, {
+        method: 'GET',
+        mode: 'cors',
+        cache: 'no-cache',
+        credentials: 'same-origin',
+        referrer: 'no-referrer',
+      })
+        .then((response) => response.blob())
+        .then((blob) => {
+          saveAs(blob, this.getFileName(this.fileName));
+        });
+
+    },
+
+    getFileName (uploadData, isFullName = true) {
+      let fileName;
+      if (typeof uploadData !== "string") {
+        fileName = uploadData.name;
+      } else {
+        const values = uploadData.split('/');
+        fileName = values[values.length - 1];
+      }
+
+      if (isFullName || fileName.length <= 15) {
+        return fileName;
+      } else {
+        return fileName.substring(0, 10) + '....' + fileName.slice(-3);
+      }
+    },
+
+    getFileFormats (type) {
+      if (type === 'audio') {
+        return "audio/mpeg, audio/ogg, audio/wav";
+      }
+      if (type === 'image') {
+        return "image/jpeg, image/png, image/bmp"
+      }
+      if (type === 'video') {
+        return "video/*, image/gif"
+      }
+      if (type === 'video_or_image') {
+        return "video/*, image/gif, image/jpeg, image/png, image/bmp";
+      }
+      return "";
     },
 
     onClickRemove() {
@@ -438,4 +738,11 @@ export default {
   background-color: rgba(0, 0, 0, 0.04);
 }
 
+.from-url {
+  cursor: pointer;
+}
+
+.from-url:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
 </style>

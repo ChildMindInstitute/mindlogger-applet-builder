@@ -104,6 +104,11 @@ export default {
       required: false,
       default: null,
     },
+    nodeEnv: {
+      type: String,
+      required: false,
+      default: 'development',
+    },
   },
   computed: {
     ...mapGetters(config.MODULE_NAME, [
@@ -145,6 +150,7 @@ export default {
     this.initThemeId(this.initialData);
 
     this.setVersions(this.versions);
+    this.setNodeEnv(this.nodeEnv);
     this.setCurrentScreen(config.PROTOCOL_SCREEN);
     this.setCurrentActivity(-1);
 
@@ -176,6 +182,8 @@ export default {
       }
 
       this.setFormattedOriginalProtocol(JSON.parse(JSON.stringify(original)));
+    } else {
+      this.setFormattedOriginalProtocol(null);
     }
 
     this.$emit("setLoading", false);
@@ -195,6 +203,7 @@ export default {
       'setTokenPrizeModalStatus',
       'updateTemplateRequestStatus',
       'setVersions',
+      'setNodeEnv',
       'resetProtocol',
     ]),
     ...mapGetters(config.MODULE_NAME, [
@@ -234,8 +243,15 @@ export default {
       Object.entries(basketApplets).map(([appletId, appletData]) => {
         const { applet, activities, items, protocol } = appletData;
 
-        Object.values(activities).forEach((act) => {
-          if (act.isPrize) {
+        let orders = _.get(applet, ['reprolib:terms/order', 0, '@list'], []).map(orderItem => orderItem['@id']);
+        if (!orders.length) {
+          orders = Object.keys(activities);
+        }
+
+        orders.forEach((key) => {
+          const act = activities[key];
+
+          if (!act || act.isPrize) {
             return;
           }
 

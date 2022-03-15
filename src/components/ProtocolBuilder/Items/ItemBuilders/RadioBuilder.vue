@@ -71,7 +71,7 @@
           :key="index"
         >
           <v-row>
-            <div 
+            <div
               class="d-flex justify-start align-center option-item pl-2"
               :style="{background: colorPalette ? option.color : 'none', color: colorPalette ? getTextColor(option.color) : 'black'}"
             >
@@ -90,12 +90,15 @@
                 value="false"
                 disabled
               >
-              <span>{{ option.name }}</span>
+              <span class="option-name">{{ option.name }}</span>
             </div>
 
             <v-spacer />
 
-            <div class="d-flex align-center justify-end">
+            <div
+              v-if="allowEdit"
+              class="d-flex align-center justify-end"
+            >
               <v-btn
                 icon
                 @click="option.expanded = !option.expanded"
@@ -122,6 +125,17 @@
               />
               <v-btn
                 icon
+                @click="hideOption(index)"
+              >
+                <v-icon v-if="option.isVis">
+                  mdi-eye-off-outline
+                </v-icon>
+                <v-icon v-else>
+                  mdi-eye-outline
+                </v-icon>
+              </v-btn>
+              <v-btn
+                icon
                 @click="deleteOption(index)"
               >
                 <v-icon>delete</v-icon>
@@ -143,9 +157,12 @@
                   v-model="option.name"
                   :rules="textRules"
                   label="Option Text"
-                  counter="45"
+                  counter="75"
                   @change="updateOption(option)"
                 />
+                <div v-if="!option.valid" class="error--text text-body-2 mt-2 ml-4">
+                  {{errorMsg}}
+                </div>
               </v-col>
               <v-col
                 v-if="isTokenValue"
@@ -213,7 +230,7 @@
                 <MarkDownEditor
                   v-if="isTooltipOpen"
                   v-model="option.description"
-                  @input="updateOption(option)"
+                  @input="updateOption(option, true)"
                 />
               </v-col>
             </v-row>
@@ -259,6 +276,7 @@
           x-small
           color="primary"
           @click="addOption"
+          :disabled="!allowEdit"
         >
           <v-icon color="white">
             mdi-plus
@@ -271,6 +289,7 @@
       />
       <v-row>
         <v-col
+          v-if="!isReviewerActivity"
           class="d-flex align-center"
           cols="12"
           md="3"
@@ -295,6 +314,7 @@
           />
         </v-col>
         <v-col
+          v-if="!isReviewerActivity"
           class="d-flex align-center"
           cols="12"
           md="3"
@@ -307,6 +327,7 @@
           />
         </v-col>
         <v-col
+          v-if="!isReviewerActivity"
           class="d-flex align-center"
           cols="12"
           md="3"
@@ -338,6 +359,18 @@
           sm="6"
         >
           <v-checkbox
+            v-model="removeBackOption"
+            label="Remove ability to go back to the previous item"
+            @change="update"
+          />
+        </v-col>
+        <v-col
+          class="d-flex align-center"
+          cols="12"
+          md="3"
+          sm="6"
+        >
+          <v-checkbox
             v-model="colorPalette"
             label="Set color palette"
             @change="update"
@@ -351,14 +384,20 @@
           />
         </v-col>
       </v-row>
-        <OptionalItemText
-          colClasses="d-flex align-center py-0 px-3"
+      <OptionalItemText
+        colClasses="d-flex align-center py-0 px-3"
 
-          :text="isOptionalText"
-          :required="responseOptions.isOptionalTextRequired"
-          @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
-          @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
-        />
+        :text="isOptionalText"
+        :required="responseOptions.isOptionalTextRequired"
+        @text="isOptionalText = $event; $emit('updateOptionalText', isOptionalText)"
+        @required="responseOptions.isOptionalTextRequired = $event; onUpdateResponseOptions();"
+      />
+
+      <ItemTimerOption
+        colClasses="d-flex align-center py-0 px-3"
+        @update="updateTimerOption"
+        :responseTimeLimit="timer"
+      />
     </v-form>
 
     <v-dialog
@@ -371,7 +410,7 @@
           <span>Apply a Template</span>
         </v-card-title>
         <v-card-text>
-          <v-container 
+          <v-container
             class="d-flex justify-center"
             fluid
           >
@@ -396,10 +435,10 @@
                   <v-card-text>
                     <div>This is what the options would look like:</div>
                     <div class="text--primary mt-4">
-                      <div 
+                      <div
                         v-for="(optionColor, index) in colorPalettes[value]"
                         class="d-flex justify-center align-center option-color"
-                        :style="{backgroundColor: optionColor}"
+                        :style="{backgroundColor: optionColor, color: invertColor(optionColor)}"
                         :key="optionColor"
                       >
                         Option {{index + 1}}
@@ -413,8 +452,8 @@
         </v-card-text>
         <v-card-actions>
           <small class="d-flex align-center ml-4">
-            <v-icon class="mr-1">info</v-icon> 
-            The patter repeats after the 5th option
+            <v-icon class="mr-1">info</v-icon>
+            The pattern repeats itself
           </small>
           <v-spacer></v-spacer>
           <v-btn
@@ -444,7 +483,7 @@
           <span>Set Option Color</span>
         </v-card-title>
         <v-card-text>
-          <v-container 
+          <v-container
             class="d-flex justify-center"
             fluid
           >
@@ -474,6 +513,27 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog
+      v-model="alertFlag"
+      persistent
+      width="500"
+    >
+      <v-card>
+        <v-card-text class="pt-4">
+          {{alertMsg}}
+        </v-card-text>
+
+        <v-card-actions
+          class="justify-space-around"
+        >
+          <v-btn
+            @click="alertFlag = false"
+          >
+            Ok
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -493,6 +553,10 @@
     height: auto;
     border: 2px solid white;
     border-radius: 5px;
+  }
+
+  .option-name {
+    max-width: 100%;
   }
 
   .option-color {
@@ -549,20 +613,33 @@
 
 
 <script>
+import { mapMutations } from 'vuex';
 import Uploader from '../../Uploader.vue';
 import OptionalItemText from '../../Partial/OptionalItemText.vue';
+import ItemTimerOption from '../../Partial/ItemTimerOption';
 import MarkDownEditor from '../../MarkDownEditor';
+import { checkItemVariableName } from '../../../../utilities/util';
+import config from '../../../../config';
 
 export default {
   components: {
     Uploader,
     OptionalItemText,
-    MarkDownEditor
+    MarkDownEditor,
+    ItemTimerOption,
   },
   props: {
     initialItemData: {
       type: Object,
       required: true
+    },
+    currentActivity: {
+      type: Object,
+      required: false
+    },
+    itemIndex: {
+      type: Number,
+      default: -1,
     },
     isSkippableItem: {
       type: Number,
@@ -590,6 +667,21 @@ export default {
       type: Boolean,
       default: false,
     },
+    isReviewerActivity: {
+      type: Boolean,
+      default: false
+    },
+    timer: {
+      type: Number,
+      required: false
+    },
+    allowEdit: {
+      type: Boolean,
+      default: true
+    },
+    variablesItems: {
+      type: Object
+    }
   },
   data: function () {
 
@@ -610,6 +702,7 @@ export default {
         value: option.value || 0,
         score: option.score || 0,
         image: option.image || '',
+        isVis: option.isVis || false,
         description: option.description || '',
         color: option.color || '',
         alert: option.alert || '',
@@ -631,9 +724,12 @@ export default {
 
       isTokenValue,
       colorPalettes: {
-        pastel: ["#b5feef", "#68e5a8", "#faf193", "#fabd93", "#f17688"],
-        retro: ["#9cc7bd", "#f6f2d4", "#f5bf77", "#f59797", "#988189"],
-        grayScale: ["#f2f2f2", "#e0e0e0", "#c6c6c6", "#a6a6a6", "#909090"],
+        pastel: ["#b5feef", "#68e5a8", "#faf193", "#fabd93", "#f17688", "#fbe1e3", "#ece592"],
+        retro: ["#9cc7bd", "#f6f2d4", "#f5bf77", "#f59797", "#988189", "#fdeb21", "#9b4be0"],
+        grayScale: ["#f2f2f2", "#e0e0e0", "#c6c6c6", "#a6a6a6", "#909090", "#808080", "#707070"],
+        "Grey & Lighter Grey": ["#e0e0e0", "#f2f2f2"],
+        "Blue & Light Blue": ["#cbedf4", "#E3F7FB"],
+        "Purple & Lighter Purple": ["#002973", "#004bd3"],
       },
       colorPalette: this.initialItemData.colorPalette || false,
       hasScoreValue: this.initialItemData.hasScoreValue || false,
@@ -642,6 +738,7 @@ export default {
       randomizeOptions: this.initialItemData.randomizeOptions,
       responseOptions: this.initialResponseOptions,
       isOptionalText: this.initialIsOptionalText,
+      removeBackOption: this.initialItemData.removeBackOption,
       currentOption: null,
       currentOptionColor: "",
       selectedPalette: null,
@@ -649,6 +746,9 @@ export default {
       colorPickerDialog: false,
       colorPaletteDialog: false,
       mode: "hex",
+      errorMsg: "This item is not supported, please remove it.",
+      alertFlag: false,
+      alertMsg: '',
     };
   },
 
@@ -673,12 +773,23 @@ export default {
   },
 
   methods: {
+    ...mapMutations(config.MODULE_NAME,
+      [
+        'updateActivityMetaInfo',
+      ],
+    ),
+
+    updateTimerOption(option) {
+      this.$emit('updateTimer', option.responseTimeLimit)
+    },
+
     addOption() {
       let currentPalette = "";
       const nextOption = {
         'name': `Option ${this.options.length + 1}`,
         'value': 0,
         'score': 0,
+        'isVis': false,
         'description': '',
         'color': '',
         'expanded': false,
@@ -700,7 +811,8 @@ export default {
         }
       })
       if (currentPalette) {
-        nextOption.color = this.colorPalettes[currentPalette][this.options.length % 5];
+        const paletteLength = this.colorPalettes[currentPalette].length;
+        nextOption.color = this.colorPalettes[currentPalette][this.options.length % paletteLength];
       }
 
       if (this.hasScoreValue) {
@@ -715,6 +827,15 @@ export default {
       this.options.push(nextOption);
 
       this.update();
+    },
+
+    invertColor(hex) {
+      let hexcolor = hex.replace("#", "");
+      let r = parseInt(hexcolor.substr(0, 2), 16);
+      let g = parseInt(hexcolor.substr(2, 2), 16);
+      let b = parseInt(hexcolor.substr(4, 2), 16);
+      let yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+      return (yiq >= 128) ? '#333333' : 'white';
     },
 
     getTextColor(hex) {
@@ -755,7 +876,8 @@ export default {
     applyColorPalette() {
       this.colorPaletteDialog = false;
       this.options.forEach((option, index) => {
-        option.color = this.colorPalettes[this.selectedPalette][index % 5];
+        const paletteLength = this.colorPalettes[this.selectedPalette].length;
+        option.color = this.colorPalettes[this.selectedPalette][index % paletteLength];
       })
       this.update();
     },
@@ -811,7 +933,8 @@ export default {
       this.options.splice(index, 1);
       if (currentPalette) {
         this.options.forEach((option, index) => {
-          option.color = this.colorPalettes[this.selectedPalette][index % 5];
+          const paletteLength = this.colorPalettes[this.selectedPalette].length;
+          option.color = this.colorPalettes[this.selectedPalette][index % paletteLength];
         })
       }
       this.update();
@@ -826,6 +949,7 @@ export default {
         'isSkippableItem': this.isSkippable,
         'colorPalette': this.colorPalette,
         'randomizeOptions': this.randomizeOptions,
+        'removeBackOption': this.removeBackOption,
         'valueType': this.isTokenValue ? 'xsd:token' : 'xsd:anyURI',
         'options': this.options.map(option => ({
           ...option,
@@ -850,18 +974,60 @@ export default {
       this.update();
     },
 
-    updateOption(option) {
-      option.valid = this.isValidOption(option);
+    hideOption(index) {
+      const itemOptions = [...this.options];
+
+      itemOptions[index].isVis = !itemOptions[index].isVis;
+      this.options = [...itemOptions];
+      this.update();
+    },
+
+    updateOption(option, isDescription) {
+      option.valid = this.isValidOption(option, isDescription);
 
       this.update();
     },
 
-    isValidOption(option) {
+    isValidOption(option, isDescription) {
       if (option.name.length == 0) {
         return false;
       }
       if (this.isTokenValue && isNaN(option.value) || this.hasScoreValue && isNaN(option.score)) {
         return false;
+      }
+
+      if (option.name || option.description) {
+        let text = isDescription ? option.description : option.name;
+        const { valid, found, variableNames = [] } = checkItemVariableName(text, this.currentActivity, this.itemIndex);
+        if (found) {
+          if (this.currentActivity.isOnePageAssessment || this.currentActivity.isSkippable) {
+            this.alertFlag = true;
+            this.alertMsg = `${this.currentActivity.isSkippable ? 'Skipping all the items' : 'A one-page assessment'} cannot contain variables. This variable will automatically be removed.`
+            setTimeout(()=> {
+              variableNames.forEach(variable => {
+                text = text.replace(`[[${variable}]]`, '');
+              });
+              if (isDescription) 
+                option.description = text;
+              else
+                option.name = text
+              this.update();
+            }, 250);
+          } else {
+            this.currentActivity.hasVariable = found;
+            this.updateActivityMetaInfo({ hasVariable: found })
+          }
+        }
+        try {
+          Object.assign(this.variablesItems, { [`${[this.currentActivity.items[this.itemIndex].name]}-options`]: variableNames })
+        } catch (error) { }
+
+        if (_.concat([], ...Object.values(this.variablesItems)).length < 1) {
+          this.currentActivity.hasVariable = false;
+          this.updateActivityMetaInfo({ hasVariable: false })
+        }
+
+        if (found) return typeof valid === 'object' ? false : !valid;
       }
 
       return true;

@@ -13,6 +13,8 @@
 
       <v-spacer />
 
+      <small style="margin-right: 10px" v-if="nodeEnv != 'production'">v{{ version }}</small>
+
       <v-tooltip
         v-if="currentActivity"
         bottom
@@ -50,8 +52,8 @@
           <v-btn
             :color="currentScreen == config.CONDITIONAL_SCREEN ? 'primary' : ''"
             class="mx-1"
-            :class="conditionalStatus ? '' : 'invalid'"
-            @click="viewConditionalLogic"
+            :class="onePageAssessment ? 'disabled' : conditionalStatus ? '' : 'invalid'"
+            @click="!onePageAssessment ? viewConditionalLogic() : ''"
             v-on="on"
           >
             <img
@@ -68,7 +70,12 @@
             >
           </v-btn>
         </template>
-        <span>Conditional Logic</span>
+        <span
+          v-if="!onePageAssessment"
+        >Conditional Logic</span>
+        <span
+          v-else
+        >Conditional logic is not available when the one-page activity is turned on</span>
       </v-tooltip>
 
       <v-tooltip
@@ -138,25 +145,6 @@
         <span>Download Schema</span>
       </v-tooltip>
 
-
-      <v-tooltip
-        bottom
-      >
-        <template v-slot:activator="{ on }">
-          <v-btn
-            class="mx-1"
-            @click="resetBuilder"
-            v-on="on"
-          >
-            <img
-              height="25"
-              alt=""
-              :src="baseImageURL + 'header-icons/black/refresh-icon.png'"
-            >
-          </v-btn>
-        </template>
-        <span>Reset Builder</span>
-      </v-tooltip>
 
       <v-tooltip
         v-if="formattedOriginalProtocol"
@@ -230,7 +218,10 @@
   .invalid {
     border-bottom: 4px solid red;
   }
-  .d-block{
+  .disabled {
+    background-color: rgb(224, 224, 224) !important;
+  }
+  .d-block {
     display: block !important;
   }
   .v-dialog .v-card .v-card__title {
@@ -244,6 +235,7 @@ import Protocol from '../models/Protocol';
 import Activity from '../models/Activity';
 import Item from '../models/Item';
 import util from '../utilities/util';
+import { getVersion } from "../utilities/util";
 import ChangeHistoryComponent from '../components/ProtocolBuilder/ChangeHistoryComponent';
 
 import { mapMutations, mapGetters } from 'vuex';
@@ -262,6 +254,7 @@ export default {
   },
   data () {
     return {
+      version: getVersion(),
       changeHistoryDialog: {
         visibility: false,
         defaultVersion: null,
@@ -286,6 +279,7 @@ export default {
       'currentActivity',
       'formattedOriginalProtocol',
       'versions',
+      'nodeEnv',
       'themeId',
       'originalThemeId'
     ]),
@@ -297,6 +291,9 @@ export default {
     },
     conditionalStatus () {
       return this.currentActivity && this.currentActivity.conditionalItems.every(conditional => conditional.valid);
+    },
+    onePageAssessment () {
+      return this.currentActivity && this.currentActivity.isOnePageAssessment;
     }
   },
   methods: {
@@ -304,10 +301,6 @@ export default {
       'setCurrentScreen',
       'setCurrentActivity',
       'resetProtocol',
-    ]),
-
-    ...mapGetters(config.MODULE_NAME, [
-      'formattedProtocol',
     ]),
 
     onBackToProtocolScreen () {
@@ -320,7 +313,7 @@ export default {
         return;
       }
 
-      this.formattedProtocol().then((data) => {
+      Protocol.formattedProtocol(this.protocol).then((data) => {
         if (!this.formattedOriginalProtocol) {
           this.$emit("uploadProtocol", {
             applet: data,
@@ -360,56 +353,62 @@ export default {
       const protocolModel = new Protocol();
       protocolModel.updateReferenceObject(this.protocol);
 
-      const schemaObj = protocolModel.getCompressedSchema();
-      const contextObj = protocolModel.getContext();
-
       var JSZip = require('jszip');
       var zip = new JSZip();
 
       zip
         .folder('protocols')
-        .file('schema', JSON.stringify(schemaObj, null, 2));
+        .file('schema', JSON.stringify(protocolModel.getCompressedSchema(true), null, 2));
       zip
         .folder('protocols')
-        .file('context', JSON.stringify(contextObj, null, 2));
+        .file('context', JSON.stringify(protocolModel.getContext(true), null, 2));
 
-      this.activities.forEach(function(activity) {
+      this.protocol.activities.forEach(function(activity) {
+        const name = Protocol.getConvertedActivityName(activity.name);
+
         const activityModel = new Activity();
-        activityModel.updateReferenceObject(activity);
 
-        const activityData = activityModel.getActivityData();
+        activityModel.updateReferenceObject({
+          ...activity,
+          items: activity.items.map(item => {
+            const itemModel = new Item();
+
+            itemModel.updateReferenceObject(item);
+            return itemModel.getItemData()
+          })
+        });
 
         zip
-          .folder(`activities/${activity.name}`)
+          .folder(`activities/${name}`)
           .file(
-            `${activity.name}_schema`,
-            JSON.stringify(activityData.schema, null, 2)
+            `${name}_schema`,
+            JSON.stringify(activityModel.getCompressedSchema(), null, 2)
           );
         zip
-          .folder(`activities/${activity.name}`)
+          .folder(`activities/${name}`)
           .file(
-            `${activity.name}_context`,
-            JSON.stringify(activityData.context, null, 2)
+            `${name}_context`,
+            JSON.stringify(activityModel.getContext(name), null, 2)
           );
-        activity.items.forEach(function(item) {
-          const itemModel = new Item();
-          itemModel.updateReferenceObject(item);
+
+        activityModel.ref.items.forEach(function(item) {
+          if (item.ui.inputType == 'cumulativeScore') {
+            return ;
+          }
+
+          if (item['options'] && item.ui.inputType != 'stackedRadio') {
+            delete item['options'];
+          }
 
           zip
-            .folder(`activities/${activity.name}/items`)
-            .file(`${item.name}`, JSON.stringify(itemModel.getCompressedSchema(), null, 2));
+            .folder(`activities/${name}/items`)
+            .file(`${item.name}`, JSON.stringify(item, null, 2));
         });
       });
 
       zip.generateAsync({ type: 'blob' }).then((blob) => {
         saveAs(blob, `${this.protocol.name}.zip`);
       });
-    },
-
-    resetBuilder () {
-      this.setCurrentScreen(config.PROTOCOL_SCREEN);
-      this.setCurrentActivity(-1);
-      this.resetProtocol();
     },
 
     viewItems () {
@@ -421,6 +420,8 @@ export default {
 
       if (!this.protocol.name) {
         this.dataAlertDialog.message = 'Please input applet name.';
+      } else if (!this.protocol.description) {
+        this.dataAlertDialog.message = 'Please input applet description.';
       } else if (!this.activities.length) {
         this.dataAlertDialog.message = 'Please add more than one activity.';
       }
@@ -440,6 +441,16 @@ export default {
         }
       }
 
+      const names = [];
+      for (let activity of this.protocol.activities) {
+        if (names.includes(activity.name)) {
+          this.dataAlertDialog.message = 'Activity names cannot be the same. Please update each activity to have a unique name.';
+        }
+
+        names.push(activity.name);
+      }
+
+
       this.dataAlertDialog.visibility = (this.dataAlertDialog.message.length !== 0);
 
       return !this.dataAlertDialog.visibility;
@@ -458,7 +469,7 @@ export default {
         return ;
       }
 
-      this.formattedProtocol().then((current) => {
+      Protocol.formattedProtocol(this.protocol).then((current) => {
         const { log, upgrade } = Protocol.getChangeInfo(
           this.formattedOriginalProtocol,
           current

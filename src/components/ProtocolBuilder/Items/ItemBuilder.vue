@@ -703,6 +703,38 @@
     </v-dialog>
 
     <v-dialog
+      v-model="deleteHeaderDialog"
+      persistent
+      max-width="720"
+    >
+      <v-card>
+        <v-card-title class="headline">
+          Delete Item
+        </v-card-title>
+        <v-card-text>
+          Are you sure you want to delete?
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="primary"
+            text
+            @click="deleteHeaderDialog = false"
+          >
+            No
+          </v-btn>
+          <v-btn
+            color="primary"
+            text
+            @click="removeItemHeader()"
+          >
+            Yes
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
       v-model="removeDialog"
       persistent
       max-width="720"
@@ -755,6 +787,66 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-card 
+      class="my-2 d-flex justify-space-between"
+      v-if="itemHeader || itemSection"
+    >
+      <v-container fluid>
+        <v-row>
+          <v-col
+            v-if="isHeaderAdded"
+            class="py-0"
+            sm="12"
+            cols="12"
+          >
+            <v-text-field
+              v-model="itemHeaderText"
+              color="purple darken-2"
+              :label="isHeaderAdded ? 'Header' : 'Section'"
+              :readonly="!isUpdating"
+              required
+            />
+          </v-col>
+          <v-col
+            v-if="!isHeaderAdded"
+            class="py-0"
+            sm="12"
+            cols="12"
+          >
+            <v-text-field
+              v-model="itemSectionText"
+              color="purple darken-2"
+              :label="isHeaderAdded ? 'Header' : 'Section'"
+              :readonly="!isUpdating"
+              required
+            />
+          </v-col>
+        </v-row>
+      </v-container>
+      <v-card-actions>
+        <v-btn
+          icon
+          @click="editItemHeader(itemIndex)"
+          :disabled="itemHeader === '' && itemSection === ''"
+        >
+          <v-icon
+            color="grey lighten-1"
+          >
+            {{isUpdating ? 'save' : 'edit'}}
+          </v-icon>
+        </v-btn>
+        <v-btn
+          v-if="item.allowEdit"
+          icon
+          @click="openHeaderRemoveConfirmation(itemIndex)"
+        >
+          <v-icon color="grey lighten-1">
+            mdi-delete
+          </v-icon>
+        </v-btn>
+      </v-card-actions>
+    </v-card>
   </v-card>
 </template>
 <style scoped>

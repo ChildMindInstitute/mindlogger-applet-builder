@@ -628,13 +628,37 @@ export default class Item {
         updated: optionUpdate('Multiple choice option'),
       },
       'options.sliderOptions': {
-        updated: (field) =>'sliderOptions are updated',
+        updated: (field) => {
+          const oldOptions = _.get(oldValue, field, []);
+          const newOptions = _.get(newValue, field, []);
+
+          if (JSON.stringify(oldOptions) != JSON.stringify(newOptions)) {
+            return ['sliderOptions are updated'];
+          }
+          return [];
+        },
       },
       'options.itemList': {
-        updated: (field) =>'itemList is updated',
+        updated: (field) => {
+          const oldList = _.get(oldValue, field, []);
+          const newList = _.get(newValue, field, []);
+
+          if (JSON.stringify(oldList) != JSON.stringify(newList)) {
+            return ['itemList is updated'];
+          }
+          return [];
+        },
       },
       'options.choices': {
-        updated: (field) =>'choices are updated',
+        updated: (field) => {
+          const oldChoices = _.get(oldValue, field, []);
+          const newChoices = _.get(newValue, field, []);
+
+          if (JSON.stringify(oldChoices) != JSON.stringify(newChoices)) {
+            return ['choices are updated'];
+          }
+          return [];
+        }
       },
       'options.options': {
         updated: radioOptionListUpdate,

@@ -168,7 +168,7 @@ export default class Item {
         })) || [],
       }
     }
-    if (this.ref.inputType === "radio" || this.ref.inputType === "prize" || this.ref.inputType === "checkbox") {
+    if (this.ref.inputType === "radio" || this.ref.inputType === "prize" || this.ref.inputType === "checkbox" || this.ref.inputType === "dropdownList") {
       const choices = this.getRadioChoices();
       return {
         "valueType": (this.ref.options.valueType && this.ref.options.valueType.includes("token") || this.ref.options.isTokenValue) ? "xsd:token" : "xsd:anyURI",
@@ -343,13 +343,15 @@ export default class Item {
       schema['cumulativeScores'] = cumulativeScores;
     }
 
-    if (this.ref.inputType === 'radio' || this.ref.inputType === 'checkbox' || this.ref.inputType === 'prize' || this.ref.inputType == 'stackedRadio' || this.ref.inputType == 'stackedCheckbox') {
+    if (this.ref.inputType === 'radio' || this.ref.inputType === 'checkbox' || this.ref.inputType === 'prize' || this.ref.inputType == 'stackedRadio' || this.ref.inputType == 'stackedCheckbox' || this.ref.inputType == 'dropdownList') {
       let inputType = this.ref.inputType;
 
       if (this.ref.inputType == 'radio' || this.ref.inputType == 'checkbox') {
         inputType = 'radio';
       } else if (this.ref.inputType == 'stackedRadio' || this.ref.inputType == 'stackedCheckbox') {
         inputType = 'stackedRadio';
+      } else if (this.ref.inputType == 'dropdownList') {
+        inputType = 'dropdownList';
       } else {
         inputType = 'prize';
       }
@@ -414,6 +416,7 @@ export default class Item {
         this.ref.inputType === "prize" ||
         this.ref.inputType === "stackedRadio" ||
         this.ref.inputType === "stackedCheckbox" ||
+        this.ref.inputType === "dropdownList" ||
         this.ref.inputType === "audioRecord") &&
       Object.keys(this.ref.responseOptions).length
     ) {
@@ -1127,6 +1130,53 @@ export default class Item {
             }
           }),
           choices: parsedItemOptions
+        };
+      }
+
+      if (itemType === 'dropdownList') {
+        itemContent.options = {
+          isMultipleChoice: itemContent.multipleChoice || false,
+          enableNegativeTokens: itemContent.enableNegativeTokens || false,
+          hasScoreValue: itemContent.scoring || false,
+          hasResponseAlert: itemContent.responseAlert || false,
+          colorPalette: itemContent.colorPalette || false,
+          randomizeOptions: itemContent.randomizeOptions || false,
+          valueType: itemContent.valueType,
+          options:
+            responseOptions[0] &&
+            responseOptions[0]['schema:itemListElement'] &&
+            responseOptions[0]['schema:itemListElement'].map(
+              (itemListElement) => {
+                const image = itemListElement['schema:image'];
+                const name = itemListElement["schema:name"];
+                const value = itemListElement["schema:value"];
+                const color = itemListElement["schema:color"];
+                const score = itemListElement["schema:score"];
+                const alert = itemListElement["schema:alert"];
+                const description = itemListElement["schema:description"];
+
+                return {
+                  image:
+                    typeof image === 'string' && image ||
+                    Array.isArray(image) && image[0] && image[0]['@value'].toString(),
+                  name:
+                    typeof name == "string" && name ||
+                    Array.isArray(name) && name[0] && name[0]['@value'].toString(),
+                  color:
+                    typeof color == "string" && color ||
+                    Array.isArray(color) && color[0] && color[0]['@value'].toString(),
+                  value:
+                    Array.isArray(value) && value[0] && value[0]['@value'],
+                  score:
+                    Array.isArray(score) && score[0] && score[0]['@value'],
+                  alert:
+                    Array.isArray(alert) && alert[0] && alert[0]['@value'],
+                  description:
+                    typeof description == 'string' && description ||
+                    Array.isArray(description) && description[0] && description[0]['@value'].toString(),
+                };
+              }
+            ),
         };
       }
 

@@ -352,7 +352,7 @@
           </v-select>
         </v-col>
         <v-col
-          v-if="item.inputType !== 'radio' && item.inputType !== 'checkbox' && item.inputType !== 'slider' && item.inputType !== 'text' && item.inputType !== 'cumulativeScore' && item.inputType !== 'ageSelector'"
+          v-if="!['radio', 'checkbox', 'dropdownList', 'text', 'slider', 'cumulativeScore', 'ageSelector'].includes(item.inputType)"
           class="d-flex align-center red--text"
         >
           This item is only available for use in mobile version of MindLogger.
@@ -416,6 +416,27 @@
         @updateTimer="updateTimer"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
+      />
+
+      <DropdownListBuilder
+        v-if="item.inputType === 'dropdownList'"
+        :key="`${baseKey}-dropdownList`"
+        :is-skippable-item="skippable"
+        :initial-response-options="item.responseOptions"
+        :initial-item-data="item.options"
+        :item-templates="itemTemplates"
+        :has-prize-activity="hasPrizeActivity"
+        :is-reviewer-activity="isReviewerActivity"
+        :initial-is-optional-text="item.isOptionalText"
+        @openPrize="setTokenPrizeModalStatus(true)"
+        @removeTemplate="onRemoveTemplate"
+        @updateTemplates="onUpdateTemplates"
+        @updateOptions="updateOptions"
+        @updateAllow="updateAllow"
+        @updateOptionalText="updateOptionalText"
+        @updateResponseOptions="updateResponseOptions"
+        @loading="loading = $event"
+        @notify="notify = $event"
       />
 
       <TextBuilder
@@ -949,6 +970,7 @@ import Uploader from '../Uploader.vue';
 import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
 import MarkDownBuilder from "./ItemBuilders/MarkDownBuilder.vue";
 import StackedRadioBuilder from "./ItemBuilders/StackedRadioBuilder.vue";
+import DropdownListBuilder from "./ItemBuilders/DropdownListBuilder.vue";
 import TextBuilder from "./ItemBuilders/TextBuilder.vue";
 import SliderBuilder from "./ItemBuilders/SliderBuilder.vue";
 import VideoBuilder from "./ItemBuilders/VideoBuilder.vue";
@@ -981,6 +1003,7 @@ export default {
   components: {
     Uploader,
     RadioBuilder,
+    DropdownListBuilder,
     TextBuilder,
     SliderBuilder,
     VideoBuilder,

@@ -15,6 +15,39 @@
       </span>
       <v-spacer />
       <v-card-actions>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              v-if="item.allowEdit"
+              icon
+              v-bind="attrs"
+              v-on="on"
+              @click="addItemHeader(itemIndex)"
+            >
+              <v-icon color="grey lighten-1">
+                book
+              </v-icon>
+            </v-btn>
+          </template>
+          <span>Add Header</span>
+        </v-tooltip>
+
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              v-if="item.allowEdit"
+              icon
+              v-bind="attrs"
+              v-on="on"
+              @click="addItemSection(itemIndex)"
+            >
+              <v-icon color="grey lighten-1">
+                light
+              </v-icon>
+            </v-btn>
+          </template>
+          <span>Add Section</span>
+        </v-tooltip>        
         <v-tooltip
           v-if="item.allowEdit"
           top
@@ -670,6 +703,38 @@
     </v-dialog>
 
     <v-dialog
+      v-model="deleteHeaderDialog"
+      persistent
+      max-width="720"
+    >
+      <v-card>
+        <v-card-title class="headline">
+          Delete Item
+        </v-card-title>
+        <v-card-text>
+          Are you sure you want to delete?
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="primary"
+            text
+            @click="deleteHeaderDialog = false"
+          >
+            No
+          </v-btn>
+          <v-btn
+            color="primary"
+            text
+            @click="removeItemHeader()"
+          >
+            Yes
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
       v-model="removeDialog"
       persistent
       max-width="720"
@@ -722,9 +787,68 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-card 
+      class="my-2 d-flex justify-space-between"
+      v-if="itemHeader || itemSection"
+    >
+      <v-container fluid>
+        <v-row>
+          <v-col
+            v-if="isHeaderAdded"
+            class="py-0"
+            sm="12"
+            cols="12"
+          >
+            <v-text-field
+              v-model="itemHeaderText"
+              color="purple darken-2"
+              :label="isHeaderAdded ? 'Header' : 'Section'"
+              :readonly="!isUpdating"
+              required
+            />
+          </v-col>
+          <v-col
+            v-if="!isHeaderAdded"
+            class="py-0"
+            sm="12"
+            cols="12"
+          >
+            <v-text-field
+              v-model="itemSectionText"
+              color="purple darken-2"
+              :label="isHeaderAdded ? 'Header' : 'Section'"
+              :readonly="!isUpdating"
+              required
+            />
+          </v-col>
+        </v-row>
+      </v-container>
+      <v-card-actions>
+        <v-btn
+          icon
+          @click="editItemHeader(itemIndex)"
+          :disabled="itemHeader === '' && itemSection === ''"
+        >
+          <v-icon
+            color="grey lighten-1"
+          >
+            {{isUpdating ? 'save' : 'edit'}}
+          </v-icon>
+        </v-btn>
+        <v-btn
+          v-if="item.allowEdit"
+          icon
+          @click="openHeaderRemoveConfirmation(itemIndex)"
+        >
+          <v-icon color="grey lighten-1">
+            mdi-delete
+          </v-icon>
+        </v-btn>
+      </v-card-actions>
+    </v-card>
   </v-card>
 </template>
-
 <style scoped>
   .move-icon {
     cursor: move;
@@ -815,6 +939,7 @@
   .disabled-option {
     color: grey;
   }
+  
 </style>
 
 <script>
@@ -885,6 +1010,12 @@ export default {
     variablesItems: {
       type: Object,
       required: true
+    },
+    header: {
+      type: String,
+    },
+    section: {
+      type: String,
     }
   },
   data() {
@@ -918,6 +1049,14 @@ export default {
       alertFlag: false,
       alertMsg: '',
       editVariableValid: true,
+      isUpdating: false,
+      deleteHeaderDialog: false,
+      isHeaderAdded: this.header ? true: false,
+      itemHeader: this.header || "",
+      itemHeaderText: this.header || "",
+      itemSection: this.section || "",
+      itemSectionText: this.section || "",
+      actionItemIndex: 0,
     }
   },
   computed: {
@@ -928,11 +1067,31 @@ export default {
     ...mapGetters(config.MODULE_NAME,
       [
         'currentActivity',
+        'currentHeaders',
         'itemInputTypes',
         'itemTemplates',
         'prizeActivity',
       ]
     ),
+
+    canAddHeader () {
+      if (this.itemHeader === "" && this.itemSection === "") {
+        return false;
+      }
+      return true;
+    },
+
+    canAddSection () {
+      if (this.itemHeader === "" && this.itemSection === "") {
+        return false;
+        // for (let i = this.itemIndex; i >= 0; i -= 1) {
+        //   if (this.currentHeaders[i]) {
+        //     return false;
+        //   }
+        // }
+      }
+      return true;
+    },
 
     isReviewerActivity () {
       return this.currentActivity.isReviewerActivity;
@@ -957,6 +1116,8 @@ export default {
     },
 
     item () {
+      // this.itemHeader = this.currentActivity.items[this.itemIndex].header;
+      // this.itemSection = this.currentActivity.items[this.itemIndex].section;
       return this.currentActivity.items[this.itemIndex];
     },
     skippable() {
@@ -1046,6 +1207,8 @@ export default {
         'duplicateItem',
         'showOrHideItem',
         'showItem',
+        'updateHeader',
+        'updateSection',
         'deleteConditional',
         'deleteItem',
         'updateItemInputType',
@@ -1076,6 +1239,85 @@ export default {
     hideItem (index) {
       this.isVis = !this.isVis;
       this.showOrHideItem(index);
+    },
+ 
+    addItemHeader (index) {
+      let headerIndex = 1;
+      this.currentActivity.items.forEach(item => {
+        if (item.header) {
+          const values = item.header.split(' ');
+
+          if (
+            values[0] === "Header" && 
+            values[1] && 
+            Number(values[1]) >= headerIndex
+          ) {
+            headerIndex = Number(values[1]) + 1
+          }
+        }
+      })
+
+      this.itemHeader = "Header " + headerIndex;
+      this.itemHeaderText = this.itemHeader;
+      this.isHeaderAdded = true;
+      this.updateHeader({ index, headerName: this.itemHeader });
+    },
+
+    editItemHeader (index) {
+      if (this.isUpdating) {
+        if (this.itemHeader) {
+          if (this.itemHeaderText) {
+            this.updateHeader({ index, headerName: this.itemHeaderText });
+            this.isUpdating = false;
+          }
+        } else {
+          if (this.itemSectionText) {
+            this.updateSection({ index, sectionName: this.itemSectionText });
+            this.isUpdating = false;
+          }
+        }
+      } else {
+        this.isUpdating = true;
+      }
+    },
+
+    openHeaderRemoveConfirmation (index) {
+      this.deleteHeaderDialog = true;
+      this.actionItemIndex = index;
+    },
+
+    removeItemHeader () {
+      if (this.itemHeader) {
+        this.updateHeader({ index: this.actionItemIndex, headerName: '' });
+        this.itemHeader = '';
+      } else {
+        this.updateSection({ index: this.actionItemIndex, sectionName: '' });
+        this.itemSection = '';
+      }
+      this.isHeaderAdded = false;
+      this.deleteHeaderDialog = false;
+    },
+
+    addItemSection (index) {
+      let sectionIndex = 1;
+
+      this.currentActivity.items.forEach(item => {
+        if (item.section) {
+          const values = item.section.split(' ');
+
+          if (
+            values[0] === "Section" && 
+            values[1] && 
+            Number(values[1]) >= sectionIndex
+          ) {
+            sectionIndex = Number(values[1]) + 1
+          }
+        }
+      })
+
+      this.itemSection = "Section " + sectionIndex;
+      this.itemSectionText = this.itemSection;
+      this.updateSection({ index, sectionName: this.itemSection });
     },
 
     getConditionAnswer (condition) {
@@ -1393,7 +1635,6 @@ export default {
         duration: 3000,
       };
     },
-
   }
 }
 </script>

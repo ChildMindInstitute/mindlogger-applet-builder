@@ -71,6 +71,8 @@
             <ItemBuilder
               :item-index="index"
               :variablesItems="variablesItems"
+              :header="item.header"
+              :section="item.section"
               class="ma-4 flex-grow-1 item-builder"
               @addItem="addBlankItem(index+1)"
             />

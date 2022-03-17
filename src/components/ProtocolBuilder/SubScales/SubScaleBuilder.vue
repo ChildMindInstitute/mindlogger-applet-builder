@@ -469,7 +469,8 @@ export default {
           ).join(' + '),
         isAverageScore: this.scoringType === "sum" ? false : true,
         lookupTable: this.subScale && this.subScale.lookupTable,
-        valid: this.valid && this.selectedItemCount >= 1
+        valid: this.valid && this.selectedItemCount >= 1,
+        items: this.itemsFormatted.filter(item => item.selected).map(item => item.obj),
       };
 
       if (this.currentActivity.subScales[this.subScaleIndex].subScaleId) {
@@ -523,6 +524,7 @@ export default {
             subScales: relatedSubScales,
             selected: (index >= 0),
             id: items.length,
+            obj: item
           });
         }
       }
@@ -541,7 +543,8 @@ export default {
             subScales: [],
             items: this.getItemNames(this.currentActivity.subScales[i]),
             selected: false,
-            current: i == this.subScaleIndex
+            current: i == this.subScaleIndex,
+            obj: this.currentActivity.subScales[i]
           }
         );
       }

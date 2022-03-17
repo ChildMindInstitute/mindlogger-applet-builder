@@ -15,58 +15,161 @@
       </span>
       <v-spacer />
       <v-card-actions>
-        <v-btn
-          v-if="item.allowEdit"
-          icon
-          @click="duplicateItem(itemIndex)"
-        >
-          <v-icon color="grey lighten-1">
-            content_copy
-          </v-icon>
-        </v-btn>
-        <v-btn
-          icon
-          v-if="!isConditionalItem(itemIndex)"
-          @click="hideItem(itemIndex)"
-        >
-          <v-icon v-if="isVis" color="grey lighten-1">
-            mdi-eye-off-outline
-          </v-icon>
-          <v-icon v-else color="grey lighten-1">
-            mdi-eye-outline
-          </v-icon>
-        </v-btn>
-        <v-btn
-          icon
-          @click="editItem"
-        >
-          <v-icon
-            v-if="!isExpanded && item.allowEdit"
-            color="grey lighten-1"
-          >
-            edit
-          </v-icon>
-          <v-icon
-            v-else-if="!isExpanded"
-            color="grey lighten-1"
-          >
-            mdi-eye
-          </v-icon>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              v-if="item.allowEdit"
+              icon
+              v-bind="attrs"
+              v-on="on"
+              @click="addItemHeader(itemIndex)"
+            >
+              <v-icon color="grey lighten-1">
+                book
+              </v-icon>
+            </v-btn>
+          </template>
+          <span>Add Header</span>
+        </v-tooltip>
 
-          <v-icon
-            v-else
-            color="grey lighten-1"
-          >
-            mdi-chevron-double-up
-          </v-icon>
-        </v-btn>
-        <v-btn
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              v-if="item.allowEdit"
+              icon
+              v-bind="attrs"
+              v-on="on"
+              @click="addItemSection(itemIndex)"
+            >
+              <v-icon color="grey lighten-1">
+                light
+              </v-icon>
+            </v-btn>
+          </template>
+          <span>Add Section</span>
+        </v-tooltip>        
+        <v-tooltip
           v-if="item.allowEdit"
+          top
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              class="ml-4"
+              icon
+              v-on="on"
+              @click="$emit('addItem')"
+            >
+              <v-icon color="grey lighten-1">
+                mdi-plus-circle-outline
+              </v-icon>
+            </v-btn>
+          </template>
+
+          <span>New Item</span>
+        </v-tooltip>
+
+        <v-tooltip
+          v-if="item.allowEdit"
+          top
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              icon
+              v-on="on"
+              @click="duplicateItem(itemIndex)"
+            >
+              <v-icon color="grey lighten-1">
+                content_copy
+              </v-icon>
+            </v-btn>
+          </template>
+
+          <span>Duplicate Item</span>
+        </v-tooltip>
+
+        <v-tooltip
+          v-if="!isConditionalItem(itemIndex)"
+          top
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              icon
+              v-on="on"
+              @click="checkVariableNameOnAction(itemIndex, hideItem)"
+            >
+              <v-icon v-if="isVis" color="grey lighten-1">
+                mdi-eye-off-outline
+              </v-icon>
+              <v-icon v-else color="grey lighten-1">
+                mdi-eye-outline
+              </v-icon>
+            </v-btn>
+          </template>
+
+          <span>{{ isVis ? 'Click to Show Item' : 'Click to Hide Item' }}</span>
+        </v-tooltip>
+
+        <v-tooltip
+          v-if="item.allowEdit"
+          top
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              icon
+              @click="editItem"
+              v-on="on"
+            >
+              <v-icon
+                v-if="!isExpanded && item.allowEdit"
+                color="grey lighten-1"
+              >
+                edit
+              </v-icon>
+              <v-icon
+                v-else-if="!isExpanded"
+                color="grey lighten-1"
+              >
+                mdi-eye
+              </v-icon>
+
+              <v-icon
+                v-else
+                color="grey lighten-1"
+              >
+                mdi-chevron-double-up
+              </v-icon>
+            </v-btn>
+          </template>
+
+          <span>Edit Item</span>
+        </v-tooltip>
+
+        <v-tooltip
+          v-if="item.allowEdit"
+          top
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              icon
+              v-on="on"
+              @click="checkVariableNameOnAction(item, onDeleteItem)"
+            >
+              <v-icon color="grey lighten-1">
+                mdi-delete
+              </v-icon>
+            </v-btn>
+          </template>
+
+          <span>Delete Item</span>
+        </v-tooltip>
+
+        <v-btn
+          v-if="item.allowEdit && !['cumulativeScore', 'futureBehaviorTracker', 'pastBehaviorTracker'].includes(item.inputType)"
+          class="ml-4 move-icon dragging-handle"
           icon
-          @click="onDeleteItem(item)"
         >
           <v-icon color="grey lighten-1">
-            mdi-delete
+            mdi-dots-vertical
           </v-icon>
         </v-btn>
       </v-card-actions>
@@ -100,6 +203,7 @@
           @blur="isItemNameEditing = false"
           @input="onUpdateName"
           @keydown="nameKeydown($event)"
+          @mouseup="onMouseup($event, item)"
         />
       </div>
       <template
@@ -152,6 +256,9 @@
           <div v-if="largeText.length === 0" class="error--text text-body-2 mt-2 ml-4">
             * This field is required
           </div>
+          <div v-if="invalidLargeText" class="error--text text-body-2 mt-2 ml-4">
+            {{errorMsg}}
+          </div>
           <div class="d-flex mt-2" :class="largeText.length > 75 ? 'justify-space-between' : 'justify-end'">
             <div
               v-if="largeText.length > 75 && isTextExpanded"
@@ -194,7 +301,7 @@
                 v-on="on"
               >
                 <v-tooltip
-                  v-if="!hasScoringItem && item.text == 'cumulativeScore'"
+                  v-if="!hasScoringItem && item.text == 'cumulativeScore' || item.text == 'tokenSummary'"
                   top
                 >
                   <template
@@ -213,7 +320,8 @@
                       <span>{{ item.text }}</span>
                     </div>
                   </template>
-                  <span>Please create an item with scores before creating this page</span>
+                  <span v-if="item.text == 'cumulativeScore'">Please create an item with scores before creating this page</span>
+                  <span v-else>Please create future behavior tracker or past behavior tracker items</span>
                 </v-tooltip>
                 <div
                   v-else
@@ -257,26 +365,15 @@
         label="Allow the user to see results"
       />
 
-      <div
+      <MarkDownBuilder
         v-if="item.inputType === 'markdownMessage'"
-      >
-        Message:
-
-        <MarkDownEditor
-          :value="item.markdownText"
-          @input="onUpdateMarkdownText"
-        />
-
-        <v-divider
-          class="my-4"
-        />
-
-        <ItemTimerOption
-          colClasses="d-flex align-center py-0 px-3"
-          @update="updateTimer($event.responseTimeLimit)"
-          :responseTimeLimit="item.timer"
-        />
-      </div>
+        :markdownText="item.markdownText"
+        :initial-item-data="item.options"
+        :timer="item.timer"
+        @onUpdateMarkdown="onUpdateMarkdownText"
+        @updateOptions="updateOptions"
+        @updateTimer="updateTimer"
+      />
 
       <RadioBuilder
         v-if="item.inputType === 'radio' || item.inputType === 'checkbox'"
@@ -284,12 +381,16 @@
         :is-multiple-choice="item.inputType === 'checkbox'"
         :is-skippable-item="skippable"
         :initial-response-options="item.responseOptions"
+        :allow-edit="item.allowEdit"
         :initial-item-data="item.options"
         :item-templates="itemTemplates"
         :has-prize-activity="hasPrizeActivity"
         :is-reviewer-activity="isReviewerActivity"
         :initial-is-optional-text="item.isOptionalText"
         :timer="item.timer"
+        :current-activity="currentActivity"
+        :variables-items="variablesItems"
+        :item-index="itemIndex"
         @openPrize="setTokenPrizeModalStatus(true)"
         @removeTemplate="onRemoveTemplate"
         @updateTemplates="onUpdateTemplates"
@@ -517,6 +618,17 @@
         @updateOptions="updateOptions"
       />
 
+      <BehaviorTracker
+        v-if="item.inputType === 'pastBehaviorTracker' || item.inputType == 'futureBehaviorTracker'"
+        :key="`${baseKey}-${item.inputType}`"
+        :is-skippable-item="skippable"
+        :initial-item-data="item.options"
+        @notify="notify = $event"
+        @loading="loading = $event"
+        @updateOptions="updateOptions"
+        @updateAllow="updateAllow"
+      />
+
       <CumulativeScoreBuilder
         v-if="item.inputType === 'cumulativeScore'"
         :key="`${baseKey}-cumulativeScore`"
@@ -541,6 +653,88 @@
     <Loading :loading="loading" />
 
     <v-dialog
+      v-model="warningFlag"
+      persistent
+      width="500"
+    >
+      <v-card>
+        <v-card-text class="pt-4">
+          {{warningMsg}}
+        </v-card-text>
+
+        <v-card-actions
+          class="justify-space-around"
+        >
+          <v-btn
+            @click="handleWarningConfirm(item, itemIndex)"
+          >
+            Continue
+          </v-btn>
+
+          <v-btn
+            @click="warningFlag = false"
+          >
+            Cancel
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
+      v-model="alertFlag"
+      persistent
+      width="500"
+    >
+      <v-card>
+        <v-card-text class="pt-4">
+          {{alertMsg}}
+        </v-card-text>
+
+        <v-card-actions
+          class="justify-space-around"
+        >
+          <v-btn
+            @click="alertFlag = false"
+          >
+            Ok
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
+      v-model="deleteHeaderDialog"
+      persistent
+      max-width="720"
+    >
+      <v-card>
+        <v-card-title class="headline">
+          Delete Item
+        </v-card-title>
+        <v-card-text>
+          Are you sure you want to delete?
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="primary"
+            text
+            @click="deleteHeaderDialog = false"
+          >
+            No
+          </v-btn>
+          <v-btn
+            color="primary"
+            text
+            @click="removeItemHeader()"
+          >
+            Yes
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
       v-model="removeDialog"
       persistent
       max-width="720"
@@ -559,7 +753,7 @@
             >
               <template v-slot:activator>
                 <v-list-item-content>
-                  <v-list-item-title v-text="'If ' + conditional.operation + ' of the `IF` rules are matched, show ' + conditional.showValue" />
+                  <v-list-item-title v-text="'If ' + conditional.operation + ' of the `IF` rules are matched, show ' + conditional.showValue.name" />
                 </v-list-item-content>
               </template>
 
@@ -568,7 +762,7 @@
                 :key="conditional.id + condition.ifValue.name"
               >
                 <v-list-item-content>
-                  <v-list-item-title v-text="condition.ifValue.name + ' ' + condition.stateValue.name + ' is ' + getConditionAnswer(condition)" />
+                  <v-list-item-title v-text="(condition.ifValue.name || condition.ifValue) + ' ' + condition.stateValue.name + ' is ' + getConditionAnswer(condition)" />
                 </v-list-item-content>
               </v-list-item>
             </v-list-group>
@@ -593,10 +787,72 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-card 
+      class="my-2 d-flex justify-space-between"
+      v-if="itemHeader || itemSection"
+    >
+      <v-container fluid>
+        <v-row>
+          <v-col
+            v-if="isHeaderAdded"
+            class="py-0"
+            sm="12"
+            cols="12"
+          >
+            <v-text-field
+              v-model="itemHeaderText"
+              color="purple darken-2"
+              :label="isHeaderAdded ? 'Header' : 'Section'"
+              :readonly="!isUpdating"
+              required
+            />
+          </v-col>
+          <v-col
+            v-if="!isHeaderAdded"
+            class="py-0"
+            sm="12"
+            cols="12"
+          >
+            <v-text-field
+              v-model="itemSectionText"
+              color="purple darken-2"
+              :label="isHeaderAdded ? 'Header' : 'Section'"
+              :readonly="!isUpdating"
+              required
+            />
+          </v-col>
+        </v-row>
+      </v-container>
+      <v-card-actions>
+        <v-btn
+          icon
+          @click="editItemHeader(itemIndex)"
+          :disabled="itemHeader === '' && itemSection === ''"
+        >
+          <v-icon
+            color="grey lighten-1"
+          >
+            {{isUpdating ? 'save' : 'edit'}}
+          </v-icon>
+        </v-btn>
+        <v-btn
+          v-if="item.allowEdit"
+          icon
+          @click="openHeaderRemoveConfirmation(itemIndex)"
+        >
+          <v-icon color="grey lighten-1">
+            mdi-delete
+          </v-icon>
+        </v-btn>
+      </v-card-actions>
+    </v-card>
   </v-card>
 </template>
-
 <style scoped>
+  .move-icon {
+    cursor: move;
+  }
 
   .item.not-editable {
     position: relative;
@@ -683,12 +939,15 @@
   .disabled-option {
     color: grey;
   }
+  
 </style>
 
 <script>
+import _ from 'lodash';
 import Uploader from '../Uploader.vue';
 
 import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
+import MarkDownBuilder from "./ItemBuilders/MarkDownBuilder.vue";
 import StackedRadioBuilder from "./ItemBuilders/StackedRadioBuilder.vue";
 import TextBuilder from "./ItemBuilders/TextBuilder.vue";
 import SliderBuilder from "./ItemBuilders/SliderBuilder.vue";
@@ -704,7 +963,9 @@ import GeolocationBuilder from "./ItemBuilders/GeolocationBuilder.vue";
 import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
 import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
 import StackedSliderBuilder from "./ItemBuilders/StackedSliderBuilder";
-import ItemTimerOption from "../Partial/ItemTimerOption";
+import BehaviorTracker from "./ItemBuilders/BehaviorTracker";
+import { timeScreen } from './ItemBuilders/timeScreen';
+import { tokenSummary } from './ItemBuilders/tokenSummary';
 
 import MarkDownEditor from "../MarkDownEditor";
 import Item from '../../../models/Item';
@@ -714,6 +975,7 @@ import Loading from '../Additional/Loading.vue';
 
 import { mapMutations, mapGetters } from 'vuex';
 import config from '../../../config';
+import { checkItemVariableName, checkItemVariableNameIndex, getTextBetweenBrackets } from '../../../utilities/util';
 
 export default {
   components: {
@@ -733,17 +995,28 @@ export default {
     AudioStimulusBuilder,
     CumulativeScoreBuilder,
     MarkDownEditor,
+    MarkDownBuilder,
     StackedRadioBuilder,
     StackedSliderBuilder,
     Notify,
     Loading,
-    ItemTimerOption,
+    BehaviorTracker,
   },
   props: {
     itemIndex: {
       type: Number,
       required: true,
     },
+    variablesItems: {
+      type: Object,
+      required: true
+    },
+    header: {
+      type: String,
+    },
+    section: {
+      type: String,
+    }
   },
   data() {
     return {
@@ -767,7 +1040,23 @@ export default {
       loading: false,
       notify: {},
       isVis: false,
-      responseIdentifierMessage: 'By using this option, the user will be required to enter response data identifier text into the field. The text entered will identify the response data collected at that point in time. The identifier used will be filterable on the user\'s data visualization tab.'
+      invalidLargeText: false,
+      debounceTimer: undefined,
+      responseIdentifierMessage: 'By using this option, the user will be required to enter response data identifier text into the field. The text entered will identify the response data collected at that point in time. The identifier used will be filterable on the user\'s data visualization tab.',
+      warningFlag: false,
+      warningMsg: '',
+      errorMsg: '* This item is not supported, please remove it.',
+      alertFlag: false,
+      alertMsg: '',
+      editVariableValid: true,
+      isUpdating: false,
+      deleteHeaderDialog: false,
+      isHeaderAdded: this.header ? true: false,
+      itemHeader: this.header || "",
+      itemHeaderText: this.header || "",
+      itemSection: this.section || "",
+      itemSectionText: this.section || "",
+      actionItemIndex: 0,
     }
   },
   computed: {
@@ -778,11 +1067,31 @@ export default {
     ...mapGetters(config.MODULE_NAME,
       [
         'currentActivity',
+        'currentHeaders',
         'itemInputTypes',
         'itemTemplates',
-        'prizeActivity'
+        'prizeActivity',
       ]
     ),
+
+    canAddHeader () {
+      if (this.itemHeader === "" && this.itemSection === "") {
+        return false;
+      }
+      return true;
+    },
+
+    canAddSection () {
+      if (this.itemHeader === "" && this.itemSection === "") {
+        return false;
+        // for (let i = this.itemIndex; i >= 0; i -= 1) {
+        //   if (this.currentHeaders[i]) {
+        //     return false;
+        //   }
+        // }
+      }
+      return true;
+    },
 
     isReviewerActivity () {
       return this.currentActivity.isReviewerActivity;
@@ -807,6 +1116,8 @@ export default {
     },
 
     item () {
+      // this.itemHeader = this.currentActivity.items[this.itemIndex].header;
+      // this.itemSection = this.currentActivity.items[this.itemIndex].section;
       return this.currentActivity.items[this.itemIndex];
     },
     skippable() {
@@ -818,11 +1129,56 @@ export default {
     }
   },
   watch: {
+    item: function(newItem) {
+      this.largeText = newItem.question.text;
+    },
     largeText: function(text) {
       this.updateItemMetaInfo({
         index: this.itemIndex,
-        obj: { question: { text, image: this.headerImage } }
+        obj: { question: { text, image: this.headerImage } },
       });
+
+      this.debounce(function() {
+        const { valid, found, variableNames = [] } = checkItemVariableName(text, this.currentActivity, this.itemIndex);
+        try {
+          Object.assign(this.variablesItems, { [this.currentActivity.items[this.itemIndex].name]: variableNames })
+        } catch (error) { }
+        this.invalidLargeText = valid;
+        if (typeof this.invalidLargeText === 'object') {
+          this.errorMsg = `* You cannot use ${this.currentActivity.items[this.itemIndex].name} in the same item. Please remove`
+          this.invalidLargeText = true;
+        } else {
+          this.errorMsg = '* This item is not supported, please remove it.'
+        }
+
+        if (found) {
+          if (this.currentActivity.isOnePageAssessment || this.currentActivity.isSkippable) {
+            this.alertFlag = true;
+            this.alertMsg = `${this.currentActivity.isSkippable ? 'Skipping all the items' : 'A one-page assessment'} cannot contain variables. This variable will automatically be removed.`
+            setTimeout(()=> {
+              variableNames.forEach(variable => {
+                text = text.replace(`[[${variable}]]`, '');
+              });
+              this.largeText = text;
+              this.updateItemMetaInfo({
+                index: this.itemIndex,
+                obj: { question: { text, image: this.headerImage } },
+              });
+            }, 200);
+          }
+          this.currentActivity.hasVariable = found;
+          this.updateActivityMetaInfo({ hasVariable: found })
+        }
+
+        if (_.concat([], ...Object.values(this.variablesItems)).length < 1) {
+          this.currentActivity.hasVariable = false;
+        }
+
+        this.updateItemMetaInfo({
+          index: this.itemIndex,
+          obj: { valid: !this.invalidLargeText },
+        });
+      }, 300)
     },
     headerImage: function(image) {
       this.updateItemMetaInfo({
@@ -843,7 +1199,6 @@ export default {
 
     this.isVis = !!this.item.isVis;
     this.setItemName();
-
   },
   methods: {
     ...mapMutations(config.MODULE_NAME,
@@ -852,13 +1207,26 @@ export default {
         'duplicateItem',
         'showOrHideItem',
         'showItem',
+        'updateHeader',
+        'updateSection',
         'deleteConditional',
         'deleteItem',
         'updateItemInputType',
         'setTokenPrizeModalStatus',
         'insertTemplateUpdateRequest',
+        'addTimeScreen',
+        'deleteTimeScreen',
+        'updateTokenSummary',
+        'updateActivityMetaInfo',
       ],
     ),
+
+    debounce (func, delay) {
+      const context = this;
+      const args = arguments;
+      clearTimeout(this.debounceTimer);
+      this.debounceTimer = setTimeout(() => func.apply(context, args), delay);
+    },
 
     setItemName () {
       if(!this.item.name) this.onUpdateName(`Screen${this.itemIndex + 1}`);
@@ -872,6 +1240,85 @@ export default {
       this.isVis = !this.isVis;
       this.showOrHideItem(index);
     },
+ 
+    addItemHeader (index) {
+      let headerIndex = 1;
+      this.currentActivity.items.forEach(item => {
+        if (item.header) {
+          const values = item.header.split(' ');
+
+          if (
+            values[0] === "Header" && 
+            values[1] && 
+            Number(values[1]) >= headerIndex
+          ) {
+            headerIndex = Number(values[1]) + 1
+          }
+        }
+      })
+
+      this.itemHeader = "Header " + headerIndex;
+      this.itemHeaderText = this.itemHeader;
+      this.isHeaderAdded = true;
+      this.updateHeader({ index, headerName: this.itemHeader });
+    },
+
+    editItemHeader (index) {
+      if (this.isUpdating) {
+        if (this.itemHeader) {
+          if (this.itemHeaderText) {
+            this.updateHeader({ index, headerName: this.itemHeaderText });
+            this.isUpdating = false;
+          }
+        } else {
+          if (this.itemSectionText) {
+            this.updateSection({ index, sectionName: this.itemSectionText });
+            this.isUpdating = false;
+          }
+        }
+      } else {
+        this.isUpdating = true;
+      }
+    },
+
+    openHeaderRemoveConfirmation (index) {
+      this.deleteHeaderDialog = true;
+      this.actionItemIndex = index;
+    },
+
+    removeItemHeader () {
+      if (this.itemHeader) {
+        this.updateHeader({ index: this.actionItemIndex, headerName: '' });
+        this.itemHeader = '';
+      } else {
+        this.updateSection({ index: this.actionItemIndex, sectionName: '' });
+        this.itemSection = '';
+      }
+      this.isHeaderAdded = false;
+      this.deleteHeaderDialog = false;
+    },
+
+    addItemSection (index) {
+      let sectionIndex = 1;
+
+      this.currentActivity.items.forEach(item => {
+        if (item.section) {
+          const values = item.section.split(' ');
+
+          if (
+            values[0] === "Section" && 
+            values[1] && 
+            Number(values[1]) >= sectionIndex
+          ) {
+            sectionIndex = Number(values[1]) + 1
+          }
+        }
+      })
+
+      this.itemSection = "Section " + sectionIndex;
+      this.itemSectionText = this.itemSection;
+      this.updateSection({ index, sectionName: this.itemSection });
+    },
 
     getConditionAnswer (condition) {
       if (condition.answerValue) {
@@ -883,10 +1330,41 @@ export default {
       return condition.minValue;
     },
 
+    handleWarningConfirm(item, itemIndex) {
+      if (this.warningMsg.includes('By deleting'))
+        this.onDeleteItem(item)
+      else if (this.warningMsg.includes('By hiding')) {
+        this.hideItem(itemIndex)
+      }
+      this.warningFlag = false;
+    },
+
+    checkVariableNameOnAction(item, callBack) {
+      let index;
+      if (typeof item === 'number') {
+        index = item;
+        item = this.currentActivity.items[item];
+      }
+      if (item && !item.isVis) {
+        for (const citem of this.currentActivity.items) {
+          const invalidLargeTextIndex = checkItemVariableNameIndex(citem.question.text, { items: [item] });
+          if (invalidLargeTextIndex != -1) {
+            if (index > -1) {
+              this.warningMsg = `By hiding ${item.name}, it will cause ${citem.name} to fail. Do you want to continue? (Please fix ${citem.name} if you choose to continue.)`;
+            } else
+              this.warningMsg = `By deleting ${item.name}, it will cause ${citem.name} to fail. Do you want to continue? (Please fix ${citem.name} if you choose to continue.)`;
+            this.warningFlag = true;
+            return;
+          }
+        }
+      }
+      callBack(index > -1 ? index : item);
+    },
+
     onDeleteItem () {
       this.itemConditionals = [];
       this.conditionals.forEach(conditional => {
-        if (conditional.showValue === this.item.name) {
+        if (conditional.showValue.name === this.item.name) {
           this.itemConditionals.push(conditional);
         } else if(conditional.conditions.find(({ ifValue }) => ifValue.name === this.item.name)) {
           this.itemConditionals.push(conditional);
@@ -901,7 +1379,16 @@ export default {
     },
 
     removeConditionals () {
+      const inputType = this.item.inputType;
+
       this.deleteItem(this.itemIndex);
+
+      if (inputType == 'futureBehaviorTracker') {
+        this.deleteTimeScreen(this.itemIndex - 1)
+      }
+
+      this.updateTokenSummary(tokenSummary);
+
       this.itemConditionals.forEach((conditional) => {
         const index = this.conditionals.findIndex(({ id }) => id === conditional.id);
 
@@ -914,7 +1401,7 @@ export default {
     },
 
     isConditionalItem (index) {
-      const res = this.conditionals.some(({ showValue }) => showValue === this.item.name);
+      const res = this.conditionals.some(({ showValue }) => showValue === this.item);
 
       if (res) {
         this.showItem(index);
@@ -923,8 +1410,22 @@ export default {
     },
 
     nameKeydown (e) {
+      if (!this.editVariableValid) {
+        this.alertMsg = `You cannot edit this item name, since it is using as a variable.`;
+        this.alertFlag = true;
+        e.preventDefault();
+      }
+
       if (!/^[a-zA-Z0-9-_]+$/.test(e.key)) {
         e.preventDefault();
+      }
+    },
+
+    onMouseup (event, item) {
+      if (_.concat([], ...Object.values(this.variablesItems)).includes(item.name)) {
+        this.editVariableValid = false;
+      } else {
+        this.editVariableValid = true;
       }
     },
 
@@ -938,6 +1439,9 @@ export default {
 
       updates.options = { options: [] };
       updates.allow = false;
+      updates.timer = 0;
+
+      const prev = this.item.inputType;
 
       this.updateItemMetaInfo({
         index: this.itemIndex,
@@ -953,6 +1457,17 @@ export default {
       })
 
       this.baseKey++;
+
+      if (prev == 'futureBehaviorTracker') {
+        this.deleteTimeScreen(this.itemIndex-1)
+      } else if (inputType == 'futureBehaviorTracker') {
+        let name = this.addTimeScreen({
+          index: this.itemIndex,
+          screen: timeScreen
+        })
+      }
+
+      this.updateTokenSummary(tokenSummary);
     },
 
     onUpdateName (name) {
@@ -991,6 +1506,22 @@ export default {
     },
 
     updateAllow(allowItem) {
+      if (allowItem) {
+        const item = this.currentActivity.items[this.itemIndex];
+        for (const citem of this.currentActivity.items) {
+          const invalidLargeTextIndex = checkItemVariableNameIndex(citem.question.text, { items: [item] });
+          if (invalidLargeTextIndex != -1) {
+            this.updateItemMetaInfo({
+              index: this.itemIndex,
+              obj: { allow: false, valid: false }
+            })
+            this.alertMsg = `By skipping ${item.name}, it will cause ${citem.name} to fail.`;
+            this.alertFlag = true;
+            return;
+          }
+        }
+      }
+
       this.updateItemMetaInfo({
         index: this.itemIndex,
         obj: { allow: allowItem }
@@ -1104,7 +1635,6 @@ export default {
         duration: 3000,
       };
     },
-
   }
 }
 </script>

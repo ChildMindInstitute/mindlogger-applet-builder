@@ -40,7 +40,7 @@
           Sub Scale Alert
         </v-card-title>
         <v-card-text class="pa-4">
-          Please insert two or more items with scoring option to add sub-scale.
+          Please insert one or more items with scoring option to add sub-scale.
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -156,7 +156,7 @@ export default {
         const itemCount = this.currentActivity.items.length;
 
         for (let i = itemCount - 1; i >= 0; i--) {
-          if (!this.currentActivity.items[i].allowEdit) {
+          if (!this.currentActivity.items[i].allowEdit && ['age_screen', 'gender_screen'].indexOf(this.currentActivity.items[i].name)) {
             this.deleteItem(i);
           }
         }
@@ -182,7 +182,10 @@ export default {
 
       if (!this.currentActivity.subScales.find((subScale) => !!subScale['lookupTable'])) {
         for (let screen of [ageScreen, genderScreen]) {
-          this.addItem(screen);
+          this.addItem({
+            obj: screen,
+            index: -1,
+          });
         }
       }
 

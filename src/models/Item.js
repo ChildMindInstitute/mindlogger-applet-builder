@@ -44,6 +44,8 @@ export default class Item {
         && (initialItemData.ui.allow.includes("dontKnow")
           || initialItemData.ui.allow.includes("dont_know_answer")),
       responseOptions: initialItemData.responseOptions || {},
+      header: initialItemData.header || "",
+      section: initialItemData.section || "",
       inputOptions: initialItemData.inputOptions || [],
       media: initialItemData.media || {},
       cumulativeScores: initialItemData.cumulativeScores  || [],
@@ -58,6 +60,7 @@ export default class Item {
     model.updateReferenceObject(parsedData);
 
     parsedData.responseOptions = model.getResponseOptions()
+    parsedData.timestamp = Date.now();
 
     return parsedData;
   }
@@ -224,6 +227,31 @@ export default class Item {
 
       return responseOptions;
     }
+
+    if (this.ref.inputType === 'pastBehaviorTracker' || this.ref.inputType == 'futureBehaviorTracker') {
+      const data = {
+        positiveBehaviors: (this.ref.options.positiveBehaviors || []).map(option => ({
+          "schema:name": option.name,
+          "schema:image": option.image,
+          "schema:value": Number(option.value)
+        })),
+        negativeBehaviors: (this.ref.options.negativeBehaviors || []).map(option => ({
+          "schema:name": option.name,
+          "schema:image": option.image,
+          "schema:value": Number(option.value),
+          "schema:rate": option.rate,
+          "schema:startTime": option.startTime,
+          "schema:endTime": option.endTime
+        }))
+      }
+
+      if (this.ref.inputType == 'futureBehaviorTracker') {
+        data.timeScreen = this.ref.options.timeScreen;
+      }
+
+      return data;
+    }
+
     if (this.ref.inputType === "ageSelector") {
       return {
         "schema:minAge": this.ref.options.minAge,
@@ -260,6 +288,7 @@ export default class Item {
       || this.ref.inputType === "geolocation"
       || this.ref.inputType === "audioStimulus"
       || this.ref.inputType === "photo"
+      || this.ref.inputType === "markdownMessage"
       || this.ref.inputType === "video"
       || this.ref.inputType === "timeRange") {
       return {
@@ -298,6 +327,8 @@ export default class Item {
         isVis: this.ref.isVis,
         "schema:schemaVersion": "0.0.1",
         "schema:version": "0.0.1",
+        "header": this.ref.header,
+        "section": this.ref.section,
         ui: {
           inputType: this.ref.inputType,
         },
@@ -571,6 +602,12 @@ export default class Item {
       'correctAnswer': {
         updated: (field) => `Correct answer was changed`
       },
+      'header': {
+        updated: (field) => `Item header was changed`
+      },
+      'section': {
+        updated: (field) => `Item section was changed`
+      },
       'timer': {
         updated: field => {
           const newTimeLimit = _.get(newValue, field);
@@ -601,13 +638,37 @@ export default class Item {
         updated: optionUpdate('Multiple choice option'),
       },
       'options.sliderOptions': {
-        updated: (field) =>'sliderOptions are updated',
+        updated: (field) => {
+          const oldOptions = _.get(oldValue, field, []);
+          const newOptions = _.get(newValue, field, []);
+
+          if (JSON.stringify(oldOptions) != JSON.stringify(newOptions)) {
+            return ['sliderOptions are updated'];
+          }
+          return [];
+        },
       },
       'options.itemList': {
-        updated: (field) =>'itemList is updated',
+        updated: (field) => {
+          const oldList = _.get(oldValue, field, []);
+          const newList = _.get(newValue, field, []);
+
+          if (JSON.stringify(oldList) != JSON.stringify(newList)) {
+            return ['itemList is updated'];
+          }
+          return [];
+        },
       },
       'options.choices': {
-        updated: (field) =>'choices are updated',
+        updated: (field) => {
+          const oldChoices = _.get(oldValue, field, []);
+          const newChoices = _.get(newValue, field, []);
+
+          if (JSON.stringify(oldChoices) != JSON.stringify(newChoices)) {
+            return ['choices are updated'];
+          }
+          return [];
+        }
       },
       'options.options': {
         updated: radioOptionListUpdate,
@@ -678,6 +739,28 @@ export default class Item {
       },
       'options.scores': {
         updated: scoreUpdate,
+      },
+      'options.positiveBehaviors': {
+        updated: (field) => {
+          const oldBehaviors = _.get(oldValue, field, []);
+          const newBehaviors = _.get(newValue, field, []);
+
+          if (JSON.stringify(oldBehaviors) != JSON.stringify(newBehaviors)) {
+            return ['positive behaviors were been updated']
+          }
+          return []
+        }
+      },
+      'options.negativeBehaviors': {
+        updated: (field) => {
+          const oldBehaviors = _.get(oldValue, field, []);
+          const newBehaviors = _.get(newValue, field, []);
+
+          if (JSON.stringify(oldBehaviors) != JSON.stringify(newBehaviors)) {
+            return ['negative behaviors were updated']
+          }
+          return []
+        }
       },
       'options.maxLength': {
         updated: valueUpdate('maxLength'),
@@ -778,6 +861,8 @@ export default class Item {
       description:
         _.get(item, ['schema:description', 0, '@value']),
       isVis: _.get(item, ['reprolib:terms/isVis', 0, '@value']),
+      header: _.get(item, ['schema:header', 0, '@value']),
+      section: _.get(item, ['schema:section', 0, '@value']),
       ui: {
         allow,
         inputType:
@@ -797,6 +882,14 @@ export default class Item {
 
     if (responseOptions) {
       itemContent.responseOptions = {};
+      let positiveBehaviors =
+        _.get(responseOptions, [0, 'reprolib:terms/positiveBehaviors'], []);
+
+      let negativeBehaviors =
+        _.get(responseOptions, [0, 'reprolib:terms/negativeBehaviors'], []);
+
+      let timeScreen =
+        _.get(responseOptions, [0, 'reprolib:terms/timeScreen']);
 
       let isOptionalTextRequired =
         _.get(responseOptions, [0, 'reprolib:terms/isOptionalTextRequired']);
@@ -842,9 +935,9 @@ export default class Item {
         _.get(responseOptions, [0, 'reprolib:terms/itemList'], []);
       let options =
         _.get(responseOptions, [0, 'reprolib:terms/options'], []);
-      let drawingImage = 
+      let drawingImage =
         _.get(responseOptions, [0, 'schema:image']);
-      
+
       if (drawingImage) {
         itemContent.responseOptions['schema:image'] = drawingImage;
       }
@@ -961,6 +1054,33 @@ export default class Item {
               }
             ),
         };
+      }
+
+      if (itemType === 'pastBehaviorTracker' || itemType == 'futureBehaviorTracker') {
+        itemContent.options = {
+          positiveBehaviors: positiveBehaviors.map(behavior => ({
+            image: _.get(behavior, ['schema:image'], ''),
+            name: _.get(behavior, ['schema:name', 0, '@value'], ''),
+            value: _.get(behavior, ['schema:value', 0, '@value'], ''),
+            valid: true
+          })),
+
+          negativeBehaviors: negativeBehaviors.map(behavior => ({
+            image: _.get(behavior, ['schema:image'], ''),
+            name: _.get(behavior, ['schema:name', 0, '@value'], ''),
+            value: _.get(behavior, ['schema:value', 0, '@value'], ''),
+            rate: _.get(behavior, ['schema:rate', 0, '@value'], 0),
+            startTime: _.get(behavior, ['schema:startTime', 0, '@value'], ''),
+            endTime: _.get(behavior, ['schema:endTime', 0, '@value'], ''),
+            valid: true
+          })),
+
+          valid: true
+        }
+
+        if (itemType == 'futureBehaviorTracker') {
+          itemContent.options.timeScreen = _.get(timeScreen, [0, '@value'])
+        }
       }
 
       if (itemType === 'stackedRadio') {
@@ -1176,6 +1296,7 @@ export default class Item {
         || itemType === 'geolocation'
         || itemType === 'date'
         || itemType === 'video'
+        || itemType === 'markdownMessage'
         || itemType === 'photo'
         || itemType === 'timeRange') {
         itemContent.options = {
@@ -1314,6 +1435,16 @@ export default class Item {
       && (item.options.minAge === "" || item.options.maxAge === "")) {
       return false;
     }
+
+    if (item.inputType == "pastBehaviorTracker" || item.inputType == "futureBehaviorTracker") {
+      if (
+        (!item.options.positiveBehaviors || !item.options.positiveBehaviors.length) &&
+        (!item.options.negativeBehaviors || !item.options.negativeBehaviors.length)
+      ) {
+        return false;
+      }
+    }
+
     if (item.cumulativeScores) {
       for (let i = 0; i < item.cumulativeScores.length; i++) {
         if (!item.cumulativeScores[i].valid) {

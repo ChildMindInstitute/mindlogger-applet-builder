@@ -155,6 +155,12 @@
                 @change="onUpdateRule(rule)"
               />
               <div class="ml-2 text-uppercase">IF THE USER'S SCORE OF {{rule.operator.text || 'X'}} IS {{rule.score || 'Y'}}</div>
+              <v-checkbox
+                class="ml-4"
+                label="Hide this activity until user meets threshold"
+                v-model="rule.hideActivityInRange"
+                @change="onUpdateRule(rule)"
+              />
             </div>
             <div v-else>
               <div>Show an activity based on the score the user achieves</div>
@@ -192,6 +198,12 @@
                 @change="onUpdateRule(rule)"
               />
               <div class="ml-2">IF THE USER'S SCORE OUT OF RANGE</div>
+              <v-checkbox
+                class="ml-4"
+                label="Hide this activity until user meets threshold"
+                v-model="rule.hideActivityOutRange"
+                @change="onUpdateRule(rule)"
+              />
             </div>
             <div v-else>
               <div>Show an activity based on the score the user achieves</div>
@@ -351,6 +363,10 @@ export default {
       this.$emit("updateCumulativeScore", this.rules);
     },
 
+    handleActivityHide(key, value) {
+      this.$emit("updateCumulativeScore", this.rules);
+    },
+
     rowClicked(item, rule) {
       item.selected = !item.selected;
 
@@ -360,13 +376,20 @@ export default {
     activitySelect(v, rule, key) {
       if(!v) {
         rule[key] = null;
-        this.onUpdateRule(rule)
       } else {
+        rule.valid = false;
         this.update();
       }
+      this.onUpdateRule(rule)
     },
 
     onUpdateRule(rule) {
+      try {
+        if (rule.name && rule.name.match(/[&\/\\#,+()$~%.'":*?<>{}]/g)) {
+          rule.name = rule.name.replace(/[&\/\\#,+()$~%.'":*?<>{}]/g, '');
+        }        
+      } catch (error) { }
+
       rule.compute = {
         jsExpression: rule.items
           .filter((item) => item.selected)
@@ -383,14 +406,16 @@ export default {
             rule.name + (rule.operator.value ? " >= " : " <= ") + rule.score,
           message: rule.messageInRange,
           outputType: rule.outputType.value,
-          nextActivity: rule.activityInRange
+          nextActivity: rule.activityInRange,
+          hideActivity: rule.hideActivityInRange,
         },
         {
           jsExpression:
             rule.name + (rule.operator.value ? " < " : " > ") + rule.score,
           message: rule.messageOutRange,
           outputType: rule.outputType.value,
-          nextActivity: rule.activityOutRange
+          nextActivity: rule.activityOutRange,
+          hideActivity: rule.hideActivityOutRange,
         },
       ];
 
@@ -422,7 +447,9 @@ export default {
           score: "",
           outputType: this.outputTypes[0],
           messageInRange: "",
+          hideActivityInRange: true,
           messageOutRange: "",
+          hideActivityOutRange: true,
           valid: false,
         };
       }
@@ -463,8 +490,10 @@ export default {
         valid: true,
         isActivityInRange: Boolean(message && message.nextActivity),
         activityInRange: message && message.nextActivity,
+        hideActivityInRange: message && message.hasOwnProperty('hideActivity') && message.hideActivity !== undefined ? message.hideActivity : true,
         isActivityOutRange: Boolean(messageOutRange && messageOutRange.nextActivity),
-        activityOutRange: messageOutRange && messageOutRange.nextActivity
+        activityOutRange: messageOutRange && messageOutRange.nextActivity,
+        hideActivityOutRange: messageOutRange && messageOutRange.hasOwnProperty('hideActivity') && messageOutRange.hideActivity !== undefined ? messageOutRange.hideActivity : true,
       };
     },
 

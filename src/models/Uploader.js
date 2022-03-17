@@ -10,8 +10,25 @@ export function isAudioUrlValid(url) {
   });
 }
 
-export function isImageValid(data) {
+export function isSplashImageValid(data, imageType) {
 
+  const img = new Image();
+  if (typeof data === 'string') img.src = data;
+  else img.src = URL.createObjectURL(data);
+
+  return new Promise((resolve, reject) => {
+    img.onload = function () {
+      if (this.width !== 700 || this.height !== 1000)
+        reject('Image size should be 700px * 1000px');
+
+      resolve(data);
+    };
+
+    img.onerror = () => reject('Please check if you use correct url.');
+  });
+}
+
+export function isImageValid(data, imageType) {
   const img = new Image();
   if(typeof data === 'string') img.src = data;
   else img.src = URL.createObjectURL(data);
@@ -23,6 +40,7 @@ export function isImageValid(data) {
 
       // < 8192 (8MB)
       const imgSize = Math.round(data.size / 1024);
+      
       if(imgSize > 8192) 
         reject('Size of image should be less than 8MB.');
       // Minimum resolution: 320x566 (lower resolutions will be not be posted)
@@ -41,7 +59,7 @@ export function isImageValid(data) {
       resolve(data);
     };
 
-    img.onerror = () => reject('Please check if you use correct image url.');
+    img.onerror = () => reject('Please check if you use correct url.');
   });
 }
 
@@ -50,7 +68,7 @@ export function isVideoUrlValid(url) {
   video.src = url;
 
   return new Promise((resolve, reject) => {
-    video.onload = () => {
+    video.onloadedmetadata = () => {
       resolve(url);
     }
 
@@ -63,7 +81,7 @@ export function isVideoUrlValid(url) {
           reject('Please check if you use correct gif url.');
         }
       } catch (err) {
-        reject('Please check if you use correct video url.');
+        reject('Please check if you use correct url.');
       }
     }
   });

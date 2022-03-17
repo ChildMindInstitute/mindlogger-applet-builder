@@ -91,6 +91,7 @@
         <p>Image Requirements</p>
         <ul>
           <li>Size: less than 8MB</li>
+          <li>Format: JPEG and PNG</li>
           <li>Width: between 100px and 1920px</li>
           <li>Height: between 100px and 1920px</li>
         </ul>
@@ -296,8 +297,11 @@ export default {
     }
   }
 }
+</style>
+
+<style lang="scss">
 .v-alert {
-  padding: 25px;
-  margin-bottom: 0px;
+  padding: 16px;
+  margin-bottom: 0px !important;
 }
 </style>

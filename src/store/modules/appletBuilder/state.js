@@ -87,12 +87,32 @@ export default {
       icon: baseImageURL + 'item-types/audio-stimulus-icon.png',
     },
     {
+      text: "pastBehaviorTracker",
+      icon: baseImageURL + 'item-types/past-behavior-tracker-icon.png'
+    },
+    {
+      text: "futureBehaviorTracker",
+      icon: baseImageURL + 'item-types/future-behavior-tracker-icon.png'
+    },
+    {
       text: "ageSelector",
       icon: baseImageURL + 'item-types/slider-icon.png',
     },
     {
+      text: "pastBehaviorTracker",
+      icon: baseImageURL + 'item-types/past-behavior-tracker-icon.png'
+    },
+    {
+      text: "futureBehaviorTracker",
+      icon: baseImageURL + 'item-types/future-behavior-tracker-icon.png'
+    },
+    {
       text: "markdownMessage",
       icon: baseImageURL + 'item-types/message-icon.png',
+    },
+    {
+      text: "tokenSummary",
+      icon: baseImageURL + 'item-types/token-summary.png'
     },
     {
       text: "cumulativeScore",
@@ -101,6 +121,7 @@ export default {
   ],
   templates: [],
   versions: null,
+  nodeEnv: null,
   original: null,
   currentScreen: config.PROTOCOL_SCREEN,
   currentActivity: null,

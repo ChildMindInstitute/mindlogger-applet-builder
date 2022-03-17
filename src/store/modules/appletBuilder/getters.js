@@ -15,6 +15,10 @@ const activityGetters = {
     return state.currentActivity;
   },
 
+  currentHeaders(state) {
+    return state.currentActivity.items.map(item => item.header);
+  },
+
   prizeActivity (state) {
     return state.protocol.prizeActivity;
   },
@@ -74,5 +78,9 @@ export default {
 
   versions (state) {
     return state.versions;
+  },
+
+  nodeEnv (state) {
+    return state.nodeEnv;
   }
 }

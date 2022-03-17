@@ -14,7 +14,7 @@ export default class Protocol {
   }
 
   static getConvertedActivityName(name) {
-    return name.replace(/\s/g, '__').replace(/[()]/g, '');
+    return name.replace(/\s/g, '__').replace(/[()/]/g, '');
   }
 
   getVariableMap(convertNames=false) {

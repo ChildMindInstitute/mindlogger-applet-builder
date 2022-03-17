@@ -211,6 +211,17 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+
+    <v-dialog
+      v-model="downloadSchemaAlert"
+      width="350"
+    >
+      <v-card>
+        <v-card-text>
+          Please update url of contexts in protocol schema, activity schema and change activity/item paths in context files after uploading content to github.
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-card>
 </template>
 
@@ -264,7 +275,8 @@ export default {
       dataAlertDialog: {
         visibility: false,
         message: ''
-      }
+      },
+      downloadSchemaAlert: false
     };
   },
   computed: {
@@ -350,6 +362,10 @@ export default {
     },
 
     downloadSchema () {
+      if (!this.appletStatus()) {
+        return ;
+      }
+
       const protocolModel = new Protocol();
       protocolModel.updateReferenceObject(this.protocol);
 
@@ -378,11 +394,17 @@ export default {
           })
         });
 
+        const activitySchema = activityModel.getCompressedSchema();
+
+        if (activitySchema._id) {
+          delete activitySchema._id;
+        }
+
         zip
           .folder(`activities/${name}`)
           .file(
             `${name}_schema`,
-            JSON.stringify(activityModel.getCompressedSchema(), null, 2)
+            JSON.stringify(activitySchema, null, 2)
           );
         zip
           .folder(`activities/${name}`)
@@ -400,6 +422,10 @@ export default {
             delete item['options'];
           }
 
+          if (item._id) {
+            delete item._id;
+          }
+
           zip
             .folder(`activities/${name}/items`)
             .file(`${item.name}`, JSON.stringify(item, null, 2));
@@ -408,6 +434,8 @@ export default {
 
       zip.generateAsync({ type: 'blob' }).then((blob) => {
         saveAs(blob, `${this.protocol.name}.zip`);
+
+        this.downloadSchemaAlert = true;
       });
     },
 

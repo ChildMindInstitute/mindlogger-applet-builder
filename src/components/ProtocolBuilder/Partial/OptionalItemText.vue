@@ -3,8 +3,8 @@
     <v-col
       :class="colClasses"
       :cols="12"
-      :md="3"
-      :sm="6"
+      :md="md"
+      :sm="sm"
     >
       <v-checkbox
         v-model="isText"
@@ -17,8 +17,8 @@
       v-if="isText"
       :class="colClasses"
       :cols="12"
-      :md="3"
-      :sm="6"
+      :md="md"
+      :sm="sm"
     >
       <v-checkbox
         v-model="isRequired"

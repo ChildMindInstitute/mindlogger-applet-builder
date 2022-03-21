@@ -606,7 +606,7 @@ export default {
       return res;
     },
     async onAddWatermarkFromDevice (uploadFunction) {
-      this.$emit('loading', true);
+      this.$  emit('loading', true);
       try {
         this.appletWatermark = await uploadFunction();
         this.$emit('loading', false);
@@ -626,6 +626,10 @@ export default {
         this.fileSuccessMsg = 'Applet About image is sucessfully added.';
       } catch (error) {
         this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'error',
+          message: `Something went wrong with uploading applet watermark.`,
+        });
       }
     },
     onRemoveWatermark () {

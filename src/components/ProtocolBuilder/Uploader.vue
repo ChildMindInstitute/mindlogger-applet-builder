@@ -267,7 +267,6 @@
                   <p>Image Requirements</p>
                   <ul>
                     <li>Size: less than 8MB</li>
-                    <li>700px * 1000px size is required</li>
                   </ul>
                 </span>
               </v-tooltip>
@@ -504,6 +503,9 @@
             ref="cropper"
             class="cropper"
             :src="cropper.src"
+            :stencil-props="{
+              aspectRatio
+            }"
           />
 
         <v-card-actions class="justify-space-around">
@@ -542,6 +544,10 @@ export default {
     initialType: {
       type: String,
       default: '',
+    },
+    aspectRatio: {
+      type: Number,
+      default: 0
     },
     imageType: {
       type: String,

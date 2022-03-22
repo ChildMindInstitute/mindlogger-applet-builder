@@ -90,6 +90,7 @@
               :initialData="appletImage"
               :initialAdditionalType="'small-circle'"
               :initialTitle="'Applet Image'"
+              :aspectRatio="1/1"
               @onAddFromUrl="onAddImageFromUrl($event)"
               @onAddFromDevice="onAddImageFromDevice($event)"
               @onRemove="onRemoveImage()"
@@ -606,7 +607,7 @@ export default {
       return res;
     },
     async onAddWatermarkFromDevice (uploadFunction) {
-      this.$  emit('loading', true);
+      this.$emit('loading', true);
       try {
         this.appletWatermark = await uploadFunction();
         this.$emit('loading', false);

@@ -18,9 +18,6 @@ export function isSplashImageValid(data, imageType) {
 
   return new Promise((resolve, reject) => {
     img.onload = function () {
-      if (this.width !== 700 || this.height !== 1000)
-        reject('Image size should be 700px * 1000px');
-
       resolve(data);
     };
 

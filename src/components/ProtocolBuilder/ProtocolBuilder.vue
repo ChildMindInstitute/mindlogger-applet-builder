@@ -125,7 +125,7 @@
 
           <v-tooltip bottom>
             <template v-slot:activator="{ on, attrs }">
-              <v-col sm="4" 
+              <v-col sm="4"
                 v-bind="attrs"
                 v-on="on"
               >
@@ -606,7 +606,7 @@ export default {
       return res;
     },
     async onAddWatermarkFromDevice (uploadFunction) {
-      this.$  emit('loading', true);
+      this.$emit('loading', true);
       try {
         this.appletWatermark = await uploadFunction();
         this.$emit('loading', false);

@@ -953,7 +953,7 @@ export default class Item {
 
       let colorPalette =
         _.get(responseOptions, [0, 'reprolib:terms/colorPalette']);
-      
+
       let timeDuration =
         _.get(responseOptions, [0, 'schema:timeDuration']);
 
@@ -1010,16 +1010,22 @@ export default class Item {
       if (tickLabel) {
         itemContent.tickLabel =
           tickLabel[0] && tickLabel[0]['@value'];
+      } else {
+        itemContent.tickLabel = true;
       }
 
       if (textAnchors) {
         itemContent.textAnchors =
           textAnchors[0] && textAnchors[0]['@value'];
+      } else {
+        itemContent.textAnchors = true;
       }
 
       if (tickMark) {
         itemContent.tickMark =
           tickMark[0] && tickMark[0]['@value'];
+      } else {
+        itemContent.tickMark = true;
       }
 
       if (continousSlider) {

@@ -749,7 +749,15 @@ export default {
     saveCroppedImage() {
       const { coordinates, canvas, } = this.$refs.cropper.getResult();
       const image = canvas.toBlob(blob => {
-        const file = new File([blob], { type: 'image/jpeg', lastModified: Date.now() });
+        let fileName;
+        if (typeof this.uploadData !== "string") {
+          fileName = this.uploadData.name;
+        } else {
+          const values = this.uploadData.split('/');
+          fileName = values[values.length - 1];
+        }
+        const file = new File([blob], fileName, { type: 'image/jpeg', lastModified: Date.now() });
+        console.log('file', file)
         this.uploadData = file;
 
         this.$emit('onAddFromDevice', this.upload);

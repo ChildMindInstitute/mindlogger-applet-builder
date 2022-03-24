@@ -497,6 +497,11 @@
           primary-title
         >
           Please select area to show users
+          <v-spacer></v-spacer>
+          <v-icon 
+            @click="onCloseCropping()"
+            class="close-icon"
+          >mdi-close</v-icon>
         </v-card-title>
 
           <Cropper
@@ -632,6 +637,13 @@ export default {
           });
         }
       }
+    },
+
+    onCloseCropping () {
+      const inputRef = this.$refs['fileInput'];
+      if(inputRef) inputRef.value = '';
+      this.uploadData = '';
+      this.cropper.visible = false;
     },
 
     async onAddFromDevice(event, externalFile, updateParent=true) {
@@ -829,6 +841,10 @@ export default {
 
 .from-url:hover {
   background-color: rgba(0, 0, 0, 0.04);
+}
+
+.close-icon {
+  cursor: pointer;
 }
 
 .cropper {

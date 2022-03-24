@@ -90,6 +90,7 @@
               :initialData="appletImage"
               :initialAdditionalType="'small-circle'"
               :initialTitle="'Applet Image'"
+              :aspectRatio="1/1"
               @onAddFromUrl="onAddImageFromUrl($event)"
               @onAddFromDevice="onAddImageFromDevice($event)"
               @onRemove="onRemoveImage()"

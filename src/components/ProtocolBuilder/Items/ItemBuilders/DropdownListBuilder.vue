@@ -12,29 +12,6 @@
       <v-row class="ma-2">
         Options
         <v-spacer />
-        <template v-if="isTokenValue">
-          <v-btn class="mx-2" outlined color="primary" @click="$emit('openPrize')">
-            {{ hasPrizeActivity ? "Edit" : "Create" }} Token Prizes
-          </v-btn>
-
-          <v-menu offset-y>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn class="deep-orange" color="primary" dark v-bind="attrs" v-on="on">
-                Saved Templates
-              </v-btn>
-            </template>
-            <v-list>
-              <v-list-item v-for="(item, i) in items" :key="i">
-                <v-list-item-title @click="addFromTemplate(item)">
-                  {{ item.text }} | {{ item.value }}
-                </v-list-item-title>
-                <v-btn icon color="grey darken-1 ml-2" @click="removeTemplate(item)">
-                  <v-icon>mdi-delete</v-icon>
-                </v-btn>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-        </template>
       </v-row>
 
       <div class="option-list">
@@ -63,22 +40,7 @@
               <v-btn v-if="colorPalette" icon @click="openColorPicker(option)">
                 <v-icon>palette</v-icon>
               </v-btn>
-              <Uploader
-                :initialType="'image'"
-                :initialTitle="'Option Image'"
-                :initialAdditionalType="'small-circle'"
-                :initialData="option.image"
-                @onAddFromUrl="onAddOptionImageFromUrl(option, $event)"
-                @onAddFromDevice="
-                  $emit('loading', true);
-                  onAddOptionImageFromDevice(option, $event);
-                "
-                @onRemove="onRemoveOptionImage(option)"
-                @onNotify="
-                  $emit('loading', false);
-                  $emit('notify', $event);
-                "
-              />
+
               <v-btn icon @click="deleteOption(index)">
                 <v-icon>delete</v-icon>
               </v-btn>
@@ -121,26 +83,6 @@
               </v-col>
             </v-row>
 
-            <v-row>
-              <v-col cols="12" sm="12">
-                <div
-                  class="ds-tooltip-header d-flex justify-space-between align-center"
-                  :class="!isTooltipOpen ? 'ds-tooltip-close' : ''"
-                >
-                  <span>Tooltip Creator</span>
-                  <v-btn icon @click="isTooltipOpen = !isTooltipOpen">
-                    <v-icon v-if="isTooltipOpen" color="white lighten-1">
-                      mdi-chevron-double-up
-                    </v-icon>
-                    <v-icon v-else color="grey lighten-1">
-                      edit
-                    </v-icon>
-                  </v-btn>
-                </div>
-                <MarkDownEditor v-if="isTooltipOpen" v-model="option.description" @input="updateOption(option)" />
-              </v-col>
-            </v-row>
-
             <v-row v-if="hasResponseAlert">
               <v-col class="d-flex align-center" cols="12" sm="12">
                 <v-text-field
@@ -150,14 +92,6 @@
                   required
                   @change="updateOption(option)"
                 />
-              </v-col>
-            </v-row>
-
-            <v-row>
-              <v-col v-if="isTokenValue" cols="auto">
-                <v-btn color="primary" @click="appendTemplate(option)">
-                  Save As Template
-                </v-btn>
               </v-col>
             </v-row>
           </div>
@@ -183,33 +117,13 @@
       </v-row>
       <v-row>
         <v-col v-if="!isReviewerActivity" class="d-flex align-center" cols="12" md="3" sm="6">
-          <v-checkbox v-model="isTokenValue" label="Token Value" @change="updateTokenOption" />
+          <v-checkbox v-model="hasScoreValue" label="Option Score" @change="update" />
         </v-col>
         <v-col class="d-flex align-center" cols="12" md="3" sm="6">
           <v-checkbox
             v-model="isSkippable"
             label="Skippable Item"
             :disabled="isSkippableItem == 2 || (isOptionalText && responseOptions.isOptionalTextRequired)"
-          />
-        </v-col>
-        <v-col v-if="!isReviewerActivity" class="d-flex align-center" cols="12" md="3" sm="6">
-          <v-checkbox v-model="hasResponseAlert" label="Set Alert" @change="update" />
-        </v-col>
-        <v-col v-if="!isReviewerActivity" class="d-flex align-center" cols="12" md="3" sm="6">
-          <v-checkbox v-model="hasScoreValue" label="Option Score" @change="update" />
-        </v-col>
-
-        <v-col class="d-flex align-center" cols="12" md="3" sm="6">
-          <v-checkbox v-model="randomizeOptions" label="Randomize response options" @change="update" />
-        </v-col>
-        <v-col class="d-flex align-center" cols="12" md="3" sm="6">
-          <v-checkbox v-model="colorPalette" label="Set color palette" @change="update" />
-        </v-col>
-        <v-col v-if="isTokenValue">
-          <v-checkbox
-            v-model="enableNegativeTokens"
-            label="Reduce cumulation of tokens with negative token responses"
-            @change="update"
           />
         </v-col>
       </v-row>
@@ -371,15 +285,11 @@
 </style>
 
 <script>
-import Uploader from "../../Uploader.vue";
 import OptionalItemText from "../../Partial/OptionalItemText.vue";
-import MarkDownEditor from "../../MarkDownEditor";
 
 export default {
   components: {
-    Uploader,
     OptionalItemText,
-    MarkDownEditor,
   },
   props: {
     initialItemData: {
@@ -548,15 +458,6 @@ export default {
       return yiq >= 128 ? "#333333" : "white";
     },
 
-    removeTemplate(item) {
-      const { items } = this;
-      const updatedItems = items.filter(
-        ({ text, value, description }) => text !== item.text || value !== item.value || description !== item.description
-      );
-      this.items = [...updatedItems];
-      this.$emit("removeTemplate", item);
-    },
-
     openColorPicker(option) {
       this.colorPickerDialog = true;
       this.currentOption = option;
@@ -580,38 +481,6 @@ export default {
       this.update();
     },
 
-    appendTemplate(option) {
-      const newOption = {
-        text: option.name,
-        value: option.value,
-        description: option.description,
-      };
-
-      this.items.push(newOption);
-      this.$emit("updateTemplates", newOption);
-    },
-
-    addFromTemplate(item) {
-      const nextOption = {
-        name: item.text,
-        value: Number(item.value),
-        image: "",
-        score: 0,
-        description: item.description,
-        alert: "",
-        expanded: false,
-        valid: false,
-      };
-
-      if (this.hasScoreValue) {
-        nextOption.score = this.nextOptionScore;
-        this.nextOptionScore++;
-      }
-      nextOption.valid = this.isValidOption(nextOption);
-
-      this.options.push(nextOption);
-      this.update();
-    },
     deleteOption(index) {
       let currentPalette = "";
 
@@ -656,20 +525,6 @@ export default {
       this.$emit("updateOptions", responseOptions);
     },
 
-    updateTokenOption() {
-      if (this.isTokenValue) {
-        for (let i = 0; i < this.options.length; i++) {
-          this.options[i].value = 0;
-        }
-      } else {
-        for (let i = 0; i < this.options.length; i++) {
-          this.options[i].value = i;
-        }
-      }
-
-      this.update();
-    },
-
     updateOption(option) {
       option.valid = this.isValidOption(option);
 
@@ -690,52 +545,6 @@ export default {
     onUpdateResponseOptions() {
       if (this.responseOptions.isOptionalTextRequired) this.$emit("updateAllow", false);
       this.$emit("updateResponseOptions", this.responseOptions);
-    },
-
-    onAddOptionImageFromUrl(option, url) {
-      option.image = url;
-      this.update();
-      this.$emit("notify", {
-        type: "success",
-        message: "Image from URL successfully added to Option.",
-        duration: 3000,
-      });
-
-      this.update();
-    },
-
-    async onAddOptionImageFromDevice(option, uploadFunction) {
-      try {
-        option.image = await uploadFunction();
-        this.update();
-        this.$emit("loading", false);
-        this.$emit("notify", {
-          type: "success",
-          message: "Image successfully added to Option.",
-          duration: 3000,
-        });
-
-        this.update();
-      } catch (error) {
-        this.$emit("loading", false);
-        this.$emit("notify", {
-          type: "error",
-          message:
-            "Something went wrong with uploading image for Item > Option. Please try to upload again or just save Option without image changes.",
-        });
-      }
-    },
-
-    onRemoveOptionImage(option) {
-      option.image = "";
-      this.update();
-      this.$emit("notify", {
-        type: "warning",
-        message: "Image successfully removed from Option.",
-        duration: 3000,
-      });
-
-      this.update();
     },
   },
 };

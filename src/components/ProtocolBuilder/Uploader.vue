@@ -450,6 +450,38 @@
       @cancel="isAddingFromUrl = false"
     />
     <!-- Add From Url Popup -->
+    <v-dialog
+      v-model="closeConfirm"
+      persistent
+      width="400"
+    >
+      <v-alert
+        border="left"
+        colored-border
+        type="error"
+        elevation="2"
+      >
+        <v-row class="flex-column">
+          <v-col class="grow">
+            <h3>Are you sure you want to close without saving the image?</h3>
+          </v-col>
+          <v-col class="shrink d-flex justify-end">
+            <v-btn
+              @click="closeConfirm = false"
+            >
+              No
+            </v-btn>
+            <v-btn
+              class="ml-4"
+              color="error"
+              @click="onCloseCropping"
+            >
+              Yes
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-alert>
+    </v-dialog>
 
     <v-dialog
       v-model="removeConfirm"
@@ -499,7 +531,7 @@
           Please select area to show users
           <v-spacer></v-spacer>
           <v-icon 
-            @click="onCloseCropping()"
+            @click="closeConfirm = true"
             class="close-icon"
           >mdi-close</v-icon>
         </v-card-title>
@@ -582,6 +614,7 @@ export default {
       fileName: this.initialData,
       isAddingFromUrl: false,
       removeConfirm: false,
+      closeConfirm: false,
       cropper: {
         src: '',
         visible: false
@@ -644,6 +677,7 @@ export default {
       if(inputRef) inputRef.value = '';
       this.uploadData = '';
       this.cropper.visible = false;
+      this.closeConfirm = false;
     },
 
     async onAddFromDevice(event, externalFile, updateParent=true) {

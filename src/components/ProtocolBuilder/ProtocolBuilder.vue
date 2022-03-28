@@ -126,7 +126,7 @@
 
           <v-tooltip bottom>
             <template v-slot:activator="{ on, attrs }">
-              <v-col sm="4" 
+              <v-col sm="4"
                 v-bind="attrs"
                 v-on="on"
               >

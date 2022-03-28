@@ -11,9 +11,9 @@ export function isAudioUrlValid(url) {
 }
 
 export function isSplashImageValid(data, imageType) {
-
+  const isUrl = typeof data === 'string';
   const img = new Image();
-  if (typeof data === 'string') img.src = data;
+  if (isUrl) img.src = data;
   else img.src = URL.createObjectURL(data);
 
   return new Promise((resolve, reject) => {
@@ -21,13 +21,14 @@ export function isSplashImageValid(data, imageType) {
       resolve(data);
     };
 
-    img.onerror = () => reject('Please check if you use correct url.');
+    img.onerror = () => reject(isUrl ? 'Please check if you use correct url.' : 'Please check if you use correct image file.');
   });
 }
 
 export function isImageValid(data, imageType) {
   const img = new Image();
-  if(typeof data === 'string') img.src = data;
+  const isUrl = typeof data === 'string';
+  if(isUrl) img.src = data;
   else img.src = URL.createObjectURL(data);
 
   return new Promise((resolve, reject) => {
@@ -37,8 +38,8 @@ export function isImageValid(data, imageType) {
 
       // < 8192 (8MB)
       const imgSize = Math.round(data.size / 1024);
-      
-      if(imgSize > 8192) 
+
+      if(imgSize > 8192)
         reject('Size of image should be less than 8MB.');
       // Minimum resolution: 320x566 (lower resolutions will be not be posted)
       if(imgWidth <= 100 || imgWidth > 1920)
@@ -56,7 +57,7 @@ export function isImageValid(data, imageType) {
       resolve(data);
     };
 
-    img.onerror = () => reject('Please check if you use correct url.');
+    img.onerror = () => reject(isUrl ? 'Please check if you use correct url.' : 'Please check if you use correct image file.');
   });
 }
 

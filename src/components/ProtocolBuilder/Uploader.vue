@@ -512,6 +512,7 @@
           <v-btn
             outlined
             color="primary"
+            :disabled="aspectRatio === 7/10"
             @click="saveOriginalImage"
           >
             Save Original Image

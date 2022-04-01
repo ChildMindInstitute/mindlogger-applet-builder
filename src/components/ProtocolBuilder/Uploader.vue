@@ -549,6 +549,7 @@
           <v-btn
             outlined
             color="primary"
+            :disabled="aspectRatio === 7/10"
             @click="saveOriginalImage"
           >
             Save Original Image
@@ -611,6 +612,7 @@ export default {
       structureTypes,
       uploader,
       uploadData: this.initialData,
+      tempData: '',
       fileName: this.initialData,
       isAddingFromUrl: false,
       removeConfirm: false,
@@ -652,7 +654,7 @@ export default {
           await isVideoUrlValid(url);
         }
 
-        this.uploadData = url;
+        this.tempData = url;
         this.fileName = url;
         if (updateParent) {
           this.$set(this, 'cropper', {
@@ -675,7 +677,7 @@ export default {
     onCloseCropping () {
       const inputRef = this.$refs['fileInput'];
       if(inputRef) inputRef.value = '';
-      this.uploadData = '';
+      this.tempData = '';
       this.cropper.visible = false;
       this.closeConfirm = false;
     },
@@ -689,7 +691,7 @@ export default {
         if (this.initialType === 'image') await isImageValid(file);
         if (this.imageType === 'splash' && file.type.match(/(jpeg|jpg|png)$/) != null) await isSplashImageValid(file);
 
-        this.uploadData = file;
+        this.tempData = file;
         this.fileName = file;
 
         if (updateParent) {
@@ -784,6 +786,7 @@ export default {
     },
 
     saveOriginalImage() {
+      this.uploadData = this.tempData;
       if (typeof this.fileName == 'string') {
         this.$emit('onAddFromUrl', this.uploadData);
       } else {
@@ -793,6 +796,7 @@ export default {
     },
 
     saveCroppedImage() {
+      this.uploadData = this.tempData;
       const { coordinates, canvas, } = this.$refs.cropper.getResult();
       const image = canvas.toBlob(blob => {
         let fileName;
@@ -882,8 +886,8 @@ export default {
 }
 
 .cropper {
-  min-height: 300px;
-  width: 500px;
+  width: 100%;
+  height: 400px;
   background: black;
 }
 </style>

@@ -352,7 +352,7 @@
           </v-select>
         </v-col>
         <v-col
-          v-if="!['radio', 'checkbox', 'dropdownList', 'text', 'slider', 'cumulativeScore', 'ageSelector'].includes(item.inputType)"
+          v-if="!webItems.includes(item.inputType)"
           class="d-flex align-center red--text"
         >
           This item is only available for use in mobile version of MindLogger.
@@ -1081,6 +1081,7 @@ export default {
       invalidLargeText: false,
       debounceTimer: undefined,
       responseIdentifierMessage: 'By using this option, the user will be required to enter response data identifier text into the field. The text entered will identify the response data collected at that point in time. The identifier used will be filterable on the user\'s data visualization tab.',
+      webItems: ['radio', 'checkbox', 'dropdownList', 'text', 'slider', 'cumulativeScore', 'ageSelector', 'duration'],
       warningFlag: false,
       warningMsg: '',
       errorMsg: '* This item is not supported, please remove it.',

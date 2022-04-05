@@ -190,7 +190,8 @@ export default class Item {
         'valueType': this.ref.options.valueType || this.ref.valueType,
         "removeBackOption": this.ref.options.removeBackOption,
         'requiredValue': this.ref.options.requiredValue,
-        'isResponseIdentifier': this.ref.options.isResponseIdentifier
+        'isResponseIdentifier': this.ref.options.isResponseIdentifier,
+        'maxLength': this.ref.options.maxLength,
       }
     }
     if (this.ref.inputType === "drawing") {
@@ -1269,8 +1270,9 @@ export default class Item {
             _.get(responseOptions, [0, 'reprolib:terms/requiredValue', 0, '@value']),
           removeBackOption: itemContent.removeBackOption || false,
           isResponseIdentifier:
-            _.get(responseOptions, [0, 'reprolib:terms/isResponseIdentifier', 0, '@value'])
-          // TODO: add 'maximum response length' value which is absent for now
+            _.get(responseOptions, [0, 'reprolib:terms/isResponseIdentifier', 0, '@value']),
+          maxLength:
+            _.get(responseOptions, [0, 'reprolib:terms/maxLength', 0, '@value'])
         };
         if (item['schema:correctAnswer'] &&
           item['schema:correctAnswer'][0] &&

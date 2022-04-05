@@ -153,6 +153,7 @@ export default {
         'isResponseIdentifier': this.isResponseIdentifier,
         'valueType': this.isNumerical ? 'xsd:integer' : 'xsd:string',
       };
+
       this.$emit('updateOptions', responseOptions);
     },
     updateAnswer() {

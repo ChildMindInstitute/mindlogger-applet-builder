@@ -530,7 +530,7 @@
         >
           Please select area to show users
           <v-spacer></v-spacer>
-          <v-icon 
+          <v-icon
             @click="closeConfirm = true"
             class="close-icon"
           >mdi-close</v-icon>
@@ -656,7 +656,9 @@ export default {
 
         this.tempData = url;
         this.fileName = url;
-        if (updateParent) {
+        if (url.match(/^.*\.(avi|AVI|wmv|WMV|flv|FLV|mpg|MPG|mp4|MP4)$/) != null) {
+          this.saveOriginalImage();
+        } else if (updateParent) {
           this.$set(this, 'cropper', {
             src: url + '?' + Date.now(),
             visible: true
@@ -694,7 +696,9 @@ export default {
         this.tempData = file;
         this.fileName = file;
 
-        if (updateParent) {
+        if (file.type.includes('video')) {
+          this.saveOriginalImage();
+        } else if (updateParent) {
           this.$set(this, 'cropper', {
             src: URL.createObjectURL(file),
             visible: true

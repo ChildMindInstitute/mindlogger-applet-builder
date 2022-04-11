@@ -201,6 +201,8 @@
         <draggable
           v-model="withoutPrize"
           handle=".dragging-handle"
+          :scroll-sensitivity="100"
+          :force-fallback="true"
         >
           <transition-group>
             <v-card

@@ -60,7 +60,7 @@
         <transition-group>
           <div
             v-for="(item, index) in currentActivity.items"
-            :key="`${index}-${item.id || 0}-${item.timestamp || ''}`"
+            :key="`${item.timestamp}-${item.id || 0}`"
             class="d-flex align-center"
           >
             <v-checkbox

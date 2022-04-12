@@ -250,9 +250,10 @@ const activityMutations = {
       ...activity,
       id: null,
       name: `${activity.name} (${suffix})`,
-      items: activity.items.map(item => ({
+      items: activity.items.map((item, index) => ({
         ...item,
         id: null,
+        timestamp: Date.now() + index
       })),
       finalSubScale: { ...activity.finalSubScale },
       subScales: [...activity.subScales],

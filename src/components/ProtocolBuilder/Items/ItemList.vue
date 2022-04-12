@@ -54,6 +54,8 @@
         v-model="draggableItems"
         handle=".dragging-handle"
         @change="handleChange($event)"
+        :scroll-sensitivity="100"
+        :force-fallback="true"
       >
         <transition-group>
           <div

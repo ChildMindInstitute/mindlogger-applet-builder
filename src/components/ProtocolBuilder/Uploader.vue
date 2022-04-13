@@ -656,7 +656,7 @@ export default {
 
         this.tempData = url;
         this.fileName = url;
-        if (url.match(/^.*\.(avi|AVI|wmv|WMV|flv|FLV|mpg|MPG|mp4|MP4)$/) != null) {
+        if (url.match(/^.*\.(avi|AVI|wmv|WMV|flv|FLV|mpg|MPG|mp4|MP4|mp3|MP3|aac|AAC|wav|WAV)$/) != null) {
           this.saveOriginalImage();
         } else if (updateParent) {
           this.$set(this, 'cropper', {
@@ -696,7 +696,7 @@ export default {
         this.tempData = file;
         this.fileName = file;
 
-        if (file.type.includes('video')) {
+        if (file.type.includes('video') || file.type.includes('audio')) {
           this.saveOriginalImage();
         } else if (updateParent) {
           this.$set(this, 'cropper', {

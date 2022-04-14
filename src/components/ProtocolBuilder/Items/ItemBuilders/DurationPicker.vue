@@ -37,63 +37,62 @@
             <v-radio
               label="Time"
               value="time"
-              @change="update"
+              @change="updateDurationType('secs')"
             ></v-radio>
 
             <v-checkbox
               class="ml-6 mt-0"
               v-if="durationType === 'time'"
-              v-model="timeDuration.hours"
-              @change="update"
-              label="Hours"
+              v-model="timeDuration.secs"
+              @change="update('secs')"
+              label="Seconds"
             />
             <v-checkbox
               class="ml-6 mt-0"
               v-if="durationType === 'time'"
               v-model="timeDuration.mins"
-              @change="update"
+              @change="update('mins')"
               label="Minutes"
             />
             <v-checkbox
               class="ml-6 mt-0"
               v-if="durationType === 'time'"
-              v-model="timeDuration.secs"
-              @change="update"
-              label="Seconds"
+              v-model="timeDuration.hours"
+              @change="update('hours')"
+              label="Hours"
             />
-
             <v-radio
               label="Days"
               value="days"
-              @change="update"
+              @change="updateDurationType('days')"
             ></v-radio>
 
             <v-checkbox
               class="ml-6 mt-0"
               v-if="durationType === 'days'"
               v-model="timeDuration.days"
-              @change="update"
+              @change="update('days')"
               label="Days"
             />
             <v-checkbox
               class="ml-6 mt-0"
               v-if="durationType === 'days'"
               v-model="timeDuration.weeks"
-              @change="update"
+              @change="update('weeks')"
               label="Weeks"
             />
             <v-checkbox
               class="ml-6 mt-0"
               v-if="durationType === 'days'"
               v-model="timeDuration.months"
-              @change="update"
+              @change="update('months')"
               label="Months"
             />
             <v-checkbox
               class="ml-6 mt-0"
               v-if="durationType === 'days'"
               v-model="timeDuration.years"
-              @change="update"
+              @change="update('years')"
               label="Years"
             />
           </v-radio-group>
@@ -132,7 +131,6 @@ export default {
   data() {
     let durationType = "";
     const timeDuration = {};
-
     const values = this.initialItemData.timeDuration ? this.initialItemData.timeDuration.split(' ') : [];
 
     if (values.includes('hours')) {
@@ -183,6 +181,10 @@ export default {
       durationType = "days";
     }
 
+    if (values.length === 0) {
+      timeDuration.days = true;
+    }
+
     return {
       durationType,
       responseOptions: this.initialResponseOptions,
@@ -213,29 +215,36 @@ export default {
       this.responseOptions.isOptionalTextRequired = event;
       this.onUpdateResponseOptions();
     },
-    update() {
+    updateDurationType(key) {
       if (this.durationType === "time") {
+        this.timeDuration.hours = false;
+        this.timeDuration.mins = false;
+        this.timeDuration.secs = false;
+      } else {
         this.timeDuration.days = false;
         this.timeDuration.weeks = false;
         this.timeDuration.months = false;
         this.timeDuration.years = false;
-      } else {
-        this.timeDuration.hours = false;
-        this.timeDuration.mins = false;
-        this.timeDuration.secs = false;
       }
-
+      this.update(key);
+    },
+    update(key) {
       let timeDuration = "";
-
       Object.keys(this.timeDuration).forEach(key => {
         timeDuration += this.timeDuration[key] ? key + ' ' : '';
       })
 
-
       const responseOptions = {
         timeDuration,
       };
-      this.$emit('updateOptions', responseOptions);
+
+      if (!timeDuration) {
+        this.$nextTick(() => {
+          this.timeDuration[key] = true;
+        })
+      } else {
+        this.$emit('updateOptions', responseOptions);
+      }
     },
     onUpdateResponseOptions() {
       if (this.responseOptions.isOptionalTextRequired)

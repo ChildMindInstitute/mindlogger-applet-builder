@@ -33,69 +33,53 @@
           cols="12"
           sm="3"
         >
-          <v-radio-group v-model="durationType">
-            <v-radio
-              label="Time"
-              value="time"
-              @change="updateDurationType('secs')"
-            ></v-radio>
-
-            <v-checkbox
-              class="ml-6 mt-0"
-              v-if="durationType === 'time'"
-              v-model="timeDuration.secs"
-              @change="update('secs')"
-              label="Seconds"
-            />
-            <v-checkbox
-              class="ml-6 mt-0"
-              v-if="durationType === 'time'"
-              v-model="timeDuration.mins"
-              @change="update('mins')"
-              label="Minutes"
-            />
-            <v-checkbox
-              class="ml-6 mt-0"
-              v-if="durationType === 'time'"
-              v-model="timeDuration.hours"
-              @change="update('hours')"
-              label="Hours"
-            />
-            <v-radio
-              label="Days"
-              value="days"
-              @change="updateDurationType('days')"
-            ></v-radio>
-
-            <v-checkbox
-              class="ml-6 mt-0"
-              v-if="durationType === 'days'"
-              v-model="timeDuration.days"
-              @change="update('days')"
-              label="Days"
-            />
-            <v-checkbox
-              class="ml-6 mt-0"
-              v-if="durationType === 'days'"
-              v-model="timeDuration.weeks"
-              @change="update('weeks')"
-              label="Weeks"
-            />
-            <v-checkbox
-              class="ml-6 mt-0"
-              v-if="durationType === 'days'"
-              v-model="timeDuration.months"
-              @change="update('months')"
-              label="Months"
-            />
-            <v-checkbox
-              class="ml-6 mt-0"
-              v-if="durationType === 'days'"
-              v-model="timeDuration.years"
-              @change="update('years')"
-              label="Years"
-            />
-          </v-radio-group>
+          <v-checkbox
+            class="ml-6 mt-0"
+            v-model="timeDuration.days"
+            @change="update('days')"
+            label="Days"
+          />
+          <v-checkbox
+            class="ml-6 mt-0"
+            v-model="timeDuration.weeks"
+            @change="update('weeks')"
+            label="Weeks"
+          />
+          <v-checkbox
+            class="ml-6 mt-0"
+            v-model="timeDuration.months"
+            @change="update('months')"
+            label="Months"
+          />
+          <v-checkbox
+            class="ml-6 mt-0"
+            v-model="timeDuration.years"
+            @change="update('years')"
+            label="Years"
+          />
+        </v-col>
+        <v-col
+          cols="12"
+          sm="3"
+        >
+          <v-checkbox
+            class="ml-6 mt-0"
+            v-model="timeDuration.secs"
+            @change="update('secs')"
+            label="Seconds"
+          />
+          <v-checkbox
+            class="ml-6 mt-0"
+            v-model="timeDuration.mins"
+            @change="update('mins')"
+            label="Minutes"
+          />
+          <v-checkbox
+            class="ml-6 mt-0"
+            v-model="timeDuration.hours"
+            @change="update('hours')"
+            label="Hours"
+          />
         </v-col>
       </v-row>
     </v-container>
@@ -129,7 +113,6 @@ export default {
     },
   },
   data() {
-    let durationType = "";
     const timeDuration = {};
     const values = this.initialItemData.timeDuration ? this.initialItemData.timeDuration.split(' ') : [];
 
@@ -175,18 +158,11 @@ export default {
       timeDuration.days = false;
     }
 
-    if (timeDuration.hours || timeDuration.mins || timeDuration.secs) {
-      durationType = "time";
-    } else {
-      durationType = "days";
-    }
-
     if (values.length === 0) {
       timeDuration.days = true;
     }
 
     return {
-      durationType,
       responseOptions: this.initialResponseOptions,
       isOptionalText: this.initialIsOptionalText,
       timeDuration,
@@ -214,19 +190,6 @@ export default {
 
       this.responseOptions.isOptionalTextRequired = event;
       this.onUpdateResponseOptions();
-    },
-    updateDurationType(key) {
-      if (this.durationType === "time") {
-        this.timeDuration.hours = false;
-        this.timeDuration.mins = false;
-        this.timeDuration.secs = false;
-      } else {
-        this.timeDuration.days = false;
-        this.timeDuration.weeks = false;
-        this.timeDuration.months = false;
-        this.timeDuration.years = false;
-      }
-      this.update(key);
     },
     update(key) {
       let timeDuration = "";

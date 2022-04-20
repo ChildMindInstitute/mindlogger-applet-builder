@@ -84,7 +84,7 @@ export default class Item {
         obj["schema:alert"] = slider.alerts[i - slider.minSliderTick];
       }
 
-      if (slider.minValueImg && i === 1)
+      if (slider.minValueImg && i === slider.minSliderTick)
         obj["schema:image"] = slider.minValueImg;
 
       if(slider.maxValueImg && i == slider.maxSliderTick)

@@ -184,6 +184,7 @@
         <v-card-actions class="justify-space-around">
           <v-btn
             @click="confirmMovementOfItems"
+            :disabled="transferItemDlg.index < 0"
           >
             OK
           </v-btn>

@@ -520,6 +520,7 @@
     <!-- Image cropping tool -->
     <v-dialog
       v-model="cropper.visible"
+      class="cropper-modal"
       max-width="500px"
       persistent
     >
@@ -566,6 +567,12 @@
     </v-dialog>
   </div>
 </template>
+
+<style >
+  .v-dialog {
+    overflow-y: unset;
+  }
+</style>
 
 <script>
 import { Uploader, isSplashImageValid, isAudioUrlValid, isImageValid, isVideoUrlValid } from '../../models/Uploader';

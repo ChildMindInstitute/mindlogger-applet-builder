@@ -103,7 +103,7 @@
         <v-card-text>
           <p>These items have been successfully moved to {{ targetActivity }}</p>
           <ul class="list-group">
-            <li v-for="(name, index) in selectedItems.map(item => item.name)" :key="index">
+            <li v-for="(name, index) in movedItems.map(item => item.name)" :key="index">
               {{ name }}
             </li>
           </ul>
@@ -184,6 +184,7 @@
         <v-card-actions class="justify-space-around">
           <v-btn
             @click="confirmMovementOfItems"
+            :disabled="transferItemDlg.index < 0"
           >
             OK
           </v-btn>
@@ -294,6 +295,7 @@ export default {
       },
       cachedItems: [],
       selectedItems: [],
+      movedItems: [],
       errorMessages: [],
       cumulativeData: [],
       subScaleData: [],
@@ -544,7 +546,10 @@ export default {
         this.transferItems({
           target: this.transferItemDlg.index,
           items: this.selectedItems
-        })
+        });
+
+        this.movedItems = this.selectedItems;
+        this.selectedItems = [];
       }
       this.transferItemDlg.visible = false;
     },
@@ -577,7 +582,8 @@ export default {
         scores: this.cumulativeData,
         subScales: this.subScaleData,
       })
-
+      this.movedItems = this.selectedItems;
+      this.selectedItems = [];
       this.errorMessages = [];
       this.subScaleData = [];
       this.transferConfirmDlg = false;

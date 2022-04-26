@@ -1568,6 +1568,12 @@ export default class Item {
       }
     }
 
+    if (item.inputType == 'text') {
+      if (item.options.maxLength < item.correctAnswer.length || item.options.maxLength <= 0) {
+        return false;
+      }
+    }
+
     if (item.timer && item.timer < 0 ) {
       return false;
     }

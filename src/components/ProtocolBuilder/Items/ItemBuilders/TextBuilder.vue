@@ -14,7 +14,8 @@
       v-if="requiredAnswer"
       v-model="correctAnswer"
       label="Correct answer"
-      @change="updateAnswer"
+      :rules="correctAnswerRules"
+      @input="updateAnswer"
     />
     <v-row>
       <v-col
@@ -73,7 +74,7 @@
         <v-checkbox
           v-model="requiredValue"
           label="Response required"
-          @change="updateRequiredValue"
+          @change="update"
         />
       </v-col>
       <v-col
@@ -130,6 +131,9 @@ export default {
       maxLengthRules: [
         v => (v > 0 && v % 1 ===0) || 'Max response length must be a positive integer',
       ],
+      correctAnswerRules: [
+        v => (v.length <= this.maxLength) || 'Length of correct answer can\'t exceed maximum response length'
+      ]
     };
   },
 

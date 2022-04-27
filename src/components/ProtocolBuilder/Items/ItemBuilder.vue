@@ -669,6 +669,12 @@
         :items="currentActivity.items"
         :activity="currentActivity"
         :initial-item-data="item"
+        :allow-edit="item.allowEdit"
+        :current-activity="currentActivity"
+        :variables-items="variablesItems"
+        :item-index="itemIndex"
+        @updateAllow="updateAllow"
+        @notify="notify = $event"
         @updateCumulativeScore="updateCumulativeScore"
       />
     </v-form>
@@ -1385,8 +1391,19 @@ export default {
         item = this.currentActivity.items[item];
       }
       if (item && !item.isVis) {
+        let invalidLargeTextIndex;
         for (const citem of this.currentActivity.items) {
-          const invalidLargeTextIndex = checkItemVariableNameIndex(citem.question.text, { items: [item] });
+          if (citem.inputType === "cumulativeScore") {
+            for (const cumulativeItem of citem.cumulativeScores) {
+              const { messageInRange, messageOutRange, description } = cumulativeItem;
+              invalidLargeTextIndex = checkItemVariableNameIndex(`${messageInRange} ${messageOutRange} ${description}`, { items: [item] });
+              if (invalidLargeTextIndex != -1) {
+                break;
+              }
+            }
+          } else {
+            invalidLargeTextIndex = checkItemVariableNameIndex(citem.question.text, { items: [item] });
+          }
           if (invalidLargeTextIndex != -1) {
             if (index > -1) {
               this.warningMsg = `By hiding ${item.name}, it will cause ${citem.name} to fail. Do you want to continue? (Please fix ${citem.name} if you choose to continue.)`;
@@ -1547,8 +1564,19 @@ export default {
     updateAllow(allowItem) {
       if (allowItem) {
         const item = this.currentActivity.items[this.itemIndex];
+        let invalidLargeTextIndex;
         for (const citem of this.currentActivity.items) {
-          const invalidLargeTextIndex = checkItemVariableNameIndex(citem.question.text, { items: [item] });
+          if (citem.inputType === "cumulativeScore") {
+            for (const cumulativeItem of citem.cumulativeScores) {
+              const { messageInRange, messageOutRange, description } = cumulativeItem;
+              invalidLargeTextIndex = checkItemVariableNameIndex(`${messageInRange} ${messageOutRange} ${description}`, { items: [item] });
+              if (invalidLargeTextIndex != -1) {
+                break;
+              }
+            }
+          } else {
+            invalidLargeTextIndex = checkItemVariableNameIndex(citem.question.text, { items: [item] });
+          }
           if (invalidLargeTextIndex != -1) {
             this.updateItemMetaInfo({
               index: this.itemIndex,

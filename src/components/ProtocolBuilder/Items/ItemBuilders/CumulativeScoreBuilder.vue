@@ -162,6 +162,12 @@
                   v-model="rule.hideActivityInRange"
                   @change="onUpdateRule(rule)"
                 />
+                <v-checkbox
+                  class="ml-4"
+                  label="Show recommendation badge"
+                  v-model="rule.isInRangeRecommended"
+                  @change="onUpdateRule(rule)"
+                />
               </div>
               <div v-else>
                 <div>Show an activity based on the score the user achieves</div>
@@ -203,6 +209,12 @@
                   class="ml-4"
                   label="Hide this activity until user meets threshold"
                   v-model="rule.hideActivityOutRange"
+                  @change="onUpdateRule(rule)"
+                />
+                <v-checkbox
+                  class="ml-4"
+                  label="Show recommendation badge"
+                  v-model="rule.isOutRangeRecommended"
                   @change="onUpdateRule(rule)"
                 />
               </div>
@@ -461,6 +473,7 @@ export default {
           outputType: rule.outputType.value,
           nextActivity: rule.activityInRange,
           hideActivity: rule.hideActivityInRange,
+          isRecommended: rule.isInRangeRecommended,
         },
         {
           jsExpression:
@@ -469,6 +482,7 @@ export default {
           outputType: rule.outputType.value,
           nextActivity: rule.activityOutRange,
           hideActivity: rule.hideActivityOutRange,
+          isRecommended: rule.isOutRangeRecommended,
         },
       ];
 
@@ -527,8 +541,10 @@ export default {
           outputType: this.outputTypes[0],
           messageInRange: "",
           hideActivityInRange: true,
+          isInRangeRecommended: true,
           messageOutRange: "",
           hideActivityOutRange: true,
+          isOutRangeRecommended: true,
           valid: false,
         };
       }
@@ -570,9 +586,11 @@ export default {
         isActivityInRange: Boolean(message && message.nextActivity),
         activityInRange: message && message.nextActivity,
         hideActivityInRange: message && message.hasOwnProperty('hideActivity') && message.hideActivity !== undefined ? message.hideActivity : true,
+        isInRangeRecommended: message && message.hasOwnProperty('isRecommended') && message.isRecommended !== undefined ? message.isRecommended : true,
         isActivityOutRange: Boolean(messageOutRange && messageOutRange.nextActivity),
         activityOutRange: messageOutRange && messageOutRange.nextActivity,
         hideActivityOutRange: messageOutRange && messageOutRange.hasOwnProperty('hideActivity') && messageOutRange.hideActivity !== undefined ? messageOutRange.hideActivity : true,
+        isOutRangeRecommended: messageOutRange && messageOutRange.hasOwnProperty('isRecommended') && messageOutRange.isRecommended !== undefined ? messageOutRange.isRecommended : true,
       };
     },
 

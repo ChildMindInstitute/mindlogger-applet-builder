@@ -15,7 +15,7 @@
       </span>
       <v-spacer />
       <v-card-actions>
-        <v-tooltip bottom>
+        <!-- <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-btn
               v-if="item.allowEdit"
@@ -47,7 +47,7 @@
             </v-btn>
           </template>
           <span>Add Section</span>
-        </v-tooltip>        
+        </v-tooltip> -->
         <v-tooltip
           v-if="item.allowEdit"
           top

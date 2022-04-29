@@ -14,8 +14,8 @@
       v-if="requiredAnswer"
       v-model="correctAnswer"
       label="Correct answer"
-      :rules="correctAnswerRules"
       @input="updateAnswer"
+      :error-messages="correctAnswer.length <= maxLength ? '' : 'Length of correct answer can\'t exceed maximum response length'"
     />
     <v-row>
       <v-col
@@ -131,9 +131,6 @@ export default {
       maxLengthRules: [
         v => (v > 0 && v % 1 ===0) || 'Max response length must be a positive integer',
       ],
-      correctAnswerRules: [
-        v => (v.length <= this.maxLength) || 'Length of correct answer can\'t exceed maximum response length'
-      ]
     };
   },
 

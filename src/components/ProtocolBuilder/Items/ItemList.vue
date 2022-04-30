@@ -58,29 +58,48 @@
         :force-fallback="true"
       >
         <transition-group>
-          <div
+          <template
             v-for="(item, index) in currentActivity.items"
-            :key="`${item.timestamp}-${item.id || 0}`"
-            class="d-flex align-center"
           >
-            <v-checkbox
-              class="ml-4"
-              v-if="selectingItems"
-              :input-value="selectedItems.includes(item)"
-              @click="switchOption(item)"
-            />
+            <div
+              v-if="item.inputType != 'cumulativeScore'"
+              :key="`${item.timestamp}-${item.id || 0}`"
+              class="d-flex align-center"
+            >
+              <v-checkbox
+                class="ml-4"
+                v-if="selectingItems"
+                :input-value="selectedItems.includes(item)"
+                @click="switchOption(item)"
+              />
 
-            <ItemBuilder
-              :item-index="index"
-              :variablesItems="variablesItems"
-              :header="item.header"
-              :section="item.section"
-              class="ma-4 flex-grow-1 item-builder"
-              @addItem="addBlankItem(index+1)"
-            />
-          </div>
+              <ItemBuilder
+                :item-index="index"
+                :variablesItems="variablesItems"
+                :header="item.header"
+                :section="item.section"
+                class="ma-4 flex-grow-1 item-builder"
+                @addItem="addBlankItem(index+1)"
+              />
+            </div>
+          </template>
         </transition-group>
       </draggable>
+
+      <div
+        v-if="cumulativeItem"
+        :key="`${cumulativeItem.timestamp}-${cumulativeItem.id || 0}`"
+        class="d-flex align-center"
+      >
+        <ItemBuilder
+          :item-index="currentActivity.items.indexOf(cumulativeItem)"
+          :variablesItems="variablesItems"
+          :header="cumulativeItem.header"
+          :section="cumulativeItem.section"
+          class="ma-4 flex-grow-1 item-builder"
+        />
+      </div>
+
     </div>
 
     <v-dialog
@@ -339,6 +358,10 @@ export default {
         this.updateItemList(value);
       }
     },
+
+    cumulativeItem () {
+      return this.currentActivity.items.find(item => item.inputType == 'cumulativeScore')
+    }
   },
   methods: {
     ...mapMutations(config.MODULE_NAME,

@@ -362,15 +362,42 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(config.MODULE_NAME, ['activities', 'currentActivity', 'baseImageURL']),
+    ...mapGetters(config.MODULE_NAME, ['activities', 'baseImageURL']),
     scoreOverview: {
       get() {
         return this.activity.scoreOverview;
       },
-      set(value) {
+      set(value) { 
         this.activity.scoreOverview = value;
       }
     }
+  },
+  watch: {
+    scoreOverview: function(text) {
+      this.debounce(function() {
+        const { valid, found, variableNames = [] } = checkItemVariableName(text, this.currentActivity, this.itemIndex);
+        try {
+          Object.assign(this.variablesItems, { [this.currentActivity.items[this.itemIndex].name]: variableNames })
+        } catch (error) { }
+        if (found) {
+          if (this.currentActivity.isOnePageAssessment || this.currentActivity.isSkippable) {
+            this.alertFlag = true;
+            this.alertMsg = `${this.currentActivity.isSkippable ? 'Skipping all the items' : 'A one-page assessment'} cannot contain variables. This variable will automatically be removed.`
+            setTimeout(()=> {
+              variableNames.forEach(variable => {
+                text = text.replace(`[[${variable}]]`, '');
+              });
+            }, 200);
+          }
+          this.currentActivity.hasVariable = found;
+          this.updateActivityMetaInfo({ hasVariable: found })
+        }
+
+        if (_.concat([], ...Object.values(this.variablesItems)).length < 1) {
+          this.currentActivity.hasVariable = false;
+        }
+      }, 300)
+    },
   },
   beforeMount() {
     let rules = this.initialItemData.cumulativeScores || [];
@@ -485,7 +512,7 @@ export default {
         this.debounce(function() {
           const { valid, found, variableNames = [] } = checkItemVariableName(rule[fieldName], this.currentActivity, this.itemIndex);
           try {
-            Object.assign(this.variablesItems, { [this.currentActivity.items[this.itemIndex].name]: variableNames })
+            Object.assign(this.variablesItems, { [`${this.currentActivity.items[this.itemIndex]}${rule.name}`]: variableNames })
           } catch (error) { }
           if (found) {
             if (this.currentActivity.isOnePageAssessment || this.currentActivity.isSkippable) {

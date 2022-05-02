@@ -1396,7 +1396,7 @@ export default {
           if (citem.inputType === "cumulativeScore") {
             for (const cumulativeItem of citem.cumulativeScores) {
               const { messageInRange, messageOutRange, description } = cumulativeItem;
-              invalidLargeTextIndex = checkItemVariableNameIndex(`${messageInRange} ${messageOutRange} ${description}`, { items: [item] });
+              invalidLargeTextIndex = checkItemVariableNameIndex(`${messageInRange} ${messageOutRange} ${description} ${this.currentActivity.scoreOverview}`, { items: [item] });
               if (invalidLargeTextIndex != -1) {
                 break;
               }
@@ -1569,7 +1569,7 @@ export default {
           if (citem.inputType === "cumulativeScore") {
             for (const cumulativeItem of citem.cumulativeScores) {
               const { messageInRange, messageOutRange, description } = cumulativeItem;
-              invalidLargeTextIndex = checkItemVariableNameIndex(`${messageInRange} ${messageOutRange} ${description}`, { items: [item] });
+              invalidLargeTextIndex = checkItemVariableNameIndex(`${messageInRange} ${messageOutRange} ${description} ${this.currentActivity.scoreOverview}`, { items: [item] });
               if (invalidLargeTextIndex != -1) {
                 break;
               }

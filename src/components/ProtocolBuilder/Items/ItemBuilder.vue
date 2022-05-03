@@ -15,7 +15,7 @@
       </span>
       <v-spacer />
       <v-card-actions>
-        <v-tooltip bottom>
+        <!-- <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-btn
               v-if="item.allowEdit"
@@ -47,9 +47,9 @@
             </v-btn>
           </template>
           <span>Add Section</span>
-        </v-tooltip>        
+        </v-tooltip> -->
         <v-tooltip
-          v-if="item.allowEdit"
+          v-if="item.allowEdit && item.inputType != 'cumulativeScore'"
           top
         >
           <template v-slot:activator="{ on }">
@@ -69,7 +69,7 @@
         </v-tooltip>
 
         <v-tooltip
-          v-if="item.allowEdit"
+          v-if="item.allowEdit && item.inputType != 'cumulativeScore'"
           top
         >
           <template v-slot:activator="{ on }">
@@ -526,7 +526,7 @@
         @updateTimer="updateTimer"
         @updateOptions="updateOptions"
       />
-
+<!-- 
       <DurationPicker
         v-if="item.inputType === 'duration'"
         :key="`${baseKey}-duration`"
@@ -538,7 +538,7 @@
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
-      />
+      /> -->
 
       <TimeRangeBuilder
         v-if="item.inputType === 'timeRange'"
@@ -828,7 +828,7 @@
       </v-card>
     </v-dialog>
 
-    <v-card 
+    <v-card
       class="my-2 d-flex justify-space-between"
       v-if="itemHeader || itemSection"
     >
@@ -979,7 +979,7 @@
   .disabled-option {
     color: grey;
   }
-  
+
 </style>
 
 <script>
@@ -995,7 +995,7 @@ import SliderBuilder from "./ItemBuilders/SliderBuilder.vue";
 import VideoBuilder from "./ItemBuilders/VideoBuilder.vue";
 import AgeSelectorBuilder from "./ItemBuilders/AgeSelectorBuilder.vue";
 import PhotoBuilder from "./ItemBuilders/PhotoBuilder.vue";
-import DurationPicker from "./ItemBuilders/DurationPicker.vue";
+// import DurationPicker from "./ItemBuilders/DurationPicker.vue";
 import TimeRangeBuilder from "./ItemBuilders/TimeRangeBuilder.vue";
 import DateBuilder from "./ItemBuilders/DateBuilder.vue";
 import DrawingBuilder from "./ItemBuilders/DrawingBuilder.vue";
@@ -1031,7 +1031,7 @@ export default {
     PhotoBuilder,
     TimeRangeBuilder,
     DateBuilder,
-    DurationPicker,
+    // DurationPicker,
     DrawingBuilder,
     AudioRecordBuilder,
     AudioImageRecordBuilder,
@@ -1285,7 +1285,7 @@ export default {
       this.isVis = !this.isVis;
       this.showOrHideItem(index);
     },
- 
+
     addItemHeader (index) {
       let headerIndex = 1;
       this.currentActivity.items.forEach(item => {
@@ -1293,8 +1293,8 @@ export default {
           const values = item.header.split(' ');
 
           if (
-            values[0] === "Header" && 
-            values[1] && 
+            values[0] === "Header" &&
+            values[1] &&
             Number(values[1]) >= headerIndex
           ) {
             headerIndex = Number(values[1]) + 1
@@ -1351,8 +1351,8 @@ export default {
           const values = item.section.split(' ');
 
           if (
-            values[0] === "Section" && 
-            values[1] && 
+            values[0] === "Section" &&
+            values[1] &&
             Number(values[1]) >= sectionIndex
           ) {
             sectionIndex = Number(values[1]) + 1

@@ -372,9 +372,12 @@ export default {
       var JSZip = require('jszip');
       var zip = new JSZip();
 
+      const procotolSchema = protocolModel.getCompressedSchema(true);
+      delete procotolSchema['_id'];
+
       zip
         .folder('protocols')
-        .file('schema', JSON.stringify(protocolModel.getCompressedSchema(true), null, 2));
+        .file('schema', JSON.stringify(procotolSchema, null, 2));
       zip
         .folder('protocols')
         .file('context', JSON.stringify(protocolModel.getContext(true), null, 2));
@@ -410,7 +413,12 @@ export default {
           .folder(`activities/${name}`)
           .file(
             `${name}_context`,
-            JSON.stringify(activityModel.getContext(name), null, 2)
+            JSON.stringify(
+              activityModel.getContext(
+                name,
+                activityModel.ref.items.filter(item => item.ui.inputType != 'cumulativeScore')
+              ), null, 2
+            )
           );
 
         activityModel.ref.items.forEach(function(item) {

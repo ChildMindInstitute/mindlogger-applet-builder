@@ -484,12 +484,12 @@ export default class Activity {
     };
   }
 
-  getContext(activityName = this.ref.name) {
+  getContext(activityName = this.ref.name, items = this.ref.items) {
     const contextObj = {
       '@version': 1.1,
     };
     var isPrefixNeeded = false;
-    this.ref.items.forEach(function (item) {
+    items.forEach(function (item) {
       if ('iri' in item) {
         contextObj[item.name] = {
           '@id': item.iri,

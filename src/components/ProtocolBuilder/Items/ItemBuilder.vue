@@ -49,7 +49,7 @@
           <span>Add Section</span>
         </v-tooltip> -->
         <v-tooltip
-          v-if="item.allowEdit"
+          v-if="item.allowEdit && item.inputType != 'cumulativeScore'"
           top
         >
           <template v-slot:activator="{ on }">
@@ -69,7 +69,7 @@
         </v-tooltip>
 
         <v-tooltip
-          v-if="item.allowEdit"
+          v-if="item.allowEdit && item.inputType != 'cumulativeScore'"
           top
         >
           <template v-slot:activator="{ on }">
@@ -828,7 +828,7 @@
       </v-card>
     </v-dialog>
 
-    <v-card 
+    <v-card
       class="my-2 d-flex justify-space-between"
       v-if="itemHeader || itemSection"
     >
@@ -979,7 +979,7 @@
   .disabled-option {
     color: grey;
   }
-  
+
 </style>
 
 <script>
@@ -1285,7 +1285,7 @@ export default {
       this.isVis = !this.isVis;
       this.showOrHideItem(index);
     },
- 
+
     addItemHeader (index) {
       let headerIndex = 1;
       this.currentActivity.items.forEach(item => {
@@ -1293,8 +1293,8 @@ export default {
           const values = item.header.split(' ');
 
           if (
-            values[0] === "Header" && 
-            values[1] && 
+            values[0] === "Header" &&
+            values[1] &&
             Number(values[1]) >= headerIndex
           ) {
             headerIndex = Number(values[1]) + 1
@@ -1351,8 +1351,8 @@ export default {
           const values = item.section.split(' ');
 
           if (
-            values[0] === "Section" && 
-            values[1] && 
+            values[0] === "Section" &&
+            values[1] &&
             Number(values[1]) >= sectionIndex
           ) {
             sectionIndex = Number(values[1]) + 1

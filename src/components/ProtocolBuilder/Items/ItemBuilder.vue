@@ -526,7 +526,7 @@
         @updateTimer="updateTimer"
         @updateOptions="updateOptions"
       />
-
+<!-- 
       <DurationPicker
         v-if="item.inputType === 'duration'"
         :key="`${baseKey}-duration`"
@@ -538,7 +538,7 @@
         @updateOptionalText="updateOptionalText"
         @updateResponseOptions="updateResponseOptions"
         @updateAllow="updateAllow"
-      />
+      /> -->
 
       <TimeRangeBuilder
         v-if="item.inputType === 'timeRange'"
@@ -995,7 +995,7 @@ import SliderBuilder from "./ItemBuilders/SliderBuilder.vue";
 import VideoBuilder from "./ItemBuilders/VideoBuilder.vue";
 import AgeSelectorBuilder from "./ItemBuilders/AgeSelectorBuilder.vue";
 import PhotoBuilder from "./ItemBuilders/PhotoBuilder.vue";
-import DurationPicker from "./ItemBuilders/DurationPicker.vue";
+// import DurationPicker from "./ItemBuilders/DurationPicker.vue";
 import TimeRangeBuilder from "./ItemBuilders/TimeRangeBuilder.vue";
 import DateBuilder from "./ItemBuilders/DateBuilder.vue";
 import DrawingBuilder from "./ItemBuilders/DrawingBuilder.vue";
@@ -1031,7 +1031,7 @@ export default {
     PhotoBuilder,
     TimeRangeBuilder,
     DateBuilder,
-    DurationPicker,
+    // DurationPicker,
     DrawingBuilder,
     AudioRecordBuilder,
     AudioImageRecordBuilder,

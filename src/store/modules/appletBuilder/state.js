@@ -70,10 +70,10 @@ export default {
       text: "date",
       icon: baseImageURL + 'item-types/date-icon.png',
     },
-    {
-      text: "duration",
-      icon: baseImageURL + 'item-types/duration.png',
-    },
+    // {
+    //   text: "duration",
+    //   icon: baseImageURL + 'item-types/duration.png',
+    // },
     {
       text: "drawing",
       icon: baseImageURL + 'item-types/drawing-icon.png',

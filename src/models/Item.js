@@ -1539,6 +1539,10 @@ export default class Item {
         && !item.question.text)) {
       return false;
     }
+    if (!/^[a-zA-Z0-9-_]+$/.test(item.name)) {
+      return false;
+    }
+
     if (item.inputType === "ageSelector"
       && (item.options.minAge === "" || item.options.maxAge === "")) {
       return false;

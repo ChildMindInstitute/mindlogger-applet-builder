@@ -541,10 +541,10 @@ export default {
           outputType: this.outputTypes[0],
           messageInRange: "",
           hideActivityInRange: true,
-          isInRangeRecommended: true,
+          isInRangeRecommended: false,
           messageOutRange: "",
           hideActivityOutRange: true,
-          isOutRangeRecommended: true,
+          isOutRangeRecommended: false,
           valid: false,
         };
       }
@@ -586,11 +586,11 @@ export default {
         isActivityInRange: Boolean(message && message.nextActivity),
         activityInRange: message && message.nextActivity,
         hideActivityInRange: message && message.hasOwnProperty('hideActivity') && message.hideActivity !== undefined ? message.hideActivity : true,
-        isInRangeRecommended: message && message.hasOwnProperty('isRecommended') && message.isRecommended !== undefined ? message.isRecommended : true,
+        isInRangeRecommended: message && message.hasOwnProperty('isRecommended') && message.isRecommended !== undefined ? message.isRecommended : false,
         isActivityOutRange: Boolean(messageOutRange && messageOutRange.nextActivity),
         activityOutRange: messageOutRange && messageOutRange.nextActivity,
         hideActivityOutRange: messageOutRange && messageOutRange.hasOwnProperty('hideActivity') && messageOutRange.hideActivity !== undefined ? messageOutRange.hideActivity : true,
-        isOutRangeRecommended: messageOutRange && messageOutRange.hasOwnProperty('isRecommended') && messageOutRange.isRecommended !== undefined ? messageOutRange.isRecommended : true,
+        isOutRangeRecommended: messageOutRange && messageOutRange.hasOwnProperty('isRecommended') && messageOutRange.isRecommended !== undefined ? messageOutRange.isRecommended : false,
       };
     },
 

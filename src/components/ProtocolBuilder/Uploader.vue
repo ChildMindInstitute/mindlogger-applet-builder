@@ -103,11 +103,11 @@
                   >
                     mdi-image
                   </v-icon>
-                  <div @click="downloadImage" class="mr-4">{{ getFileName(fileName, false) }}</div>
+                  <div @click="downloadImage" class="mr-4">{{ getFileName(uploadData, false) }}</div>
                 </div>
               </template>
               <span>
-                <div>{{ getFileName(fileName) }}</div>
+                <div>{{ getFileName(uploadData) }}</div>
               </span>
             </v-tooltip>
           </v-list-group>
@@ -197,11 +197,11 @@
                     >
                       mdi-image
                     </v-icon>
-                    <div @click="downloadImage" class="mr-4">{{ getFileName(fileName, false) }}</div>
+                    <div @click="downloadImage" class="mr-4">{{ getFileName(uploadData, false) }}</div>
                   </div>
                 </template>
                 <span>
-                  <div>{{ getFileName(fileName) }}</div>
+                  <div>{{ getFileName(uploadData) }}</div>
                 </span>
               </v-tooltip>
               <v-tooltip right>
@@ -245,11 +245,11 @@
                     >
                       mdi-image
                     </v-icon>
-                    <div @click="downloadImage" class="mr-4">{{ getFileName(fileName, false) }}</div>
+                    <div @click="downloadImage" class="mr-4">{{ getFileName(uploadData, false) }}</div>
                   </div>
                 </template>
                 <span>
-                  <div>{{ getFileName(fileName) }}</div>
+                  <div>{{ getFileName(uploadData) }}</div>
                 </span>
               </v-tooltip>
               <v-tooltip right>
@@ -405,11 +405,11 @@
                   >
                     mdi-image
                   </v-icon>
-                  <div @click="downloadImage" class="mr-4">{{ getFileName(fileName, false) }}</div>
+                  <div @click="downloadImage" class="mr-4">{{ getFileName(uploadData, false) }}</div>
                 </div>
               </template>
               <span>
-                <div>{{ getFileName(fileName) }}</div>
+                <div>{{ getFileName(uploadData) }}</div>
               </span>
             </v-tooltip>
 
@@ -687,6 +687,7 @@ export default {
       const inputRef = this.$refs['fileInput'];
       if(inputRef) inputRef.value = '';
       this.tempData = '';
+      this.fileName = this.uploadData;
       this.cropper.visible = false;
       this.closeConfirm = false;
     },
@@ -736,7 +737,7 @@ export default {
 
     downloadImage () {
       const s3ImageURL = "https://mindlogger-applet-contents.s3.amazonaws.com/image/";
-      let imageUrl = typeof this.uploadData === 'string' ? this.uploadData : this.uploadData.name;
+      let imageUrl = typeof this.fileName === 'string' ? this.fileName : this.fileName.name;
 
       if (!imageUrl.includes('https://')) {
         imageUrl = s3ImageURL + imageUrl;
@@ -751,7 +752,7 @@ export default {
       })
         .then((response) => response.blob())
         .then((blob) => {
-          saveAs(blob, this.getFileName(this.fileName));
+          saveAs(blob, this.getFileName(this.uploadData));
         });
 
     },

@@ -166,7 +166,7 @@ export default {
         this.$emit('setLoading', true);
       }
 
-      const original = this.initialData ? await this.formattedProtocol() : this.cacheData.original;
+      const original = this.cacheData && this.cacheData.original ? this.cacheData.original : await this.formattedProtocol();
 
       if (!this.versions.length) {
         /** upload first version */
@@ -213,10 +213,10 @@ export default {
     async fillStoreWithAppletData () {
       let initialStoreData = null;
 
-      if (this.initialData) {
-        initialStoreData = await Protocol.parseApplet(this.initialData);
-      } else if (this.cacheData) {
+      if (this.cacheData) {
         initialStoreData = JSON.parse(JSON.stringify(this.cacheData.protocol));
+      } else if (this.initialData) {
+        initialStoreData = await Protocol.parseApplet(this.initialData);
       }
 
       if (!initialStoreData) {

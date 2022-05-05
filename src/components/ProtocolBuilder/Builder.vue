@@ -158,6 +158,7 @@ export default {
     if (this.basketApplets) {
       initialStoreData = await this.mergeStoreDataWithBasketApplets(initialStoreData, this.basketApplets);
     }
+
     this.initProtocolData(initialStoreData);
 
     if (this.initialData || (this.cacheData && this.cacheData.original)) {
@@ -256,11 +257,12 @@ export default {
           }
 
           const activityInfo = Activity.parseJSONLD(act)
-          const activityItems = activityInfo.orderList.filter(key => items[key]).map((key) => {
+          const activityItems = activityInfo.orderList.filter(key => items[key]).map((key, index) => {
             const itemData = itemModel.getItemBuilderData(Item.parseJSONLD(items[key]));
             itemData.baseAppletId = appletId;
             itemData.baseItemId = itemData.id;
             itemData.id = null;
+            itemData.timestamp = Date.now() + index;
             return itemData;
           });
 
@@ -273,7 +275,8 @@ export default {
             ...activityInfo,
             items: activityItems,
           });
-        activityBuilderData.index = storeData.activities.length;
+          activityBuilderData.timestamp = Date.now() + storeData.activities.length;
+          activityBuilderData.index = storeData.activities.length;
           activityBuilderData.baseAppletId = appletId;
           activityBuilderData.baseActivityId = activityBuilderData.id;
           activityBuilderData.id = null;

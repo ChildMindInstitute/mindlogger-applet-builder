@@ -168,9 +168,7 @@
           class="ml-4 move-icon dragging-handle"
           icon
         >
-          <v-icon color="grey lighten-1">
-            mdi-dots-vertical
-          </v-icon>
+          <img class="px-2 pt-2 drag-indicator" :src="baseImageURL + 'drag_indicator.png'" />
         </v-btn>
       </v-card-actions>
     </v-card-title>
@@ -944,6 +942,11 @@
     right: 0;
   }
 
+  .drag-indicator {
+    height: 25px;
+    margin-bottom: 8px;
+  }
+
   .item-name-edit-wrapper:hover .item-name-input,
   .item-name-edit-wrapper .item-name-input.focus {
     opacity: 1;
@@ -1112,6 +1115,7 @@ export default {
     ...mapGetters(config.MODULE_NAME,
       [
         'currentActivity',
+        'baseImageURL',
         'currentHeaders',
         'itemInputTypes',
         'itemTemplates',

@@ -291,7 +291,7 @@ import config from '../../../config';
 import ItemBuilder from './ItemBuilder';
 import UrlItemUploader from './UrlItemUploader';
 import draggable from 'vuedraggable'
-import { checkItemVariableNameIndex } from '../../../utilities/util';
+import { checkItemVariableNameIndex, getTextBetweenBrackets } from '../../../utilities/util';
 
 export default {
   components: {
@@ -381,12 +381,22 @@ export default {
 
     handleChange (evt) {
       const { element, oldIndex, newIndex } = evt.moved;
-
       const invalidLargeTextIndex = checkItemVariableNameIndex(element.question.text, { items: this.cachedItems }, true);
-      if (newIndex <= invalidLargeTextIndex ) {
+
+      if (newIndex < invalidLargeTextIndex || (newIndex === invalidLargeTextIndex && oldIndex > invalidLargeTextIndex) ) {
         this.warningMsg = "This item has been moved above the user's input. Please move it above  in order for the variable to work correctly.";
         this.warningFlag = true;
         return;
+      }
+
+      for (let i = 0; i < this.cachedItems.length; i += 1) {
+        if (this.cachedItems[i].question.text.includes(element.name)) {
+          if (newIndex > i || (newIndex === i && oldIndex < i)) {
+            this.warningMsg = "This item has been moved above the user's input. Please move it above  in order for the variable to work correctly.";
+            this.warningFlag = true;
+            return;
+          }
+        }
       }
 
       this.movedItem = newIndex;

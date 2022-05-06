@@ -338,9 +338,11 @@
                     class="ml-4 move-icon dragging-handle"
                     icon
                   >
-                    <v-icon color="grey lighten-1">
-                      mdi-dots-vertical
-                    </v-icon>
+                    <img
+                      height="20"
+                      class="px-2 pt-2"
+                      :src="baseImageURL + 'drag_indicator.png'"
+                    />
                   </v-btn>
                 </v-card-actions>
               </v-card-title>
@@ -442,7 +444,14 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(config.MODULE_NAME, ['protocol', 'activities', 'themes', 'themeId']),
+    ...mapGetters(config.MODULE_NAME, 
+    [
+      'protocol', 
+      'activities', 
+      'themes', 
+      'themeId', 
+      'baseImageURL'
+    ]),
     config() {
       return config;
     },

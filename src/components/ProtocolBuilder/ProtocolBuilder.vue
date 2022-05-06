@@ -338,11 +338,7 @@
                     class="ml-4 move-icon dragging-handle"
                     icon
                   >
-                    <img
-                      height="20"
-                      class="px-2 pt-2"
-                      :src="baseImageURL + 'drag_indicator.png'"
-                    />
+                    <img class="px-2 pt-2 drag-indicator" :src="baseImageURL + 'drag_indicator.png'" />
                   </v-btn>
                 </v-card-actions>
               </v-card-title>
@@ -396,6 +392,11 @@
     font-size: 18px;
     padding: 4px;
     text-transform: none;
+  }
+
+  .drag-indicator {
+    height: 25px;
+    margin-bottom: 8px;
   }
 
   .invalid {

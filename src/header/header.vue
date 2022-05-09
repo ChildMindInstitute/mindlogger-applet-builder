@@ -45,7 +45,7 @@
       </v-tooltip>
 
       <v-tooltip
-        v-if="currentActivity"
+        v-if="currentActivity && currentActivity.activityType == 'NORMAL'"
         bottom
       >
         <template v-slot:activator="{ on }">
@@ -79,7 +79,7 @@
       </v-tooltip>
 
       <v-tooltip
-        v-if="currentActivity"
+        v-if="currentActivity && currentActivity.activityType == 'NORMAL'"
         bottom
       >
         <template v-slot:activator="{ on }">
@@ -128,6 +128,7 @@
       </v-tooltip>
 
       <v-tooltip
+        v-if="!currentActivity || currentActivity.activityType == 'NORMAL'"
         bottom
       >
         <template v-slot:activator="{ on }">
@@ -167,7 +168,7 @@
         <span>View History</span>
       </v-tooltip>
       <v-tooltip
-        v-if="!viewMode"
+        v-if="!viewMode && (!currentActivity || currentActivity.activityType == 'NORMAL')"
         bottom
       >
         <template v-slot:activator="{ on }">

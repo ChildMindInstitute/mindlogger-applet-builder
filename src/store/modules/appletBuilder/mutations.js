@@ -178,7 +178,7 @@ const itemMutations = {
     state.currentActivity.items[index].section = sectionName
   },
 
-  duplicateItem(state, index) {
+  duplicateItem(state, { appendToActivity = false, index }) {
     const item = JSON.parse(JSON.stringify(state.currentActivity.items[index]));
 
     const names = state.currentActivity.items.map((item) => item.name);
@@ -195,7 +195,11 @@ const itemMutations = {
       timestamp: Date.now()
     };
 
-    state.currentActivity.items.splice(index + 1, 0, newItem);
+    if (appendToActivity) {
+      state.currentActivity.items.push(newItem);
+    } else {
+      state.currentActivity.items.splice(index + 1, 0, newItem);
+    }
   },
 
   deleteItem(state, index) {

@@ -41,162 +41,167 @@
         maxlength="230"
         label="Activity Description"
       />
-      <v-row
-        class="align-center"
+
+      <template
+        v-if="currentActivity.activityType == 'NORMAL'"
       >
-        <v-tooltip bottom v-if="currentActivity.hasVariable">
-          <template v-slot:activator="{ on, attrs }">
-            <v-col
-              class="py-0"
-              cols="12"
-              sm="4"
-              v-bind="attrs"
-              v-on="on"
-            >
-              <v-checkbox
-                @click="onSwitchSkipAllItems"
-                v-model="isSkippable"
-                :disabled="currentActivity.hasVariable"
-                label="Allow user to skip all items"
-              />
-            </v-col>
-          </template>
-          <span>This activity contains variables and cannot skip all items.</span>
-        </v-tooltip>
-        <v-col
-          class="py-0"
-          cols="12"
-          sm="4"
-          v-else
+        <v-row
+          class="align-center"
         >
-          <v-checkbox
-            @click="onSwitchSkipAllItems"
-            v-model="isSkippable"
-            :disabled="currentActivity.hasVariable"
-            label="Allow user to skip all items"
-          />
-        </v-col>
+          <v-tooltip bottom v-if="currentActivity.hasVariable">
+            <template v-slot:activator="{ on, attrs }">
+              <v-col
+                class="py-0"
+                cols="12"
+                sm="4"
+                v-bind="attrs"
+                v-on="on"
+              >
+                <v-checkbox
+                  @click="onSwitchSkipAllItems"
+                  v-model="isSkippable"
+                  :disabled="currentActivity.hasVariable"
+                  label="Allow user to skip all items"
+                />
+              </v-col>
+            </template>
+            <span>This activity contains variables and cannot skip all items.</span>
+          </v-tooltip>
+          <v-col
+            class="py-0"
+            cols="12"
+            sm="4"
+            v-else
+          >
+            <v-checkbox
+              @click="onSwitchSkipAllItems"
+              v-model="isSkippable"
+              :disabled="currentActivity.hasVariable"
+              label="Allow user to skip all items"
+            />
+          </v-col>
 
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
-            <v-col
-              class="py-0"
-              cols="12"
-              sm="4"
-              v-bind="attrs"
-              v-on="on"
-            >
-              <v-checkbox
-                v-model="isReviewerActivity"
-                :disabled="!hasOnlyRadioCheckSlider"
-                label="This activity will only be available to review a user's data on the user's detail page"
-              />
-            </v-col>
-          </template>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-col
+                class="py-0"
+                cols="12"
+                sm="4"
+                v-bind="attrs"
+                v-on="on"
+              >
+                <v-checkbox
+                  v-model="isReviewerActivity"
+                  :disabled="!hasOnlyRadioCheckSlider"
+                  label="This activity will only be available to review a user's data on the user's detail page"
+                />
+              </v-col>
+            </template>
 
-          <span>
-            Reviewer dashboard assessment supports only radio/checkbox/slider items
-          </span>
-        </v-tooltip>
+            <span>
+              Reviewer dashboard assessment supports only radio/checkbox/slider items
+            </span>
+          </v-tooltip>
 
 
-        <v-col
-          class="py-0"
-          cols="12"
-          sm="4"
+          <v-col
+            class="py-0"
+            cols="12"
+            sm="4"
+          >
+            <v-checkbox
+              v-model="isDisableResponseChanges"
+              label="Disable the users's ability to change the response"
+            />
+          </v-col>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-col
+                class="py-0"
+                cols="12"
+                sm="4"
+                v-bind="attrs"
+                v-on="on"
+                @mouseover="show = true"
+                @mouseleave="show = false"
+              >
+                <v-checkbox
+                  @click="onSwitchAssessmentType"
+                  v-model="isOnePageAssessment"
+                  label="Show all questions at once"
+                  :disabled="!hasOnlyWebSupported || currentActivity.hasVariable"
+                />
+              </v-col>
+            </template>
+            <span v-if="show">
+              <span v-if="currentActivity.hasVariable">This activity contains variables and cannot be a one page assessment.</span>
+              <span v-else>This feature is for webapp(radio, checkbox, slider, cumulative, text, and age) only.</span>
+            </span>
+          </v-tooltip>
+        </v-row>
+
+        <div
+          class="d-flex justify-space-around"
         >
-          <v-checkbox
-            v-model="isDisableResponseChanges"
-            label="Disable the users's ability to change the response"
+          <Uploader
+            class="mt-3 mb-4"
+            style="max-width: 300px"
+            initialType="video_or_image"
+            :initialData="splash"
+            :aspectRatio="7/10"
+            imageType="splash"
+            initialTitle="Splash Screen"
+            @onAddFromUrl="onAddMediaFromUrl($event, 'splash')"
+            @onAddFromDevice="loading = true; onAddMediaFromDevice($event, 'splash');"
+            @onRemove="onRemoveMedia('splash')"
+            @onNotify="loading = false; notify = $event;"
           />
-        </v-col>
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
-            <v-col
-              class="py-0"
-              cols="12"
-              sm="4"
-              v-bind="attrs"
-              v-on="on"
-              @mouseover="show = true"
-              @mouseleave="show = false"
-            >
-              <v-checkbox
-                @click="onSwitchAssessmentType"
-                v-model="isOnePageAssessment"
-                label="Show all questions at once"
-                :disabled="!hasOnlyWebSupported || currentActivity.hasVariable"
-              />
-            </v-col>
-          </template>
-          <span v-if="show">
-            <span v-if="currentActivity.hasVariable">This activity contains variables and cannot be a one page assessment.</span>
-            <span v-else>This feature is for webapp(radio, checkbox, slider, cumulative, text, and age) only.</span>
-          </span>
-        </v-tooltip>
-      </v-row>
 
-      <div
-        class="d-flex justify-space-around"
-      >
-        <Uploader
-          class="mt-3 mb-4"
-          style="max-width: 300px"
-          initialType="video_or_image"
-          :initialData="splash"
-          :aspectRatio="7/10"
-          imageType="splash"
-          initialTitle="Splash Screen"
-          @onAddFromUrl="onAddMediaFromUrl($event, 'splash')"
-          @onAddFromDevice="loading = true; onAddMediaFromDevice($event, 'splash');"
-          @onRemove="onRemoveMedia('splash')"
-          @onNotify="loading = false; notify = $event;"
-        />
-
-        <Uploader
-          class="mt-3 mb-4"
-          style="max-width: 300px"
-          :initialType="'image'"
-          :initialData="activityImage"
-          :initialTitle="'Activity Image'"
-          :aspectRatio="1/1"
-          @onAddFromUrl="onAddMediaFromUrl($event, 'activityImage')"
-          @onAddFromDevice="loading = true; onAddMediaFromDevice($event, 'activityImage');"
-          @onRemove="onRemoveMedia('activityImage')"
-          @onNotify="loading = false; notify = $event;"
-        />
-      </div>
+          <Uploader
+            class="mt-3 mb-4"
+            style="max-width: 300px"
+            :initialType="'image'"
+            :initialData="activityImage"
+            :initialTitle="'Activity Image'"
+            :aspectRatio="1/1"
+            @onAddFromUrl="onAddMediaFromUrl($event, 'activityImage')"
+            @onAddFromDevice="loading = true; onAddMediaFromDevice($event, 'activityImage');"
+            @onRemove="onRemoveMedia('activityImage')"
+            @onNotify="loading = false; notify = $event;"
+          />
+        </div>
+      </template>
 
     </div>
 
-      <v-dialog
-        v-model="assessmentTypeConfirmationDlg"
-        persistent
-        width="500"
-      >
-        <v-card>
-          <v-card-text class="pt-4">
-            A one page assessment is not available with conditional logic.
-            Are you sure you want to delete the conditional logic on this activity to have a one page assessment?
-          </v-card-text>
+    <v-dialog
+      v-model="assessmentTypeConfirmationDlg"
+      persistent
+      width="500"
+    >
+      <v-card>
+        <v-card-text class="pt-4">
+          A one page assessment is not available with conditional logic.
+          Are you sure you want to delete the conditional logic on this activity to have a one page assessment?
+        </v-card-text>
 
-          <v-card-actions
-            class="justify-space-around"
+        <v-card-actions
+          class="justify-space-around"
+        >
+          <v-btn
+            @click="deleteConditionals(); assessmentTypeConfirmationDlg = false; isOnePageAssessment = true;"
           >
-            <v-btn
-              @click="deleteConditionals(); assessmentTypeConfirmationDlg = false; isOnePageAssessment = true;"
-            >
-              Yes
-            </v-btn>
+            Yes
+          </v-btn>
 
-            <v-btn
-              @click="isOnePageAssessment = false; assessmentTypeConfirmationDlg = false"
-            >
-              No
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+          <v-btn
+            @click="isOnePageAssessment = false; assessmentTypeConfirmationDlg = false"
+          >
+            No
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <v-dialog
       v-model="alertFlag"
@@ -387,7 +392,7 @@ export default {
     conditionals () {
       return this.currentActivity.conditionalItems;
     },
-  
+
     name: {
       get: function () {
         return this.currentActivity && this.currentActivity.name;

@@ -1556,6 +1556,7 @@ export default class Item {
       || !item.question
       || (item.inputType !== "markdownMessage"
         && item.inputType !== "cumulativeScore"
+        && item.inputType !== "stabilityTracker"
         && !item.question.text)) {
       return false;
     }

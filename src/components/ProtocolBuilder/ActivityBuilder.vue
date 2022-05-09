@@ -6,21 +6,32 @@
       @onExpand="handleExpansion()"
     />
 
-    <ItemList
-      v-if="currentScreen == config.ITEM_SCREEN"
-      class="pb-2"
-      @onAddItem="handleAddItem()"
-    />
+    <template
+      v-if="currentActivity.activityType === 'NORMAL'"
+    >
+      <ItemList
+        v-if="currentScreen == config.ITEM_SCREEN"
+        class="pb-2"
+        @onAddItem="handleAddItem()"
+      />
 
-    <SubScaleList
-      v-if="currentScreen == config.SUBSCALE_SCREEN"
-      class="pb-2"
-    />
+      <SubScaleList
+        v-if="currentScreen == config.SUBSCALE_SCREEN"
+        class="pb-2"
+      />
 
-    <ConditionalList
-      v-if="currentScreen == config.CONDITIONAL_SCREEN"
-      class="pb-2"
-    />
+      <ConditionalList
+        v-if="currentScreen == config.CONDITIONAL_SCREEN"
+        class="pb-2"
+      />
+    </template>
+
+    <template
+      v-else-if="currentActivity.activityType == 'CST_GYRO' || currentActivity.activityType == 'CST_TOUCH'"
+    >
+      <CSTBuilder
+      />
+    </template>
   </div>
 </template>
 
@@ -31,6 +42,7 @@ import ActivityHeader from './ActivityHeader';
 import ItemList from './Items/ItemList';
 import SubScaleList from './SubScales/SubScaleList';
 import ConditionalList from './Conditionals/ConditionalList';
+import CSTBuilder from './CognitiveActivityBuilders/CSTBuilder';
 
 export default {
   components: {
@@ -38,6 +50,7 @@ export default {
     ItemList,
     SubScaleList,
     ConditionalList,
+    CSTBuilder,
   },
   data() {
     return {
@@ -49,7 +62,8 @@ export default {
       return config;
     },
     ...mapGetters(config.MODULE_NAME, [
-      'currentScreen'
+      'currentScreen',
+      'currentActivity',
     ]),
   },
   methods: {

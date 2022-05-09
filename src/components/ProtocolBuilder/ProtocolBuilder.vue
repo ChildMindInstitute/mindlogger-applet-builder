@@ -370,7 +370,7 @@
                   </v-tooltip>
 
                   <v-tooltip
-                    v-if="activity.activityType === 'NORMAL'"
+                    v-if="activity.activityType === 'NORMAL' || activity.activityType == 'CST_GYRO' || activity.activityType == 'CST_TOUCH'"
                     top
                   >
                     <template v-slot:activator="{ on }">
@@ -517,12 +517,12 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(config.MODULE_NAME, 
+    ...mapGetters(config.MODULE_NAME,
     [
-      'protocol', 
-      'activities', 
-      'themes', 
-      'themeId', 
+      'protocol',
+      'activities',
+      'themes',
+      'themeId',
       'baseImageURL'
     ]),
     config() {

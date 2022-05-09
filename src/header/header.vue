@@ -108,6 +108,7 @@
       </v-tooltip>
 
       <v-tooltip
+        v-if="!viewMode"
         bottom
       >
         <template v-slot:activator="{ on }">
@@ -166,6 +167,7 @@
         <span>View History</span>
       </v-tooltip>
       <v-tooltip
+        v-if="!viewMode"
         bottom
       >
         <template v-slot:activator="{ on }">
@@ -261,6 +263,10 @@ export default {
       type: Function,
       required: false,
       default: null,
+    },
+    viewMode: {
+      type: Boolean,
+      default: false,
     }
   },
   data () {

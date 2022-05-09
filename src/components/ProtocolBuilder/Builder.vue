@@ -3,6 +3,7 @@
     <div class="container">
       <Header
         :getProtocols="getProtocols"
+        :viewMode="viewMode"
         @uploadProtocol="uploadProtocol"
         @updateProtocol="updateProtocol"
         @onUploadError="onUploadError"
@@ -109,6 +110,11 @@ export default {
       required: false,
       default: 'development',
     },
+    viewMode: {
+      type: Boolean,
+      required: false,
+      default: false
+    }
   },
   computed: {
     ...mapGetters(config.MODULE_NAME, [

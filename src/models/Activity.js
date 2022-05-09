@@ -1,24 +1,28 @@
 import util from '../utilities/util';
 import Item from './Item';
+
+export const ACTIVITY_TYPES = [
+  "NORMAL",
+  "CST_GYRO",
+  "CST_TOUCH",
+  "FLANKER",
+  "TRAILS_IPAD",
+  "TRAILS_MOBILE"
+];
+
 export default class Activity {
   constructor() {
     this.ref = null;
   }
 
   getActivityBuilderData(initialActivityData) {
-    const name = initialActivityData.isABTrails
-      ? 'A/B Trails v' + initialActivityData.trailVersion + '.0'
-      : initialActivityData.name;
-    const description = initialActivityData.isABTrails ? 'A/B Trails' : initialActivityData.description;
-    const valid = initialActivityData.isABTrails ? true : initialActivityData.valid;
+    const name = initialActivityData.name;
+    const description = initialActivityData.description;
+    const valid = initialActivityData.valid;
     const items = (initialActivityData.items || []).map(item => item);
 
     if (initialActivityData.visibilities && initialActivityData.visibilities.length) {
       initialActivityData.conditionalItems = this.getConditionalItems(initialActivityData, initialActivityData.items);
-    }
-
-    if (initialActivityData.activityType && initialActivityData.activityType.includes('ABTrails')) {
-      initialActivityData.isABTrails = true;
     }
 
     if (initialActivityData.subScales && initialActivityData.subScales.length) {
@@ -72,7 +76,7 @@ export default class Activity {
       textRules: [(v) => !!v || 'This field is required'],
       error: '',
       componentKey: 0,
-      '@type': initialActivityData.isABTrails ? 'reproschema:ABTrails' : 'reproschema:Activity',
+      activityType: initialActivityData.activityType,
       initialItemData: initialActivityData.isPrize && initialActivityData.items ? initialActivityData.items[0] : {},
       isItemEditable: true,
       editIndex: -1,
@@ -454,7 +458,8 @@ export default class Activity {
       ],
       _id: this.ref.id,
       '@id': this.ref.name,
-      '@type': this.ref['@type'],
+      '@type': 'reproschema:Activity',
+      'activityType': this.ref.activityType,
       'skos:prefLabel': this.ref.name,
       'skos:altLabel': this.ref.name,
       'schema:description': this.ref.description,
@@ -943,7 +948,7 @@ export default class Activity {
       ['reprolib:terms/scoreOverview']: scoreOverview,
       ['reprolib:terms/isPrize']: isPrize,
       ['reprolib:terms/order']: orders,
-      ['@type']: activityType,
+      ['reprolib:terms/activityType']: activityType,
       ['_id']: id,
     } = activitiesObj;
 
@@ -1013,7 +1018,8 @@ export default class Activity {
         activityPreamble[0]['@value'],
       activityType:
         activityType &&
-        activityType[0],
+        activityType[0] &&
+        activityType[0]['@value'] || 'NORMAL',
       isReviewerActivity:
         isReviewerActivity &&
         isReviewerActivity[0] &&

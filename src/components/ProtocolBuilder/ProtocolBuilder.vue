@@ -90,6 +90,7 @@
               :initialData="appletImage"
               :initialAdditionalType="'small-circle'"
               :initialTitle="'Applet Image'"
+              :aspectRatio="1/1"
               @onAddFromUrl="onAddImageFromUrl($event)"
               @onAddFromDevice="onAddImageFromDevice($event)"
               @onRemove="onRemoveImage()"
@@ -125,7 +126,7 @@
 
           <v-tooltip bottom>
             <template v-slot:activator="{ on, attrs }">
-              <v-col sm="4" 
+              <v-col sm="4"
                 v-bind="attrs"
                 v-on="on"
               >
@@ -139,12 +140,12 @@
           </v-tooltip>
         </v-row>
 
-        <div>
-          <v-subheader class="ml-10" v-if="themes && themes.length">
+        <div v-if="themes && themes.length">
+          <v-subheader class="ml-10">
             Theme
           </v-subheader>
 
-          <v-select v-if="themes && themes.length"
+          <v-select
               v-model="selectedTheme"
               :items="themes"
               :label="'Select theme'"
@@ -200,11 +201,13 @@
         <draggable
           v-model="withoutPrize"
           handle=".dragging-handle"
+          :scroll-sensitivity="100"
+          :force-fallback="true"
         >
           <transition-group>
             <v-card
               v-for="(activity, index) in withoutPrize"
-              :key="`${activity._id}-${index}_${activity.timestamp}`"
+              :key="`${activity.timestamp}-${activity.id || 0}`"
               class="ma-4"
             >
               <v-card-title
@@ -335,9 +338,7 @@
                     class="ml-4 move-icon dragging-handle"
                     icon
                   >
-                    <v-icon color="grey lighten-1">
-                      mdi-dots-vertical
-                    </v-icon>
+                    <img class="px-2 pt-2 drag-indicator" :src="baseImageURL + 'drag_indicator.png'" />
                   </v-btn>
                 </v-card-actions>
               </v-card-title>
@@ -393,6 +394,11 @@
     text-transform: none;
   }
 
+  .drag-indicator {
+    height: 25px;
+    margin-bottom: 8px;
+  }
+
   .invalid {
     background-color: #d44c4c;
   }
@@ -439,7 +445,14 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(config.MODULE_NAME, ['protocol', 'activities', 'themes', 'themeId']),
+    ...mapGetters(config.MODULE_NAME, 
+    [
+      'protocol', 
+      'activities', 
+      'themes', 
+      'themeId', 
+      'baseImageURL'
+    ]),
     config() {
       return config;
     },
@@ -626,6 +639,10 @@ export default {
         this.fileSuccessMsg = 'Applet About image is sucessfully added.';
       } catch (error) {
         this.$emit('loading', false);
+        this.$emit('notify', {
+          type: 'error',
+          message: `Something went wrong with uploading applet watermark.`,
+        });
       }
     },
     onRemoveWatermark () {

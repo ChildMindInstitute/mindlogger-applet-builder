@@ -49,6 +49,43 @@
 
         <div
           aria-hidden="true"
+          class="image_dropdown"
+          :class="{'selected': imageDropdown}"
+          type="button"
+          @mouseleave="$mouseleave_image_dropdown"
+          @mouseenter="$mouseenter_image_dropdown"
+        >
+          <v-icon>mdi-image</v-icon>
+          <transition name="fade">
+            <div
+              v-show="imageDropdown"
+              class="op-image popup-dropdown transition"
+              @mouseleave="$mouseleave_image_dropdown"
+              @mouseenter="$mouseenter_image_dropdown"
+            >
+              <div
+                class="dropdown-item"
+                @click.stop="linkType='Image'; linkDialog=true;"
+              >
+                <span>Image Link</span>
+              </div>
+              <div
+                class="dropdown-item"
+                style="overflow: hidden"
+              >
+                <input
+                  type="file"
+                  accept="image/*"
+                  @change="$addMedia"
+                >
+                Upload Image
+              </div>
+            </div>
+          </transition>
+        </div>
+
+        <div
+          aria-hidden="true"
           class="audio_play"
           :class="{'selected': audioDropDown}"
           type="button"
@@ -83,6 +120,7 @@
             </div>
           </transition>
         </div>
+
       </template>
     </mavon-editor>
 
@@ -113,22 +151,20 @@
             aria-hidden="true"
             @click.stop.prevent="linkDialog = false"
           />
-          <h3 class="title">
-            {{ `Add Link ${linkType}` }}
-          </h3>
+          <h3 class="title">Add Link</h3>
           <div class="link-text input-wrapper">
             <input
               ref="linkTextInput"
               v-model="linkText"
               type="text"
-              :placeholder="`${linkType} text`"
+              placeholder="Link text"
             >
           </div>
           <div class="link-addr input-wrapper">
             <input
               v-model="linkAddr"
               type="text"
-              :placeholder="`${linkType} address`"
+              placeholder="Link address"
             >
           </div>
           <div
@@ -141,7 +177,7 @@
             class="op-btn sure"
             @click.stop="$linkAdd()"
           >
-            {{ 'Sure' }}
+            {{ 'Add' }}
           </div>
         </div>
       </div>
@@ -150,13 +186,13 @@
 </template>
 
 <style lang="scss" scoped>
-  .video_play, .audio_play {
+  .video_play, .audio_play, .image_dropdown {
     position: relative;
     display: inline-block;
     padding: 0px 5px;
   }
 
-  .video_play.selected, .audio_play.selected {
+  .video_play.selected, .audio_play.selected, .image_dropdown.selected {
     background-color: rgb(233, 233, 235);
   }
 
@@ -350,13 +386,15 @@ export default {
       isUploading: false,
       videoDropDown: false,
       audioDropDown: false,
+      imageDropdown: false,
       linkDialog: false,
       linkType: 'link',
       linkText: '',
       linkAddr: '',
       toolbars: {
         ...CONFIG.toolbars,
-        fullscreen: false
+        fullscreen: false,
+        imagelink: false,
       }
     }
   },
@@ -374,6 +412,12 @@ export default {
       this.linkDialog = false;
       toolbar_left_addlink(this.linkType, this.linkText, this.linkAddr, this.$refs.md);
     },
+    $mouseenter_image_dropdown(){
+      this.imageDropdown = true;
+    },
+    $mouseleave_image_dropdown() {
+      this.imageDropdown = false;
+    },
     $mouseenter_video_dropdown() {
       this.videoDropDown = true;
     },
@@ -390,10 +434,11 @@ export default {
       this.isUploading = true;
 
       const ret = this.imageUploader.uploadImage($e.target.files[0]).then(ret => {
+        const name = $e.target.files[0].name;
         const url = ret.location;
         this.isUploading = false;
 
-        toolbar_left_addlink('media', '', url, this.$refs.md);
+        toolbar_left_addlink('media', name, url, this.$refs.md);
       });
     },
   }

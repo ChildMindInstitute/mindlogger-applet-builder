@@ -5,11 +5,10 @@ export default class Item {
   }
 
   static getQuesionInfo(question) {
-    const imageRE = new RegExp(/[\r\n]*\!\[.*\]\(.*=.*\)[\r\n]*/i);
-    const imageUrlRE = new RegExp(/http([\S]+)/i);
-    const imageMatch = question.match(imageUrlRE);
+    const imageRE = new RegExp(/[\r\n]*\!\[.*\]\((.*)=.*\)[\r\n]*/i);
+    const imageMatch = question.match(imageRE);
 
-    const questionImage = imageMatch && imageMatch[0] || '';  // The image URL.
+    const questionImage = imageMatch && imageMatch[1] || '';  // The image URL.
     const questionText = question.replace(imageRE, '');  // Remove the image from the question.
 
     return {
@@ -44,6 +43,8 @@ export default class Item {
         && (initialItemData.ui.allow.includes("dontKnow")
           || initialItemData.ui.allow.includes("dont_know_answer")),
       responseOptions: initialItemData.responseOptions || {},
+      header: initialItemData.header || "",
+      section: initialItemData.section || "",
       inputOptions: initialItemData.inputOptions || [],
       media: initialItemData.media || {},
       cumulativeScores: initialItemData.cumulativeScores  || [],
@@ -83,7 +84,7 @@ export default class Item {
         obj["schema:alert"] = slider.alerts[i - slider.minSliderTick];
       }
 
-      if (slider.minValueImg && i === 1)
+      if (slider.minValueImg && i === slider.minSliderTick)
         obj["schema:image"] = slider.minValueImg;
 
       if(slider.maxValueImg && i == slider.maxSliderTick)
@@ -166,7 +167,7 @@ export default class Item {
         })) || [],
       }
     }
-    if (this.ref.inputType === "radio" || this.ref.inputType === "prize" || this.ref.inputType === "checkbox") {
+    if (this.ref.inputType === "radio" || this.ref.inputType === "prize" || this.ref.inputType === "checkbox" || this.ref.inputType === "dropdownList") {
       const choices = this.getRadioChoices();
       return {
         "valueType": (this.ref.options.valueType && this.ref.options.valueType.includes("token") || this.ref.options.isTokenValue) ? "xsd:token" : "xsd:anyURI",
@@ -188,7 +189,8 @@ export default class Item {
         'valueType': this.ref.options.valueType || this.ref.valueType,
         "removeBackOption": this.ref.options.removeBackOption,
         'requiredValue': this.ref.options.requiredValue,
-        'isResponseIdentifier': this.ref.options.isResponseIdentifier
+        'isResponseIdentifier': this.ref.options.isResponseIdentifier,
+        'maxLength': this.ref.options.maxLength,
       }
     }
     if (this.ref.inputType === "drawing") {
@@ -207,11 +209,13 @@ export default class Item {
         "removeBackOption": this.ref.options.removeBackOption,
         "responseAlert": this.ref.options.hasResponseAlert,
         "continousSlider": this.ref.options.continousSlider,
+        'tickLabel': this.ref.options.tickLabel,
+        'textAnchors': this.ref.options.textAnchors,
+        'tickMark': this.ref.options.tickMark,
         "schema:minValue": this.ref.options.minValue,
         "schema:maxValue": this.ref.options.maxValue,
         "schema:minValueImg": this.ref.options.minValueImg,
         "schema:maxValueImg": this.ref.options.maxValueImg,
-        "showTickMarks": this.ref.options.showTickMarks,
         "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
         choices: choices,
       };
@@ -282,6 +286,13 @@ export default class Item {
         "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
       };
     }
+    if (this.ref.inputType === "duration") {
+      return {
+        "isOptionalTextRequired": this.ref.responseOptions.isOptionalTextRequired,
+        "timeDuration": this.ref.options.timeDuration,
+      }
+    }
+
     if (this.ref.inputType === "audioImageRecord"
       || this.ref.inputType === "geolocation"
       || this.ref.inputType === "audioStimulus"
@@ -325,6 +336,8 @@ export default class Item {
         isVis: this.ref.isVis,
         "schema:schemaVersion": "0.0.1",
         "schema:version": "0.0.1",
+        "header": this.ref.header,
+        "section": this.ref.section,
         ui: {
           inputType: this.ref.inputType,
         },
@@ -339,13 +352,15 @@ export default class Item {
       schema['cumulativeScores'] = cumulativeScores;
     }
 
-    if (this.ref.inputType === 'radio' || this.ref.inputType === 'checkbox' || this.ref.inputType === 'prize' || this.ref.inputType == 'stackedRadio' || this.ref.inputType == 'stackedCheckbox') {
+    if (this.ref.inputType === 'radio' || this.ref.inputType === 'checkbox' || this.ref.inputType === 'prize' || this.ref.inputType == 'stackedRadio' || this.ref.inputType == 'stackedCheckbox' || this.ref.inputType == 'dropdownList') {
       let inputType = this.ref.inputType;
 
       if (this.ref.inputType == 'radio' || this.ref.inputType == 'checkbox') {
         inputType = 'radio';
       } else if (this.ref.inputType == 'stackedRadio' || this.ref.inputType == 'stackedCheckbox') {
         inputType = 'stackedRadio';
+      } else if (this.ref.inputType == 'dropdownList') {
+        inputType = 'dropdownList';
       } else {
         inputType = 'prize';
       }
@@ -410,6 +425,7 @@ export default class Item {
         this.ref.inputType === "prize" ||
         this.ref.inputType === "stackedRadio" ||
         this.ref.inputType === "stackedCheckbox" ||
+        this.ref.inputType === "dropdownList" ||
         this.ref.inputType === "audioRecord") &&
       Object.keys(this.ref.responseOptions).length
     ) {
@@ -440,11 +456,13 @@ export default class Item {
       itemObj.options.minValue = itemObj.options.minValue || "Min";
       itemObj.options.minValueImg = itemObj.options.minValueImg || "";
       itemObj.options.maxValue = itemObj.options.maxValue || "Max";
-      itemObj.options.showTickMarks = itemObj.options.showTickMarks || false;
       itemObj.options.maxValueImg = itemObj.options.maxValueImg || "";
       itemObj.options.minSliderTick = itemObj.options.minSliderTick || 0;
       itemObj.options.maxSliderTick = itemObj.options.maxSliderTick || 0;
       itemObj.options.continousSlider = itemObj.options.continousSlider || false;
+      itemObj.options.textAnchors = itemObj.options.textAnchors || false;
+      itemObj.options.tickLabel = itemObj.options.tickLabel || false;
+      itemObj.options.tickMark = itemObj.options.tickMark || false;
       itemObj.options.hasScoreValue = itemObj.options.hasScoreValue || false;
       itemObj.options.hasResponseAlert = itemObj.options.hasResponseAlert || false;
     }
@@ -598,6 +616,12 @@ export default class Item {
       'correctAnswer': {
         updated: (field) => `Correct answer was changed`
       },
+      'header': {
+        updated: (field) => `Item header was changed`
+      },
+      'section': {
+        updated: (field) => `Item section was changed`
+      },
       'timer': {
         updated: field => {
           const newTimeLimit = _.get(newValue, field);
@@ -628,13 +652,40 @@ export default class Item {
         updated: optionUpdate('Multiple choice option'),
       },
       'options.sliderOptions': {
-        updated: (field) =>'sliderOptions are updated',
+        updated: (field) => {
+          const oldOptions = _.get(oldValue, field, []);
+          const newOptions = _.get(newValue, field, []);
+
+          if (JSON.stringify(oldOptions) != JSON.stringify(newOptions)) {
+            return ['sliderOptions are updated'];
+          }
+          return [];
+        },
+      },
+      'options.timeDuration': {
+        updated: (field) => 'timeDuration is updated',
       },
       'options.itemList': {
-        updated: (field) =>'itemList is updated',
+        updated: (field) => {
+          const oldList = _.get(oldValue, field, []);
+          const newList = _.get(newValue, field, []);
+
+          if (JSON.stringify(oldList) != JSON.stringify(newList)) {
+            return ['itemList is updated'];
+          }
+          return [];
+        },
       },
       'options.choices': {
-        updated: (field) =>'choices are updated',
+        updated: (field) => {
+          const oldChoices = _.get(oldValue, field, []);
+          const newChoices = _.get(newValue, field, []);
+
+          if (JSON.stringify(oldChoices) != JSON.stringify(newChoices)) {
+            return ['choices are updated'];
+          }
+          return [];
+        }
       },
       'options.options': {
         updated: radioOptionListUpdate,
@@ -703,6 +754,15 @@ export default class Item {
       'options.continousSlider': {
         updated: valueUpdate('Continous Slider'),
       },
+      'options.tickLabel': {
+        updated: valueUpdate('Tick Labels'),
+      },
+      'options.textAnchors': {
+        updated: valueUpdate('Text Anchors'),
+      },
+      'options.tickMark': {
+        updated: valueUpdate('Tick Mark'),
+      },
       'options.scores': {
         updated: scoreUpdate,
       },
@@ -747,9 +807,6 @@ export default class Item {
       },
       'responseOptions.isOptionalTextRequired': {
         updated: optionUpdate('Optional text required option'),
-      },
-      'responseOptions.showTickMarks': {
-        updated: optionUpdate('Show tick marks'),
       },
       'responseOptions.schema:minValue': {
         updated: valueUpdate('minValue'),
@@ -827,6 +884,8 @@ export default class Item {
       description:
         _.get(item, ['schema:description', 0, '@value']),
       isVis: _.get(item, ['reprolib:terms/isVis', 0, '@value']),
+      header: _.get(item, ['schema:header', 0, '@value']),
+      section: _.get(item, ['schema:section', 0, '@value']),
       ui: {
         allow,
         inputType:
@@ -880,14 +939,23 @@ export default class Item {
       let continousSlider =
         _.get(responseOptions, [0, 'reprolib:terms/continousSlider']);
 
-      let showTickMarks =
-        _.get(responseOptions, [0, 'reprolib:terms/showTickMarks']);
+      let tickLabel =
+        _.get(responseOptions, [0, 'reprolib:terms/tickLabel']);
+
+      let textAnchors =
+        _.get(responseOptions, [0, 'reprolib:terms/textAnchors']);
+
+      let tickMark =
+        _.get(responseOptions, [0, 'reprolib:terms/tickMark']);
 
       let responseAlert =
         _.get(responseOptions, [0, 'reprolib:terms/responseAlert']);
 
       let colorPalette =
         _.get(responseOptions, [0, 'reprolib:terms/colorPalette']);
+
+      let timeDuration =
+        _.get(responseOptions, [0, 'schema:timeDuration']);
 
       let topNavigationOption =
         _.get(responseOptions, [0, 'reprolib:terms/topNavigationOption']);
@@ -939,14 +1007,30 @@ export default class Item {
           _.get(removeUndoOption, [0, '@value']);
       }
 
+      if (tickLabel) {
+        itemContent.tickLabel =
+          tickLabel[0] && tickLabel[0]['@value'];
+      } else {
+        itemContent.tickLabel = true;
+      }
+
+      if (textAnchors) {
+        itemContent.textAnchors =
+          textAnchors[0] && textAnchors[0]['@value'];
+      } else {
+        itemContent.textAnchors = true;
+      }
+
+      if (tickMark) {
+        itemContent.tickMark =
+          tickMark[0] && tickMark[0]['@value'];
+      } else {
+        itemContent.tickMark = true;
+      }
+
       if (continousSlider) {
         itemContent.continousSlider =
           continousSlider[0] && continousSlider[0]['@value'];
-      }
-
-      if (showTickMarks) {
-        itemContent.showTickMarks =
-          showTickMarks[0] && showTickMarks[0]['@value'];
       }
 
       if (responseAlert) {
@@ -957,6 +1041,11 @@ export default class Item {
       if (colorPalette) {
         itemContent.colorPalette =
           _.get(colorPalette, [0, '@value']);
+      }
+
+      if (timeDuration) {
+        itemContent.timeDuration =
+          _.get(timeDuration, [0, '@value']);
       }
 
       if (topNavigationOption) {
@@ -1094,6 +1183,53 @@ export default class Item {
         };
       }
 
+      if (itemType === 'dropdownList') {
+        itemContent.options = {
+          isMultipleChoice: itemContent.multipleChoice || false,
+          enableNegativeTokens: itemContent.enableNegativeTokens || false,
+          hasScoreValue: itemContent.scoring || false,
+          hasResponseAlert: itemContent.responseAlert || false,
+          colorPalette: itemContent.colorPalette || false,
+          randomizeOptions: itemContent.randomizeOptions || false,
+          valueType: itemContent.valueType,
+          options:
+            responseOptions[0] &&
+            responseOptions[0]['schema:itemListElement'] &&
+            responseOptions[0]['schema:itemListElement'].map(
+              (itemListElement) => {
+                const image = itemListElement['schema:image'];
+                const name = itemListElement["schema:name"];
+                const value = itemListElement["schema:value"];
+                const color = itemListElement["schema:color"];
+                const score = itemListElement["schema:score"];
+                const alert = itemListElement["schema:alert"];
+                const description = itemListElement["schema:description"];
+
+                return {
+                  image:
+                    typeof image === 'string' && image ||
+                    Array.isArray(image) && image[0] && image[0]['@value'].toString(),
+                  name:
+                    typeof name == "string" && name ||
+                    Array.isArray(name) && name[0] && name[0]['@value'].toString(),
+                  color:
+                    typeof color == "string" && color ||
+                    Array.isArray(color) && color[0] && color[0]['@value'].toString(),
+                  value:
+                    Array.isArray(value) && value[0] && value[0]['@value'],
+                  score:
+                    Array.isArray(score) && score[0] && score[0]['@value'],
+                  alert:
+                    Array.isArray(alert) && alert[0] && alert[0]['@value'],
+                  description:
+                    typeof description == 'string' && description ||
+                    Array.isArray(description) && description[0] && description[0]['@value'].toString(),
+                };
+              }
+            ),
+        };
+      }
+
       if (itemType === 'prize') {
         itemContent.options = {
           isMultipleChoice: itemContent.multipleChoice || false,
@@ -1133,8 +1269,9 @@ export default class Item {
             _.get(responseOptions, [0, 'reprolib:terms/requiredValue', 0, '@value']),
           removeBackOption: itemContent.removeBackOption || false,
           isResponseIdentifier:
-            _.get(responseOptions, [0, 'reprolib:terms/isResponseIdentifier', 0, '@value'])
-          // TODO: add 'maximum response length' value which is absent for now
+            _.get(responseOptions, [0, 'reprolib:terms/isResponseIdentifier', 0, '@value']),
+          maxLength:
+            _.get(responseOptions, [0, 'reprolib:terms/maxLength', 0, '@value'])
         };
         if (item['schema:correctAnswer'] &&
           item['schema:correctAnswer'][0] &&
@@ -1156,6 +1293,9 @@ export default class Item {
           hasScoreValue: itemContent.scoring || false,
           hasResponseAlert: itemContent.responseAlert || false,
           continousSlider: itemContent.continousSlider || false,
+          tickLabel: itemContent.tickLabel || false,
+          textAnchors: itemContent.textAnchors || false,
+          tickMark: itemContent.tickMark || false,
           removeBackOption: itemContent.removeBackOption || false,
           maxValue:
             _.get(responseOptions, [0, 'schema:maxValue', 0, '@value']),
@@ -1175,7 +1315,6 @@ export default class Item {
             Math.max(..._.get(responseOptions, '0.schema:itemListElement', []).map(item => _.get(item, 'schema:value.0.@value'))),
           minSliderTick:
             Math.min(..._.get(responseOptions, '0.schema:itemListElement', []).map(item => _.get(item, 'schema:value.0.@value'))),
-          showTickMarks: itemContent.showTickMarks || false,
           scores: itemContent.scoring && responseOptions[0] &&
             responseOptions[0]['schema:itemListElement'] &&
             responseOptions[0]['schema:itemListElement'].map(
@@ -1268,6 +1407,11 @@ export default class Item {
         };
       }
 
+      if (itemType === 'duration') {
+        itemContent.options = {
+          timeDuration: itemContent.timeDuration || {},
+        };
+      }
     }
 
     const inputOptions = item['reprolib:terms/inputs'];
@@ -1395,6 +1539,10 @@ export default class Item {
         && !item.question.text)) {
       return false;
     }
+    if (!/^[a-zA-Z0-9-_]+$/.test(item.name)) {
+      return false;
+    }
+
     if (item.inputType === "ageSelector"
       && (item.options.minAge === "" || item.options.maxAge === "")) {
       return false;
@@ -1421,6 +1569,12 @@ export default class Item {
         if (option.valid === false) {
           return false;
         }
+      }
+    }
+
+    if (item.inputType == 'text') {
+      if (item.options.maxLength < item.correctAnswer.length || item.options.maxLength <= 0) {
+        return false;
       }
     }
 

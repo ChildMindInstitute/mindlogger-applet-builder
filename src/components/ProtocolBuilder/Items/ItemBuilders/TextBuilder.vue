@@ -14,7 +14,8 @@
       v-if="requiredAnswer"
       v-model="correctAnswer"
       label="Correct answer"
-      @change="updateAnswer"
+      @input="updateAnswer"
+      :error-messages="correctAnswer.length <= maxLength ? '' : 'Length of correct answer can\'t exceed maximum response length'"
     />
     <v-row>
       <v-col
@@ -73,7 +74,7 @@
         <v-checkbox
           v-model="requiredValue"
           label="Response required"
-          @change="updateRequiredValue"
+          @change="update"
         />
       </v-col>
       <v-col
@@ -153,6 +154,7 @@ export default {
         'isResponseIdentifier': this.isResponseIdentifier,
         'valueType': this.isNumerical ? 'xsd:integer' : 'xsd:string',
       };
+
       this.$emit('updateOptions', responseOptions);
     },
     updateAnswer() {

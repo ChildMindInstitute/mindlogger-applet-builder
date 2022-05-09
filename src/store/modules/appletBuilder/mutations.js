@@ -169,6 +169,14 @@ const itemMutations = {
     state.currentActivity.items[index].isVis = false;
   },
 
+  updateHeader(state, {index, headerName}) {
+    state.currentActivity.items[index].header = headerName;
+  },
+
+  updateSection(state, { index, sectionName }) {
+    state.currentActivity.items[index].section = sectionName
+  },
+
   duplicateItem(state, index) {
     const item = JSON.parse(JSON.stringify(state.currentActivity.items[index]));
 
@@ -242,9 +250,10 @@ const activityMutations = {
       ...activity,
       id: null,
       name: `${activity.name} (${suffix})`,
-      items: activity.items.map(item => ({
+      items: activity.items.map((item, index) => ({
         ...item,
         id: null,
+        timestamp: Date.now() + index
       })),
       finalSubScale: { ...activity.finalSubScale },
       subScales: [...activity.subScales],
@@ -434,10 +443,10 @@ const conditionalMutations = {
 
   updateConditionalData(state, { index, updates }) {
     const conditional = state.currentActivity.conditionalItems[index];
-    state.currentActivity.conditionalItems[index] = {
+    state.currentActivity.conditionalItems.splice(index, 1, {
       ...conditional,
       ...updates
-    };
+    });
   },
 
   deleteConditional(state, index) {

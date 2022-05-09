@@ -54,29 +54,52 @@
         v-model="draggableItems"
         handle=".dragging-handle"
         @change="handleChange($event)"
+        :scroll-sensitivity="100"
+        :force-fallback="true"
       >
         <transition-group>
-          <div
+          <template
             v-for="(item, index) in currentActivity.items"
-            :key="`${index}-${item.id || 0}-${item.timestamp || ''}`"
-            class="d-flex align-center"
           >
-            <v-checkbox
-              class="ml-4"
-              v-if="selectingItems"
-              :input-value="selectedItems.includes(item)"
-              @click="switchOption(item)"
-            />
+            <div
+              v-if="item.inputType != 'cumulativeScore'"
+              :key="`${item.timestamp}-${item.id || 0}`"
+              class="d-flex align-center"
+            >
+              <v-checkbox
+                class="ml-4"
+                v-if="selectingItems"
+                :input-value="selectedItems.includes(item)"
+                @click="switchOption(item)"
+              />
 
-            <ItemBuilder
-              :item-index="index"
-              :variablesItems="variablesItems"
-              class="ma-4 flex-grow-1 item-builder"
-              @addItem="addBlankItem(index+1)"
-            />
-          </div>
+              <ItemBuilder
+                :item-index="index"
+                :variablesItems="variablesItems"
+                :header="item.header"
+                :section="item.section"
+                class="ma-4 flex-grow-1 item-builder"
+                @addItem="addBlankItem(index+1)"
+              />
+            </div>
+          </template>
         </transition-group>
       </draggable>
+
+      <div
+        v-if="cumulativeItem"
+        :key="`${cumulativeItem.timestamp}-${cumulativeItem.id || 0}`"
+        class="d-flex align-center"
+      >
+        <ItemBuilder
+          :item-index="currentActivity.items.indexOf(cumulativeItem)"
+          :variablesItems="variablesItems"
+          :header="cumulativeItem.header"
+          :section="cumulativeItem.section"
+          class="ma-4 flex-grow-1 item-builder"
+        />
+      </div>
+
     </div>
 
     <v-dialog
@@ -99,7 +122,7 @@
         <v-card-text>
           <p>These items have been successfully moved to {{ targetActivity }}</p>
           <ul class="list-group">
-            <li v-for="(name, index) in selectedItems.map(item => item.name)" :key="index">
+            <li v-for="(name, index) in movedItems.map(item => item.name)" :key="index">
               {{ name }}
             </li>
           </ul>
@@ -180,6 +203,7 @@
         <v-card-actions class="justify-space-around">
           <v-btn
             @click="confirmMovementOfItems"
+            :disabled="transferItemDlg.index < 0"
           >
             OK
           </v-btn>
@@ -267,7 +291,7 @@ import config from '../../../config';
 import ItemBuilder from './ItemBuilder';
 import UrlItemUploader from './UrlItemUploader';
 import draggable from 'vuedraggable'
-import { checkItemVariableNameIndex } from '../../../utilities/util';
+import { checkItemVariableNameIndex, getTextBetweenBrackets } from '../../../utilities/util';
 
 export default {
   components: {
@@ -290,6 +314,7 @@ export default {
       },
       cachedItems: [],
       selectedItems: [],
+      movedItems: [],
       errorMessages: [],
       cumulativeData: [],
       subScaleData: [],
@@ -333,6 +358,10 @@ export default {
         this.updateItemList(value);
       }
     },
+
+    cumulativeItem () {
+      return this.currentActivity.items.find(item => item.inputType == 'cumulativeScore')
+    }
   },
   methods: {
     ...mapMutations(config.MODULE_NAME,
@@ -352,12 +381,22 @@ export default {
 
     handleChange (evt) {
       const { element, oldIndex, newIndex } = evt.moved;
-
       const invalidLargeTextIndex = checkItemVariableNameIndex(element.question.text, { items: this.cachedItems }, true);
-      if (newIndex <= invalidLargeTextIndex ) {
+
+      if (newIndex < invalidLargeTextIndex || (newIndex === invalidLargeTextIndex && oldIndex > invalidLargeTextIndex) ) {
         this.warningMsg = "This item has been moved above the user's input. Please move it above  in order for the variable to work correctly.";
         this.warningFlag = true;
         return;
+      }
+
+      for (let i = 0; i < this.cachedItems.length; i += 1) {
+        if (this.cachedItems[i].question.text.includes(element.name)) {
+          if (newIndex > i || (newIndex === i && oldIndex < i)) {
+            this.warningMsg = "This item has been moved above the user's input. Please move it above  in order for the variable to work correctly.";
+            this.warningFlag = true;
+            return;
+          }
+        }
       }
 
       this.movedItem = newIndex;
@@ -540,7 +579,10 @@ export default {
         this.transferItems({
           target: this.transferItemDlg.index,
           items: this.selectedItems
-        })
+        });
+
+        this.movedItems = this.selectedItems;
+        this.selectedItems = [];
       }
       this.transferItemDlg.visible = false;
     },
@@ -573,7 +615,8 @@ export default {
         scores: this.cumulativeData,
         subScales: this.subScaleData,
       })
-
+      this.movedItems = this.selectedItems;
+      this.selectedItems = [];
       this.errorMessages = [];
       this.subScaleData = [];
       this.transferConfirmDlg = false;

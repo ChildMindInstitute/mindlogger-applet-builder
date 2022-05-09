@@ -11,7 +11,7 @@
             v-model="minSliderTick"
             label="Min Value"
             type="number"
-            min="1"
+            min="0"
             :max="maxSliderTick"
             @input="sliderRangeUpdate($event, 'min')"
           />
@@ -42,7 +42,6 @@
           />
         </v-col>
       </v-row>
-
       <v-row>
         <v-col
           class="d-flex align-center"
@@ -81,6 +80,30 @@
             @onAddFromDevice="$emit('loading', true); onAddSliderImageFromDevice($event, 'Max');"
             @onRemove="maxValueImg = ''; onRemoveSliderImage('Max');"
             @onNotify="$emit('loading', false); $emit('notify', $event);"
+          />
+        </v-col>
+      </v-row>
+
+      <v-row>
+        <v-col cols="12" sm="4">
+          <v-switch
+            v-model="tickMark"
+            label="Tick Marks"
+            @change="update"
+          />
+        </v-col>
+        <v-col cols="12" sm="4">
+          <v-switch
+            v-model="tickLabel"
+            label="Tick Mark Labels"
+            @change="update"
+          />
+        </v-col>
+        <v-col cols="12" sm="4">
+          <v-switch
+            v-model="textAnchors"
+            label="Text Anchors"
+            @change="update"
           />
         </v-col>
       </v-row>
@@ -165,17 +188,6 @@
         />
       </v-col>
 
-      <v-col
-        class="d-flex align-center"
-        cols="12"
-        sm="3"
-      >
-        <v-checkbox
-          v-model="showTickMarks"
-          label="Turn off Tick Marks & Labels"
-          @change="update"
-        />
-      </v-col>
       <v-col
         class="d-flex align-center"
         cols="12"
@@ -440,6 +452,9 @@ export default {
       minValueImg: this.initialItemData.minValueImg || '',
       maxValue: this.initialItemData.maxValue || '',
       maxValueImg: this.initialItemData.maxValueImg || '',
+      textAnchors: this.initialItemData.textAnchors || false,
+      tickMark: this.initialItemData.tickMark || false,
+      tickLabel: this.initialItemData.tickLabel || false,
       valid: true,
       minLabelRules: [
         v => !!v || 'Min label cannot be empty',
@@ -469,7 +484,6 @@ export default {
       alertMinValue: Number(this.initialItemData.minAlertValue || this.initialItemData.minSliderTick || 0),
       alertMaxValue: Number(this.initialItemData.maxAlertValue || this.initialItemData.maxSliderTick || 0),
       removeBackOption: this.initialItemData.removeBackOption,
-      showTickMarks: this.initialItemData.showTickMarks || false,
       scores: this.initialItemData.scores || [],
       alerts: this.initialItemData.alerts || [],
       isOptionalText: this.initialIsOptionalText,
@@ -532,8 +546,8 @@ export default {
     update () {
       if (this.maxSliderTick > 12) {
         this.maxSliderTick = 12;
-      } else if (this.minSliderTick < 1) {
-        this.minSliderTick = 1;
+      } else if (this.minSliderTick < 0) {
+        this.minSliderTick = 0;
       }
 
       let responseOptions = {
@@ -543,11 +557,13 @@ export default {
         'minValueImg': this.minValueImg,
         'maxValue': this.maxValue || "Max",
         'maxValueImg': this.maxValueImg,
+        'tickLabel': this.tickLabel,
+        'textAnchors': this.textAnchors,
+        'tickMark': this.tickMark,
         'hasScoreValue': this.hasScoreValue,
         'hasResponseAlert': this.hasResponseAlert,
         'continousSlider': this.continousSlider,
         'removeBackOption': this.removeBackOption,
-        'showTickMarks': this.showTickMarks,
         'scores': this.hasScoreValue ? this.scores : false,
       };
 
@@ -568,15 +584,14 @@ export default {
 
     sliderRangeUpdate(ev, type) {
       if (Number(this.maxSliderTick) > 12) {
-        return false;
+        this.maxSliderTick = 12;
       }
       if (Number(this.minSliderTick) < 0) {
-        return false;
+        this.minSliderTick = 0
       }
       if (this.minSliderTick === '' || this.maxSliderTick === '' || Number(this.minSliderTick) > Number(this.maxSliderTick)) {
         return ;
       }
-
       this.scores = this.scores || [];
       this.alerts = this.alerts || [];
 
@@ -584,7 +599,6 @@ export default {
       if (tickCount < 0) {
         return;
       }
-
       if (type == 'max') {
         while (this.scores.length < tickCount) {
           this.scores.push(Number(this.minSliderTick) + this.scores.length);

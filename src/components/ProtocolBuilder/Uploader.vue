@@ -103,11 +103,11 @@
                   >
                     mdi-image
                   </v-icon>
-                  <div @click="downloadImage" class="mr-4">{{ getFileName(fileName, false) }}</div>
+                  <div @click="downloadImage" class="mr-4">{{ getFileName(uploadData, false) }}</div>
                 </div>
               </template>
               <span>
-                <div>{{ getFileName(fileName) }}</div>
+                <div>{{ getFileName(uploadData) }}</div>
               </span>
             </v-tooltip>
           </v-list-group>
@@ -197,11 +197,11 @@
                     >
                       mdi-image
                     </v-icon>
-                    <div @click="downloadImage" class="mr-4">{{ getFileName(fileName, false) }}</div>
+                    <div @click="downloadImage" class="mr-4">{{ getFileName(uploadData, false) }}</div>
                   </div>
                 </template>
                 <span>
-                  <div>{{ getFileName(fileName) }}</div>
+                  <div>{{ getFileName(uploadData) }}</div>
                 </span>
               </v-tooltip>
               <v-tooltip right>
@@ -245,11 +245,11 @@
                     >
                       mdi-image
                     </v-icon>
-                    <div @click="downloadImage" class="mr-4">{{ getFileName(fileName, false) }}</div>
+                    <div @click="downloadImage" class="mr-4">{{ getFileName(uploadData, false) }}</div>
                   </div>
                 </template>
                 <span>
-                  <div>{{ getFileName(fileName) }}</div>
+                  <div>{{ getFileName(uploadData) }}</div>
                 </span>
               </v-tooltip>
               <v-tooltip right>
@@ -267,7 +267,6 @@
                   <p>Image Requirements</p>
                   <ul>
                     <li>Size: less than 8MB</li>
-                    <li>700px * 1000px size is required</li>
                   </ul>
                 </span>
               </v-tooltip>
@@ -406,11 +405,11 @@
                   >
                     mdi-image
                   </v-icon>
-                  <div @click="downloadImage" class="mr-4">{{ getFileName(fileName, false) }}</div>
+                  <div @click="downloadImage" class="mr-4">{{ getFileName(uploadData, false) }}</div>
                 </div>
               </template>
               <span>
-                <div>{{ getFileName(fileName) }}</div>
+                <div>{{ getFileName(uploadData) }}</div>
               </span>
             </v-tooltip>
 
@@ -451,6 +450,38 @@
       @cancel="isAddingFromUrl = false"
     />
     <!-- Add From Url Popup -->
+    <v-dialog
+      v-model="closeConfirm"
+      persistent
+      width="400"
+    >
+      <v-alert
+        border="left"
+        colored-border
+        type="error"
+        elevation="2"
+      >
+        <v-row class="flex-column">
+          <v-col class="grow">
+            <h3>Are you sure you want to close without saving the image?</h3>
+          </v-col>
+          <v-col class="shrink d-flex justify-end">
+            <v-btn
+              @click="closeConfirm = false"
+            >
+              No
+            </v-btn>
+            <v-btn
+              class="ml-4"
+              color="error"
+              @click="onCloseCropping"
+            >
+              Yes
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-alert>
+    </v-dialog>
 
     <v-dialog
       v-model="removeConfirm"
@@ -485,21 +516,83 @@
       </v-alert>
     </v-dialog>
     <!-- Delete Confirmation Popup -->
+
+    <!-- Image cropping tool -->
+    <v-dialog
+      v-model="cropper.visible"
+      class="cropper-modal"
+      max-width="500px"
+      persistent
+    >
+      <v-card>
+        <v-card-title
+          class="headline grey lighten-2"
+          primary-title
+        >
+          Please select area to show users
+          <v-spacer></v-spacer>
+          <v-icon
+            @click="closeConfirm = true"
+            class="close-icon"
+          >mdi-close</v-icon>
+        </v-card-title>
+
+          <Cropper
+            ref="cropper"
+            class="cropper"
+            :src="cropper.src"
+            :stencil-props="{
+              aspectRatio
+            }"
+          />
+
+        <v-card-actions class="justify-space-around">
+          <v-btn
+            outlined
+            color="primary"
+            :disabled="aspectRatio === 7/10"
+            @click="saveOriginalImage"
+          >
+            Save Original Image
+          </v-btn>
+
+          <v-btn
+            color="primary"
+            @click="saveCroppedImage"
+          >
+            Save Cropped Image
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
+
+<style >
+  .v-dialog {
+    overflow-y: unset;
+  }
+</style>
 
 <script>
 import { Uploader, isSplashImageValid, isAudioUrlValid, isImageValid, isVideoUrlValid } from '../../models/Uploader';
 import AddFromUrl from './Additional/AddFromUrl.vue';
+import { Cropper } from 'vue-advanced-cropper';
+import "vue-advanced-cropper/dist/style.css";
 
 export default {
   components: {
     AddFromUrl,
+    Cropper,
   },
   props: {
     initialType: {
       type: String,
       default: '',
+    },
+    aspectRatio: {
+      type: Number,
+      default: 0
     },
     imageType: {
       type: String,
@@ -526,9 +619,15 @@ export default {
       structureTypes,
       uploader,
       uploadData: this.initialData,
+      tempData: '',
       fileName: this.initialData,
       isAddingFromUrl: false,
       removeConfirm: false,
+      closeConfirm: false,
+      cropper: {
+        src: '',
+        visible: false
+      }
     };
   },
   watch: {
@@ -562,13 +661,18 @@ export default {
           await isVideoUrlValid(url);
         }
 
-        this.uploadData = url;
+        this.tempData = url;
         this.fileName = url;
-        this.isAddingFromUrl = false;
-
-        if (updateParent) {
-          this.$emit('onAddFromUrl', this.uploadData);
+        if (url.match(/^.*\.(avi|AVI|wmv|WMV|flv|FLV|mpg|MPG|mp4|MP4|mp3|MP3|aac|AAC|wav|WAV)$/) != null) {
+          this.saveOriginalImage();
+        } else if (updateParent) {
+          this.$set(this, 'cropper', {
+            src: url + '?' + Date.now(),
+            visible: true
+          })
         }
+
+        this.isAddingFromUrl = false;
       } catch (error) {
         if (updateParent) {
           this.$emit('onNotify', {
@@ -577,6 +681,15 @@ export default {
           });
         }
       }
+    },
+
+    onCloseCropping () {
+      const inputRef = this.$refs['fileInput'];
+      if(inputRef) inputRef.value = '';
+      this.tempData = '';
+      this.fileName = this.uploadData;
+      this.cropper.visible = false;
+      this.closeConfirm = false;
     },
 
     async onAddFromDevice(event, externalFile, updateParent=true) {
@@ -588,11 +701,16 @@ export default {
         if (this.initialType === 'image') await isImageValid(file);
         if (this.imageType === 'splash' && file.type.match(/(jpeg|jpg|png)$/) != null) await isSplashImageValid(file);
 
-        this.uploadData = file;
+        this.tempData = file;
         this.fileName = file;
 
-        if (updateParent) {
-          this.$emit('onAddFromDevice', this.upload);
+        if (file.type.includes('video') || file.type.includes('audio')) {
+          this.saveOriginalImage();
+        } else if (updateParent) {
+          this.$set(this, 'cropper', {
+            src: URL.createObjectURL(file),
+            visible: true
+          })
         }
       } catch (error) {
         if (updateParent) {
@@ -619,7 +737,7 @@ export default {
 
     downloadImage () {
       const s3ImageURL = "https://mindlogger-applet-contents.s3.amazonaws.com/image/";
-      let imageUrl = typeof this.uploadData === 'string' ? this.uploadData : this.uploadData.name;
+      let imageUrl = typeof this.fileName === 'string' ? this.fileName : this.fileName.name;
 
       if (!imageUrl.includes('https://')) {
         imageUrl = s3ImageURL + imageUrl;
@@ -634,7 +752,7 @@ export default {
       })
         .then((response) => response.blob())
         .then((blob) => {
-          saveAs(blob, this.getFileName(this.fileName));
+          saveAs(blob, this.getFileName(this.uploadData));
         });
 
     },
@@ -679,6 +797,35 @@ export default {
       this.removeConfirm = false;
     },
 
+    saveOriginalImage() {
+      this.uploadData = this.tempData;
+      if (typeof this.fileName == 'string') {
+        this.$emit('onAddFromUrl', this.uploadData);
+      } else {
+        this.$emit('onAddFromDevice', this.upload);
+      }
+      this.cropper.visible = false;
+    },
+
+    saveCroppedImage() {
+      this.uploadData = this.tempData;
+      const { coordinates, canvas, } = this.$refs.cropper.getResult();
+      const image = canvas.toBlob(blob => {
+        let fileName;
+        if (typeof this.uploadData !== "string") {
+          fileName = this.uploadData.name;
+        } else {
+          const values = this.uploadData.split('/');
+          fileName = values[values.length - 1];
+        }
+        const file = new File([blob], fileName, { type: 'image/jpeg', lastModified: Date.now() });
+        console.log('file', file)
+        this.uploadData = file;
+
+        this.$emit('onAddFromDevice', this.upload);
+      }, 'image/jpeg');
+      this.cropper.visible = false;
+    }
   },
 }
 </script>
@@ -744,5 +891,15 @@ export default {
 
 .from-url:hover {
   background-color: rgba(0, 0, 0, 0.04);
+}
+
+.close-icon {
+  cursor: pointer;
+}
+
+.cropper {
+  width: 100%;
+  height: 400px;
+  background: black;
 }
 </style>

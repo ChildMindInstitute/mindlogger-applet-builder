@@ -131,7 +131,7 @@
           </template>
           <span v-if="show">
             <span v-if="currentActivity.hasVariable">This activity contains variables and cannot be a one page assessment.</span>
-            <span v-else>This feature is for webapp only.</span>
+            <span v-else>This feature is for webapp(radio, checkbox, slider, cumulative, text, and age) only.</span>
           </span>
         </v-tooltip>
       </v-row>
@@ -144,6 +144,7 @@
           style="max-width: 300px"
           initialType="video_or_image"
           :initialData="splash"
+          :aspectRatio="7/10"
           imageType="splash"
           initialTitle="Splash Screen"
           @onAddFromUrl="onAddMediaFromUrl($event, 'splash')"
@@ -158,6 +159,7 @@
           :initialType="'image'"
           :initialData="activityImage"
           :initialTitle="'Activity Image'"
+          :aspectRatio="1/1"
           @onAddFromUrl="onAddMediaFromUrl($event, 'activityImage')"
           @onAddFromDevice="loading = true; onAddMediaFromDevice($event, 'activityImage');"
           @onRemove="onRemoveMedia('activityImage')"

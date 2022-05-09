@@ -15,8 +15,41 @@
       </span>
       <v-spacer />
       <v-card-actions>
+        <!-- <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              v-if="item.allowEdit"
+              icon
+              v-bind="attrs"
+              v-on="on"
+              @click="addItemHeader(itemIndex)"
+            >
+              <v-icon color="grey lighten-1">
+                book
+              </v-icon>
+            </v-btn>
+          </template>
+          <span>Add Header</span>
+        </v-tooltip>
+
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              v-if="item.allowEdit"
+              icon
+              v-bind="attrs"
+              v-on="on"
+              @click="addItemSection(itemIndex)"
+            >
+              <v-icon color="grey lighten-1">
+                light
+              </v-icon>
+            </v-btn>
+          </template>
+          <span>Add Section</span>
+        </v-tooltip> -->
         <v-tooltip
-          v-if="item.allowEdit"
+          v-if="item.allowEdit && item.inputType != 'cumulativeScore'"
           top
         >
           <template v-slot:activator="{ on }">
@@ -36,7 +69,7 @@
         </v-tooltip>
 
         <v-tooltip
-          v-if="item.allowEdit"
+          v-if="item.allowEdit && item.inputType != 'cumulativeScore'"
           top
         >
           <template v-slot:activator="{ on }">
@@ -135,9 +168,7 @@
           class="ml-4 move-icon dragging-handle"
           icon
         >
-          <v-icon color="grey lighten-1">
-            mdi-dots-vertical
-          </v-icon>
+          <img class="px-2 pt-2 drag-indicator" :src="baseImageURL + 'drag_indicator.png'" />
         </v-btn>
       </v-card-actions>
     </v-card-title>
@@ -319,7 +350,7 @@
           </v-select>
         </v-col>
         <v-col
-          v-if="item.inputType !== 'radio' && item.inputType !== 'checkbox' && item.inputType !== 'slider' && item.inputType !== 'text' && item.inputType !== 'cumulativeScore' && item.inputType !== 'ageSelector'"
+          v-if="!webItems.includes(item.inputType)"
           class="d-flex align-center red--text"
         >
           This item is only available for use in mobile version of MindLogger.
@@ -383,6 +414,27 @@
         @updateTimer="updateTimer"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
+      />
+
+      <DropdownListBuilder
+        v-if="item.inputType === 'dropdownList'"
+        :key="`${baseKey}-dropdownList`"
+        :is-skippable-item="skippable"
+        :initial-response-options="item.responseOptions"
+        :initial-item-data="item.options"
+        :item-templates="itemTemplates"
+        :has-prize-activity="hasPrizeActivity"
+        :is-reviewer-activity="isReviewerActivity"
+        :initial-is-optional-text="item.isOptionalText"
+        @openPrize="setTokenPrizeModalStatus(true)"
+        @removeTemplate="onRemoveTemplate"
+        @updateTemplates="onUpdateTemplates"
+        @updateOptions="updateOptions"
+        @updateAllow="updateAllow"
+        @updateOptionalText="updateOptionalText"
+        @updateResponseOptions="updateResponseOptions"
+        @loading="loading = $event"
+        @notify="notify = $event"
       />
 
       <TextBuilder
@@ -472,6 +524,19 @@
         @updateTimer="updateTimer"
         @updateOptions="updateOptions"
       />
+<!-- 
+      <DurationPicker
+        v-if="item.inputType === 'duration'"
+        :key="`${baseKey}-duration`"
+        :initial-is-optional-text="item.isOptionalText"
+        :initial-response-options="item.responseOptions"
+        :initial-item-data="item.options"
+        :is-skippable-item="skippable"
+        @updateOptions="updateOptions"
+        @updateOptionalText="updateOptionalText"
+        @updateResponseOptions="updateResponseOptions"
+        @updateAllow="updateAllow"
+      /> -->
 
       <TimeRangeBuilder
         v-if="item.inputType === 'timeRange'"
@@ -602,6 +667,12 @@
         :items="currentActivity.items"
         :activity="currentActivity"
         :initial-item-data="item"
+        :allow-edit="item.allowEdit"
+        :current-activity="currentActivity"
+        :variables-items="variablesItems"
+        :item-index="itemIndex"
+        @updateAllow="updateAllow"
+        @notify="notify = $event"
         @updateCumulativeScore="updateCumulativeScore"
       />
     </v-form>
@@ -670,6 +741,38 @@
     </v-dialog>
 
     <v-dialog
+      v-model="deleteHeaderDialog"
+      persistent
+      max-width="720"
+    >
+      <v-card>
+        <v-card-title class="headline">
+          Delete Item
+        </v-card-title>
+        <v-card-text>
+          Are you sure you want to delete?
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="primary"
+            text
+            @click="deleteHeaderDialog = false"
+          >
+            No
+          </v-btn>
+          <v-btn
+            color="primary"
+            text
+            @click="removeItemHeader()"
+          >
+            Yes
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
       v-model="removeDialog"
       persistent
       max-width="720"
@@ -722,9 +825,68 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-card
+      class="my-2 d-flex justify-space-between"
+      v-if="itemHeader || itemSection"
+    >
+      <v-container fluid>
+        <v-row>
+          <v-col
+            v-if="isHeaderAdded"
+            class="py-0"
+            sm="12"
+            cols="12"
+          >
+            <v-text-field
+              v-model="itemHeaderText"
+              color="purple darken-2"
+              :label="isHeaderAdded ? 'Header' : 'Section'"
+              :readonly="!isUpdating"
+              required
+            />
+          </v-col>
+          <v-col
+            v-if="!isHeaderAdded"
+            class="py-0"
+            sm="12"
+            cols="12"
+          >
+            <v-text-field
+              v-model="itemSectionText"
+              color="purple darken-2"
+              :label="isHeaderAdded ? 'Header' : 'Section'"
+              :readonly="!isUpdating"
+              required
+            />
+          </v-col>
+        </v-row>
+      </v-container>
+      <v-card-actions>
+        <v-btn
+          icon
+          @click="editItemHeader(itemIndex)"
+          :disabled="itemHeader === '' && itemSection === ''"
+        >
+          <v-icon
+            color="grey lighten-1"
+          >
+            {{isUpdating ? 'save' : 'edit'}}
+          </v-icon>
+        </v-btn>
+        <v-btn
+          v-if="item.allowEdit"
+          icon
+          @click="openHeaderRemoveConfirmation(itemIndex)"
+        >
+          <v-icon color="grey lighten-1">
+            mdi-delete
+          </v-icon>
+        </v-btn>
+      </v-card-actions>
+    </v-card>
   </v-card>
 </template>
-
 <style scoped>
   .move-icon {
     cursor: move;
@@ -780,6 +942,11 @@
     right: 0;
   }
 
+  .drag-indicator {
+    height: 25px;
+    margin-bottom: 8px;
+  }
+
   .item-name-edit-wrapper:hover .item-name-input,
   .item-name-edit-wrapper .item-name-input.focus {
     opacity: 1;
@@ -815,6 +982,7 @@
   .disabled-option {
     color: grey;
   }
+
 </style>
 
 <script>
@@ -824,11 +992,13 @@ import Uploader from '../Uploader.vue';
 import RadioBuilder from "./ItemBuilders/RadioBuilder.vue";
 import MarkDownBuilder from "./ItemBuilders/MarkDownBuilder.vue";
 import StackedRadioBuilder from "./ItemBuilders/StackedRadioBuilder.vue";
+import DropdownListBuilder from "./ItemBuilders/DropdownListBuilder.vue";
 import TextBuilder from "./ItemBuilders/TextBuilder.vue";
 import SliderBuilder from "./ItemBuilders/SliderBuilder.vue";
 import VideoBuilder from "./ItemBuilders/VideoBuilder.vue";
 import AgeSelectorBuilder from "./ItemBuilders/AgeSelectorBuilder.vue";
 import PhotoBuilder from "./ItemBuilders/PhotoBuilder.vue";
+// import DurationPicker from "./ItemBuilders/DurationPicker.vue";
 import TimeRangeBuilder from "./ItemBuilders/TimeRangeBuilder.vue";
 import DateBuilder from "./ItemBuilders/DateBuilder.vue";
 import DrawingBuilder from "./ItemBuilders/DrawingBuilder.vue";
@@ -856,6 +1026,7 @@ export default {
   components: {
     Uploader,
     RadioBuilder,
+    DropdownListBuilder,
     TextBuilder,
     SliderBuilder,
     VideoBuilder,
@@ -863,6 +1034,7 @@ export default {
     PhotoBuilder,
     TimeRangeBuilder,
     DateBuilder,
+    // DurationPicker,
     DrawingBuilder,
     AudioRecordBuilder,
     AudioImageRecordBuilder,
@@ -885,6 +1057,12 @@ export default {
     variablesItems: {
       type: Object,
       required: true
+    },
+    header: {
+      type: String,
+    },
+    section: {
+      type: String,
     }
   },
   data() {
@@ -912,12 +1090,21 @@ export default {
       invalidLargeText: false,
       debounceTimer: undefined,
       responseIdentifierMessage: 'By using this option, the user will be required to enter response data identifier text into the field. The text entered will identify the response data collected at that point in time. The identifier used will be filterable on the user\'s data visualization tab.',
+      webItems: ['radio', 'checkbox', 'dropdownList', 'text', 'slider', 'cumulativeScore', 'ageSelector', 'duration'],
       warningFlag: false,
       warningMsg: '',
       errorMsg: '* This item is not supported, please remove it.',
       alertFlag: false,
       alertMsg: '',
       editVariableValid: true,
+      isUpdating: false,
+      deleteHeaderDialog: false,
+      isHeaderAdded: this.header ? true: false,
+      itemHeader: this.header || "",
+      itemHeaderText: this.header || "",
+      itemSection: this.section || "",
+      itemSectionText: this.section || "",
+      actionItemIndex: 0,
     }
   },
   computed: {
@@ -928,11 +1115,32 @@ export default {
     ...mapGetters(config.MODULE_NAME,
       [
         'currentActivity',
+        'baseImageURL',
+        'currentHeaders',
         'itemInputTypes',
         'itemTemplates',
         'prizeActivity',
       ]
     ),
+
+    canAddHeader () {
+      if (this.itemHeader === "" && this.itemSection === "") {
+        return false;
+      }
+      return true;
+    },
+
+    canAddSection () {
+      if (this.itemHeader === "" && this.itemSection === "") {
+        return false;
+        // for (let i = this.itemIndex; i >= 0; i -= 1) {
+        //   if (this.currentHeaders[i]) {
+        //     return false;
+        //   }
+        // }
+      }
+      return true;
+    },
 
     isReviewerActivity () {
       return this.currentActivity.isReviewerActivity;
@@ -957,6 +1165,8 @@ export default {
     },
 
     item () {
+      // this.itemHeader = this.currentActivity.items[this.itemIndex].header;
+      // this.itemSection = this.currentActivity.items[this.itemIndex].section;
       return this.currentActivity.items[this.itemIndex];
     },
     skippable() {
@@ -1046,6 +1256,8 @@ export default {
         'duplicateItem',
         'showOrHideItem',
         'showItem',
+        'updateHeader',
+        'updateSection',
         'deleteConditional',
         'deleteItem',
         'updateItemInputType',
@@ -1078,6 +1290,85 @@ export default {
       this.showOrHideItem(index);
     },
 
+    addItemHeader (index) {
+      let headerIndex = 1;
+      this.currentActivity.items.forEach(item => {
+        if (item.header) {
+          const values = item.header.split(' ');
+
+          if (
+            values[0] === "Header" &&
+            values[1] &&
+            Number(values[1]) >= headerIndex
+          ) {
+            headerIndex = Number(values[1]) + 1
+          }
+        }
+      })
+
+      this.itemHeader = "Header " + headerIndex;
+      this.itemHeaderText = this.itemHeader;
+      this.isHeaderAdded = true;
+      this.updateHeader({ index, headerName: this.itemHeader });
+    },
+
+    editItemHeader (index) {
+      if (this.isUpdating) {
+        if (this.itemHeader) {
+          if (this.itemHeaderText) {
+            this.updateHeader({ index, headerName: this.itemHeaderText });
+            this.isUpdating = false;
+          }
+        } else {
+          if (this.itemSectionText) {
+            this.updateSection({ index, sectionName: this.itemSectionText });
+            this.isUpdating = false;
+          }
+        }
+      } else {
+        this.isUpdating = true;
+      }
+    },
+
+    openHeaderRemoveConfirmation (index) {
+      this.deleteHeaderDialog = true;
+      this.actionItemIndex = index;
+    },
+
+    removeItemHeader () {
+      if (this.itemHeader) {
+        this.updateHeader({ index: this.actionItemIndex, headerName: '' });
+        this.itemHeader = '';
+      } else {
+        this.updateSection({ index: this.actionItemIndex, sectionName: '' });
+        this.itemSection = '';
+      }
+      this.isHeaderAdded = false;
+      this.deleteHeaderDialog = false;
+    },
+
+    addItemSection (index) {
+      let sectionIndex = 1;
+
+      this.currentActivity.items.forEach(item => {
+        if (item.section) {
+          const values = item.section.split(' ');
+
+          if (
+            values[0] === "Section" &&
+            values[1] &&
+            Number(values[1]) >= sectionIndex
+          ) {
+            sectionIndex = Number(values[1]) + 1
+          }
+        }
+      })
+
+      this.itemSection = "Section " + sectionIndex;
+      this.itemSectionText = this.itemSection;
+      this.updateSection({ index, sectionName: this.itemSection });
+    },
+
     getConditionAnswer (condition) {
       if (condition.answerValue) {
         return condition.answerValue.name;
@@ -1104,8 +1395,19 @@ export default {
         item = this.currentActivity.items[item];
       }
       if (item && !item.isVis) {
+        let invalidLargeTextIndex;
         for (const citem of this.currentActivity.items) {
-          const invalidLargeTextIndex = checkItemVariableNameIndex(citem.question.text, { items: [item] });
+          if (citem.inputType === "cumulativeScore") {
+            for (const cumulativeItem of citem.cumulativeScores) {
+              const { messageInRange, messageOutRange, description } = cumulativeItem;
+              invalidLargeTextIndex = checkItemVariableNameIndex(`${messageInRange} ${messageOutRange} ${description} ${this.currentActivity.scoreOverview}`, { items: [item] });
+              if (invalidLargeTextIndex != -1) {
+                break;
+              }
+            }
+          } else {
+            invalidLargeTextIndex = checkItemVariableNameIndex(citem.question.text, { items: [item] });
+          }
           if (invalidLargeTextIndex != -1) {
             if (index > -1) {
               this.warningMsg = `By hiding ${item.name}, it will cause ${citem.name} to fail. Do you want to continue? (Please fix ${citem.name} if you choose to continue.)`;
@@ -1266,8 +1568,19 @@ export default {
     updateAllow(allowItem) {
       if (allowItem) {
         const item = this.currentActivity.items[this.itemIndex];
+        let invalidLargeTextIndex;
         for (const citem of this.currentActivity.items) {
-          const invalidLargeTextIndex = checkItemVariableNameIndex(citem.question.text, { items: [item] });
+          if (citem.inputType === "cumulativeScore") {
+            for (const cumulativeItem of citem.cumulativeScores) {
+              const { messageInRange, messageOutRange, description } = cumulativeItem;
+              invalidLargeTextIndex = checkItemVariableNameIndex(`${messageInRange} ${messageOutRange} ${description} ${this.currentActivity.scoreOverview}`, { items: [item] });
+              if (invalidLargeTextIndex != -1) {
+                break;
+              }
+            }
+          } else {
+            invalidLargeTextIndex = checkItemVariableNameIndex(citem.question.text, { items: [item] });
+          }
           if (invalidLargeTextIndex != -1) {
             this.updateItemMetaInfo({
               index: this.itemIndex,
@@ -1393,7 +1706,6 @@ export default {
         duration: 3000,
       };
     },
-
   }
 }
 </script>

@@ -211,6 +211,17 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+
+    <v-dialog
+      v-model="downloadSchemaAlert"
+      width="350"
+    >
+      <v-card>
+        <v-card-text>
+          Please update url of contexts in protocol schema, activity schema and change activity/item paths in context files after uploading content to github.
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-card>
 </template>
 
@@ -264,7 +275,8 @@ export default {
       dataAlertDialog: {
         visibility: false,
         message: ''
-      }
+      },
+      downloadSchemaAlert: false
     };
   },
   computed: {
@@ -350,52 +362,88 @@ export default {
     },
 
     downloadSchema () {
+      if (!this.appletStatus()) {
+        return ;
+      }
+
       const protocolModel = new Protocol();
       protocolModel.updateReferenceObject(this.protocol);
-
-      const schemaObj = protocolModel.getCompressedSchema();
-      const contextObj = protocolModel.getContext();
 
       var JSZip = require('jszip');
       var zip = new JSZip();
 
-      zip
-        .folder('protocols')
-        .file('schema', JSON.stringify(schemaObj, null, 2));
-      zip
-        .folder('protocols')
-        .file('context', JSON.stringify(contextObj, null, 2));
+      const procotolSchema = protocolModel.getCompressedSchema(true);
+      delete procotolSchema['_id'];
 
-      this.activities.forEach(function(activity) {
+      zip
+        .folder('protocols')
+        .file('schema', JSON.stringify(procotolSchema, null, 2));
+      zip
+        .folder('protocols')
+        .file('context', JSON.stringify(protocolModel.getContext(true), null, 2));
+
+      this.protocol.activities.forEach(function(activity) {
+        const name = Protocol.getConvertedActivityName(activity.name);
+
         const activityModel = new Activity();
-        activityModel.updateReferenceObject(activity);
 
-        const activityData = activityModel.getActivityData();
+        activityModel.updateReferenceObject({
+          ...activity,
+          items: activity.items.map(item => {
+            const itemModel = new Item();
+
+            itemModel.updateReferenceObject(item);
+            return itemModel.getItemData()
+          })
+        });
+
+        const activitySchema = activityModel.getCompressedSchema();
+
+        if (activitySchema._id) {
+          delete activitySchema._id;
+        }
 
         zip
-          .folder(`activities/${activity.name}`)
+          .folder(`activities/${name}`)
           .file(
-            `${activity.name}_schema`,
-            JSON.stringify(activityData.schema, null, 2)
+            `${name}_schema`,
+            JSON.stringify(activitySchema, null, 2)
           );
         zip
-          .folder(`activities/${activity.name}`)
+          .folder(`activities/${name}`)
           .file(
-            `${activity.name}_context`,
-            JSON.stringify(activityData.context, null, 2)
+            `${name}_context`,
+            JSON.stringify(
+              activityModel.getContext(
+                name,
+                activityModel.ref.items.filter(item => item.ui.inputType != 'cumulativeScore')
+              ), null, 2
+            )
           );
-        activity.items.forEach(function(item) {
-          const itemModel = new Item();
-          itemModel.updateReferenceObject(item);
+
+        activityModel.ref.items.forEach(function(item) {
+          if (item.ui.inputType == 'cumulativeScore') {
+            return ;
+          }
+
+          if (item['options'] && item.ui.inputType != 'stackedRadio') {
+            delete item['options'];
+          }
+
+          if (item._id) {
+            delete item._id;
+          }
 
           zip
-            .folder(`activities/${activity.name}/items`)
-            .file(`${item.name}`, JSON.stringify(itemModel.getCompressedSchema(), null, 2));
+            .folder(`activities/${name}/items`)
+            .file(`${item.name}`, JSON.stringify(item, null, 2));
         });
       });
 
       zip.generateAsync({ type: 'blob' }).then((blob) => {
         saveAs(blob, `${this.protocol.name}.zip`);
+
+        this.downloadSchemaAlert = true;
       });
     },
 
@@ -408,6 +456,8 @@ export default {
 
       if (!this.protocol.name) {
         this.dataAlertDialog.message = 'Please input applet name.';
+      } else if (!this.protocol.description) {
+        this.dataAlertDialog.message = 'Please input applet description.';
       } else if (!this.activities.length) {
         this.dataAlertDialog.message = 'Please add more than one activity.';
       }

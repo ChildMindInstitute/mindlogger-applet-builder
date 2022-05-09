@@ -484,13 +484,12 @@ export default class Activity {
     };
   }
 
-  getContext() {
-    const activityName = this.ref.name;
+  getContext(activityName = this.ref.name, items = this.ref.items) {
     const contextObj = {
       '@version': 1.1,
     };
     var isPrefixNeeded = false;
-    this.ref.items.forEach(function (item) {
+    items.forEach(function (item) {
       if ('iri' in item) {
         contextObj[item.name] = {
           '@id': item.iri,
@@ -1060,6 +1059,8 @@ export default class Activity {
         message: _.get(msg, ['reprolib:terms/message', 0, '@value']),
         outputType: _.get(msg, ['reprolib:terms/outputType', 0, '@value'], 'cumulative'),
         nextActivity: _.get(msg, ['reprolib:terms/nextActivity', 0, '@value']),
+        hideActivity: _.get(msg, ['reprolib:terms/hideActivity', 0, '@value']),
+        isRecommended: _.get(msg, ['reprolib:terms/isRecommended', 0, '@value']),
       })),
       scoreOverview: _.get(scoreOverview, [0, '@value']),
       orderList: _.get(orders, '0.@list', []).map(order => order['@id'])

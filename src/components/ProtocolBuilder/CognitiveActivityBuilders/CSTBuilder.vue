@@ -88,6 +88,7 @@
 
         <v-card-text class="mt-2">
           <MarkDownEditor
+            class="markdown-editor"
             v-model="markdown"
           />
         </v-card-text>
@@ -120,6 +121,11 @@
 .input-element {
   margin-top: 8px;
   max-width: 75px;
+}
+
+.markdown-editor /deep/ .v-note-panel {
+  max-height: 400px;
+  overflow: auto;
 }
 </style>
 
@@ -247,10 +253,7 @@ export default {
         this.updateItemMetaInfo({
           index,
           obj: {
-            question: {
-              text: this.markdown,
-              image: ''
-            }
+            markdownText: this.markdown
           }
         })
       }
@@ -261,7 +264,7 @@ export default {
 
       if (index >= 0) {
         this.dialogTitle = title;
-        this.markdown = this.items[index].question.text;
+        this.markdown = this.items[index].markdownText;
         this.dataType = type;
         this.markdownDialog = true;
       }

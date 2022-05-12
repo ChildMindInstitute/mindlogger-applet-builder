@@ -792,9 +792,12 @@ export default {
     },
 
     newActivity (index = -1, type = null) {
-      for (const menu of this.$refs.menu) {
-        menu.save();
+      if (Array.isArray(this.$refs.menu)) {
+        for (const menu of this.$refs.menu) {
+          menu.save();
+        }
       }
+
       this.$refs.mainMenu.save();
 
       const activityCount = this.activities.length;

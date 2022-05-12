@@ -33,6 +33,7 @@
           type="number"
           :min="1"
         />
+        %
       </v-col>
     </v-row>
 
@@ -177,37 +178,10 @@ export default {
 
     trialCount: {
       get() {
-        let count = 0;
-        for (const item of this.items) {
-          if (item.inputType == 'stabilityTracker') {
-            count++;
-          }
-        }
-
-        return count-1;
+        return this.getInputOption('trialNumber');
       },
       set(value) {
-        if (value < 1) {
-          return ;
-        }
-
-        if (this.trialCount > value) {
-          const count = (this.trialCount - value) * 2;
-
-          for (let index = this.items.length-1; index >= this.items.length-count; index--) {
-            this.deleteItem(index)
-          }
-        } else {
-          const count = value - this.trialCount;
-
-          const practiceIndex = this.items.length-1;
-          const markdownIndex = this.items.length-2;
-
-          for (let i = 0; i < count; i++) {
-            this.duplicateItem({ index: markdownIndex, appendToActivity: true });
-            this.duplicateItem({ index: practiceIndex, appendToActivity: true });
-          }
-        }
+        return this.updateInputOption('trialNumber', value, 2);
       }
     },
   },
@@ -231,10 +205,10 @@ export default {
       return 0;
     },
 
-    updateInputOption(name, value) {
+    updateInputOption(name, value, itemIndex = -1) {
       for (let i = 0; i < this.items.length; i++) {
         const item = this.items[i];
-        if (item.inputType == 'stabilityTracker') {
+        if (item.inputType == 'stabilityTracker' && (itemIndex == -1 || itemIndex == i)) {
           this.updateItemMetaInfo({
             index: i,
             obj: {

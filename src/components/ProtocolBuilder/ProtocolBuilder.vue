@@ -165,6 +165,7 @@
           <v-spacer />
           <v-menu
             top
+            ref="mainMenu"
             :close-on-content-click="false"
           >
             <template
@@ -255,6 +256,7 @@
                 <v-card-actions>
                   <v-menu
                     top
+                    ref="menu"
                     :close-on-content-click="false"
                   >
                     <template
@@ -790,6 +792,11 @@ export default {
     },
 
     newActivity (index = -1, type = null) {
+      for (const menu of this.$refs.menu) {
+        menu.save();
+      }
+      this.$refs.mainMenu.save();
+
       const activityCount = this.activities.length;
 
       this.addActivity({ index, type });

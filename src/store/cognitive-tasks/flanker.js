@@ -500,7 +500,7 @@ export default {
       ]
     },
     {
-      name: "next-instructions",
+      name: "test2-instructions",
       question: "## Instructions\nPress the Next button to start next block.",
       description: "Instructions for the Practice Phase",
       options: {options: []},
@@ -796,7 +796,7 @@ export default {
       ]
     },
     {
-      name: "next-instructions",
+      name: "test3-instructions",
       question: "## Instructions\nPress the Next button to start next block.",
       description: "Instructions for the Practice Phase",
       options: {options: []},

@@ -10,6 +10,7 @@
           class="mx-2 input-element"
           type="number"
           :min="1"
+          :error-messages="trialCount <= 0 || trialCount % 1 !== 0 ? 'Please enter a positive integer' : ''"
         />
       </v-col>
 
@@ -20,6 +21,7 @@
           class="mx-2 input-element"
           type="number"
           :min="1"
+          :error-messages="durationMins <= 0 || durationMins % 1 !== 0 ? 'Please enter a positive integer' : ''"
         />
 
         minutes
@@ -32,7 +34,9 @@
           class="mx-2 input-element"
           type="number"
           :min="1"
+          :error-messages="lambdaSlope <= 0 || lambdaSlope % 1 !== 0 || lambdaSlope > 100 ? 'Please enter an integer between 1 and 100' : ''"
         />
+        %
       </v-col>
     </v-row>
 
@@ -87,6 +91,7 @@
 
         <v-card-text class="mt-2">
           <MarkDownEditor
+            class="markdown-editor"
             v-model="markdown"
           />
         </v-card-text>
@@ -118,7 +123,12 @@
 
 .input-element {
   margin-top: 8px;
-  max-width: 75px;
+  max-width: 100px;
+}
+
+.markdown-editor /deep/ .v-note-panel {
+  max-height: 400px;
+  overflow: auto;
 }
 </style>
 
@@ -137,7 +147,7 @@ export default {
       markdown: '',
       dialogTitle: '',
       markdownDialog: false,
-      dataType: ''
+      dataType: '',
     }
   },
 
@@ -177,37 +187,10 @@ export default {
 
     trialCount: {
       get() {
-        let count = 0;
-        for (const item of this.items) {
-          if (item.inputType == 'stabilityTracker') {
-            count++;
-          }
-        }
-
-        return count-1;
+        return this.getInputOption('trialNumber');
       },
       set(value) {
-        if (value < 1) {
-          return ;
-        }
-
-        if (this.trialCount > value) {
-          const count = (this.trialCount - value) * 2;
-
-          for (let index = this.items.length-1; index >= this.items.length-count; index--) {
-            this.deleteItem(index)
-          }
-        } else {
-          const count = value - this.trialCount;
-
-          const practiceIndex = this.items.length-1;
-          const markdownIndex = this.items.length-2;
-
-          for (let i = 0; i < count; i++) {
-            this.duplicateItem({ index: markdownIndex, appendToActivity: true });
-            this.duplicateItem({ index: practiceIndex, appendToActivity: true });
-          }
-        }
+        return this.updateInputOption('trialNumber', value, 2);
       }
     },
   },
@@ -231,10 +214,10 @@ export default {
       return 0;
     },
 
-    updateInputOption(name, value) {
+    updateInputOption(name, value, itemIndex = -1) {
       for (let i = 0; i < this.items.length; i++) {
         const item = this.items[i];
-        if (item.inputType == 'stabilityTracker') {
+        if (item.inputType == 'stabilityTracker' && (itemIndex == -1 || itemIndex == i)) {
           this.updateItemMetaInfo({
             index: i,
             obj: {
@@ -273,10 +256,7 @@ export default {
         this.updateItemMetaInfo({
           index,
           obj: {
-            question: {
-              text: this.markdown,
-              image: ''
-            }
+            markdownText: this.markdown
           }
         })
       }
@@ -287,7 +267,7 @@ export default {
 
       if (index >= 0) {
         this.dialogTitle = title;
-        this.markdown = this.items[index].question.text;
+        this.markdown = this.items[index].markdownText;
         this.dataType = type;
         this.markdownDialog = true;
       }

@@ -10,6 +10,7 @@
           class="mx-2 input-element"
           type="number"
           :min="1"
+          :error-messages="trialCount <= 0 || trialCount % 1 !== 0 ? 'Please enter a positive integer' : ''"
         />
       </v-col>
 
@@ -20,6 +21,7 @@
           class="mx-2 input-element"
           type="number"
           :min="1"
+          :error-messages="durationMins <= 0 || durationMins % 1 !== 0 ? 'Please enter a positive integer' : ''"
         />
 
         minutes
@@ -32,6 +34,7 @@
           class="mx-2 input-element"
           type="number"
           :min="1"
+          :error-messages="lambdaSlope <= 0 || lambdaSlope % 1 !== 0 || lambdaSlope > 100 ? 'Please enter an integer between 1 and 100' : ''"
         />
         %
       </v-col>
@@ -120,7 +123,7 @@
 
 .input-element {
   margin-top: 8px;
-  max-width: 75px;
+  max-width: 100px;
 }
 
 .markdown-editor /deep/ .v-note-panel {
@@ -144,7 +147,7 @@ export default {
       markdown: '',
       dialogTitle: '',
       markdownDialog: false,
-      dataType: ''
+      dataType: '',
     }
   },
 

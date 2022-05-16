@@ -1564,6 +1564,30 @@ export default class Item {
       return false;
     }
 
+    if (item.inputType == "stabilityTracker") {
+      const getInputOption = (name) => {
+        const inputOption = item.inputOptions.find(option => option['schema:name'] == name);
+        if (inputOption) {
+          return inputOption['schema:value'];
+        }
+
+        return '';
+      }
+
+      const phaseType = getInputOption('phaseType');
+      const durationMins = getInputOption('durationMins');
+      const lambdaSlope = getInputOption('lambdaSlope');
+      const trialNumber = getInputOption('trialNumber');
+
+      if (durationMins%1 !== 0 || lambdaSlope%1 !== 0 || phaseType == 'challenge-phase' && trialNumber%1 !== 0) {
+        return false;
+      }
+
+      if (durationMins <= 0 || lambdaSlope <= 0 || lambdaSlope > 100 || phaseType == 'challenge-phase' && trialNumber <= 0) {
+        return false;
+      }
+    }
+
     if (item.inputType === "ageSelector"
       && (item.options.minAge === "" || item.options.maxAge === "")) {
       return false;

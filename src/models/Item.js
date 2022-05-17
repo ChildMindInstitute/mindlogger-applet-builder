@@ -1441,7 +1441,7 @@ export default class Item {
 
         if (name) modifiedOption[NAME] = name;
 
-        if (value) modifiedOption[VALUE] = value;
+        if (value !== undefined) modifiedOption[VALUE] = value;
 
         if (contentUrl) modifiedOption[CONTENT_URL] = contentUrl;
 

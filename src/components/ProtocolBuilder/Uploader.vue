@@ -540,6 +540,9 @@
           <Cropper
             ref="cropper"
             class="cropper"
+            :canvas="{
+              fillColor: 'white'
+            }"
             :src="cropper.src"
             :stencil-props="{
               aspectRatio

@@ -1583,6 +1583,10 @@ export default class Item {
         return false;
       }
 
+      if (durationMins.toString().length > 2 || trialNumber.toString().length > 2) {
+        return false;
+      }
+
       if (durationMins <= 0 || lambdaSlope <= 0 || lambdaSlope > 100 || phaseType == 'challenge-phase' && trialNumber <= 0) {
         return false;
       }

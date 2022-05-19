@@ -10,7 +10,7 @@
           class="mx-2 input-element"
           type="number"
           :min="1"
-          :error-messages="trialCount <= 0 || trialCount % 1 !== 0 ? 'Please enter a positive integer' : ''"
+          :error-messages="trialCount <= 0 || trialCount % 1 !== 0 || trialCount >= 100 ? 'Please enter an integer between 1 and 99' : ''"
         />
       </v-col>
 
@@ -21,7 +21,7 @@
           class="mx-2 input-element"
           type="number"
           :min="1"
-          :error-messages="durationMins <= 0 || durationMins % 1 !== 0 ? 'Please enter a positive integer' : ''"
+          :error-messages="durationMins <= 0 || durationMins % 1 !== 0 || durationMins >= 100 ? 'Please enter an integer between 1 and 99' : ''"
         />
 
         minutes

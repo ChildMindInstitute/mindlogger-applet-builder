@@ -9,7 +9,7 @@ export default {
       question: "## General Instructions\n\n\n You will see arrows presented at the center of the screen that point either to the left ‘<’ or right ‘>’.\n Press the left button if the arrow is pointing to the left ‘<’ or press the right button if the arrow is pointing to the right ‘>’.\n These arrows will appear in the center of a line of other items. Sometimes, these other items will be arrows pointing in the same direction, e.g.. ‘> > > > >’, or in the opposite direction, e.g. ‘< < > < <’.\n Your job is to respond to the central arrow, no matter what direction the other arrows are pointing.\n For example, you would press the left button for both ‘< < < < <’, and ‘> > < > >’ because the middle arrow points to the left.\n Finally, in some trials dashes ‘ - ’ will appear beside the central arrow.\n Again, respond only to the direction of the central arrow. Please respond as quickly and accurately as possible.",
       description: "Instructions for the Visual Stimulus Response widget",
       ui: {
-        inputType: "markdown-message",
+        inputType: "markdownMessage",
         allow: ["disableBack"]
       }
     },
@@ -18,7 +18,7 @@ export default {
       question: "## Instructions\n\nNow you will have a chance to practice the task before moving on to the test phase.\nRemember to respond only to the central arrow\n",
       description: "Instructions for the Practice Phase",
       ui: {
-        inputType: "markdown-message",
+        inputType: "markdownMessage",
         allow: ["disableBack"]
       }
     },
@@ -209,7 +209,7 @@ export default {
       question: "## Test Instructions\n\nGood job on the practice blocks.\nYou can now move on to the test blocks.\nYou will do the same task as in the practice, responding to the direction of the central arrow.\nYou will complete 3 blocks, each about 3-5 minutes long.\nYou will have  a short break in between these blocks\n",
       description: "Instructions for the Practice Phase",
       ui: {
-        inputType: "markdown-message",
+        inputType: "markdownMessage",
         allow: ["disableBack"]
       }
     },
@@ -505,7 +505,7 @@ export default {
       description: "Instructions for the Practice Phase",
       options: {options: []},
       ui: {
-        inputType: "markdown-message",
+        inputType: "markdownMessage",
         allow: ["disableBack"]
       }
     },
@@ -801,7 +801,7 @@ export default {
       description: "Instructions for the Practice Phase",
       options: {options: []},
       ui: {
-        inputType: "markdown-message",
+        inputType: "markdownMessage",
         allow: ["disableBack"]
       }
     },

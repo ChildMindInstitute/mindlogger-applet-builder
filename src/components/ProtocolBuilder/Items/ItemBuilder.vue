@@ -1223,6 +1223,11 @@ export default {
           this.currentActivity.hasVariable = false;
         }
 
+        if (!text) {
+          this.invalidLargeText = true;
+          this.errorMsg = '';
+        }
+
         this.updateItemMetaInfo({
           index: this.itemIndex,
           obj: { valid: !this.invalidLargeText },

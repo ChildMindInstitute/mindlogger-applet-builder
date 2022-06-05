@@ -300,6 +300,10 @@ export default class Item {
       || this.ref.inputType === "markdownMessage"
       || this.ref.inputType === "video"
       || this.ref.inputType === "timeRange") {
+      if (this.ref.responseOptions) {
+        return this.ref.responseOptions;
+      }
+
       return {
         "removeBackOption": this.ref.options.removeBackOption,
       }

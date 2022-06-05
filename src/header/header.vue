@@ -15,172 +15,177 @@
 
       <small style="margin-right: 10px" v-if="nodeEnv != 'production'">v{{ version }}</small>
 
-      <v-tooltip
-        v-if="currentActivity"
-        bottom
-      >
-        <template v-slot:activator="{ on }">
-          <v-btn
-            :color="currentScreen == config.ITEM_SCREEN ? 'primary' : ''"
-            class="mx-1"
-            :class="itemStatus ? '' : 'invalid'"
-            @click="viewItems"
-            v-on="on"
-          >
-            <img
-              v-show="currentScreen === config.ITEM_SCREEN"
-              height="25"
-              alt=""
-              :src="baseImageURL + 'header-icons/white/items.png'"
+      <span :key="currentActivity && currentActivity.timestamp || 1">
+        <v-tooltip
+          v-if="currentActivity"
+          bottom
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              :color="currentScreen == config.ITEM_SCREEN ? 'primary' : ''"
+              class="mx-1"
+              :class="itemStatus ? '' : 'invalid'"
+              @click="viewItems"
+              v-on="on"
             >
-            <img
-              v-show="currentScreen !== config.ITEM_SCREEN"
-              height="25"
-              alt=""
-              :src="baseImageURL + 'header-icons/black/items.png'"
-            >
-          </v-btn>
-        </template>
-        <span>Item List</span>
-      </v-tooltip>
+              <img
+                v-show="currentScreen === config.ITEM_SCREEN"
+                height="25"
+                alt=""
+                :src="baseImageURL + 'header-icons/white/items.png'"
+              >
+              <img
+                v-show="currentScreen !== config.ITEM_SCREEN"
+                height="25"
+                alt=""
+                :src="baseImageURL + 'header-icons/black/items.png'"
+              >
+            </v-btn>
+          </template>
+          <span>Item List</span>
+        </v-tooltip>
 
-      <v-tooltip
-        v-if="currentActivity"
-        bottom
-      >
-        <template v-slot:activator="{ on }">
-          <v-btn
-            :color="currentScreen == config.CONDITIONAL_SCREEN ? 'primary' : ''"
-            class="mx-1"
-            :class="onePageAssessment ? 'disabled' : conditionalStatus ? '' : 'invalid'"
-            @click="!onePageAssessment ? viewConditionalLogic() : ''"
-            v-on="on"
-          >
-            <img
-              v-show="currentScreen === config.CONDITIONAL_SCREEN"
-              height="25"
-              alt=""
-              :src="baseImageURL + 'header-icons/white/conditional-icon.png'"
+        <v-tooltip
+          v-if="currentActivity && currentActivity.activityType == 'NORMAL'"
+          bottom
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              :color="currentScreen == config.CONDITIONAL_SCREEN ? 'primary' : ''"
+              class="mx-1"
+              :class="onePageAssessment ? 'disabled' : conditionalStatus ? '' : 'invalid'"
+              @click="!onePageAssessment ? viewConditionalLogic() : ''"
+              v-on="on"
             >
-            <img
-              v-show="currentScreen !== config.CONDITIONAL_SCREEN"
-              height="25"
-              alt=""
-              :src="baseImageURL + 'header-icons/black/conditional-icon.png'"
-            >
-          </v-btn>
-        </template>
-        <span
-          v-if="!onePageAssessment"
-        >Conditional Logic</span>
-        <span
-          v-else
-        >Conditional logic is not available when the one-page activity is turned on</span>
-      </v-tooltip>
+              <img
+                v-show="currentScreen === config.CONDITIONAL_SCREEN"
+                height="25"
+                alt=""
+                :src="baseImageURL + 'header-icons/white/conditional-icon.png'"
+              >
+              <img
+                v-show="currentScreen !== config.CONDITIONAL_SCREEN"
+                height="25"
+                alt=""
+                :src="baseImageURL + 'header-icons/black/conditional-icon.png'"
+              >
+            </v-btn>
+          </template>
+          <span
+            v-if="!onePageAssessment"
+          >Conditional Logic</span>
+          <span
+            v-else
+          >Conditional logic is not available when the one-page activity is turned on</span>
+        </v-tooltip>
 
-      <v-tooltip
-        v-if="currentActivity"
-        bottom
-      >
-        <template v-slot:activator="{ on }">
-          <v-btn
-            :color="currentScreen == config.SUBSCALE_SCREEN ? 'primary' : ''"
-            class="mx-1"
-            :class="subScaleStatus ? '' : 'invalid'"
-            @click="viewSubScales"
-            v-on="on"
-          >
-            <img
-              v-show="currentScreen === config.SUBSCALE_SCREEN"
-              height="25"
-              alt=""
-              :src="baseImageURL + 'header-icons/white/subscale-icon.png'"
+        <v-tooltip
+          v-if="currentActivity && currentActivity.activityType == 'NORMAL'"
+          bottom
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              :color="currentScreen == config.SUBSCALE_SCREEN ? 'primary' : ''"
+              class="mx-1"
+              :class="subScaleStatus ? '' : 'invalid'"
+              @click="viewSubScales"
+              v-on="on"
             >
-            <img
-              v-show="currentScreen !== config.SUBSCALE_SCREEN"
-              height="25"
-              alt=""
-              :src="baseImageURL + 'header-icons/black/subscale-icon.png'"
-            >
-          </v-btn>
-        </template>
-        <span>SubScales</span>
-      </v-tooltip>
+              <img
+                v-show="currentScreen === config.SUBSCALE_SCREEN"
+                height="25"
+                alt=""
+                :src="baseImageURL + 'header-icons/white/subscale-icon.png'"
+              >
+              <img
+                v-show="currentScreen !== config.SUBSCALE_SCREEN"
+                height="25"
+                alt=""
+                :src="baseImageURL + 'header-icons/black/subscale-icon.png'"
+              >
+            </v-btn>
+          </template>
+          <span>SubScales</span>
+        </v-tooltip>
 
-      <v-tooltip
-        bottom
-      >
-        <template v-slot:activator="{ on }">
-          <v-btn
-            class="mx-1"
-            @click="saveToDashboard"
-            v-on="on"
-          >
-            <img
-              height="25"
-              alt=""
-              :src="baseImageURL + 'header-icons/black/save-icon.png'"
+        <v-tooltip
+          v-if="!viewMode"
+          bottom
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              class="mx-1"
+              @click="saveToDashboard"
+              v-on="on"
             >
-          </v-btn>
-        </template>
-        <span>Save To Dashboard</span>
-      </v-tooltip>
+              <img
+                height="25"
+                alt=""
+                :src="baseImageURL + 'header-icons/black/save-icon.png'"
+              >
+            </v-btn>
+          </template>
+          <span>Save To Dashboard</span>
+        </v-tooltip>
 
-      <v-tooltip
-        bottom
-      >
-        <template v-slot:activator="{ on }">
-          <v-btn
-            class="mx-1"
-            @click="downloadSchema"
-            v-on="on"
-          >
-            <img
-              height="25"
-              alt=""
-              :src="baseImageURL + 'header-icons/black/export-icon.png'"
+        <v-tooltip
+          v-if="!currentActivity || currentActivity.activityType == 'NORMAL'"
+          bottom
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              class="mx-1"
+              @click="downloadSchema"
+              v-on="on"
             >
-          </v-btn>
-        </template>
-        <span>Download Schema</span>
-      </v-tooltip>
+              <img
+                height="25"
+                alt=""
+                :src="baseImageURL + 'header-icons/black/export-icon.png'"
+              >
+            </v-btn>
+          </template>
+          <span>Download Schema</span>
+        </v-tooltip>
 
 
-      <v-tooltip
-        v-if="formattedOriginalProtocol"
-        bottom
-      >
-        <template v-slot:activator="{ on }">
-          <v-btn
-            class="mx-1"
-            @click="viewHistory"
-            v-on="on"
-          >
-            <img
-              height="25"
-              alt=""
-              :src="baseImageURL + 'header-icons/black/history-icon.png'"
+        <v-tooltip
+          v-if="formattedOriginalProtocol"
+          bottom
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              class="mx-1"
+              @click="viewHistory"
+              v-on="on"
             >
-          </v-btn>
-        </template>
-        <span>View History</span>
-      </v-tooltip>
-      <v-tooltip
-        bottom
-      >
-        <template v-slot:activator="{ on }">
-          <v-btn
-            class="mx-1"
-            @click="$emit('switchToLibrary')"
-            v-on="on"
-          >
-            <v-icon>
-              mdi-database-import
-            </v-icon>
-          </v-btn>
-        </template>
-        <span>Import from Library</span>
-      </v-tooltip>
+              <img
+                height="25"
+                alt=""
+                :src="baseImageURL + 'header-icons/black/history-icon.png'"
+              >
+            </v-btn>
+          </template>
+          <span>View History</span>
+        </v-tooltip>
+        <v-tooltip
+          v-if="!viewMode && (!currentActivity || currentActivity.activityType == 'NORMAL')"
+          bottom
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              class="mx-1"
+              @click="$emit('switchToLibrary')"
+              v-on="on"
+            >
+              <v-icon>
+                mdi-database-import
+              </v-icon>
+            </v-btn>
+          </template>
+          <span>Import from Library</span>
+        </v-tooltip>
+      </span>
     </v-row>
 
     <v-dialog
@@ -261,6 +266,10 @@ export default {
       type: Function,
       required: false,
       default: null,
+    },
+    viewMode: {
+      type: Boolean,
+      default: false,
     }
   },
   data () {

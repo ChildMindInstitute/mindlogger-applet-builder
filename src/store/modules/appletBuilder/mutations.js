@@ -1,6 +1,7 @@
 import Protocol from '../../../models/Protocol';
 import Activity from '../../../models/Activity';
 import Item from '../../../models/Item';
+import CognitiveTasks from '../../cognitive-tasks';
 import { getInitialProtocol } from './state';
 
 const itemMutations = {
@@ -177,7 +178,7 @@ const itemMutations = {
     state.currentActivity.items[index].section = sectionName
   },
 
-  duplicateItem(state, index) {
+  duplicateItem(state, { appendToActivity = false, index }) {
     const item = JSON.parse(JSON.stringify(state.currentActivity.items[index]));
 
     const names = state.currentActivity.items.map((item) => item.name);
@@ -194,7 +195,11 @@ const itemMutations = {
       timestamp: Date.now()
     };
 
-    state.currentActivity.items.splice(index + 1, 0, newItem);
+    if (appendToActivity) {
+      state.currentActivity.items.push(newItem);
+    } else {
+      state.currentActivity.items.splice(index + 1, 0, newItem);
+    }
   },
 
   deleteItem(state, index) {
@@ -282,46 +287,30 @@ const activityMutations = {
     state.protocol.activities[index].isVis = false;
   },
 
-  addActivity(state, { index, isABTrails }) {
+  addActivity(state, { index, type }) {
     const activityModel = new Activity;
-    let items = [];
 
-    if (isABTrails) {
+    let content = { activityType: "NORMAL" };
+
+    if (type) {
       const itemModel = new Item();
 
-      for (let i = 1; i <= 4; i += 1) {
-        const inputType = 'trail';
-        let question = 'Sample A';
+      content = JSON.parse(JSON.stringify(CognitiveTasks[type]));
+      content.valid = true;
+      content.items = content.items.map(item => itemModel.getItemBuilderData(item))
 
-        if (i === 2) {
-          question = 'Test A';
-        } else if (i === 3) {
-          question = 'Sample B';
-        } else if (i === 4) {
-          question = 'Test B';
-        }
-        let trailsItem = {
-          name: inputType + i,
-          question,
-          description: inputType + i,
-          options: {
-            options: [],
-          },
-          ui: {
-            inputType,
-            allow: []
-          }
-        };
-        const itemData = itemModel.getItemBuilderData(trailsItem);
-        itemData.valid = true;
+      const names = state.protocol.activities.map(activity => activity.name);
 
-        items.push({ ...itemData });
+      let name = content.name, suffix = 0;
+      while (names.includes(name)) {
+        suffix++;
+        name = `${content.name} (${suffix})`;
       }
+      content.name = name;
     }
 
-    const trailActivities = state.protocol.activities.filter(activity => activity["@type"].includes("ABTrails"));
     const activity = {
-      ...activityModel.getActivityBuilderData({ items, isABTrails, trailVersion: trailActivities.length + 1 }),
+      ...activityModel.getActivityBuilderData(content),
       index: index < 0 ? state.protocol.activities.length : index,
     };
 

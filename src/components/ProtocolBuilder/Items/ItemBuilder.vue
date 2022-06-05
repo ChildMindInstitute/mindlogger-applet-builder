@@ -76,7 +76,7 @@
             <v-btn
               icon
               v-on="on"
-              @click="duplicateItem(itemIndex)"
+              @click="duplicateItem({ index: itemIndex })"
             >
               <v-icon color="grey lighten-1">
                 content_copy
@@ -524,7 +524,7 @@
         @updateTimer="updateTimer"
         @updateOptions="updateOptions"
       />
-<!-- 
+<!--
       <DurationPicker
         v-if="item.inputType === 'duration'"
         :key="`${baseKey}-duration`"
@@ -1221,6 +1221,11 @@ export default {
 
         if (_.concat([], ...Object.values(this.variablesItems)).length < 1) {
           this.currentActivity.hasVariable = false;
+        }
+
+        if (!text) {
+          this.invalidLargeText = true;
+          this.errorMsg = '';
         }
 
         this.updateItemMetaInfo({

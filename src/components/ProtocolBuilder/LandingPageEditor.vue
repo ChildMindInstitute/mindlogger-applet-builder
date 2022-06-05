@@ -12,6 +12,7 @@
         <v-card-text>
           <v-container>
             <MarkDownEditor
+              class="markdown-editor"
               v-if="inputType == 'markdown'"
               v-model="markdownData"
             />
@@ -52,6 +53,13 @@
     </v-dialog>
   </v-row>
 </template>
+
+<style scoped>
+.markdown-editor /deep/ .v-note-panel {
+  max-height: 400px;
+  overflow: auto;
+}
+</style>
 
 
 <script>

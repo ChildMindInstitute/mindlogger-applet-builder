@@ -437,6 +437,10 @@ export default class Item {
       itemObj.inputOptions = this.ref.inputOptions;
     }
 
+    else if (this.ref.inputType == "stabilityTracker" || this.ref.inputType == "visual-stimulus-response") {
+      itemObj.inputOptions = this.ref.inputOptions;
+    }
+
     else if(this.ref.inputType === "audioImageRecord") {
       if(!itemObj.responseOptions['schema:image']) {
         // default image
@@ -1420,8 +1424,10 @@ export default class Item {
 
       const NAME = 'schema:name';
       const VALUE = 'schema:value';
+      const IMAGE = 'schema:image';
       const CONTENT_URL = 'schema:contentUrl';
       const TYPE = '@type';
+      const ITEM_LIST = "schema:itemListElement";
 
       inputOptions.forEach(option => {
         const modifiedOption = {};
@@ -1429,19 +1435,33 @@ export default class Item {
         const type = _.get(option, [TYPE, 0]);
         const name = _.get(option, [NAME, 0, '@value']);
         const value = _.get(option, [VALUE, 0, '@value']);
+        const itemList = _.get(option, [ITEM_LIST]);
+
         const contentUrl = option[CONTENT_URL];
 
-        if(name)
-          modifiedOption[NAME] = name;
+        if (name) modifiedOption[NAME] = name;
 
-        if(value)
-          modifiedOption[VALUE] = value;
+        if (value !== undefined) modifiedOption[VALUE] = value;
 
-        if(contentUrl)
-          modifiedOption[CONTENT_URL] = contentUrl;
+        if (contentUrl) modifiedOption[CONTENT_URL] = contentUrl;
 
-        if (type)
-          modifiedOption[TYPE] = type;
+        if (type) modifiedOption[TYPE] = type;
+
+        if (itemList) {
+          modifiedOption[ITEM_LIST] = itemList.map(item => ({
+            [NAME]: _.get(item, [NAME, 0, '@value']),
+            [VALUE]: _.get(item, [VALUE, 0, '@value']),
+            [IMAGE]: _.get(item, [IMAGE]),
+            [TYPE]: _.get(item, [TYPE, 0]),
+            responseOptions: {
+              [TYPE]: "xsd:anyURI",
+              choices: _.get(item, ['reprolib:terms/responseOptions', 0, 'schema:itemListElement'], []).map(choice => ({
+                [NAME]: _.get(choice, [NAME, 0, '@value']),
+                [VALUE]: _.get(choice, [VALUE, 0, '@value'])
+              }))
+            }
+          }))
+        }
 
         if(!_.isEmpty(modifiedOption))
           itemContent.inputOptions.push(modifiedOption);
@@ -1536,11 +1556,40 @@ export default class Item {
       || !item.question
       || (item.inputType !== "markdownMessage"
         && item.inputType !== "cumulativeScore"
+        && item.inputType !== "stabilityTracker"
         && !item.question.text)) {
       return false;
     }
     if (!/^[a-zA-Z0-9-_]+$/.test(item.name)) {
       return false;
+    }
+
+    if (item.inputType == "stabilityTracker") {
+      const getInputOption = (name) => {
+        const inputOption = item.inputOptions.find(option => option['schema:name'] == name);
+        if (inputOption) {
+          return inputOption['schema:value'];
+        }
+
+        return '';
+      }
+
+      const phaseType = getInputOption('phaseType');
+      const durationMins = getInputOption('durationMins');
+      const lambdaSlope = getInputOption('lambdaSlope');
+      const trialNumber = getInputOption('trialNumber');
+
+      if (durationMins%1 !== 0 || lambdaSlope%1 !== 0 || phaseType == 'challenge-phase' && trialNumber%1 !== 0) {
+        return false;
+      }
+
+      if (durationMins.toString().length > 2 || trialNumber.toString().length > 2) {
+        return false;
+      }
+
+      if (durationMins <= 0 || lambdaSlope <= 0 || lambdaSlope > 100 || phaseType == 'challenge-phase' && trialNumber <= 0) {
+        return false;
+      }
     }
 
     if (item.inputType === "ageSelector"

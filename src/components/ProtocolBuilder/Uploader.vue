@@ -518,8 +518,15 @@
     <!-- Delete Confirmation Popup -->
 
     <!-- Image cropping tool -->
+    <Cropper
+      v-show="false"
+      :src="cropper.src"
+      @error="onErrorCropping"
+      @ready="onReadyCropping"
+    />
+
     <v-dialog
-      v-model="cropper.visible"
+      v-model="cropper.ready"
       class="cropper-modal"
       max-width="500px"
       persistent
@@ -537,14 +544,14 @@
           >mdi-close</v-icon>
         </v-card-title>
 
-          <Cropper
-            ref="cropper"
-            class="cropper"
-            :src="cropper.src"
-            :stencil-props="{
-              aspectRatio
-            }"
-          />
+        <Cropper
+          ref="cropper"
+          class="cropper"
+          :src="cropper.src"
+          :stencil-props="{
+            aspectRatio
+          }"
+        />
 
         <v-card-actions class="justify-space-around">
           <v-btn
@@ -626,7 +633,8 @@ export default {
       closeConfirm: false,
       cropper: {
         src: '',
-        visible: false
+        active: false,
+        ready: false
       }
     };
   },
@@ -668,7 +676,8 @@ export default {
         } else if (updateParent) {
           this.$set(this, 'cropper', {
             src: url + '?' + Date.now(),
-            visible: true
+            active: true,
+            ready: false
           })
         }
 
@@ -683,12 +692,28 @@ export default {
       }
     },
 
+    onErrorCropping () {
+      this.$emit('onNotify', {
+        type: 'error',
+        message: 'Sorry, we were not able to process image. Please download image to your computer and upload from there.'
+      });
+
+      this.cropper.active = false;
+    },
+
+    onReadyCropping () {
+      if (this.cropper.active) {
+        this.cropper.ready = true;
+      }
+    },
+
     onCloseCropping () {
       const inputRef = this.$refs['fileInput'];
       if(inputRef) inputRef.value = '';
       this.tempData = '';
       this.fileName = this.uploadData;
-      this.cropper.visible = false;
+      this.cropper.active = false;
+      this.cropper.ready = false;
       this.closeConfirm = false;
     },
 
@@ -709,7 +734,8 @@ export default {
         } else if (updateParent) {
           this.$set(this, 'cropper', {
             src: URL.createObjectURL(file),
-            visible: true
+            active: true,
+            ready: false
           })
         }
       } catch (error) {
@@ -804,7 +830,9 @@ export default {
       } else {
         this.$emit('onAddFromDevice', this.upload);
       }
-      this.cropper.visible = false;
+
+      this.cropper.active = false;
+      this.cropper.ready = false;
     },
 
     saveCroppedImage() {
@@ -818,13 +846,15 @@ export default {
           const values = this.uploadData.split('/');
           fileName = values[values.length - 1];
         }
-        const file = new File([blob], fileName, { type: 'image/jpeg', lastModified: Date.now() });
-        console.log('file', file)
+
+        const file = new File([blob], fileName, { type: 'image/png', lastModified: Date.now() });
         this.uploadData = file;
 
         this.$emit('onAddFromDevice', this.upload);
-      }, 'image/jpeg');
-      this.cropper.visible = false;
+      }, 'image/png');
+
+      this.cropper.active = false;
+      this.cropper.ready = false;
     }
   },
 }

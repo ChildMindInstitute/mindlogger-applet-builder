@@ -190,7 +190,7 @@ export default {
         {
           "@type": "schema:Number",
           "schema:name": "sampleSize",
-          "schema:value": 5
+          "schema:value": 1
         },
         {
           "@type": "schema:Number",
@@ -582,7 +582,7 @@ export default {
         {
           "@type": "schema:Number",
           "schema:name": "sampleSize",
-          "schema:value": 10
+          "schema:value": 1
         },
         {
           "@type": "schema:Number",
@@ -965,7 +965,7 @@ export default {
         {
           "@type": "schema:Number",
           "schema:name": "sampleSize",
-          "schema:value": 10
+          "schema:value": 1
         },
         {
           "@type": "schema:Number",
@@ -1353,7 +1353,7 @@ export default {
         {
           "@type": "schema:Number",
           "schema:name": "sampleSize",
-          "schema:value": 10
+          "schema:value": 1
         },
         {
           "@type": "schema:Number",

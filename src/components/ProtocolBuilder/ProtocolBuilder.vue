@@ -372,7 +372,7 @@
                   </v-tooltip>
 
                   <v-tooltip
-                    v-if="activity.activityType === 'NORMAL' || activity.activityType == 'CST_GYRO' || activity.activityType == 'CST_TOUCH'"
+                    v-if="activity.activityType === 'NORMAL' || activity.activityType == 'CST_GYRO' || activity.activityType == 'CST_TOUCH' || activity.activityType == 'FLANKER'"
                     top
                   >
                     <template v-slot:activator="{ on }">

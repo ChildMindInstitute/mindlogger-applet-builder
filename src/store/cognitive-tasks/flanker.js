@@ -37,118 +37,128 @@ export default {
           "schema:numberOfItems": 6,
           "schema:itemListElement": [
             {
+              "@id": "left-con",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<<<<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": "<<<<<",
+              "schema:image": "",
               "schema:value": 0
             },
             {
+              "@id": "right-inc",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<><<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": "<<><<",
+              "schema:image": "",
               "schema:value": 1
             },
             {
+              "@id": "left-inc",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">><>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": ">><>>",
+              "schema:image": "",
               "schema:value": 0
             },
             {
+              "@id": "right-con",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">>>>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": ">>>>>",
+              "schema:image": "",
               "schema:value": 1
             },
             {
+              "@id": "left-neut",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "--<--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": "--<--",
+              "schema:image": "",
               "schema:value": 0
             },
             {
+              "@id": "right-neut",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "-->--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": "-->--",
+              "schema:image": "",
               "schema:value": 1
+            }
+          ]
+        },
+        {
+          "@type": "schema:ItemList",
+          "schema:name": "blocks",
+          "schema:numberOfItems": 5,
+          "schema:itemListElement": [
+            {
+              "schema:name": "Block 1",
+              "schema:value": 0,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 2",
+              "schema:value": 1,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 3",
+              "schema:value": 1,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 4",
+              "schema:value": 1,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 5",
+              "schema:value": 1,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            }
+          ]
+        },
+        {
+          "schema:name": "buttons",
+          "schema:itemListElement": [
+            {
+              "schema:name": "<",
+              "schema:value": 0,
+              "schema:image": ""
+            },
+            {
+              "schema:name": ">",
+              "schema:value": 1,
+              "schema:image": ""
             }
           ]
         },
@@ -189,8 +199,19 @@ export default {
         },
         {
           "@type": "schema:Number",
+          "schema:name": "fixationDuration",
+          "schema:value": 500,
+        },
+        {
+          "@type": "schema:Text",
+          "schema:name": "fixationScreen",
+          "schema:value": "-----",
+          "schema:image": ""
+        },
+        {
+          "@type": "schema:Number",
           "schema:name": "minimumAccuracy",
-          "schema:value": 75
+          "schema:value": 80
         },
         {
           "@type": "schema:Number",
@@ -225,235 +246,311 @@ export default {
         {
           "@type": "schema:ItemList",
           "schema:name": "trials",
-          "schema:numberOfItems": 12,
+          "schema:numberOfItems": 6,
           "schema:itemListElement": [
             {
+              "@id": "left-con",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<<<<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": "<<<<<",
+              "schema:image": "",
               "schema:value": 0
             },
             {
+              "@id": "right-inc",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<><<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": "<<><<",
+              "schema:image": "",
               "schema:value": 1
             },
             {
+              "@id": "left-inc",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">><>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": ">><>>",
+              "schema:image": "",
               "schema:value": 0
             },
             {
+              "@id": "right-con",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">>>>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": ">>>>>",
+              "schema:image": "",
               "schema:value": 1
             },
             {
+              "@id": "left-neut",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "--<--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": "--<--",
+              "schema:image": "",
               "schema:value": 0
             },
             {
+              "@id": "right-neut",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "-->--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": "-->--",
+              "schema:image": "",
               "schema:value": 1
+            }
+          ]
+        },
+        {
+          "@type": "schema:ItemList",
+          "schema:name": "blocks",
+          "schema:numberOfItems": 20,
+          "schema:itemListElement": [
+            {
+              "schema:name": "Block 1",
+              "schema:value": 0,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
             },
             {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<<<<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
+              "schema:name": "Block 2",
+              "schema:value": 1,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
             },
             {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<><<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
+              "schema:name": "Block 3",
+              "schema:value": 2,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
             },
             {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">><>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
+              "schema:name": "Block 4",
+              "schema:value": 3,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
             },
             {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">>>>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
+              "schema:name": "Block 5",
+              "schema:value": 4,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
             },
             {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "--<--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
+              "schema:name": "Block 6",
+              "schema:value": 5,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
             },
             {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "-->--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
+              "schema:name": "Block 7",
+              "schema:value": 6,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 8",
+              "schema:value": 7,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 9",
+              "schema:value": 8,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 10",
+              "schema:value": 9,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 11",
+              "schema:value": 10,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 12",
+              "schema:value": 11,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 13",
+              "schema:value": 12,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 14",
+              "schema:value": 13,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 15",
+              "schema:value": 14,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 16",
+              "schema:value": 15,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 17",
+              "schema:value": 16,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 18",
+              "schema:value": 17,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 19",
+              "schema:value": 18,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 20",
+              "schema:value": 19,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            }
+          ]
+        },
+        {
+          "schema:name": "buttons",
+          "schema:itemListElement": [
+            {
+              "schema:name": "<",
+              "schema:value": 0,
+              "schema:image": ""
+            },
+            {
+              "schema:name": ">",
+              "schema:value": 1,
+              "schema:image": ""
             }
           ]
         },
@@ -491,6 +588,17 @@ export default {
           "@type": "schema:Number",
           "schema:name": "trialDuration",
           "schema:value": 3000
+        },
+        {
+          "@type": "schema:Number",
+          "schema:name": "fixationDuration",
+          "schema:value": 500,
+        },
+        {
+          "@type": "schema:Text",
+          "schema:name": "fixationScreen",
+          "schema:value": "-----",
+          "schema:image": ""
         },
         {
           "@type": "schema:Number",
@@ -521,235 +629,311 @@ export default {
         {
           "@type": "schema:ItemList",
           "schema:name": "trials",
-          "schema:numberOfItems": 12,
+          "schema:numberOfItems": 6,
           "schema:itemListElement": [
             {
+              "@id": "left-con",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<<<<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": "<<<<<",
+              "schema:image": "",
               "schema:value": 0
             },
             {
+              "@id": "right-inc",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<><<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": "<<><<",
+              "schema:image": "",
               "schema:value": 1
             },
             {
+              "@id": "left-inc",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">><>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": ">><>>",
+              "schema:image": "",
               "schema:value": 0
             },
             {
+              "@id": "right-con",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">>>>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": ">>>>>",
+              "schema:image": "",
               "schema:value": 1
             },
             {
+              "@id": "left-neut",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "--<--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": "--<--",
+              "schema:image": "",
               "schema:value": 0
             },
             {
+              "@id": "right-neut",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "-->--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": "-->--",
+              "schema:image": "",
               "schema:value": 1
+            }
+          ]
+        },
+        {
+          "@type": "schema:ItemList",
+          "schema:name": "blocks",
+          "schema:numberOfItems": 20,
+          "schema:itemListElement": [
+            {
+              "schema:name": "Block 1",
+              "schema:value": 0,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
             },
             {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<<<<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
+              "schema:name": "Block 2",
+              "schema:value": 1,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
             },
             {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<><<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
+              "schema:name": "Block 3",
+              "schema:value": 2,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
             },
             {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">><>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
+              "schema:name": "Block 4",
+              "schema:value": 3,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
             },
             {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">>>>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
+              "schema:name": "Block 5",
+              "schema:value": 4,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
             },
             {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "--<--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
+              "schema:name": "Block 6",
+              "schema:value": 5,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
             },
             {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "-->--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
+              "schema:name": "Block 7",
+              "schema:value": 6,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 8",
+              "schema:value": 7,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 9",
+              "schema:value": 8,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 10",
+              "schema:value": 9,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 11",
+              "schema:value": 10,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 12",
+              "schema:value": 11,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 13",
+              "schema:value": 12,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 14",
+              "schema:value": 13,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 15",
+              "schema:value": 14,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 16",
+              "schema:value": 15,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 17",
+              "schema:value": 16,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 18",
+              "schema:value": 17,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 19",
+              "schema:value": 18,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 20",
+              "schema:value": 19,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            }
+          ]
+        },
+        {
+          "schema:name": "buttons",
+          "schema:itemListElement": [
+            {
+              "schema:name": "<",
+              "schema:value": 0,
+              "schema:image": ""
+            },
+            {
+              "schema:name": ">",
+              "schema:value": 1,
+              "schema:image": ""
             }
           ]
         },
@@ -790,6 +974,17 @@ export default {
         },
         {
           "@type": "schema:Number",
+          "schema:name": "fixationDuration",
+          "schema:value": 500,
+        },
+        {
+          "@type": "schema:Text",
+          "schema:name": "fixationScreen",
+          "schema:value": "-----",
+          "schema:image": ""
+        },
+        {
+          "@type": "schema:Number",
           "schema:name": "blockIndex",
           "schema:value": 2
         }
@@ -817,235 +1012,311 @@ export default {
         {
           "@type": "schema:ItemList",
           "schema:name": "trials",
-          "schema:numberOfItems": 12,
+          "schema:numberOfItems": 6,
           "schema:itemListElement": [
             {
+              "@id": "left-con",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<<<<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": "<<<<<",
+              "schema:image": "",
               "schema:value": 0
             },
             {
+              "@id": "right-inc",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<><<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": "<<><<",
+              "schema:image": "",
               "schema:value": 1
             },
             {
+              "@id": "left-inc",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">><>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": ">><>>",
+              "schema:image": "",
               "schema:value": 0
             },
             {
+              "@id": "right-con",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">>>>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": ">>>>>",
+              "schema:image": "",
               "schema:value": 1
             },
             {
+              "@id": "left-neut",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "--<--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": "--<--",
+              "schema:image": "",
               "schema:value": 0
             },
             {
+              "@id": "right-neut",
               "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "-->--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
+              "schema:name": "-->--",
+              "schema:image": "",
               "schema:value": 1
+            }
+          ]
+        },
+        {
+          "@type": "schema:ItemList",
+          "schema:name": "blocks",
+          "schema:numberOfItems": 20,
+          "schema:itemListElement": [
+            {
+              "schema:name": "Block 1",
+              "schema:value": 0,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
             },
             {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<<<<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
+              "schema:name": "Block 2",
+              "schema:value": 1,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
             },
             {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<><<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
+              "schema:name": "Block 3",
+              "schema:value": 2,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
             },
             {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">><>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
+              "schema:name": "Block 4",
+              "schema:value": 3,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
             },
             {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">>>>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
+              "schema:name": "Block 5",
+              "schema:value": 4,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
             },
             {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "--<--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
+              "schema:name": "Block 6",
+              "schema:value": 5,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
             },
             {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "-->--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
+              "schema:name": "Block 7",
+              "schema:value": 6,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 8",
+              "schema:value": 7,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 9",
+              "schema:value": 8,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 10",
+              "schema:value": 9,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 11",
+              "schema:value": 10,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 12",
+              "schema:value": 11,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 13",
+              "schema:value": 12,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 14",
+              "schema:value": 13,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 15",
+              "schema:value": 14,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 16",
+              "schema:value": 15,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 17",
+              "schema:value": 16,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 18",
+              "schema:value": 17,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 19",
+              "schema:value": 18,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            },
+            {
+              "schema:name": "Block 20",
+              "schema:value": 19,
+              "order": [
+                "left-con",
+                "right-con",
+                "left-inc",
+                "right-inc",
+                "left-neut",
+                "right-neut"
+              ]
+            }
+          ]
+        },
+        {
+          "schema:name": "buttons",
+          "schema:itemListElement": [
+            {
+              "schema:name": "<",
+              "schema:value": 0,
+              "schema:image": ""
+            },
+            {
+              "schema:name": ">",
+              "schema:value": 1,
+              "schema:image": ""
             }
           ]
         },
@@ -1088,6 +1359,17 @@ export default {
           "@type": "schema:Number",
           "schema:name": "trialDuration",
           "schema:value": 3000
+        },
+        {
+          "@type": "schema:Number",
+          "schema:name": "fixationDuration",
+          "schema:value": 500,
+        },
+        {
+          "@type": "schema:Text",
+          "schema:name": "fixationScreen",
+          "schema:value": "-----",
+          "schema:image": ""
         },
         {
           "@type": "schema:Number",

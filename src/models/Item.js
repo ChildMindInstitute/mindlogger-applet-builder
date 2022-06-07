@@ -1393,6 +1393,8 @@ export default class Item {
             _.get(responseOptions, [0, 'schema:maxValue', 0, '@value']),
           'schema:minValue':
             _.get(responseOptions, [0, 'schema:minValue', 0, '@value']),
+          'schema:image':
+            _.get(responseOptions, [0, 'schema:image']),
         };
       }
       if (itemType === 'drawing') {

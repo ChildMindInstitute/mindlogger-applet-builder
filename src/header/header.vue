@@ -53,8 +53,8 @@
             <v-btn
               :color="currentScreen == config.REPORT_SCREEN ? 'primary' : ''"
               class="mx-1"
-              :class="itemStatus ? '' : 'invalid'"
-              @click="viewItems"
+              :class="reportStatus ? '' : 'invalid'"
+              @click="viewReports"
               v-on="on"
             >
               <img
@@ -333,6 +333,9 @@ export default {
       'themeId',
       'originalThemeId'
     ]),
+    reportStatus () {
+      return this.currentActivity && (this.currentActivity.reports || []).every(report => report.valid);
+    },
     itemStatus () {
       return this.currentActivity && this.currentActivity.items.every(item => item.valid);
     },
@@ -487,6 +490,10 @@ export default {
 
     viewItems () {
       this.setCurrentScreen(config.ITEM_SCREEN);
+    },
+
+    viewReports () {
+      this.setCurrentScreen(config.REPORT_SCREEN);
     },
 
     appletStatus () {

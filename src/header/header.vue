@@ -51,6 +51,35 @@
         >
           <template v-slot:activator="{ on }">
             <v-btn
+              :color="currentScreen == config.REPORT_SCREEN ? 'primary' : ''"
+              class="mx-1"
+              :class="itemStatus ? '' : 'invalid'"
+              @click="viewItems"
+              v-on="on"
+            >
+              <img
+                v-show="currentScreen === config.REPORT_SCREEN"
+                height="25"
+                alt=""
+                :src="baseImageURL + 'header-icons/white/reports-icon.png'"
+              >
+              <img
+                v-show="currentScreen !== config.REPORT_SCREEN"
+                height="25"
+                alt=""
+                :src="baseImageURL + 'header-icons/black/reports-icon.png'"
+              >
+            </v-btn>
+          </template>
+          <span>Reports</span>
+        </v-tooltip>
+
+        <v-tooltip
+          v-if="currentActivity && currentActivity.activityType == 'NORMAL'"
+          bottom
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
               :color="currentScreen == config.CONDITIONAL_SCREEN ? 'primary' : ''"
               class="mx-1"
               :class="onePageAssessment ? 'disabled' : conditionalStatus ? '' : 'invalid'"

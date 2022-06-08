@@ -37,6 +37,7 @@
     "markdown-it-html5-media": "^0.7.0",
     "markdown-it-imsize": "^2.0.1",
     "mavon-editor": "^2.9.1",
+    "object-to-csv": "^1.0.5",
     "prop-types": "^15.7.2",
     "raw-loader": "^4.0.2",
     "style-loader": "^2.0.0",

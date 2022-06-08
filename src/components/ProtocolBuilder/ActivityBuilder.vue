@@ -32,6 +32,13 @@
       <CSTBuilder
       />
     </template>
+
+    <template
+      v-else-if="currentActivity.activityType == 'FLANKER'"
+    >
+      <FlankerBuilder
+      />
+    </template>
   </div>
 </template>
 
@@ -43,6 +50,7 @@ import ItemList from './Items/ItemList';
 import SubScaleList from './SubScales/SubScaleList';
 import ConditionalList from './Conditionals/ConditionalList';
 import CSTBuilder from './CognitiveActivityBuilders/CSTBuilder';
+import FlankerBuilder from './CognitiveActivityBuilders/FlankerBuilder';
 
 export default {
   components: {
@@ -51,6 +59,7 @@ export default {
     SubScaleList,
     ConditionalList,
     CSTBuilder,
+    FlankerBuilder,
   },
   data() {
     return {

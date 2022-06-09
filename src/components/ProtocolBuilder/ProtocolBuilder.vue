@@ -350,28 +350,6 @@
                   </v-tooltip>
 
                   <v-tooltip
-                    v-if="isThresholdActivity(activity)"
-                    top
-                  >
-                    <template v-slot:activator="{ on }">
-                      <v-btn
-                        icon
-                        v-on="on"
-                        @click="showOrHideActivity(activities.findIndex(act => act == activity))"
-                      >
-                        <v-icon v-if="activity.isVis" color="grey lighten-1">
-                          mdi-eye-off-outline
-                        </v-icon>
-                        <v-icon v-else color="grey lighten-1">
-                          mdi-eye-outline
-                        </v-icon>
-                      </v-btn>
-                    </template>
-
-                    <span>{{ activity.isVis ? 'Click to Show Activity' : 'Click to Hide Activity' }}</span>
-                  </v-tooltip>
-
-                  <v-tooltip
                     v-if="activity.activityType === 'NORMAL' || activity.activityType == 'CST_GYRO' || activity.activityType == 'CST_TOUCH' || activity.activityType == 'FLANKER'"
                     top
                   >
@@ -669,28 +647,6 @@ export default {
       this.validFileDlg = true;
       this.fileSuccessMsg = 'Applet About image is successfully added.';
       this.landingPageType = 'image';
-    },
-    isThresholdActivity (activity) {
-      let res = true;
-
-      this.activities.forEach(({ items }) => {
-        items.forEach(({ cumulativeScores }) => {
-          cumulativeScores.forEach(({ messages }) => {
-            messages.forEach(message => {
-              if (message.nextActivity === activity.name) {
-                res = false;
-              }
-            });
-          })
-        })
-      })
-
-      if (!res) {
-        const index = this.activities.findIndex(act => act == activity);
-        this.showActivity(index);
-      }
-
-      return res;
     },
     async onAddWatermarkFromDevice (uploadFunction) {
       this.$emit('loading', true);

@@ -38,26 +38,6 @@ export default class Activity {
       }
     }
 
-    if (initialActivityData.compute && initialActivityData.compute.length) {
-      const itemModel = new Item();
-      const cumulative = itemModel.getItemBuilderData({
-        name: 'cumulatives',
-        ui: {
-          inputType: 'cumulativeScore'
-        },
-        cumulativeScores: initialActivityData.compute.map(compute => {
-          return {
-            compute,
-            messages: initialActivityData.messages.filter(message => message.jsExpression.split(/[<>]=*\s/g)[0].trim() == compute.variableName.trim()),
-            valid: true,
-          }
-        }).filter(cumulative => cumulative.messages.length === 2),
-        valid: true,
-      });
-
-      items.push(cumulative);
-    }
-
     return {
       name: name || '',
       description: description || '',
@@ -89,6 +69,10 @@ export default class Activity {
         ...subScale,
         valid: true
       })) || [],
+      reports: (initialActivityData.reports || []).map(report => ({
+        ...report,
+        valid: true
+      })),
       finalSubScale: initialActivityData.finalSubScale || {
         lookupTable: null,
         variableName: '',
@@ -396,42 +380,40 @@ export default class Activity {
     itemOrder.forEach((item) => {
       const currentItem = this.ref.items.find(({ name }) => name === item);
 
-      if (currentItem.ui.inputType !== "cumulativeScore") {
-        const conditionalItem = this.ref.conditionalItems.find((cond) => cond.showValue && cond.showValue.name === item);
+      const conditionalItem = this.ref.conditionalItems.find((cond) => cond.showValue && cond.showValue.name === item);
 
-        let isVis = true;
+      let isVis = true;
 
-        if (conditionalItem) {
-          const operation = conditionalItem.operation === 'ANY' ? ' || ' : ' && ';
-          const visibleItems = conditionalItem.conditions.map((cond) => {
-            if (cond.activityCondition) {
-              return `${cond.stateValue.val}("${cond.ifValue}")`;
-            } else if (cond.stateValue.val === 'between') {
-              return `(${cond.ifValue.name} > ${cond.minValue} && ${cond.ifValue.name} < ${cond.maxValue})`;
-            } else if (cond.stateValue.val === 'outsideof') {
-              return `(${cond.ifValue.name} < ${cond.minValue} || ${cond.ifValue.name} > ${cond.maxValue})`;
-            } else if (cond.stateValue.val === 'includes') {
-              return `${cond.ifValue.name}.${cond.stateValue.val}(${cond.answerValue.value})`
-            } else if (cond.stateValue.val === '!includes') {
-              return `!${cond.ifValue.name}.includes(${cond.answerValue.value})`
-            } else if (cond.stateValue.val === '=') {
-              return `${cond.ifValue.name} ${cond.stateValue.val}${cond.stateValue.val} ${cond.minValue}`;
-            } else if (!cond.answerValue) {
-              return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.minValue}`;
-            } else {
-              return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.answerValue.value}`;
-            }
-          });
-          isVis = visibleItems.join(operation);
-        }
-
-        const property = {
-          variableName: item,
-          isAbout: item,
-          isVis,
-        };
-        addProperties.push(property);
+      if (conditionalItem) {
+        const operation = conditionalItem.operation === 'ANY' ? ' || ' : ' && ';
+        const visibleItems = conditionalItem.conditions.map((cond) => {
+          if (cond.activityCondition) {
+            return `${cond.stateValue.val}("${cond.ifValue}")`;
+          } else if (cond.stateValue.val === 'between') {
+            return `(${cond.ifValue.name} > ${cond.minValue} && ${cond.ifValue.name} < ${cond.maxValue})`;
+          } else if (cond.stateValue.val === 'outsideof') {
+            return `(${cond.ifValue.name} < ${cond.minValue} || ${cond.ifValue.name} > ${cond.maxValue})`;
+          } else if (cond.stateValue.val === 'includes') {
+            return `${cond.ifValue.name}.${cond.stateValue.val}(${cond.answerValue.value})`
+          } else if (cond.stateValue.val === '!includes') {
+            return `!${cond.ifValue.name}.includes(${cond.answerValue.value})`
+          } else if (cond.stateValue.val === '=') {
+            return `${cond.ifValue.name} ${cond.stateValue.val}${cond.stateValue.val} ${cond.minValue}`;
+          } else if (!cond.answerValue) {
+            return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.minValue}`;
+          } else {
+            return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.answerValue.value}`;
+          }
+        });
+        isVis = visibleItems.join(operation);
       }
+
+      const property = {
+        variableName: item,
+        isAbout: item,
+        isVis,
+      };
+      addProperties.push(property);
     });
 
     return addProperties;
@@ -441,7 +423,7 @@ export default class Activity {
     const { items, conditionalItems } = this.ref;
 
     if (!items.length) return [];
-    return items.filter(({ ui }) => ui.inputType !== "cumulativeScore").map(({ name }) => name);
+    return items.map(({ name }) => name);
   }
 
   getCompressedSchema() {
@@ -519,25 +501,6 @@ export default class Activity {
     };
   }
 
-  parseCumulative() {
-    const item = this.ref.items.find(item => item.ui.inputType === 'cumulativeScore');
-
-    let compute = [], messages = [];
-
-    if (item) {
-      item.cumulativeScores.forEach(cumulative => {
-        compute.push(cumulative.compute);
-        messages.push(...cumulative.messages);
-      })
-    }
-
-    return {
-      compute,
-      messages,
-      scoreOverview: this.ref.scoreOverview,
-    }
-  }
-
   getActivityData() {
     const schema = this.getCompressedSchema();
     const context = this.getContext();
@@ -559,10 +522,9 @@ export default class Activity {
       allowSummary: this.ref.allowSummary,
       schema: schema,
       context: context,
-      items: this.ref.items.filter(item => item.ui.inputType !== 'cumulativeScore'),
+      items: [...this.ref.items],
       conditionalItems: conditionalItems,
       subScales: this.ref.subScales,
-      ...this.parseCumulative(),
       isPrize: this.ref.isPrize,
     };
   }
@@ -728,42 +690,6 @@ export default class Activity {
               updates.push(`subscale (${oldSubScale.variableName} | ${oldSubScale.jsExpression.replaceAll(' + ', ', ')}) was removed`)
             }
           })
-
-          return updates;
-        }
-      },
-      'compute': {
-        updated: (field) => {
-          const newCumulatives = _.get(newValue, field, []);
-          const oldCumulatives = _.get(oldValue, field, []);
-          const updates = [];
-
-          oldCumulatives.forEach(oldCumulative => {
-            const newCumulative = newCumulatives.find(newCumulative => oldCumulative.variableName === newCumulative.variableName);
-            if (newCumulative) {
-              const newMessages = _.get(newValue, 'messages', []).filter(
-                message => message.jsExpression.split(/[<>]=*\s/g)[0].trim() == newCumulative.variableName.trim()
-              );
-
-              const oldMessages = _.get(oldValue, 'messages', []).filter(
-                message => message.jsExpression.split(/[<>]=*\s/g)[0].trim() == oldCumulative.variableName.trim()
-              );
-
-              if (newCumulative.jsExpression !== oldCumulative.jsExpression || JSON.stringify(oldMessages) !== JSON.stringify(newMessages) || newCumulative.description !== oldCumulative.description || newCumulative.direction !== oldCumulative.direction) {
-                updates.push(`cumulative ${oldCumulative.variableName} was updated`);
-              }
-            } else {
-              updates.push(`cumulative ${oldCumulative.variableName} was removed`);
-            }
-          });
-
-          newCumulatives.forEach(newCumulative => {
-            const oldCumulative = oldCumulatives.find(oldCumulative => oldCumulative.variableName === newCumulative.variableName);
-
-            if (!oldCumulative) {
-              updates.push(`cumulative ${newCumulative.variableName} was added`);
-            }
-          });
 
           return updates;
         }
@@ -943,8 +869,6 @@ export default class Activity {
       ['reprolib:terms/addProperties']: addProperties,
       ['reprolib:terms/subScales']: subScales,
       ['reprolib:terms/finalSubScale']: finalSubScale,
-      ['reprolib:terms/compute']: compute,
-      ['reprolib:terms/messages']: messages,
       ['reprolib:terms/scoreOverview']: scoreOverview,
       ['reprolib:terms/isPrize']: isPrize,
       ['reprolib:terms/order']: orders,
@@ -1054,20 +978,6 @@ export default class Activity {
         lookupTable: parseLookupTable(true, _.get(finalSubScale, [0, 'reprolib:terms/lookupTable'], null)),
         variableName: _.get(finalSubScale, [0, 'reprolib:terms/variableName', 0, '@value'])
       },
-      compute: Array.isArray(compute) && compute.map((exp) => ({
-        jsExpression: _.get(exp, ['reprolib:terms/jsExpression', 0, '@value']),
-        variableName: _.get(exp, ['reprolib:terms/variableName', 0, '@value']),
-        description: _.get(exp, ['schema:description', 0, '@value']),
-        direction: _.get(exp, ['reprolib:terms/direction', 0, '@value'], true),
-      })),
-      messages: Array.isArray(messages) && messages.map((msg) => ({
-        jsExpression: _.get(msg, ['reprolib:terms/jsExpression', 0, '@value']),
-        message: _.get(msg, ['reprolib:terms/message', 0, '@value']),
-        outputType: _.get(msg, ['reprolib:terms/outputType', 0, '@value'], 'cumulative'),
-        nextActivity: _.get(msg, ['reprolib:terms/nextActivity', 0, '@value']),
-        hideActivity: _.get(msg, ['reprolib:terms/hideActivity', 0, '@value']),
-        isRecommended: _.get(msg, ['reprolib:terms/isRecommended', 0, '@value']),
-      })),
       scoreOverview: _.get(scoreOverview, [0, '@value']),
       orderList: _.get(orders, '0.@list', []).map(order => order['@id'])
     };

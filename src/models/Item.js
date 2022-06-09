@@ -300,6 +300,10 @@ export default class Item {
       || this.ref.inputType === "markdownMessage"
       || this.ref.inputType === "video"
       || this.ref.inputType === "timeRange") {
+      if (this.ref.responseOptions) {
+        return this.ref.responseOptions;
+      }
+
       return {
         "removeBackOption": this.ref.options.removeBackOption,
       }
@@ -571,28 +575,28 @@ export default class Item {
     const inputOptionsListUpdate = (field) => {
 
       const oldOptions = _.get(oldValue, field, []).map(option => {
-        return { value: option['schema:value'], name: option['schema:name'] }
+        return { value: option['schema:value'], name: option['schema:name'], items: option['schema:itemListElement'] || [], image: option['schema:image'] }
       });
 
       const newOptions = _.get(newValue, field, []).map(option => {
-        return { value: option['schema:value'], name: option['schema:name'] }
+        return { value: option['schema:value'], name: option['schema:name'], items: option['schema:itemListElement'] || [], image: option['schema:image'] }
       });
 
       const removedOptions = oldOptions.filter(option => {
         return newOptions.find(newOption => {
-          return option.value === newOption.value
+          return JSON.stringify(option) === JSON.stringify(newOption)
         }) ? false : true
       });
 
       const insertedOptions = newOptions.filter(newOption => {
         return oldOptions.find(option => {
-          return option.value === newOption.value
+          return JSON.stringify(option) === JSON.stringify(newOption)
         }) ? false : true
       });
 
       return [
-        ...removedOptions.map(option => `${option.name}: ${option.value} option was removed`),
-        ...insertedOptions.map(option => `${option.name}: ${option.value} option was inserted`),
+        ...removedOptions.map(option => `${option.name} option was removed`),
+        ...insertedOptions.map(option => `${option.name} option was inserted`),
       ];
     };
 
@@ -1389,6 +1393,8 @@ export default class Item {
             _.get(responseOptions, [0, 'schema:maxValue', 0, '@value']),
           'schema:minValue':
             _.get(responseOptions, [0, 'schema:minValue', 0, '@value']),
+          'schema:image':
+            _.get(responseOptions, [0, 'schema:image']),
         };
       }
       if (itemType === 'drawing') {
@@ -1435,11 +1441,14 @@ export default class Item {
         const type = _.get(option, [TYPE, 0]);
         const name = _.get(option, [NAME, 0, '@value']);
         const value = _.get(option, [VALUE, 0, '@value']);
+        const image = _.get(option, [IMAGE]);
         const itemList = _.get(option, [ITEM_LIST]);
 
         const contentUrl = option[CONTENT_URL];
 
         if (name) modifiedOption[NAME] = name;
+
+        if (image) modifiedOption[IMAGE] = image;
 
         if (value !== undefined) modifiedOption[VALUE] = value;
 
@@ -1448,19 +1457,18 @@ export default class Item {
         if (type) modifiedOption[TYPE] = type;
 
         if (itemList) {
-          modifiedOption[ITEM_LIST] = itemList.map(item => ({
-            [NAME]: _.get(item, [NAME, 0, '@value']),
-            [VALUE]: _.get(item, [VALUE, 0, '@value']),
-            [IMAGE]: _.get(item, [IMAGE]),
-            [TYPE]: _.get(item, [TYPE, 0]),
-            responseOptions: {
-              [TYPE]: "xsd:anyURI",
-              choices: _.get(item, ['reprolib:terms/responseOptions', 0, 'schema:itemListElement'], []).map(choice => ({
-                [NAME]: _.get(choice, [NAME, 0, '@value']),
-                [VALUE]: _.get(choice, [VALUE, 0, '@value'])
-              }))
+          modifiedOption[ITEM_LIST] = itemList.map(item => {
+            const order = _.get(item, ['reprolib:terms/order', 0, '@list'], []).map(item => item['@id']);
+
+            return {
+              [NAME]: _.get(item, [NAME, 0, '@value']),
+              [VALUE]: _.get(item, [VALUE, 0, '@value']),
+              [IMAGE]: _.get(item, [IMAGE]),
+              [TYPE]: _.get(item, [TYPE, 0]),
+              order: order.length ? order : undefined,
+              '@id': _.get(item, ['@id']),
             }
-          }))
+          })
         }
 
         if(!_.isEmpty(modifiedOption))
@@ -1557,6 +1565,7 @@ export default class Item {
       || (item.inputType !== "markdownMessage"
         && item.inputType !== "cumulativeScore"
         && item.inputType !== "stabilityTracker"
+        && item.inputType !== "visual-stimulus-response"
         && !item.question.text)) {
       return false;
     }
@@ -1564,16 +1573,16 @@ export default class Item {
       return false;
     }
 
-    if (item.inputType == "stabilityTracker") {
-      const getInputOption = (name) => {
-        const inputOption = item.inputOptions.find(option => option['schema:name'] == name);
-        if (inputOption) {
-          return inputOption['schema:value'];
-        }
-
-        return '';
+    const getInputOption = (name) => {
+      const inputOption = item.inputOptions.find(option => option['schema:name'] == name);
+      if (inputOption) {
+        return inputOption['schema:value'];
       }
 
+      return '';
+    }
+
+    if (item.inputType == "stabilityTracker") {
       const phaseType = getInputOption('phaseType');
       const durationMins = getInputOption('durationMins');
       const lambdaSlope = getInputOption('lambdaSlope');

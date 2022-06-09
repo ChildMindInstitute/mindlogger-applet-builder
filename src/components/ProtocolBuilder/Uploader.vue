@@ -547,9 +547,6 @@
         <Cropper
           ref="cropper"
           class="cropper"
-          :canvas="{
-            fillColor: 'white'
-          }"
           :src="cropper.src"
           :stencil-props="{
             aspectRatio
@@ -849,12 +846,12 @@ export default {
           const values = this.uploadData.split('/');
           fileName = values[values.length - 1];
         }
-        const file = new File([blob], fileName, { type: 'image/jpeg', lastModified: Date.now() });
-        console.log('file', file)
+
+        const file = new File([blob], fileName, { type: 'image/png', lastModified: Date.now() });
         this.uploadData = file;
 
         this.$emit('onAddFromDevice', this.upload);
-      }, 'image/jpeg');
+      }, 'image/png');
 
       this.cropper.active = false;
       this.cropper.ready = false;

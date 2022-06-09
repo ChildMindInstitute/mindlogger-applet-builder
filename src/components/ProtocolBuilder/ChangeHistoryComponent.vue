@@ -7,7 +7,7 @@
       >
         Change History
       </v-card-title>
-      <v-card-text>
+      <v-card-text class="treeview">
         <v-select
           v-model="selectedVersion"
           :items="allVersions"
@@ -30,9 +30,14 @@
   </div>
 </template>
 
+<style scoped>
+.treeview {
+  max-height: 450px;
+  overflow: auto;
+}
+</style>
+
 <script>
-
-
 export default {
   props: {
     history: {

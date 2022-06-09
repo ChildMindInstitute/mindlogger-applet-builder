@@ -21,16 +21,21 @@
 
       <div
         v-for="(report, index) in reports"
-        :key="index"
+        :key="report.timestamp"
+        class="my-6"
       >
         <ScoreBuilder
           v-if="report.dataType == 'score'"
           :report="report"
+          @update="updateReport(index, $event)"
+          @deleteReport="deleteReportSection(index)"
         />
 
         <SectionBuilder
           v-else
           :report="report"
+          @update="updateReport(index, $event)"
+          @deleteReport="deleteReportSection(index)"
         />
       </div>
     </v-card-text>
@@ -73,15 +78,6 @@ export default {
     }
   },
 
-  methods: {
-    ...mapMutations(config.MODULE_NAME, [
-      'addReportSection',
-      'deleteReportSection',
-      'updateReportInfo',
-      'updateActivityMetaInfo',
-    ]),
-  },
-
   computed: {
     config () {
       return config;
@@ -113,6 +109,22 @@ export default {
         this.updateActivityMetaInfo({ allowSummary: value });
       }
     }
-  }
+  },
+
+  methods: {
+    ...mapMutations(config.MODULE_NAME, [
+      'addReportSection',
+      'deleteReportSection',
+      'updateReportInfo',
+      'updateActivityMetaInfo',
+    ]),
+
+    updateReport (index, value) {
+      this.updateReportInfo({
+        index,
+        obj: value
+      });
+    },
+  },
 }
 </script>

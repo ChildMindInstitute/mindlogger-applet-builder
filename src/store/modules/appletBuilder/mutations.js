@@ -433,7 +433,8 @@ const reportMutations = {
       message: '',
       printItems: [],
       jsExpression: '',
-      valid: false
+      valid: false,
+      timestamp: Date.now()
     };
 
     if (type == 'score') {
@@ -449,7 +450,7 @@ const reportMutations = {
 
   updateReportInfo (state, { index, obj }) {
     const currentActivity = state.currentActivity;
-    currentActivity.reports[index] = { ...obj };
+    Object.assign(currentActivity.reports[index], obj);
   },
 
   deleteReportSection (state, index) {

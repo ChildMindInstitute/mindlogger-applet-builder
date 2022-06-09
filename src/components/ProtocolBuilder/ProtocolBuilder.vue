@@ -158,8 +158,8 @@
           />
         </div>
       </v-card>
-
-      <v-card class="pb-2">
+      <ActivityFlow v-if="currentScreen === config.ACTIVITY_FLOW_SCREEN" />
+      <v-card v-else class="pb-2">
         <v-card-title>
           Activities
           <v-spacer />
@@ -488,6 +488,7 @@
 
 <script>
 import LandingPageEditor from './LandingPageEditor';
+import ActivityFlow from './ActivityFlow';
 import Uploader from './Uploader.vue';
 import Protocol from '../../models/Protocol';
 import Activity from '../../models/Protocol';
@@ -501,6 +502,7 @@ import { mapMutations, mapGetters } from 'vuex';
 export default {
   components: {
     LandingPageEditor,
+    ActivityFlow,
     Notify,
     Uploader,
     draggable,
@@ -523,6 +525,7 @@ export default {
     [
       'protocol',
       'activities',
+      'currentScreen',
       'themes',
       'themeId',
       'baseImageURL'

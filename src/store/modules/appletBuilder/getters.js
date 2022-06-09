@@ -11,8 +11,16 @@ const activityGetters = {
     return state.protocol.activities;
   },
 
+  activityFlows(state) {
+    return state.protocol.activityFlows;
+  },
+
   currentActivity(state) {
     return state.currentActivity;
+  },
+
+  currentActivityFlow(state) {
+    return state.currentActivityFlow;
   },
 
   currentHeaders(state) {

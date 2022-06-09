@@ -1,5 +1,6 @@
 import Protocol from '../../../models/Protocol';
 import Activity from '../../../models/Activity';
+import ActivityFlow from '../../../models/ActivityFlow';
 import Item from '../../../models/Item';
 import CognitiveTasks from '../../cognitive-tasks';
 import { getInitialProtocol } from './state';
@@ -211,6 +212,109 @@ const itemMutations = {
   }
 };
 
+const activityFlowMutations = {
+  addActivityFlow(state, index) {
+    const activityFlowModel = new ActivityFlow;
+    const orderList = state.protocol.activities.map(activity => activity.name);
+    const activityFlow = {
+      ...activityFlowModel.getActivityFlowBuilderData({ orderList }),
+      index: index < 0 ? state.protocol.activities.length : index,
+    };
+
+    if (index >= 0) {
+      state.protocol.activityFlows.splice(index, 0, activityFlow);
+
+      for (let i = index + 1; i < state.protocol.activityFlows.length; i++) {
+        state.protocol.activityFlows[i].index = i;
+      }
+    } else {
+      state.protocol.activityFlows.push(activityFlow);
+    }
+  },
+
+  deleteActivityFlow(state, index) {
+    state.protocol.activityFlows.splice(index, 1);
+  },
+
+  duplicateActivityFlow(state, index) {
+    const activityFlows = state.protocol.activityFlows;
+    const names = activityFlows.map((activityFlow) => activityFlow.name);
+    const activityFlow = activityFlows[index];
+
+    let suffix = 1;
+    while (names.includes(`${activityFlow.name} (${suffix})`)) {
+      suffix++;
+    }
+
+    const newActivityFlow = {
+      ...activityFlow,
+      id: null,
+      name: `${activityFlow.name} (${suffix})`,
+      index: index + 1,
+      timestamp: Date.now()
+    };
+
+    activityFlows.splice(index + 1, 0, newActivityFlow);
+
+    for (let i = index + 1; i < activityFlows.length; i += 1) {
+      activityFlows[i].index = i;
+    }
+  },
+
+  setCurrentActivityFlow(state, index) {
+    if (index < 0) {
+      state.currentActivityFlow = null;
+      return;
+    }
+    state.currentActivityFlow = state.protocol.activityFlows[index];
+  },
+
+  showOrHideActivityFlow(state, index) {
+    const isVis = !!state.protocol.activityFlows[index].isVis;
+    state.protocol.activityFlows[index].isVis = !isVis;
+  },
+
+  updateActivityFlowList(state, activityFlows) {
+    state.protocol.activityFlows = activityFlows;
+
+    for (let i = 0; i < state.protocol.activityFlows.length; i++) {
+      state.protocol.activityFlows[i].index = i;
+    }
+  },
+
+  updateActivityFlowOrder(state, activity) {
+    const { order } = state.currentActivityFlow;
+    state.currentActivityFlow.order = [...order, activity];
+  },
+
+  updateActivityFlowInfo(state, obj) {
+    if (obj.name && state.currentActivityFlow.valid) {
+      for (const existing of state.protocol.activityFlows) {
+        if (existing != state.currentActivityFlow && existing.name == state.currentActivityFlow.name) {
+          existing.valid = Activity.checkValidation(existing);
+
+          if (existing.valid) {
+            break;
+          }
+        }
+      }
+    }
+
+    Object.assign(state.currentActivityFlow, obj);
+
+    if (!obj.hasOwnProperty('valid')) {
+      state.currentActivityFlow.valid = Activity.checkValidation(state.currentActivityFlow);
+    }
+
+    for (const existing of state.protocol.activityFlows) {
+      if (existing != state.currentActivityFlow && existing.name == state.currentActivityFlow.name && existing.valid) {
+        state.currentActivityFlow.valid = false;
+        break;
+      }
+    }
+  },
+}
+
 const activityMutations = {
   setCurrentActivity (state, index) {
     if (index < 0) {
@@ -382,7 +486,7 @@ const activityMutations = {
     for (let i = 0; i < state.protocol.activities.length; i++) {
       state.protocol.activities[i].index = i;
     }
-  }
+  },
 };
 
 const subScaleMutations = {
@@ -452,6 +556,7 @@ const conditionalMutations = {
 
 export default {
   ...activityMutations,
+  ...activityFlowMutations,
   ...itemMutations,
   ...subScaleMutations,
   ...conditionalMutations,
@@ -486,7 +591,7 @@ export default {
     state.originalThemeId = themeId;
   },
 
-  setCurrentScreen (state, screen) {
+  setCurrentScreen(state, screen) {
     state.currentScreen = screen;
   },
 

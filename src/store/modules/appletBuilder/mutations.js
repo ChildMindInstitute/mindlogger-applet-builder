@@ -423,6 +423,42 @@ const subScaleMutations = {
   }
 };
 
+const reportMutations = {
+  addReportSection (state, type) {
+    const currentActivity = state.currentActivity;
+    const report = {
+      prefLabel: '',
+      id: '',
+      dataType: "section",
+      message: '',
+      printItems: [],
+      jsExpression: '',
+      valid: false
+    };
+
+    if (type == 'score') {
+      Object.assign(report, {
+        outputType: 'cumulative',
+        printItems: [],
+        conditionals: []
+      })
+    }
+
+    currentActivity.reports.push(report);
+  },
+
+  updateReportInfo (state, { index, obj }) {
+    const currentActivity = state.currentActivity;
+    currentActivity.reports[index] = { ...obj };
+  },
+
+  deleteReportSection (state, index) {
+    if (state.currentActivity) {
+      state.currentActivity.reports.splice(index, 1);
+    }
+  },
+}
+
 const conditionalMutations = {
   addConditional (state) {
     if (state.currentActivity) {
@@ -453,6 +489,7 @@ const conditionalMutations = {
 export default {
   ...activityMutations,
   ...itemMutations,
+  ...reportMutations,
   ...subScaleMutations,
   ...conditionalMutations,
 

@@ -49,7 +49,7 @@
           <span>Add Section</span>
         </v-tooltip> -->
         <v-tooltip
-          v-if="item.allowEdit && item.inputType != 'cumulativeScore'"
+          v-if="item.allowEdit"
           top
         >
           <template v-slot:activator="{ on }">
@@ -69,7 +69,7 @@
         </v-tooltip>
 
         <v-tooltip
-          v-if="item.allowEdit && item.inputType != 'cumulativeScore'"
+          v-if="item.allowEdit"
           top
         >
           <template v-slot:activator="{ on }">
@@ -164,7 +164,7 @@
         </v-tooltip>
 
         <v-btn
-          v-if="item.allowEdit && !['cumulativeScore', 'futureBehaviorTracker', 'pastBehaviorTracker'].includes(item.inputType)"
+          v-if="item.allowEdit && !['futureBehaviorTracker', 'pastBehaviorTracker'].includes(item.inputType)"
           class="ml-4 move-icon dragging-handle"
           icon
         >
@@ -195,7 +195,6 @@
           :class="{ 'focus': isItemNameEditing }"
           label="Item Name"
           :rules="nameRules"
-          :disabled="item.inputType == 'cumulativeScore'"
           required
           @focus="isItemNameEditing = true"
           @blur="isItemNameEditing = false"
@@ -218,7 +217,7 @@
           @onRemove="onRemoveHeaderImage()"
           @onNotify="loading = false; notify = $event;"
         />
-        <div v-if="item.inputType !== 'cumulativeScore'">
+        <div>
           <v-card
             v-if="isTextExpanded"
             elevation="2"
@@ -299,7 +298,7 @@
                 v-on="on"
               >
                 <v-tooltip
-                  v-if="!hasScoringItem && item.text == 'cumulativeScore' || item.text == 'tokenSummary'"
+                  v-if="item.text == 'tokenSummary'"
                   top
                 >
                   <template
@@ -318,8 +317,7 @@
                       <span>{{ item.text }}</span>
                     </div>
                   </template>
-                  <span v-if="item.text == 'cumulativeScore'">Please create an item with scores before creating this page</span>
-                  <span v-else>Please create future behavior tracker or past behavior tracker items</span>
+                  <span>Please create future behavior tracker or past behavior tracker items</span>
                 </v-tooltip>
                 <div
                   v-else
@@ -356,12 +354,6 @@
           This item is only available for use in mobile version of MindLogger.
         </v-col>
       </v-row>
-
-      <v-checkbox
-        v-if="item.inputType === 'cumulativeScore'"
-        v-model="currentActivity.allowSummary"
-        label="Allow the user to see results"
-      />
 
       <MarkDownBuilder
         v-if="item.inputType === 'markdownMessage'"
@@ -659,21 +651,6 @@
         @loading="loading = $event"
         @updateOptions="updateOptions"
         @updateAllow="updateAllow"
-      />
-
-      <CumulativeScoreBuilder
-        v-if="item.inputType === 'cumulativeScore'"
-        :key="`${baseKey}-cumulativeScore`"
-        :items="currentActivity.items"
-        :activity="currentActivity"
-        :initial-item-data="item"
-        :allow-edit="item.allowEdit"
-        :current-activity="currentActivity"
-        :variables-items="variablesItems"
-        :item-index="itemIndex"
-        @updateAllow="updateAllow"
-        @notify="notify = $event"
-        @updateCumulativeScore="updateCumulativeScore"
       />
     </v-form>
 
@@ -1006,7 +983,6 @@ import AudioRecordBuilder from "./ItemBuilders/AudioRecordBuilder.vue";
 import AudioImageRecordBuilder from "./ItemBuilders/AudioImageRecordBuilder.vue";
 import GeolocationBuilder from "./ItemBuilders/GeolocationBuilder.vue";
 import AudioStimulusBuilder from "./ItemBuilders/AudioStimulusBuilder.vue";
-import CumulativeScoreBuilder from "./ItemBuilders/CumulativeScoreBuilder.vue";
 import StackedSliderBuilder from "./ItemBuilders/StackedSliderBuilder";
 import BehaviorTracker from "./ItemBuilders/BehaviorTracker";
 import { timeScreen } from './ItemBuilders/timeScreen';
@@ -1040,7 +1016,6 @@ export default {
     AudioImageRecordBuilder,
     GeolocationBuilder,
     AudioStimulusBuilder,
-    CumulativeScoreBuilder,
     MarkDownEditor,
     MarkDownBuilder,
     StackedRadioBuilder,
@@ -1090,7 +1065,7 @@ export default {
       invalidLargeText: false,
       debounceTimer: undefined,
       responseIdentifierMessage: 'By using this option, the user will be required to enter response data identifier text into the field. The text entered will identify the response data collected at that point in time. The identifier used will be filterable on the user\'s data visualization tab.',
-      webItems: ['radio', 'checkbox', 'dropdownList', 'text', 'slider', 'cumulativeScore', 'ageSelector', 'duration'],
+      webItems: ['radio', 'checkbox', 'dropdownList', 'text', 'slider', 'ageSelector', 'duration'],
       warningFlag: false,
       warningMsg: '',
       errorMsg: '* This item is not supported, please remove it.',
@@ -1402,17 +1377,8 @@ export default {
       if (item && !item.isVis) {
         let invalidLargeTextIndex;
         for (const citem of this.currentActivity.items) {
-          if (citem.inputType === "cumulativeScore") {
-            for (const cumulativeItem of citem.cumulativeScores) {
-              const { messageInRange, messageOutRange, description } = cumulativeItem;
-              invalidLargeTextIndex = checkItemVariableNameIndex(`${messageInRange} ${messageOutRange} ${description} ${this.currentActivity.scoreOverview}`, { items: [item] });
-              if (invalidLargeTextIndex != -1) {
-                break;
-              }
-            }
-          } else {
-            invalidLargeTextIndex = checkItemVariableNameIndex(citem.question.text, { items: [item] });
-          }
+          invalidLargeTextIndex = checkItemVariableNameIndex(citem.question.text, { items: [item] });
+
           if (invalidLargeTextIndex != -1) {
             if (index > -1) {
               this.warningMsg = `By hiding ${item.name}, it will cause ${citem.name} to fail. Do you want to continue? (Please fix ${citem.name} if you choose to continue.)`;
@@ -1498,9 +1464,6 @@ export default {
       const updates = {
         inputType
       };
-      if (inputType === 'cumulativeScore') {
-        updates.name = 'cumulatives';
-      }
 
       updates.options = { options: [] };
       updates.allow = false;
@@ -1575,17 +1538,7 @@ export default {
         const item = this.currentActivity.items[this.itemIndex];
         let invalidLargeTextIndex;
         for (const citem of this.currentActivity.items) {
-          if (citem.inputType === "cumulativeScore") {
-            for (const cumulativeItem of citem.cumulativeScores) {
-              const { messageInRange, messageOutRange, description } = cumulativeItem;
-              invalidLargeTextIndex = checkItemVariableNameIndex(`${messageInRange} ${messageOutRange} ${description} ${this.currentActivity.scoreOverview}`, { items: [item] });
-              if (invalidLargeTextIndex != -1) {
-                break;
-              }
-            }
-          } else {
-            invalidLargeTextIndex = checkItemVariableNameIndex(citem.question.text, { items: [item] });
-          }
+          invalidLargeTextIndex = checkItemVariableNameIndex(citem.question.text, { items: [item] });
           if (invalidLargeTextIndex != -1) {
             this.updateItemMetaInfo({
               index: this.itemIndex,
@@ -1667,13 +1620,6 @@ export default {
         index: this.itemIndex,
         obj: { responseOptions: model.getResponseOptions() }
       })
-    },
-
-    updateCumulativeScore (scoreRules) {
-      this.updateItemMetaInfo({
-        index: this.itemIndex,
-        obj: { cumulativeScores: scoreRules }
-      });
     },
 
     onAddHeaderImageFromUrl(url) {

@@ -118,10 +118,6 @@ export default {
       text: "tokenSummary",
       icon: baseImageURL + 'item-types/token-summary.png'
     },
-    {
-      text: "cumulativeScore",
-      icon: baseImageURL + 'item-types/cumulative-icon.png',
-    },
   ],
   templates: [],
   versions: null,

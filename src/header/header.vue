@@ -513,6 +513,7 @@ export default {
             || activity.items.some(item => !item.valid)
             || activity.subScales.some(subScale => !subScale.valid)
             || activity.conditionalItems.some(conditional => !conditional.valid)
+            || activity.reports.some(report => !report.valid)
             || (activity.items.length === 0)
         );
 

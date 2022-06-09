@@ -50,6 +50,7 @@ export default class Activity {
       items: items || [],
       disableBack: initialActivityData.disableBack || false,
       allowSummary: initialActivityData.allowSummary !== undefined ? initialActivityData.allowSummary : true,
+      exportAvailable: initialActivityData.exportAvailable,
       isReviewerActivity: initialActivityData.isReviewerActivity || false,
       isOnePageAssessment: initialActivityData.isOnePageAssessment || false,
       id: initialActivityData._id || null,

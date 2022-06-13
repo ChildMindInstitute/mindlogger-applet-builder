@@ -823,7 +823,7 @@ export default {
         case 'practice':
           return [1];
         case 'test':
-          return this.items.map((_, index) => index).filter(index => index >= 3 && index % 2 == 1);
+          return [3];
       }
       return [-1];
     },

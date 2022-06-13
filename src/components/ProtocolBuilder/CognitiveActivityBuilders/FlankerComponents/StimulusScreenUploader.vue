@@ -182,6 +182,9 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+
+  max-height: 450px;
+  overflow: auto;
 }
 
 .upload-screens {
@@ -317,7 +320,7 @@ export default {
           }
 
           this.$set(this.files, index, {
-            id: this.files[index].id || this.files[index].name.replace(/[^a-zA-Z0-9]/g, '__'),
+            id: this.files[index].id || (this.files[index].name.replace(/[^a-zA-Z0-9]/g, '__') + index),
             name: this.files[index].name,
             image
           })

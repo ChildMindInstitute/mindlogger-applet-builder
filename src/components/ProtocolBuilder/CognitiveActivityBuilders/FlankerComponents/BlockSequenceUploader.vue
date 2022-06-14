@@ -166,7 +166,7 @@ export default {
     },
 
     getScreen (name) {
-      return this.screens.find(screen => screen.name == name);
+      return this.screens.find(screen => screen.name == name || screen.name.startsWith(name + '.'));
     },
 
     onCSVInput (e) {

@@ -270,6 +270,7 @@
       :button-count="buttonCount"
       :stimulus-duration-practice="stimulusDurationPractice"
       :stimulus-duration-test="stimulusDurationTest"
+      :active-screens="activeScreens"
       @save="saveStimulusScreens"
     />
 
@@ -659,6 +660,20 @@ export default {
       set (blocks) {
         this.setBlocks(blocks, [4, 6, 8]);
       }
+    },
+
+    activeScreens () {
+      const allBlocks = [...this.blocksPractice, ...this.blocksTest];
+      const activeScreens = [];
+      for (const block of allBlocks) {
+        for (const screen of block.screens) {
+          if (!activeScreens.includes(screen)) {
+            activeScreens.push(screen);
+          }
+        }
+      }
+
+      return activeScreens;
     }
   },
 
@@ -823,7 +838,7 @@ export default {
         case 'practice':
           return [1];
         case 'test':
-          return this.items.map((_, index) => index).filter(index => index >= 3 && index % 2 == 1);
+          return [3];
       }
       return [-1];
     },
@@ -839,8 +854,8 @@ export default {
       }
     },
 
-    saveStimulusScreens ({ screens, duration }) {
-      if (screens.length >= this.stimulusScreens.length) {
+    saveStimulusScreens ({ screens, duration, activeScreenRemoved }) {
+      if (screens.length >= this.stimulusScreens.length && !activeScreenRemoved) {
         const screenMapping = {};
         for (let i = 0; i < this.stimulusScreens.length; i++) {
           screenMapping[this.stimulusScreens[i].id] = screens[i].id;

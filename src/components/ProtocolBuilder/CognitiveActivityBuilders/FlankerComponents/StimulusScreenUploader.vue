@@ -109,7 +109,7 @@
                     <v-icon>mdi-pencil</v-icon>
                   </v-btn>
 
-                  <v-btn @click="deleteStimulusScreen(index)" class="stimulus-btn" icon>
+                  <v-btn @click="onDeleteStimulusScreen(index)" class="stimulus-btn" icon>
                     <v-icon>mdi-delete</v-icon>
                   </v-btn>
                 </td>
@@ -157,6 +157,33 @@
           />
         </v-card>
       </v-dialog>
+
+      <v-dialog
+        v-model="deleteScreenDialog"
+        width="600"
+        persistent
+      >
+        <v-card>
+          <v-card-title>
+            Delete Stimulus Screen
+          </v-card-title>
+
+          <v-card-text class="pa-4">
+            Are you sure you want to delete this image? It is part of one of your block sequences.
+          </v-card-text>
+
+          <v-card-actions>
+            <v-spacer />
+            <v-btn color="primary" @click="deleteStimulusScreen">
+              OK
+            </v-btn>
+
+            <v-btn @click="deleteScreenDialog = false; currentIndex = -1;">
+              Cancel
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-card>
   </v-dialog>
 </template>
@@ -188,6 +215,9 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+
+  max-height: 450px;
+  overflow: auto;
 }
 
 .upload-screens {
@@ -248,6 +278,10 @@ export default {
     screens: {
       type: Array,
       required: true
+    },
+    activeScreens: {
+      type: Array,
+      required: true
     }
   },
 
@@ -264,6 +298,8 @@ export default {
       uploading: false,
       errorMessage: '',
       currentIndex: -1,
+      deleteScreenDialog: false,
+      activeScreenRemoved: false,
     }
   },
 
@@ -291,9 +327,25 @@ export default {
       this.$set(this.correct, index, value);
     },
 
-    deleteStimulusScreen (index) {
-      this.files.splice(index, 1);
-      this.correct.splice(index, 1);
+    onDeleteStimulusScreen (index) {
+      if (this.activeScreens.includes(this.files[index].id)) {
+        this.currentIndex = index;
+        this.deleteScreenDialog = true;
+      } else {
+        this.deleteStimulusScreen();
+      }
+    },
+
+    deleteStimulusScreen () {
+      this.files.splice(this.currentIndex, 1);
+      this.correct.splice(this.currentIndex, 1);
+      this.currentIndex = -1;
+
+      if (this.deleteScreenDialog) {
+        this.activeScreenRemoved = true;
+      }
+
+      this.deleteScreenDialog = false;
     },
 
     replaceStimulusScreen (index) {
@@ -323,7 +375,7 @@ export default {
           }
 
           this.$set(this.files, index, {
-            id: this.files[index].id || this.files[index].name.replace(/[^a-zA-Z0-9]/g, '__'),
+            id: this.files[index].id || (this.files[index].name.replace(/[^a-zA-Z0-9]/g, '__') + index),
             name: this.files[index].name,
             image
           })
@@ -337,7 +389,8 @@ export default {
           duration: {
             practice: Number(this.duration.practice),
             test: Number(this.duration.test),
-          }
+          },
+          activeScreenRemoved: this.activeScreenRemoved
         })
       } catch (e) {
         this.errorMessage = `Sorry, we were not able to upload ${this.files[index].name}. Please upload different file or try again later.`;

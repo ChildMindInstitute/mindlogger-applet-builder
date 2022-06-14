@@ -63,7 +63,7 @@
       </v-card-actions>
 
       <v-dialog
-        v-model="csvError"
+        v-model="csvResultDialog"
         width="500"
       >
         <v-card>
@@ -72,7 +72,7 @@
           </v-card-title>
 
           <v-card-text class="pa-4">
-            Sorry, we were not able to process your csv file. Please double check your file and try again.
+            {{ message }}
           </v-card-text>
         </v-card>
       </v-dialog>
@@ -129,7 +129,8 @@ export default {
       blocks,
       templates: blocks.length ? blocks : templates,
       screenLength,
-      csvError: false,
+      csvResultDialog: false,
+      message: ''
     }
   },
 
@@ -175,7 +176,7 @@ export default {
       reader.onload = () => {
         csv().fromString(reader.result).then(sequences => {
           if (!sequences.length) {
-            this.csvError = true;
+            this.csvResultDialog = true;
             return ;
           }
 
@@ -192,7 +193,8 @@ export default {
               const screen = this.getScreen(sequence[blocks[i].name]);
 
               if (!screen) {
-                this.csvError = true;
+                this.csvResultDialog = true;
+                this.message = 'The uploaded table cannot be parsed. Please ensure stimulus screens have been uploaded prior to the block sequences and ensure the image name is the same as the file name uploaded.';
                 return ;
               }
 
@@ -206,6 +208,9 @@ export default {
       }
       reader.readAsText(file);
       this.inputKey++;
+
+      this.csvResultDialog = true;
+      this.message = 'Block sequences were uploaded succesfully.'
     },
 
     saveBlocks () {

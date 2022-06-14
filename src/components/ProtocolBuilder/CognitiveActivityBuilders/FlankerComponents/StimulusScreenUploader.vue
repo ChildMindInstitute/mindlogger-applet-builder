@@ -114,6 +114,12 @@
                   </v-btn>
                 </td>
               </tr>
+
+              <tr
+                v-if="!files.length"
+              >
+                <td colspan="3" class="text-center">No stimulus screens uploaded</td>
+              </tr>
             </tbody>
           </template>
         </v-simple-table>

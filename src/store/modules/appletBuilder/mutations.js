@@ -429,12 +429,15 @@ const reportMutations = {
     const report = {
       prefLabel: '',
       id: '',
-      dataType: "section",
+      dataType: type,
       message: '',
+      showMessage: true,
       printItems: [],
+      showItems: false,
       jsExpression: '',
       valid: false,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      initialized: false
     };
 
     if (type == 'score') {
@@ -446,6 +449,12 @@ const reportMutations = {
     }
 
     currentActivity.reports.push(report);
+  },
+
+  updateReportList (state, reports) {
+    if (state.currentActivity) {
+      state.currentActivity.reports = reports;
+    }
   },
 
   updateReportInfo (state, { index, obj }) {

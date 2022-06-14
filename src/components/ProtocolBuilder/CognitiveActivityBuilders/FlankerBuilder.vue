@@ -543,7 +543,7 @@ export default {
             'schema:name': 'samplingMethod',
             'schema:value': value ? 'randomize-order' : 'fixed-order',
             '@type': 'schema:Text'
-          })
+          }, index)
         }
       }
     },

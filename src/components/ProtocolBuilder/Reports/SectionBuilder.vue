@@ -14,18 +14,35 @@
     >
       <v-text-field
         v-model="name"
+        class="section-name"
         label="Section Name"
+      />
+
+      <ReportMessageBuilder
+        class="py-4"
+        score-id=""
+        :container="report"
+        :item-list="items"
+        @update="$emit('update', $event)"
       />
     </div>
   </v-card>
 </template>
 
+<style scoped>
+.section-name {
+  width: 50%;
+}
+</style>
+
 <script>
 import CardHeader from './CardHeader';
+import ReportMessageBuilder from './ReportMessageBuilder';
 
 export default {
   components: {
-    CardHeader
+    CardHeader,
+    ReportMessageBuilder,
   },
 
   props: {

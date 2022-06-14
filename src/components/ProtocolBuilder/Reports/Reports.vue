@@ -19,25 +19,34 @@
         />
       </div>
 
-      <div
-        v-for="(report, index) in reports"
-        :key="report.timestamp"
-        class="my-6"
+      <draggable
+        v-model="draggableReports"
+        handle=".dragging-handle"
+        :scroll-sensitivity="100"
+        :force-fallback="true"
       >
-        <ScoreBuilder
-          v-if="report.dataType == 'score'"
-          :report="report"
-          @update="updateReport(index, $event)"
-          @deleteReport="deleteReportSection(index)"
-        />
+        <transition-group>
+          <div
+            v-for="(report, index) in draggableReports"
+            :key="report.timestamp"
+            class="my-6"
+          >
+            <ScoreBuilder
+              v-if="report.dataType == 'score'"
+              :report="report"
+              @update="updateReport(index, $event)"
+              @deleteReport="deleteReportSection(index)"
+            />
 
-        <SectionBuilder
-          v-else
-          :report="report"
-          @update="updateReport(index, $event)"
-          @deleteReport="deleteReportSection(index)"
-        />
-      </div>
+            <SectionBuilder
+              v-else
+              :report="report"
+              @update="updateReport(index, $event)"
+              @deleteReport="deleteReportSection(index)"
+            />
+          </div>
+        </transition-group>
+      </draggable>
     </v-card-text>
 
     <v-card-actions>
@@ -65,11 +74,13 @@ import { mapGetters, mapMutations } from 'vuex';
 import ScoreBuilder from './ScoreBuilder';
 import SectionBuilder from './SectionBuilder';
 import config from '../../../config';
+import draggable from 'vuedraggable';
 
 export default {
   components: {
     ScoreBuilder,
-    SectionBuilder
+    SectionBuilder,
+    draggable,
   },
 
   data () {
@@ -88,8 +99,14 @@ export default {
       ]
     ),
 
-    reports () {
-      return this.currentActivity.reports;
+    draggableReports: {
+      get () {
+        return this.currentActivity.reports
+      },
+
+      set (value) {
+        this.updateReportList(value);
+      }
     },
 
     exportAvailable: {
@@ -117,6 +134,7 @@ export default {
       'deleteReportSection',
       'updateReportInfo',
       'updateActivityMetaInfo',
+      'updateReportList',
     ]),
 
     updateReport (index, value) {

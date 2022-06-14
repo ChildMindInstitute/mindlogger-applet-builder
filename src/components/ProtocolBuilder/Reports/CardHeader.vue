@@ -1,7 +1,7 @@
 <template>
   <div class="pt-2 pb-6">
     <div class="score-id">
-      {{ 'abcd' }}
+      {{ scoreId }}
     </div>
 
     <div class="d-flex align-center">
@@ -12,11 +12,14 @@
           class="move-icon dragging-handle"
           icon
         >
-          <img class="px-2 pt-2 drag-indicator" :src="baseImageURL + 'drag_indicator.png'" />
+          <img class="px-2 drag-indicator" :src="baseImageURL + 'drag_indicator.png'" />
         </v-btn>
       </div>
 
-      <div class="section-name">
+      <div
+        :style="expanded ? 'padding-left: 20px;' : ''"
+        class="section-name"
+      >
         {{ name }}
       </div>
 
@@ -25,7 +28,7 @@
         color="white"
         class="mx-4"
       >
-        <v-icon color="grey lighten-1">
+        <v-icon color="black">
           mdi-delete
         </v-icon>
       </v-btn>
@@ -71,6 +74,7 @@
   .section-name {
     text-align: left;
     flex-grow: 1;
+    font-size: 22px;
   }
 </style>
 

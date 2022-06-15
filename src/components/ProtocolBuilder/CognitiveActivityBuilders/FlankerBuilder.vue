@@ -113,7 +113,12 @@
 
       <div class="d-flex my-4">
         <div class="block-1 mx-4">
-          <v-btn class="upload-blocks" @click="onUploadBlockSequence('practice')">
+          <v-btn
+            class="upload-blocks"
+            :color="blocksPractice.length ? 'white' : 'red'"
+            :dark="blocksPractice.length ? false : true"
+            @click="onUploadBlockSequence('practice')"
+          >
             Upload Block Sequences
           </v-btn>
         </div>
@@ -173,7 +178,12 @@
 
       <div class="d-flex my-4">
         <div class="block-1 mx-4">
-          <v-btn class="upload-blocks" @click="onUploadBlockSequence('test')">
+          <v-btn
+            class="upload-blocks"
+            :color="blocksTest.length ? 'white' : 'red'"
+            :dark="blocksTest.length ? false : true"
+            @click="onUploadBlockSequence('test')"
+          >
             Upload Block Sequences
           </v-btn>
         </div>
@@ -543,7 +553,7 @@ export default {
             'schema:name': 'samplingMethod',
             'schema:value': value ? 'randomize-order' : 'fixed-order',
             '@type': 'schema:Text'
-          })
+          }, index)
         }
       }
     },

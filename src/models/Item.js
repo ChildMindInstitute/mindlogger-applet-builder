@@ -1573,10 +1573,10 @@ export default class Item {
       return false;
     }
 
-    const getInputOption = (name) => {
+    const getInputOption = (name, returnValue = true) => {
       const inputOption = item.inputOptions.find(option => option['schema:name'] == name);
       if (inputOption) {
-        return inputOption['schema:value'];
+        return returnValue ? inputOption['schema:value'] : inputOption;
       }
 
       return '';
@@ -1597,6 +1597,18 @@ export default class Item {
       }
 
       if (durationMins <= 0 || lambdaSlope <= 0 || lambdaSlope > 100 || phaseType == 'challenge-phase' && trialNumber <= 0) {
+        return false;
+      }
+    }
+
+    if (item.inputType == "visual-stimulus-response") {
+      const blocks = getInputOption('blocks', false);
+      if (!blocks['schema:itemListElement'].length) {
+        return false;
+      }
+
+      const trials = getInputOption('trials', false);
+      if (!trials['schema:itemListElement'].length) {
         return false;
       }
     }

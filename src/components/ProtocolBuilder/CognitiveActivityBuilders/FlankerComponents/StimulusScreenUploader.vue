@@ -84,7 +84,28 @@
                 :key="index"
                 class="stimulus-screen"
               >
-                <td class="file-name">{{ file.name }}</td>
+                <td class="file-name">
+                  <v-tooltip
+                    v-if="file.name.length > 15"
+                    bottom
+                  >
+                    <template v-slot:activator="{ on }">
+                      <div v-on="on">
+                        {{ getDisplayName(file.name) }}
+                      </div>
+                    </template>
+
+                    <div>
+                      {{ file.name }}
+                    </div>
+                  </v-tooltip>
+
+                  <div
+                    v-else
+                  >
+                    {{ file.name }}
+                  </div>
+                </td>
                 <td
                   v-if="buttonCount > 1"
                 >
@@ -312,6 +333,10 @@ export default {
   },
 
   methods: {
+    getDisplayName (name) {
+      return name.length > 15 ? name.slice(0, 12) + '...' : name;
+    },
+
     addStimulusScreens (e) {
       for (const file of e.target.files) {
         if (this.currentIndex >= 0) {

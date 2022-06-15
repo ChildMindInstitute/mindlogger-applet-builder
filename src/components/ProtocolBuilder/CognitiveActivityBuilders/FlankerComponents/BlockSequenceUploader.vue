@@ -20,14 +20,13 @@
         />
 
         <v-simple-table
-          v-if="blocks.length > 0"
           class="block-sequences"
         >
           <template v-slot:default>
             <thead>
               <tr>
                 <th
-                  v-for="(block, index) in blocks"
+                  v-for="(block, index) in templates"
                   :key="index"
                 >
                   {{ block.name }}
@@ -37,11 +36,11 @@
 
             <tbody>
               <tr
-                v-for="(_, screenIndex) in blocks[0].screens"
+                v-for="(_, screenIndex) in templates[0].screens"
                 :key="screenIndex"
               >
                 <td
-                  v-for="(block, blockIndex) in blocks"
+                  v-for="(block, blockIndex) in templates"
                   :key="blockIndex"
                 >
                   {{ block.screens[screenIndex].name }}

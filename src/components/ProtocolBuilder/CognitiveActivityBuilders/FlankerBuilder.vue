@@ -893,8 +893,22 @@ export default {
     },
 
     saveFixationScreen ({ screen, duration }) {
-      this.fixationScreen = screen;
-      this.fixationDuration = duration;
+      this.updateInputOption('showFixation', {
+        "@type": "schema:Boolean",
+        "schema:name": "showFixation",
+        "schema:value": screen ? true : false
+      });
+
+      if (!screen) {
+        this.fixationScreen = {
+          name: '',
+          image: ''
+        };
+        this.fixationDuration = 0;
+      } else {
+        this.fixationScreen = screen;
+        this.fixationDuration = duration;
+      }
       this.fixationScreenDialog.visible = false;
     },
 

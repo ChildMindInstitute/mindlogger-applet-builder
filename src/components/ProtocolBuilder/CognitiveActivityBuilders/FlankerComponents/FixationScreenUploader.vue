@@ -59,6 +59,7 @@
           type="number"
           min="1"
           v-model="duration"
+          :disabled="file === null"
         />
 
         milliseconds
@@ -85,7 +86,7 @@
       <v-card-actions>
         <v-spacer />
 
-        <v-btn class="mx-4" color="primary" :disabled="duration <= 0 || duration % 1 != 0 || !file" @click="onSave">
+        <v-btn class="mx-4" color="primary" :disabled="(duration <= 0 || duration % 1 != 0) && file !== null" @click="onSave">
           Save
         </v-btn>
 
@@ -132,9 +133,9 @@ export default {
 
   data () {
     return {
-      file: this.screen,
+      file: !this.screen.name ? null : this.screen,
       imageURL: this.screen.image || '',
-      duration: this.fixationDuration,
+      duration: this.fixationDuration || '',
       inputKey: 0,
       s3Uploader: new S3Uploader('image'),
       uploading: false,
@@ -155,7 +156,7 @@ export default {
       this.uploading = true;
 
       try {
-        if (!this.file.image && this.file !== this.screen) {
+        if (this.file && !this.file.image && this.file !== this.screen) {
           const response = await this.s3Uploader.upload(this.file);
           this.file = {
             name: this.file.name,
@@ -177,6 +178,7 @@ export default {
     deleteImage () {
       this.file = null;
       this.imageURL = '';
+      this.duration = '';
     }
   }
 }

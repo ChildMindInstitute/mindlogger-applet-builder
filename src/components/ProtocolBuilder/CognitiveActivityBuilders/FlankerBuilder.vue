@@ -59,9 +59,9 @@
         </div>
 
         <v-text-field
-          class="button-name ml-2"
+          class="button-name ml-2 mt-4"
           v-model="buttons[0].name"
-          hide-details
+          :error-messages="buttons[0].name.length > 5 ? 'visibility decrease over 5 characters' : ''"
         />
         <Uploader
           :initialType="'image'"
@@ -82,9 +82,9 @@
         </div>
 
         <v-text-field
-          class="button-name ml-2"
+          class="button-name ml-2 mt-4"
           v-model="buttons[1].name"
-          hide-details
+          :error-messages="buttons[1].name.length > 5 ? 'visibility decrease over 5 characters' : ''"
         />
         <Uploader
           :initialType="'image'"

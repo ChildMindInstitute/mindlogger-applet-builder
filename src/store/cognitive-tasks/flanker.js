@@ -195,12 +195,12 @@ export default {
         {
           "@type": "schema:Number",
           "schema:name": "trialDuration",
-          "schema:value": 3000
+          "schema:value": ''
         },
         {
           "@type": "schema:Number",
           "schema:name": "fixationDuration",
-          "schema:value": 500,
+          "schema:value": '',
         },
         {
           "@type": "schema:Text",
@@ -211,7 +211,7 @@ export default {
         {
           "@type": "schema:Number",
           "schema:name": "minimumAccuracy",
-          "schema:value": 80
+          "schema:value": 75
         },
         {
           "@type": "schema:Number",
@@ -587,12 +587,12 @@ export default {
         {
           "@type": "schema:Number",
           "schema:name": "trialDuration",
-          "schema:value": 3000
+          "schema:value": ''
         },
         {
           "@type": "schema:Number",
           "schema:name": "fixationDuration",
-          "schema:value": 500,
+          "schema:value": '',
         },
         {
           "@type": "schema:Text",
@@ -970,12 +970,12 @@ export default {
         {
           "@type": "schema:Number",
           "schema:name": "trialDuration",
-          "schema:value": 3000
+          "schema:value": ''
         },
         {
           "@type": "schema:Number",
           "schema:name": "fixationDuration",
-          "schema:value": 500,
+          "schema:value": '',
         },
         {
           "@type": "schema:Text",
@@ -1358,12 +1358,12 @@ export default {
         {
           "@type": "schema:Number",
           "schema:name": "trialDuration",
-          "schema:value": 3000
+          "schema:value": ''
         },
         {
           "@type": "schema:Number",
           "schema:name": "fixationDuration",
-          "schema:value": 500,
+          "schema:value": '',
         },
         {
           "@type": "schema:Text",

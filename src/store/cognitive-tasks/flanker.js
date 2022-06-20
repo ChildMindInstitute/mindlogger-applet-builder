@@ -1,4 +1,5 @@
-const trial = {
+
+const getTrial = (lastPractice) => ({
   name: "trial",
   question: "",
   description: "Flanker practice",
@@ -195,14 +196,19 @@ const trial = {
       "schema:value": 3
     },
     {
-      "@type": "schema:Number",
+      "@type": "schema:Text",
       "schema:name": "blockType",
       "schema:value": "practice"
+    },
+    {
+      "@type": "schema:Boolean",
+      "schema:name": "lastPractice",
+      "schema:value": lastPractice
     }
   ]
-}
+})
 
-const test = {
+const getTest = (lastTest) => ({
   question: "",
   description: "Flanker practice",
   ui: {
@@ -568,12 +574,17 @@ const test = {
       "schema:image": ""
     },
     {
-      "@type": "schema:Number",
+      "@type": "schema:Text",
       "schema:name": "blockType",
       "schema:value": "test"
+    },
+    {
+      "@type": "schema:Boolean",
+      "schema:name": "lastTest",
+      "schema:value": lastTest
     }
   ]
-}
+})
 
 const restartInstructions = {
   question: "## Instructions\nPress the Next button to restart block.",
@@ -619,15 +630,15 @@ export default {
       }
     },
     {
-      ...trial,
-      name: "trial1",
+      ...getTrial(false),
+      name: "trial",
     },
     {
       ...restartInstructions,
       name: "trial2-instructions"
     },
     {
-      ...trial,
+      ...getTrial(false),
       name: "trial2",
     },
     {
@@ -635,7 +646,7 @@ export default {
       name: "trial3-instructions"
     },
     {
-      ...trial,
+      ...getTrial(true),
       name: "trial3",
     },
     {
@@ -648,7 +659,7 @@ export default {
       }
     },
     {
-      ...JSON.parse(JSON.stringify(test)),
+      ...getTest(false),
       name: "test1"
     },
     {
@@ -656,7 +667,7 @@ export default {
       name: "test2-instructions"
     },
     {
-      ...JSON.parse(JSON.stringify(test)),
+      ...getTest(false),
       name: "test2"
     },
     {
@@ -664,7 +675,7 @@ export default {
       name: "test3-instructions"
     },
     {
-      ...JSON.parse(JSON.stringify(test)),
+      ...getTest(true),
       name: "test3"
     },
   ]

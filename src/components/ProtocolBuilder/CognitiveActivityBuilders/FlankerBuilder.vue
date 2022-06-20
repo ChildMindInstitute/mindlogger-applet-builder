@@ -445,11 +445,13 @@ export default {
         return option['schema:value'];
       },
       set(value) {
-        this.updateInputOption('minimumAccuracy', {
-          'schema:name': 'minimumAccuracy',
-          'schema:value': value,
-          '@type': 'schema:Number',
-        })
+        for (const index of this.practiceScreens) {
+          this.updateInputOption('minimumAccuracy', {
+            'schema:name': 'minimumAccuracy',
+            'schema:value': value,
+            '@type': 'schema:Number',
+          }, index)
+        }
       }
     },
 

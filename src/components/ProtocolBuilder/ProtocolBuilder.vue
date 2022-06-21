@@ -164,7 +164,7 @@
           Activities
           <v-spacer />
           <v-menu
-            top
+            left
             ref="mainMenu"
             :close-on-content-click="false"
           >
@@ -215,7 +215,7 @@
                   class="ml-4"
                   @click="newActivity(-1, 'FLANKER')"
                 >
-                  <v-list-item-title>Flanker</v-list-item-title>
+                  <v-list-item-title>Simple & Choice Reaction Time Task Builder</v-list-item-title>
                 </v-list-item>
 
                 <v-list-item

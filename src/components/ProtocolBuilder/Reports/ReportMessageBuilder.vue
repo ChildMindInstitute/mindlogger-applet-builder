@@ -56,10 +56,14 @@
             />
           </v-list-item-action>
 
-          <v-list-item-title>{{ item.name }}</v-list-item-title>
+          <v-list-item-title>{{ item.name }}: {{ getQuestion(item.question.text) }}</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-card>
+
+    <div class="mt-4 error-message" v-if="!scoreId && !showMessage && !showItems">
+      You must show a message or print items to publish this report
+    </div>
   </div>
 </template>
 
@@ -71,6 +75,9 @@
 .item-list {
   height: 250px;
   overflow: auto;
+}
+.error-message {
+  color: rgb(255, 82, 82);
 }
 </style>
 
@@ -150,6 +157,10 @@ export default {
       }
 
       return changes;
+    },
+
+    getQuestion (text) {
+      return text.replace(/[#*]/g, '').replace(/\!\[.*?\]\(.*?\)/g, '');
     }
   }
 }

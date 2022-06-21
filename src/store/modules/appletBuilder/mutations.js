@@ -444,7 +444,18 @@ const reportMutations = {
       Object.assign(report, {
         outputType: 'cumulative',
         printItems: [],
-        conditionals: []
+        conditionals: [],
+        minScore: 0,
+        maxScore: 0
+      })
+    } else {
+      Object.assign(report, {
+        conditionalItem: {
+          showValue: null,
+          conditions: [],
+          operation: "ALL",
+          valid: true
+        }
       })
     }
 

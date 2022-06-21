@@ -108,237 +108,275 @@ export default class Activity {
     visibilities.forEach((property) => {
       if (typeof property.isVis === 'boolean') return;
 
+      let isVis = property.isVis.split(' ').join('');
+
       const conditionalItem = {
         showValue: items.find(item => item.name == property.variableName),
         conditions: [],
         operation: "ALL",
         id: Math.round(Date.now() * Math.random()),
       };
-      let isVis = property.isVis.split(' ').join('');
 
-      while (isVis) {
-        const outsideRegExp = /(\w+)<(\d+)\|\|(\w+)>(\d+)/;
-        const outsideValues = isVis.match(outsideRegExp);
-        const insideRegExp = /(\w+)>(\d+)\&\&(\w+)<(\d+)/;
-        const withinValues = isVis.match(insideRegExp);
-        const includeRegExp = /(\w+)\.includes\((\w+)\)/;
-        const includeValues = isVis.match(includeRegExp);
-        const excludeRegExp = /!(\w+)\.includes\((\w+)\)/;
-        const excludeValues = isVis.match(excludeRegExp);
-        const lessThanRegExp = /(\w+)<(\d+)/;
-        const lessThanValues = isVis.match(lessThanRegExp);
-        const greaterThanRegExp = /(\w+)>(\d+)/;
-        const greaterThanValues = isVis.match(greaterThanRegExp);
-        const equalToRegExp = /(\w+)==(\d+)/;
-        const equalToValues = isVis.match(equalToRegExp);
-        const notEqualToRegExp = /(\w+)!=(\d+)/;
-        const notEqualToValues = isVis.match(notEqualToRegExp);
-        const activityRegExp = /(\!?)isActivityShownFirstTime\("(.*?)"\)/;
-        const activityValues = isVis.match(activityRegExp);
+      conditionalItems.push(this.parseConditionalExpression(conditionalItem, isVis, items));
+    });
 
-        const minIndex = Math.min(
-          outsideValues ? outsideValues.index : isVis.length,
-          withinValues ? withinValues.index : isVis.length,
-          includeValues ? includeValues.index : isVis.length,
-          excludeValues ? excludeValues.index : isVis.length,
-          lessThanValues ? lessThanValues.index : isVis.length,
-          greaterThanValues ? greaterThanValues.index : isVis.length,
-          equalToValues ? equalToValues.index : isVis.length,
-          notEqualToValues ? notEqualToValues.index : isVis.length,
-          activityValues ? activityValues.index : isVis.length,
-        );
+    return conditionalItems;
+  }
 
-        if (outsideValues && minIndex === outsideValues.index && outsideValues[1] === outsideValues[3]) {
-          isVis = isVis.replace(outsideRegExp, '');
-          const itemIndex = items.findIndex(({ name }) => name === outsideValues[1]);
+  parseConditionalExpression (conditionalItem, isVis, items) {
+    const findItemIndex = (name) => items.findIndex(item => item.name == name || item.prefLabel == name);
 
-          if (itemIndex !== -1) {
+    while (isVis) {
+      const outsideRegExp = /(\w+)<(\d+)\|\|(\w+)>(\d+)/;
+      const outsideValues = isVis.match(outsideRegExp);
+      const insideRegExp = /(\w+)>(\d+)\&\&(\w+)<(\d+)/;
+      const withinValues = isVis.match(insideRegExp);
+      const includeRegExp = /(\w+)\.includes\((\w+)\)/;
+      const includeValues = isVis.match(includeRegExp);
+      const excludeRegExp = /!(\w+)\.includes\((\w+)\)/;
+      const excludeValues = isVis.match(excludeRegExp);
+      const lessThanRegExp = /(\w+)<(\d+)/;
+      const lessThanValues = isVis.match(lessThanRegExp);
+      const greaterThanRegExp = /(\w+)>(\d+)/;
+      const greaterThanValues = isVis.match(greaterThanRegExp);
+      const equalToRegExp = /(\w+)==(\d+)/;
+      const equalToValues = isVis.match(equalToRegExp);
+      const notEqualToRegExp = /(\w+)!=(\d+)/;
+      const notEqualToValues = isVis.match(notEqualToRegExp);
+      const activityRegExp = /(\!?)isActivityShownFirstTime\("(.*?)"\)/;
+      const activityValues = isVis.match(activityRegExp);
+
+      const minIndex = Math.min(
+        outsideValues ? outsideValues.index : isVis.length,
+        withinValues ? withinValues.index : isVis.length,
+        includeValues ? includeValues.index : isVis.length,
+        excludeValues ? excludeValues.index : isVis.length,
+        lessThanValues ? lessThanValues.index : isVis.length,
+        greaterThanValues ? greaterThanValues.index : isVis.length,
+        equalToValues ? equalToValues.index : isVis.length,
+        notEqualToValues ? notEqualToValues.index : isVis.length,
+        activityValues ? activityValues.index : isVis.length,
+      );
+
+      if (outsideValues && minIndex === outsideValues.index && outsideValues[1] === outsideValues[3]) {
+        isVis = isVis.replace(outsideRegExp, '');
+        const itemIndex = items.findIndex(({ name }) => name === outsideValues[1]);
+
+        if (itemIndex !== -1) {
+          conditionalItem.conditions.push({
+            ifValue: items[itemIndex],
+            maxValue: outsideValues[4],
+            minValue: outsideValues[2],
+            stateValue: {
+              name: "OUTSIDE OF",
+              val: "outsideof"
+            }
+          });
+        }
+      } else if (withinValues && minIndex === withinValues.index && withinValues[1] === withinValues[3]) {
+        isVis = isVis.replace(insideRegExp, '');
+        const itemIndex = findItemIndex(withinValues[1]);
+
+        if (itemIndex !== -1) {
+          conditionalItem.conditions.push({
+            ifValue: items[itemIndex],
+            maxValue: withinValues[4],
+            minValue: withinValues[2],
+            stateValue: {
+              name: "BETWEEN",
+              val: "between"
+            }
+          });
+        }
+      } else if (excludeValues && minIndex === excludeValues.index) {
+        isVis = isVis.replace(excludeRegExp, '');
+        const itemIndex = findItemIndex(excludeValues[1]);
+
+        if (itemIndex !== -1) {
+          const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == excludeValues[2]);
+
+          if (option) {
             conditionalItem.conditions.push({
               ifValue: items[itemIndex],
-              maxValue: outsideValues[4],
-              minValue: outsideValues[2],
+              answerValue: {
+                name: option['schema:name'],
+                value: option['schema:value']
+              },
               stateValue: {
-                name: "OUTSIDE OF",
-                val: "outsideof"
+                name: "Doesn't include",
+                val: "!includes",
+              }
+            })
+          }
+        }
+      } else if (includeValues && minIndex === includeValues.index) {
+        isVis = isVis.replace(includeRegExp, '');
+        const itemIndex = findItemIndex(includeValues[1]);
+
+        if (itemIndex !== -1) {
+          const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == includeValues[2]);
+
+          if (option) {
+            conditionalItem.conditions.push({
+              ifValue: items[itemIndex],
+              answerValue: {
+                name: option['schema:name'],
+                value: option['schema:value']
+              },
+              stateValue: {
+                name: "Includes",
+                val: "includes",
+              }
+            })
+          }
+        }
+      } else if (lessThanValues && isVis[lessThanValues.index - 1] !== "(" && minIndex === lessThanValues.index) {
+        isVis = isVis.replace(lessThanRegExp, '');
+        const itemIndex = findItemIndex(lessThanValues[1]);
+
+        if (itemIndex !== -1) {
+          conditionalItem.conditions.push({
+            ifValue: items[itemIndex],
+            minValue: lessThanValues[2],
+            stateValue: {
+              name: 'LESS THAN',
+              val: '<',
+            }
+          });
+        }
+      } else if (greaterThanValues && isVis[greaterThanValues.index - 1] !== "(" && minIndex === greaterThanValues.index) {
+        isVis = isVis.replace(greaterThanRegExp, '');
+        const itemIndex = findItemIndex(greaterThanValues[1]);
+
+        if (itemIndex !== -1) {
+          conditionalItem.conditions.push({
+            ifValue: items[itemIndex],
+            minValue: greaterThanValues[2],
+            stateValue: {
+              name: 'GREATER THAN',
+              val: '>',
+            }
+          });
+        }
+      } else if (notEqualToValues && minIndex === notEqualToValues.index) {
+        isVis = isVis.replace(notEqualToRegExp, '');
+        const itemIndex = findItemIndex(notEqualToValues[1]);
+
+        if (itemIndex !== -1) {
+          const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == notEqualToValues[2]);
+
+          if (option) {
+            conditionalItem.conditions.push({
+              ifValue: items[itemIndex],
+              answerValue: {
+                name: option['schema:name'],
+                value: option['schema:value']
+              },
+              stateValue: {
+                name: 'IS NOT EQUAL TO',
+                val: '!=',
               }
             });
           }
-        } else if (withinValues && minIndex === withinValues.index && withinValues[1] === withinValues[3]) {
-          isVis = isVis.replace(insideRegExp, '');
-          const itemIndex = items.findIndex(({ name }) => name === withinValues[1]);
+        }
+      } else if (equalToValues && minIndex === equalToValues.index) {
+        isVis = isVis.replace(equalToRegExp, '');
+        const itemIndex = findItemIndex(equalToValues[1]);
 
-          if (itemIndex !== -1) {
-            conditionalItem.conditions.push({
-              ifValue: items[itemIndex],
-              maxValue: withinValues[4],
-              minValue: withinValues[2],
-              stateValue: {
-                name: "BETWEEN",
-                val: "between"
-              }
-            });
-          }
-        } else if (excludeValues && minIndex === excludeValues.index) {
-          isVis = isVis.replace(excludeRegExp, '');
-          const itemIndex = items.findIndex(({ name }) => name === excludeValues[1]);
+        if (itemIndex !== -1) {
+          const item = items[itemIndex];
 
-          if (itemIndex !== -1) {
-            const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == excludeValues[2]);
+          if (item.inputType === 'radio') {
+            const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == equalToValues[2]);
 
             if (option) {
-              conditionalItem.conditions.push({
-                ifValue: items[itemIndex],
-                answerValue: {
-                  name: option['schema:name'],
-                  value: option['schema:value']
-                },
-                stateValue: {
-                  name: "Doesn't include",
-                  val: "!includes",
-                }
-              })
-            }
-          }
-        } else if (includeValues && minIndex === includeValues.index) {
-          isVis = isVis.replace(includeRegExp, '');
-          const itemIndex = items.findIndex(({ name }) => name === includeValues[1]);
-
-          if (itemIndex !== -1) {
-            const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == includeValues[2]);
-
-            if (option) {
-              conditionalItem.conditions.push({
-                ifValue: items[itemIndex],
-                answerValue: {
-                  name: option['schema:name'],
-                  value: option['schema:value']
-                },
-                stateValue: {
-                  name: "Includes",
-                  val: "includes",
-                }
-              })
-            }
-          }
-        } else if (lessThanValues && isVis[lessThanValues.index - 1] !== "(" && minIndex === lessThanValues.index) {
-          isVis = isVis.replace(lessThanRegExp, '');
-          const itemIndex = items.findIndex(({ name }) => name === lessThanValues[1]);
-
-          if (itemIndex !== -1) {
-            conditionalItem.conditions.push({
-              ifValue: items[itemIndex],
-              minValue: lessThanValues[2],
-              stateValue: {
-                name: 'LESS THAN',
-                val: '<',
-              }
-            });
-          }
-        } else if (greaterThanValues && isVis[greaterThanValues.index - 1] !== "(" && minIndex === greaterThanValues.index) {
-          isVis = isVis.replace(greaterThanRegExp, '');
-          const itemIndex = items.findIndex(({ name }) => name === greaterThanValues[1]);
-
-          if (itemIndex !== -1) {
-            conditionalItem.conditions.push({
-              ifValue: items[itemIndex],
-              minValue: greaterThanValues[2],
-              stateValue: {
-                name: 'GREATER THAN',
-                val: '>',
-              }
-            });
-          }
-        } else if (notEqualToValues && minIndex === notEqualToValues.index) {
-          isVis = isVis.replace(notEqualToRegExp, '');
-          const itemIndex = items.findIndex(({ name }) => name === notEqualToValues[1]);
-
-          if (itemIndex !== -1) {
-            const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == notEqualToValues[2]);
-
-            if (option) {
-              conditionalItem.conditions.push({
-                ifValue: items[itemIndex],
-                answerValue: {
-                  name: option['schema:name'],
-                  value: option['schema:value']
-                },
-                stateValue: {
-                  name: 'IS NOT EQUAL TO',
-                  val: '!=',
-                }
-              });
-            }
-          }
-        } else if (equalToValues && minIndex === equalToValues.index) {
-          isVis = isVis.replace(equalToRegExp, '');
-          const itemIndex = items.findIndex(({ name }) => name === equalToValues[1]);
-
-          if (itemIndex !== -1) {
-            const item = items[itemIndex];
-
-            if (item.inputType === 'radio') {
-              const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == equalToValues[2]);
-
-              if (option) {
-                conditionalItem.conditions.push({
-                  ifValue: item,
-                  answerValue: {
-                    name: option['schema:name'],
-                    value: option['schema:value']
-                  },
-                  stateValue: {
-                    name: 'IS EQUAL TO',
-                    val: '==',
-                  }
-                });
-              }
-            } else {
               conditionalItem.conditions.push({
                 ifValue: item,
-                minValue: equalToValues[2],
+                answerValue: {
+                  name: option['schema:name'],
+                  value: option['schema:value']
+                },
                 stateValue: {
-                  name: 'EQUAL TO',
+                  name: 'IS EQUAL TO',
                   val: '==',
                 }
               });
             }
-          }
-        } else if (activityValues && minIndex == activityValues.index) {
-          isVis = isVis.replace(activityRegExp, '');
-
-          if (activityValues[1]) {
-            conditionalItem.conditions.push({
-              ifValue: activityValues[2],
-              stateValue: {
-                name: "is not shown for the first time",
-                val: "!isActivityShownFirstTime"
-              },
-              activityCondition: true
-            })
           } else {
             conditionalItem.conditions.push({
-              ifValue: activityValues[2],
+              ifValue: item,
+              minValue: equalToValues[2],
               stateValue: {
-                name: "is shown for the first time",
-                val: "isActivityShownFirstTime"
-              },
-              activityCondition: true
-            })
+                name: 'EQUAL TO',
+                val: '==',
+              }
+            });
           }
-        } else {
-          isVis = isVis.split('()').join('');
-
-          if (isVis[0] === '|') {
-            conditionalItem.operation = 'ANY';
-          }
-          break;
         }
-      }
+      } else if (activityValues && minIndex == activityValues.index) {
+        isVis = isVis.replace(activityRegExp, '');
 
-      conditionalItems.push(conditionalItem);
+        if (activityValues[1]) {
+          conditionalItem.conditions.push({
+            ifValue: activityValues[2],
+            stateValue: {
+              name: "is not shown for the first time",
+              val: "!isActivityShownFirstTime"
+            },
+            activityCondition: true
+          })
+        } else {
+          conditionalItem.conditions.push({
+            ifValue: activityValues[2],
+            stateValue: {
+              name: "is shown for the first time",
+              val: "isActivityShownFirstTime"
+            },
+            activityCondition: true
+          })
+        }
+      } else {
+        isVis = isVis.split('()').join('');
+
+        if (isVis[0] === '|') {
+          conditionalItem.operation = 'ANY';
+        }
+        break;
+      }
+    }
+
+    return conditionalItem;
+  }
+
+  compressConditional (conditionalItem) {
+    if (!conditionalItem) {
+      return true;
+    }
+
+    const operation = conditionalItem.operation === 'ANY' ? ' || ' : ' && ';
+    const visibleItems = conditionalItem.conditions.map((cond) => {
+      const ifValue = typeof cond.ifValue == 'object' ? (cond.ifValue.name || cond.ifValue.prefLabel) : cond.ifValue;
+
+      if (cond.activityCondition) {
+        return `${cond.stateValue.val}("${ifValue}")`;
+      } else if (cond.stateValue.val === 'between') {
+        return `(${ifValue} > ${cond.minValue} && ${ifValue} < ${cond.maxValue})`;
+      } else if (cond.stateValue.val === 'outsideof') {
+        return `(${ifValue} < ${cond.minValue} || ${ifValue} > ${cond.maxValue})`;
+      } else if (cond.stateValue.val === 'includes') {
+        return `${ifValue}.${cond.stateValue.val}(${cond.answerValue.value})`
+      } else if (cond.stateValue.val === '!includes') {
+        return `!${ifValue}.includes(${cond.answerValue.value})`
+      } else if (cond.stateValue.val === '=') {
+        return `${ifValue} ${cond.stateValue.val}${cond.stateValue.val} ${cond.minValue}`;
+      } else if (!cond.answerValue) {
+        return `${ifValue} ${cond.stateValue.val} ${cond.minValue}`;
+      } else {
+        return `${ifValue} ${cond.stateValue.val} ${cond.answerValue.value}`;
+      }
     });
 
-    return conditionalItems;
+    return visibleItems.join(operation);
   }
 
   getItemVisibility() {
@@ -379,35 +417,15 @@ export default class Activity {
     }
 
     itemOrder.forEach((item) => {
-      const currentItem = this.ref.items.find(({ name }) => name === item);
-
       const conditionalItem = this.ref.conditionalItems.find((cond) => cond.showValue && cond.showValue.name === item);
 
       let isVis = true;
 
-      if (conditionalItem) {
-        const operation = conditionalItem.operation === 'ANY' ? ' || ' : ' && ';
-        const visibleItems = conditionalItem.conditions.map((cond) => {
-          if (cond.activityCondition) {
-            return `${cond.stateValue.val}("${cond.ifValue}")`;
-          } else if (cond.stateValue.val === 'between') {
-            return `(${cond.ifValue.name} > ${cond.minValue} && ${cond.ifValue.name} < ${cond.maxValue})`;
-          } else if (cond.stateValue.val === 'outsideof') {
-            return `(${cond.ifValue.name} < ${cond.minValue} || ${cond.ifValue.name} > ${cond.maxValue})`;
-          } else if (cond.stateValue.val === 'includes') {
-            return `${cond.ifValue.name}.${cond.stateValue.val}(${cond.answerValue.value})`
-          } else if (cond.stateValue.val === '!includes') {
-            return `!${cond.ifValue.name}.includes(${cond.answerValue.value})`
-          } else if (cond.stateValue.val === '=') {
-            return `${cond.ifValue.name} ${cond.stateValue.val}${cond.stateValue.val} ${cond.minValue}`;
-          } else if (!cond.answerValue) {
-            return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.minValue}`;
-          } else {
-            return `${cond.ifValue.name} ${cond.stateValue.val} ${cond.answerValue.value}`;
-          }
-        });
-        isVis = visibleItems.join(operation);
-      }
+      addProperties.push({
+        variableName: item,
+        isAbout: item,
+        isVis: this.compressConditional(conditionalItem),
+      })
 
       const property = {
         variableName: item,

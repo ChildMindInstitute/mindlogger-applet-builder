@@ -18,6 +18,7 @@
             v-model="name"
             class="mr-6"
             label="Score Title"
+            :error-messages="nameErrorMsg"
           />
         </v-col>
 
@@ -55,7 +56,7 @@
           <v-select
             v-model="outputType"
             :items="outputTypes"
-            @change="update"
+            @change="onUpdateScoreRange"
             item-text="name"
             outlined
             dense
@@ -68,7 +69,11 @@
             Possible range of scores:
           </div>
 
-          <div>
+          <div
+            v-show="minScore || maxScore"
+            class="score-range mt-3"
+          >
+            {{ minScore }} ~ {{ maxScore }}
           </div>
         </div>
       </div>
@@ -162,7 +167,7 @@
         class="py-4"
         :container="report"
         :score-id="report.id"
-        :item-list="items"
+        :item-list="printItemList"
         @update="$emit('update', $event)"
       />
 
@@ -226,13 +231,31 @@
                 </v-col>
               </v-row>
 
-              <ReportMessageBuilder
-                class="py-4"
-                :container="conditional"
-                :score-id="conditional.id"
-                :item-list="items"
-                @update="onUpdateConditional(conditional, $event)"
+              <ConditionalComponent
+                title="Define Score Condition:"
+                :ifValue="report"
+                :blank="false"
+                :conditional-item="conditional.conditionalItem"
+                :scores="[report]"
+                @update="onUpdateConditional(conditional, { conditionalItem: $event } )"
               />
+
+              <div class="py-4">
+                <v-switch
+                  v-model="conditional.flagScore"
+                  @change="update"
+                  inset
+                  hide-details
+                  label="Flag score (the score will be highlighted in red in the summary screen)"
+                />
+
+                <ReportMessageBuilder
+                  :container="conditional"
+                  :score-id="conditional.id"
+                  :item-list="printItemList"
+                  @update="onUpdateConditional(conditional, $event)"
+                />
+              </div>
             </div>
           </v-card>
         </transition-group>
@@ -247,6 +270,7 @@
       <v-btn
         small
         @click="onAddScoreCondition"
+        :disabled="!name || !report.jsExpression"
       >
         Add Score Condition
       </v-btn>
@@ -268,6 +292,13 @@
   margin: 0px;
   font-size: 12px;
   transform: translateY(5px);
+}
+
+.score-range {
+  color: rgba(0, 0, 0, 0.6);
+  font-weight: 500;
+  font-size: 16px;
+  text-align: center;
 }
 
 .output-type {
@@ -298,6 +329,7 @@
 <script>
 import CardHeader from './CardHeader';
 import ReportMessageBuilder from './ReportMessageBuilder';
+import ConditionalComponent from './ConditionalComponent';
 import draggable from 'vuedraggable';
 import { mapGetters, mapMutations } from 'vuex';
 import config from '../../../config';
@@ -306,6 +338,7 @@ export default {
   components: {
     CardHeader,
     ReportMessageBuilder,
+    ConditionalComponent,
     draggable,
   },
 
@@ -342,6 +375,8 @@ export default {
       searchText: '',
       selection: {},
       conditionals: this.report.conditionals.map(conditional => ({ ...conditional })),
+      minScore: this.report.minScore,
+      maxScore: this.report.maxScore,
       timerId: null
     }
   },
@@ -389,6 +424,22 @@ export default {
       ]
     ),
 
+    nameErrorMsg () {
+      if (!this.name) {
+        return 'This is a required field';
+      }
+
+      if (!this.name.match(/^[a-zA-Z_]+$/)) {
+        return 'Letters and underscores are only allowed. Please fix.';
+      }
+
+      if (this.currentActivity.reports.find(score => score.dataType == this.report.dataType && score.prefLabel == name && score != this.report)) {
+        return 'That score title is already in use. Please use a different title.';
+      }
+
+      return '';
+    },
+
     items () {
       return this.currentActivity.items.filter(item =>
           (item.inputType == 'radio' || item.inputType == 'prize' || item.inputType == 'slider' || item.inputType == 'checkbox')
@@ -396,36 +447,56 @@ export default {
           item.options.hasScoreValue
       ).map((item) => ({
         ...item,
-        identifier: `${item.timestamp}-${item.id || 0}`
+        identifier: `${item.timestamp}-${item.id || 0}`,
+        ...this.getScoreRange(item)
       }))
     },
 
-    scoreRange () {
-      switch (this.outputType.value) {
-        case 'percentage':
-          return '';
-        case 'average':
-          return '';
-        case 'cumulative':
-          return '';
-      }
-
-      return '';
+    printItemList () {
+      return this.currentActivity.items.filter(item => ['radio', 'checkbox', 'prize', 'slider', 'text'].includes(item.inputType))
     }
   },
 
   beforeMount () {
+    const selectedItems = this.report.jsExpression.split('+').map(name => name.trim());
+
     for (const item of this.items) {
-      this.$set(this.selection, item.identifier, false);
+      this.$set(this.selection, item.identifier, selectedItems.includes(item.name));
     }
   },
 
   methods: {
+    getScoreRange (item) {
+      let scores = [];
+      if (item.inputType == 'radio' || item.inputType == 'checkbox' || item.inputType == 'prize') {
+        scores = item.options.options.filter(option => !option.isVis).map(option => option.score);
+      } else { // slider
+        scores = item.options.scores;
+      }
+
+      let maxScore = 0, minScore = 0;
+      if (item.inputType == 'radio' || item.inputType == 'slider') {
+        maxScore = Math.max(...scores);
+        minScore = Math.min(...scores);
+      } else { // checkbox
+        for (let i = 0; i < scores.length; i++) {
+          if (scores[i] > 0) {
+            maxScore += scores[i];
+          } else {
+            minScore += scores[i];
+          }
+        }
+      }
+
+      return { maxScore, minScore }
+    },
+
     invertSelection (index) {
       const id = this.items[index].identifier;
       const value = !this.selection[id];
 
       this.$set(this.selection, id, value);
+      this.onUpdateScoreRange();
     },
 
     onSelectAll () {
@@ -434,6 +505,8 @@ export default {
           this.$set(this.selection, item.identifier, true);
         }
       }
+
+      this.onUpdateScoreRange();
     },
 
     onDeselectAll () {
@@ -442,19 +515,28 @@ export default {
           this.$set(this.selection, item.identifier, false);
         }
       }
+
+      this.onUpdateScoreRange();
     },
 
     onAddScoreCondition () {
       this.conditionals.push({
         prefLabel: '',
         id: '',
+        flagScore: false,
         showMessage: false,
         showItems: false,
         message: '',
         printItems: [],
-        jsExpression: '',
         expanded: true,
         timestamp: Date.now(),
+
+        conditionalItem: {
+          showValue: null,
+          conditions: [],
+          operation: "ALL",
+          valid: false
+        }
       });
 
       this.update();
@@ -485,10 +567,49 @@ export default {
       return scorePrefix[outputType] + title.toLowerCase().replace(/\s/g, '_').replace(/[()/]/g, '');
     },
 
+    onUpdateScoreRange () {
+      let totalMinScore = 0, totalMaxScore = 0, count = 0;
+
+      for (const item of this.items) {
+        if (this.selection[item.identifier]) {
+          totalMinScore += item.minScore;
+          totalMaxScore += item.maxScore;
+          count++;
+        }
+      }
+
+      switch (this.outputType.value) {
+        case 'cumulative':
+          this.minScore = totalMinScore;
+          this.maxScore = totalMaxScore;
+          break;
+        case 'average':
+          this.minScore = count ? totalMinScore / count : 0;
+          this.maxScore = count ? totalMaxScore / count : 0;
+          break;
+        case 'percentage':
+          this.minScore = totalMaxScore ? totalMinScore / totalMaxScore * 100 : 0;
+          this.maxScore = 100;
+          break;
+      }
+
+      this.update();
+    },
+
     update () {
       this.$emit('update', {
         conditionals: this.conditionals.map(conditional => ({ ...conditional })),
         outputType: this.outputType.value,
+
+        jsExpression: this.items.filter(
+          item => this.selection[item.identifier]
+        ).map(
+          item => item.name
+        ).join(' + '),
+
+        minScore: this.minScore,
+        maxScore: this.maxScore,
+
         id: this.getScoreId(this.report.prefLabel, this.outputType.value)
       })
     },

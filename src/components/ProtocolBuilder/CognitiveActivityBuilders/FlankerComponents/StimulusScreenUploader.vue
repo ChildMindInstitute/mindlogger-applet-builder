@@ -10,7 +10,7 @@
     >
       <div class="options">
         <v-btn class="upload-screens" @click="replaceStimulusScreen(-1)">
-          Upload Stimulus Screens
+          {{ files.length ? 'Add' : 'Upload' }} Stimulus Screens
         </v-btn>
 
         <input

@@ -4,11 +4,11 @@
   >
     <div class="mt-4">
       <v-btn class="mx-2" @click="onUploadStimulusScreen">
-        Upload Stimulus Screens
+        {{ stimulusScreens.length ? 'Edit' : 'Upload' }} Stimulus Screens
       </v-btn>
 
       <v-btn class="mx-2" @click="onUploadFixationScreen">
-        Upload Fixation Screen
+        {{ fixationScreen.name ? 'Edit' : 'Upload' }} Fixation Screen
       </v-btn>
     </div>
 
@@ -123,7 +123,7 @@
             :dark="blocksPractice.length ? false : true"
             @click="onUploadBlockSequence('practice')"
           >
-            Upload Block Sequences
+            {{ blocksPractice.length ? 'Edit' : 'Upload' }} Block Sequences
           </v-btn>
         </div>
 
@@ -188,7 +188,7 @@
             :dark="blocksTest.length ? false : true"
             @click="onUploadBlockSequence('test')"
           >
-            Upload Block Sequences
+            {{ blocksTest.length ? 'Edit' : 'Upload' }} Block Sequences
           </v-btn>
         </div>
 

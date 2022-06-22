@@ -2,7 +2,7 @@
   <div>
     <v-switch
       v-model="showMessage"
-      @input="updateShowMessage"
+      @change="updateShowMessage"
       inset
       hide-details
     >
@@ -32,7 +32,7 @@
 
     <v-switch
       v-model="showItems"
-      @input="updateShowItems"
+      @change="updateShowItems"
       label="Print Items"
       inset
       hide-details
@@ -45,12 +45,12 @@
       <v-list>
         <v-list-item
           v-for="(item, index) in itemList"
-          :key="item.identifier"
+          :key="index"
           @click="invertSelection(index)"
         >
           <v-list-item-action>
             <v-checkbox
-              v-model="selection[item.identifier]"
+              v-model="selection[getIdentifier(item)]"
               color="primary"
               disabled
             />
@@ -116,21 +116,25 @@ export default {
 
   beforeMount () {
     for (const item of this.itemList) {
-      this.$set(this.selection, item.identifier, this.printItems.includes(item));
+      this.$set(this.selection, this.getIdentifier(item), this.printItems.includes(item));
     }
   },
 
   methods: {
-    updateShowMessage (value) {
+    getIdentifier (item) {
+      return `${item.timestamp}-${item.id || 0}`;
+    },
+
+    updateShowMessage () {
       this.$emit('update', this.getChanges(true, this.showMessage, this.showItems));
     },
 
-    updateShowItems (value) {
+    updateShowItems () {
       this.$emit('update', this.getChanges(false, this.showMessage, this.showItems));
     },
 
     invertSelection (index) {
-      const id = this.itemList[index].identifier;
+      const id = this.getIdentifier(this.itemList[index]);
       const value = !this.selection[id];
 
       this.$set(this.selection, id, value);
@@ -149,7 +153,7 @@ export default {
         showMessage,
         showItems,
         message: showMessage ? this.message : '',
-        printItems: showItems ? this.itemList.filter(item => this.selection[item.identifier]) : [],
+        printItems: showItems ? this.itemList.filter(item => this.selection[this.getIdentifier(item)]) : [],
       };
 
       if (messageInitialized) {

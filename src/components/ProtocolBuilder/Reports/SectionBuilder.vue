@@ -3,6 +3,7 @@
     <CardHeader
       score-id=""
       :name="name"
+      :valid="report.valid"
       :expanded="expanded"
       @setExpanded="expanded = $event"
       @deleteReport="$emit('deleteReport')"
@@ -103,7 +104,7 @@ export default {
       },
       set (value) {
         this.$emit('update', {
-          prefLabel: value
+          prefLabel: value,
         })
       }
     },
@@ -117,7 +118,7 @@ export default {
         return 'Letters and underscores are only allowed. Please fix.';
       }
 
-      if (this.currentActivity.reports.find(score => score.dataType == this.report.dataType && score.prefLabel == name && score != this.report)) {
+      if (this.currentActivity.reports.find(section => section.dataType == 'section' && section.prefLabel == this.name && section != this.report)) {
         return 'That section title is already in use. Please use a different title.';
       }
 
@@ -130,7 +131,7 @@ export default {
       this.$emit('update', {
         conditionalItem: conditional
       })
-    }
+    },
   }
 }
 </script>

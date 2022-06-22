@@ -3,6 +3,7 @@
     <CardHeader
       :score-id="report.id"
       :name="name"
+      :valid="report.valid"
       :expanded="expanded"
       @setExpanded="expanded = $event"
       @deleteReport="$emit('deleteReport')"
@@ -168,7 +169,7 @@
         :container="report"
         :score-id="report.id"
         :item-list="printItemList"
-        @update="$emit('update', $event)"
+        @update="update($event)"
       />
 
       <draggable
@@ -399,8 +400,8 @@ export default {
 
           clearTimeout(this.timerId);
           this.timerId = setTimeout(() => {
-            this.$emit('update', {
-              initialized: true
+            this.update({
+              initialized: true,
             })
           }, 500)
         }
@@ -409,7 +410,7 @@ export default {
           this.$set(conditional, 'id', scoreId + '_' + conditional.prefLabel);
         }
 
-        this.$emit('update', {
+        this.update({
           prefLabel: value,
           id: scoreId,
           message,
@@ -433,7 +434,7 @@ export default {
         return 'Letters and underscores are only allowed. Please fix.';
       }
 
-      if (this.currentActivity.reports.find(score => score.dataType == this.report.dataType && score.prefLabel == name && score != this.report)) {
+      if (this.currentActivity.reports.find(score => score.dataType == this.report.dataType && score.prefLabel == this.name && score != this.report)) {
         return 'That score title is already in use. Please use a different title.';
       }
 
@@ -596,8 +597,8 @@ export default {
       this.update();
     },
 
-    update () {
-      this.$emit('update', {
+    update (newOptions = null) {
+      const updates = {
         conditionals: this.conditionals.map(conditional => ({ ...conditional })),
         outputType: this.outputType.value,
 
@@ -610,8 +611,14 @@ export default {
         minScore: this.minScore,
         maxScore: this.maxScore,
 
-        id: this.getScoreId(this.report.prefLabel, this.outputType.value)
-      })
+        id: this.getScoreId(this.report.prefLabel, this.outputType.value),
+      };
+
+      if (newOptions) {
+        Object.assign(updates, newOptions);
+      }
+
+      this.$emit('update', updates);
     },
   }
 }

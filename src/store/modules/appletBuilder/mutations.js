@@ -471,6 +471,8 @@ const reportMutations = {
   updateReportInfo (state, { index, obj }) {
     const currentActivity = state.currentActivity;
     Object.assign(currentActivity.reports[index], obj);
+
+    currentActivity.reports[index].valid = Activity.checkReportValidation(currentActivity.reports[index], currentActivity.reports);
   },
 
   deleteReportSection (state, index) {

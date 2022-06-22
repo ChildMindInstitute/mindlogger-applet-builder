@@ -1024,4 +1024,42 @@ export default class Activity {
 
     return true;
   }
+
+  static checkReportValidation (report, allReports) {
+    if (!report.prefLabel || !report.prefLabel.match(/^[a-zA-Z_]+$/)) {
+      return false;
+    }
+
+    if (allReports.find(section => section.dataType == report.dataType && section.prefLabel == report.prefLabel && section != report)) {
+      return false;
+    }
+
+    if (report.showItems && !report.printItems.length || report.showMessage && !report.message) {
+      return false;
+    }
+
+    if (report.dataType == 'score') {
+      // validation on score
+      for (const conditional of report.conditionals) {
+        if (!conditional.conditionalItem.valid) {
+          return false;
+        }
+      }
+
+      if (!report.jsExpression) {
+        return false;
+      }
+    } else {
+      // validation on section
+      if (!report.showItems && !report.showMessage) {
+        return false;
+      }
+
+      if (!report.conditionalItem.valid) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 }

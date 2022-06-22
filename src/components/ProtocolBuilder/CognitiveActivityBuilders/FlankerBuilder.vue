@@ -406,6 +406,9 @@ export default {
       notify: {},
       loading: false,
 
+      practiceScreens: [2, 4, 6],
+      testScreens: [8, 10, 12],
+
       stimulusScreenDialog: {
         visible: false,
         key: 0
@@ -442,11 +445,13 @@ export default {
         return option['schema:value'];
       },
       set(value) {
-        this.updateInputOption('minimumAccuracy', {
-          'schema:name': 'minimumAccuracy',
-          'schema:value': value,
-          '@type': 'schema:Number',
-        })
+        for (const index of this.practiceScreens) {
+          this.updateInputOption('minimumAccuracy', {
+            'schema:name': 'minimumAccuracy',
+            'schema:value': value,
+            '@type': 'schema:Number',
+          }, index)
+        }
       }
     },
 
@@ -474,11 +479,11 @@ export default {
 
     showFeedbackTest: {
       get () {
-        const option = this.getInputOption('showFeedback', 4);
+        const option = this.getInputOption('showFeedback', this.testScreens[0]);
         return option['schema:value'];
       },
       set (value) {
-        for (const index of [4, 6, 8]) { // index for test screens
+        for (const index of this.testScreens) {
           this.updateInputOption('showFeedback', {
             'schema:name': 'showFeedback',
             'schema:value': value,
@@ -490,11 +495,11 @@ export default {
 
     showSummaryTest: {
       get () {
-        const option = this.getInputOption('showResults', 4);
+        const option = this.getInputOption('showResults', this.testScreens[0]);
         return option['schema:value'];
       },
       set (value) {
-        for (const index of [4, 6, 8]) { // index for test screens
+        for (const index of this.testScreens) {
           this.updateInputOption('showResults', {
             'schema:name': 'showResults',
             'schema:value': value,
@@ -506,53 +511,59 @@ export default {
 
     showFeedbackPractice: {
       get () {
-        const option = this.getInputOption('showFeedback', 2);
+        const option = this.getInputOption('showFeedback', this.practiceScreens[0]);
         return option['schema:value'];
       },
       set (value) {
-        this.updateInputOption('showFeedback', {
-          'schema:name': 'showFeedback',
-          'schema:value': value,
-          '@type': 'schema:Boolean',
-        }, 2); // index for practice screen
+        for (const index of this.practiceScreens) {
+          this.updateInputOption('showFeedback', {
+            'schema:name': 'showFeedback',
+            'schema:value': value,
+            '@type': 'schema:Boolean',
+          }, index); // index for practice screen
+        }
       }
     },
 
     showSummaryPractice: {
       get () {
-        const option = this.getInputOption('showResults', 2);
+        const option = this.getInputOption('showResults', this.practiceScreens[0]);
         return option['schema:value'];
       },
       set (value) {
-        this.updateInputOption('showResults', {
-          'schema:name': 'showResults',
-          'schema:value': value,
-          '@type': 'schema:Boolean',
-        }, 2); // index for practice screen
+        for (const index of this.practiceScreens) {
+          this.updateInputOption('showResults', {
+            'schema:name': 'showResults',
+            'schema:value': value,
+            '@type': 'schema:Boolean',
+          }, index);
+        }
       }
     },
 
     randomizeOrderPractice: {
       get () {
-        const option = this.getInputOption('samplingMethod', 2);
+        const option = this.getInputOption('samplingMethod', this.practiceScreens[0]);
         return option['schema:value'] == 'randomize-order';
       },
       set (value) {
-        this.updateInputOption('samplingMethod', {
-          'schema:name': 'samplingMethod',
-          'schema:value': value ? 'randomize-order' : 'fixed-order',
-          '@type': 'schema:Text'
-        }, 2)
+        for (const index of this.practiceScreens) {
+          this.updateInputOption('samplingMethod', {
+            'schema:name': 'samplingMethod',
+            'schema:value': value ? 'randomize-order' : 'fixed-order',
+            '@type': 'schema:Text'
+          }, index)
+        }
       }
     },
 
     randomizeOrderTest: {
       get () {
-        const option = this.getInputOption('samplingMethod', 4);
+        const option = this.getInputOption('samplingMethod', this.testScreens[0]);
         return option['schema:value'] == 'randomize-order';
       },
       set (value) {
-        for (const index of [4, 6, 8]) {
+        for (const index of this.testScreens) {
           this.updateInputOption('samplingMethod', {
             'schema:name': 'samplingMethod',
             'schema:value': value ? 'randomize-order' : 'fixed-order',
@@ -564,25 +575,27 @@ export default {
 
     stimulusDurationPractice: {
       get () {
-        const option = this.getInputOption('trialDuration', 2);
+        const option = this.getInputOption('trialDuration', this.practiceScreens[0]);
         return option['schema:value'];
       },
       set (value) {
-        this.updateInputOption('trialDuration', {
-          'schema:name': 'trialDuration',
-          'schema:value': value,
-          '@type': 'schema:Number'
-        }, 2)
+        for (const index of this.practiceScreens) {
+          this.updateInputOption('trialDuration', {
+            'schema:name': 'trialDuration',
+            'schema:value': value,
+            '@type': 'schema:Number'
+          }, index)
+        }
       }
     },
 
     stimulusDurationTest: {
       get () {
-        const option = this.getInputOption('trialDuration', 4);
+        const option = this.getInputOption('trialDuration', this.testScreens[0]);
         return option['schema:value'];
       },
       set (value) {
-        for (const index of [4, 6, 8]) {
+        for (const index of this.testScreens) {
           this.updateInputOption('trialDuration', {
             'schema:name': 'trialDuration',
             'schema:value': value,
@@ -594,23 +607,21 @@ export default {
 
     fixationDuration: {
       get () {
-        const option = this.getInputOption('fixationDuration', 2);
+        const option = this.getInputOption('fixationDuration', this.practiceScreens[0]);
         return option['schema:value'];
       },
       set (value) {
-        for (const index of [2, 4, 6, 8]) {
-          this.updateInputOption('fixationDuration', {
-            'schema:name': 'fixationDuration',
-            'schema:value': value,
-            '@type': 'schema:Number'
-          })
-        }
+        this.updateInputOption('fixationDuration', {
+          'schema:name': 'fixationDuration',
+          'schema:value': value,
+          '@type': 'schema:Number'
+        })
       }
     },
 
     stimulusScreens: {
       get () {
-        const option = this.getInputOption('trials', 2);
+        const option = this.getInputOption('trials', this.practiceScreens[0]);
         return option['schema:itemListElement'].map(item => ({
           id: item['@id'],
           name: item['schema:name'],
@@ -620,26 +631,24 @@ export default {
       },
 
       set (trials) {
-        for (const index of [2, 4, 6, 8]) {
-          this.updateInputOption('trials', {
-            "@type": "schema:ItemList",
-            "schema:name": "trials",
-            "schema:numberOfItems": trials.length,
-            'schema:itemListElement': trials.map(trial => ({
-              "@id": trial.id,
-              "@type": "schema:Property",
-              "schema:name": trial.name,
-              "schema:image": trial.image,
-              "schema:value": trial.value
-            }))
-          })
-        }
+        this.updateInputOption('trials', {
+          "@type": "schema:ItemList",
+          "schema:name": "trials",
+          "schema:numberOfItems": trials.length,
+          'schema:itemListElement': trials.map(trial => ({
+            "@id": trial.id,
+            "@type": "schema:Property",
+            "schema:name": trial.name,
+            "schema:image": trial.image,
+            "schema:value": trial.value
+          }))
+        })
       }
     },
 
     fixationScreen: {
       get () {
-        const option = this.getInputOption('fixationScreen', 2);
+        const option = this.getInputOption('fixationScreen', this.practiceScreens[0]);
         return {
           name: option['schema:value'],
           image: option['schema:image']
@@ -647,32 +656,30 @@ export default {
       },
 
       set (screen) {
-        for (const index of [2, 4, 6, 8]) {
-          this.updateInputOption('fixationScreen', {
-            "@type": "schema:Text",
-            "schema:name": "fixationScreen",
-            "schema:value": screen.name,
-            "schema:image": screen.image
-          }, index)
-        }
+        this.updateInputOption('fixationScreen', {
+          "@type": "schema:Text",
+          "schema:name": "fixationScreen",
+          "schema:value": screen.name,
+          "schema:image": screen.image
+        })
       }
     },
 
     blocksPractice: {
       get () {
-        return this.getBlocks(2);
+        return this.getBlocks(this.practiceScreens[0]);
       },
       set (blocks) {
-        this.setBlocks(blocks, [2])
+        this.setBlocks(blocks, this.practiceScreens)
       }
     },
 
     blocksTest: {
       get () {
-        return this.getBlocks(4);
+        return this.getBlocks(this.testScreens[0]);
       },
       set (blocks) {
-        this.setBlocks(blocks, [4, 6, 8]);
+        this.setBlocks(blocks, this.testScreens);
       }
     },
 
@@ -852,7 +859,7 @@ export default {
         case 'practice':
           return [1];
         case 'test':
-          return [3];
+          return [7];
       }
       return [-1];
     },

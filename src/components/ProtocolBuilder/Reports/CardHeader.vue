@@ -1,5 +1,8 @@
 <template>
-  <div class="pt-2 pb-6">
+  <div
+    class="pt-2 pb-6"
+    :class="valid ? '' : 'invalid'"
+  >
     <div class="score-id">
       {{ scoreId }}
     </div>
@@ -59,23 +62,30 @@
 </template>
 
 <style scoped>
-  .score-id {
-    height: 32px;
-    line-height: 22px;
-    font-size: 16px;
-    color: #6F7070;
-    padding: 5px 20px;
-  }
+.invalid {
+  background-color: #d44c4c;
+}
+.score-id {
+  height: 32px;
+  line-height: 22px;
+  font-size: 16px;
+  color: #6F7070;
+  padding: 5px 20px;
+}
 
-  .move-icon {
-    cursor: move;
-  }
+.invalid .score-id {
+  color: rgba(0, 0, 0, 0.87);
+}
 
-  .section-name {
-    text-align: left;
-    flex-grow: 1;
-    font-size: 22px;
-  }
+.move-icon {
+  cursor: move;
+}
+
+.section-name {
+  text-align: left;
+  flex-grow: 1;
+  font-size: 22px;
+}
 </style>
 
 <script>
@@ -94,6 +104,10 @@ export default {
     },
     scoreId: {
       type: String,
+      required: true
+    },
+    valid: {
+      type: Boolean,
       required: true
     }
   },

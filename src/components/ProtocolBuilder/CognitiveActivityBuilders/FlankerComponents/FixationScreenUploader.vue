@@ -6,18 +6,7 @@
     persistent
   >
     <v-card class="uploader pa-4">
-      <div
-        class="d-flex justify-center my-4"
-        v-if="imageURL || file"
-      >
-        <img
-          v-if="imageURL"
-          :src="imageURL"
-        />
-        <span v-else>{{ file.name }}</span>
-      </div>
-
-      <div class="d-flex justify-center align-center">
+      <div class="mt-4 d-flex justify-center align-center">
         <v-btn
           v-if="!file"
           @click="$refs.fileInput.click()"

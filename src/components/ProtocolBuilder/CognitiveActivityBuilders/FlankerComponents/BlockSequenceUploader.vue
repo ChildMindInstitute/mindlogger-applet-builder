@@ -55,9 +55,19 @@
         <a @click="downloadTemplate">Download template (.csv)</a>
         <v-spacer />
 
-        <v-btn @click="$refs.fileInput.click()">
-          Upload
-        </v-btn>
+        <v-tooltip top>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              v-on="on"
+              v-bind="attrs"
+              @click="$refs.fileInput.click()"
+            >
+              Upload
+            </v-btn>
+          </template>
+
+          <span>Please make sure to use correct csv editor to build/edit csv file</span>
+        </v-tooltip>
 
         <v-btn @click="saveBlocks" color="primary">
           Save

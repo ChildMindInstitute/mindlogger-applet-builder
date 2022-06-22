@@ -138,8 +138,9 @@
 
               <tr
                 v-if="!files.length"
+                class="justify-center"
               >
-                <td colspan="3" class="text-center">No stimulus screens uploaded</td>
+                No stimulus screens uploaded
               </tr>
             </tbody>
           </template>
@@ -236,9 +237,6 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-
-  max-height: 450px;
-  overflow: auto;
 }
 
 .upload-screens {
@@ -272,6 +270,29 @@
 }
 .stimulus-screen:hover .stimulus-btn {
   opacity: 1;
+}
+
+thead {
+  display: block;
+}
+tbody {
+  max-height: 400px;
+  overflow: auto;
+  display: block;
+}
+tr {
+  width: 100%;
+  display: flex;
+}
+
+td, th {
+  display: flex;
+  align-items: center;
+  width: 25%;
+}
+
+td:nth-child(2), th:nth-child(2) {
+  width: 50%;
 }
 </style>
 

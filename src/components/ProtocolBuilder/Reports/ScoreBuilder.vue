@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card class="px-0">
     <CardHeader
       :score-id="report.id"
       :name="name"
@@ -181,7 +181,7 @@
       >
         <transition-group>
           <v-card
-            v-for="(conditional, index) in conditionals"
+            v-for="conditional in conditionals"
             class="px-4 my-4"
             :key="conditional.timestamp"
           >
@@ -189,8 +189,9 @@
               :score-id="conditional.id"
               :name="conditional.prefLabel"
               :expanded="conditional.expanded"
+              :valid="conditional.valid"
               @setExpanded="conditional.expanded = $event"
-              @deleteReport="deleteScoreCondition(index)"
+              @deleteReport="deleteScoreCondition(conditional)"
             />
 
             <div
@@ -204,6 +205,7 @@
                     v-model="conditional.prefLabel"
                     @input="onConditionalNameChanged(conditional)"
                     label="Score Condition Name"
+                    :error-messages="getConditionalNameError(conditional)"
                   />
                 </v-col>
 
@@ -367,7 +369,7 @@ export default {
     ];
 
     return {
-      expanded: true,
+      expanded: this.report.initialized ? false : true,
       messageTemplate: `
         <h3 style="color:#0067a0"> {score_title} </h3> The subject’s score on the **{Score Title}** subscale was [[{score_id}]].
       `,
@@ -464,6 +466,8 @@ export default {
     for (const item of this.items) {
       this.$set(this.selection, item.identifier, selectedItems.includes(item.name));
     }
+
+    this.onUpdateScoreRange();
   },
 
   methods: {
@@ -537,24 +541,62 @@ export default {
           conditions: [],
           operation: "ALL",
           valid: false
-        }
+        },
+
+        valid: false
       });
 
       this.update();
     },
 
-    deleteScoreCondition (index) {
-      this.conditionals.splice(index, 1);
+    deleteScoreCondition (conditional) {
+      this.conditionals.splice(this.conditionals.indexOf(conditional), 1);
       this.update();
+    },
+
+    getConditionalNameError (conditional) {
+      if (!conditional.prefLabel) {
+        return 'This is a required field';
+      }
+
+      if (!conditional.prefLabel.match(/^[a-zA-Z_]+$/)) {
+        return 'Letters and underscores are only allowed. Please fix.';
+      }
+
+      if (this.conditionals.find(d => d.prefLabel == conditional.prefLabel && d !== conditional)) {
+        return 'That title is already in use. Please use a different title.';
+      }
+
+      return '';
+    },
+
+    checkConditionalValidation (conditional) {
+      if (!conditional.conditionalItem.valid || this.getConditionalNameError(conditional)) {
+        return false;
+      }
+
+      if (!conditional.showMessage && !conditional.showItems) {
+        return false;
+      }
+
+      if (conditional.showMessage && !conditional.message || conditional.showItems && !conditional.printItems.length) {
+        return false;
+      }
+
+      return true;
     },
 
     onConditionalNameChanged (conditional) {
       this.$set(conditional, 'id', this.report.id + '_' + conditional.prefLabel);
+      this.$set(conditional, 'valid', this.checkConditionalValidation(conditional));
+
       this.update();
     },
 
     onUpdateConditional (conditional, updates) {
       Object.assign(conditional, updates);
+      this.$set(conditional, 'valid', this.checkConditionalValidation(conditional));
+
       this.update();
     },
 

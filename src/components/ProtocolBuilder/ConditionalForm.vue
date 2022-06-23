@@ -195,13 +195,7 @@ export default {
 
   data () {
     return {
-      conditions: (this.current.conditions || []).map(condition => ({ ...condition })),
-      valid: this.current.valid || false,
-      ifValue: this.current.ifValue || null,
-      stateValue: this.current.stateValue || null,
-      minValue: this.current.minValue === undefined ? null : this.current.minValue,
-      maxValue: this.current.maxValue === undefined ? null : this.current.maxValue,
-      answerValue: this.current.answerValue === undefined ? null : this.current.answerValue,
+      conditions: (this.current.conditions || []).map(condition => ({ ...condition, ifValue: (condition.ifValue || this.presetIfValue) })),
       showValue: this.current.showValue || null,
       operation: this.current.operation || null,
       initialCondition: {

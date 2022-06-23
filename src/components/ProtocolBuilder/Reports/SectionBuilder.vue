@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card class="px-0">
     <CardHeader
       score-id=""
       :name="name"
@@ -42,7 +42,7 @@
 
 <style scoped>
 .section-name {
-  width: 50%;
+  width: 100%;
 }
 </style>
 
@@ -69,7 +69,7 @@ export default {
 
   data () {
     return {
-      expanded: true
+      expanded: this.report.message ? false : true
     }
   },
 
@@ -105,6 +105,7 @@ export default {
       set (value) {
         this.$emit('update', {
           prefLabel: value,
+          id: `section_${value}`
         })
       }
     },

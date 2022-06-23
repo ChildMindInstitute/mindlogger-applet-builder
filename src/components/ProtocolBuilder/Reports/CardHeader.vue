@@ -30,6 +30,7 @@
         @click="$emit('deleteReport')"
         color="white"
         class="mx-4"
+        icon
       >
         <v-icon color="black">
           mdi-delete

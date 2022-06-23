@@ -116,7 +116,7 @@ export default {
 
   beforeMount () {
     for (const item of this.itemList) {
-      this.$set(this.selection, this.getIdentifier(item), this.printItems.includes(item));
+      this.$set(this.selection, this.getIdentifier(item), this.printItems.includes(item.name));
     }
   },
 
@@ -153,7 +153,7 @@ export default {
         showMessage,
         showItems,
         message: showMessage ? this.message : '',
-        printItems: showItems ? this.itemList.filter(item => this.selection[this.getIdentifier(item)]) : [],
+        printItems: showItems ? this.itemList.filter(item => this.selection[this.getIdentifier(item)]).map(item => item.name) : [],
       };
 
       if (messageInitialized) {

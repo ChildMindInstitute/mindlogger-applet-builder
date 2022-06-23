@@ -50,7 +50,7 @@ export default class Activity {
       items: items || [],
       disableBack: initialActivityData.disableBack || false,
       allowSummary: initialActivityData.allowSummary !== undefined ? initialActivityData.allowSummary : true,
-      exportAvailable: initialActivityData.exportAvailable,
+      exportAvailable: initialActivityData.exportAvailable || false,
       isReviewerActivity: initialActivityData.isReviewerActivity || false,
       isOnePageAssessment: initialActivityData.isOnePageAssessment || false,
       id: initialActivityData._id || null,
@@ -70,10 +70,10 @@ export default class Activity {
         ...subScale,
         valid: true
       })) || [],
-      reports: (initialActivityData.reports || []).map(report => ({
+      reports: this.parseReportConditionals((initialActivityData.reports || []).map(report => ({
         ...report,
         valid: true
-      })),
+      })), items),
       finalSubScale: initialActivityData.finalSubScale || {
         lookupTable: null,
         variableName: '',
@@ -91,19 +91,35 @@ export default class Activity {
     this.ref = ref;
   }
 
+  parseReportConditionals (reports, items) {
+    for (const report of reports) {
+      if (report.dataType == 'section') {
+        report.conditionalItem = this.parseConditionalExpression({
+          showValue: null,
+          conditions: [],
+          operation: "ALL",
+          valid: true,
+        }, report.isVis.replace(/\s/g, ''), [...reports, ...items]);
+      } else {
+        for (const conditional of report.conditionals) {
+          conditional.conditionalItem = this.parseConditionalExpression({
+            showValue: null,
+            conditions: [],
+            operation: "ALL",
+            valid: true,
+          }, conditional.isVis.replace(/\s/g, ''), [report]);
+
+          conditional.conditionalItem.conditions.forEach(condition => condition.ifValue = null);
+        }
+      }
+    }
+
+    return reports;
+  }
+
   getConditionalItems(activity, items) {
     const visibilities = activity.visibilities || [];
     const conditionalItems = [];
-
-    const itemChoices = [];
-
-    for (let i = 0; i < items.length; i += 1) {
-      const itemModel = new Item();
-      itemModel.updateReferenceObject(items[i]);
-
-      const options = itemModel.getResponseOptions();
-      itemChoices.push(options.choices);
-    }
 
     visibilities.forEach((property) => {
       if (typeof property.isVis === 'boolean') return;
@@ -123,8 +139,57 @@ export default class Activity {
     return conditionalItems;
   }
 
+  getReports (reports) {
+    return reports.map(report => {
+      const schema = {
+        'prefLabel': report.prefLabel,
+        '@id': report.id,
+        'dataType': report.dataType,
+        'message': report.showMessage ? report.message : '',
+        'printItems': report.showItems ? report.printItems : [],
+      };
+
+      if (report.dataType == 'section') {
+        schema.isVis = this.compressConditional(report.conditionalItem);
+      } else {
+        Object.assign(schema, {
+          outputType: report.outputType,
+          jsExpression: report.jsExpression,
+          conditionals: report.conditionals.map((conditional, index) => ({
+            'prefLabel': conditional.prefLabel,
+            '@id': conditional.id,
+            'message': conditional.showMessage ? conditional.message : '',
+            'printItems': conditional.showItems ? conditional.printItems : [],
+            'flagScore': conditional.flagScore,
+            'isVis': this.compressConditional({
+              ...conditional.conditionalItem,
+              conditions: conditional.conditionalItem.conditions.map(condition => ({
+                ...condition,
+                ifValue: report
+              }))
+            }),
+          }))
+        });
+      }
+
+      return schema;
+    })
+  }
+
   parseConditionalExpression (conditionalItem, isVis, items) {
-    const findItemIndex = (name) => items.findIndex(item => item.name == name || item.prefLabel == name);
+    const findItemIndex = (name) => items.findIndex(item => item.name == name || item.id == name);
+
+    const itemChoices = [];
+
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].inputType) {
+        const itemModel = new Item();
+        itemModel.updateReferenceObject(items[i]);
+
+        const options = itemModel.getResponseOptions();
+        itemChoices.push(options.choices);
+      }
+    }
 
     while (isVis) {
       const outsideRegExp = /(\w+)<(\d+)\|\|(\w+)>(\d+)/;
@@ -160,7 +225,7 @@ export default class Activity {
 
       if (outsideValues && minIndex === outsideValues.index && outsideValues[1] === outsideValues[3]) {
         isVis = isVis.replace(outsideRegExp, '');
-        const itemIndex = items.findIndex(({ name }) => name === outsideValues[1]);
+        const itemIndex = findItemIndex(outsideValues[1]);
 
         if (itemIndex !== -1) {
           conditionalItem.conditions.push({
@@ -355,7 +420,7 @@ export default class Activity {
 
     const operation = conditionalItem.operation === 'ANY' ? ' || ' : ' && ';
     const visibleItems = conditionalItem.conditions.map((cond) => {
-      const ifValue = typeof cond.ifValue == 'object' ? (cond.ifValue.name || cond.ifValue.prefLabel) : cond.ifValue;
+      const ifValue = typeof cond.ifValue == 'object' ? (cond.ifValue.name || cond.ifValue.id) : cond.ifValue;
 
       if (cond.activityCondition) {
         return `${cond.stateValue.val}("${ifValue}")`;
@@ -448,6 +513,7 @@ export default class Activity {
   getCompressedSchema() {
     const itemOrder = this.getItemOrder();
     const addProperties = this.getAddProperties(itemOrder);
+    const reports = this.getReports(this.ref.reports);
     const allowed = [];
     this.ref.isSkippable && allowed.push('skipped');
     this.ref.disableBack && allowed.push('disableBack');
@@ -484,9 +550,10 @@ export default class Activity {
         allow: allowed,
       },
       subScales: this.ref.subScales,
+      reports,
+      exportAvailable: this.ref.exportAvailable,
       finalSubScale: (this.ref.finalSubScale.variableName ? [this.ref.finalSubScale] : []),
       hasResponseIdentifier: !!this.ref.items.find(item => item.options.isResponseIdentifier),
-      ...this.parseCumulative(),
     };
   }
 
@@ -707,6 +774,32 @@ export default class Activity {
           oldSubScales.forEach(oldSubScale => {
             if (!newSubScales.find(newSubScale => newSubScale.subScaleId == oldSubScale.subScaleId)) {
               updates.push(`subscale (${oldSubScale.variableName} | ${oldSubScale.jsExpression.replaceAll(' + ', ', ')}) was removed`)
+            }
+          })
+
+          return updates;
+        }
+      },
+      'reports': {
+        updated: (field) => {
+          const updates = [];
+          let newReports = _.get(newValue, field, []);
+          let oldReports = _.get(oldValue, field, []);
+
+          newReports.forEach(newReport => {
+            const oldReport = oldReports.find(report => report.dataType == newReport.dataType && report.prefLabel == newReport.prefLabel);
+
+            if (!oldReport) {
+              updates.push(`The ${newReport.dataType} ${newReport.prefLabel} was added.`);
+            } else if (JSON.stringify(oldReport) != JSON.stringify(newReport)) {
+              updates.push(`The ${newReport.dataType} ${newReport.prefLabel} was updated.`);
+            }
+          })
+
+          oldReports.forEach(oldReport => {
+            const newReport = newReports.find(report => report.dataType == oldReport.dataType && report.prefLabel == oldReport.prefLabel)
+            if (!newReport) {
+              updates.push(`The ${oldReport.dataType} ${oldReport.prefLabel} was removed.`);
             }
           })
 
@@ -991,6 +1084,51 @@ export default class Activity {
         }
 
         return subScaleData;
+      }),
+      reports: _.get(activitiesObj, ['reprolib:terms/reports', 0, '@list'], []).map((report, index) => {
+        const dataType = _.get(report, ['schema:DataType', 0, '@id']);
+        const message = _.get(report, ['reprolib:terms/message', 0, '@value']);
+        const printItems = _.get(report, ['reprolib:terms/printItems', 0, '@list']).map(item => item['@value']);
+
+        const data = {
+          id: report['@id'],
+          prefLabel: _.get(report, ['http://www.w3.org/2004/02/skos/core#prefLabel', 0, '@value']),
+          showMessage: message.length > 0,
+          message,
+          showItems: printItems.length > 0,
+          printItems,
+          dataType,
+          timestamp: Date.now() - index * 10
+        }
+
+        if (dataType == 'score') {
+          Object.assign(data, {
+            initialized: true,
+            outputType: _.get(report, ['reprolib:terms/outputType', 0, '@value']),
+            jsExpression: _.get(report, ['reprolib:terms/jsExpression', 0, '@value']),
+            conditionals: _.get(report, ['reprolib:terms/conditionals', 0, '@list'], []).map((conditional, index) => {
+              const message = _.get(conditional, ['reprolib:terms/message', 0, '@value']);
+              const printItems = _.get(conditional, ['reprolib:terms/printItems', 0, '@list']).map(item => item['@value']);
+
+              return {
+                prefLabel: _.get(conditional, ['http://www.w3.org/2004/02/skos/core#prefLabel', 0, '@value']),
+                id: conditional['@id'],
+                showMessage: message.length > 0,
+                message,
+                showItems: printItems.length > 0,
+                printItems,
+                isVis: _.get(conditional, ['reprolib:terms/isVis', 0, '@value']),
+                expanded: false,
+                timestamp: Date.now() - index * 10,
+                valid: true
+              }
+            })
+          })
+        } else {
+          data.isVis = _.get(report, ['reprolib:terms/isVis', 0, '@value']);
+        }
+
+        return data;
       }),
       finalSubScale: finalSubScale && finalSubScale[0] && {
         isAverageScore: _.get(finalSubScale, [0, 'reprolib:terms/isAverageScore', 0, '@value'], false),

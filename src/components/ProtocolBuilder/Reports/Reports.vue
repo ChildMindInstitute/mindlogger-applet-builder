@@ -4,8 +4,8 @@
       Scores and Report
     </v-card-title>
 
-    <v-card-text class="my-4">
-      <div class="px-4">
+    <v-card-text class="mb-4">
+      <div class="px-4 pb-6">
         <v-checkbox
           v-model="exportAvailable"
           label="Make Report available for Export"
@@ -58,6 +58,13 @@
         Add Section
       </v-btn>
     </v-card-actions>
+
+    <v-card-actions class="mx-2">
+      <v-spacer />
+      <v-btn color="primary" rounded disabled>
+        Preview Report
+      </v-btn>
+    </v-card-actions>
   </v-card>
 </template>
 
@@ -81,12 +88,6 @@ export default {
     ScoreBuilder,
     SectionBuilder,
     draggable,
-  },
-
-  data () {
-    return {
-
-    }
   },
 
   computed: {

@@ -607,7 +607,7 @@ const nextInstructions = {
 }
 
 export default {
-  name: "Flanker_360",
+  name: "Simple & Choice Reaction Time Task Builder",
   activityType: "FLANKER",
   description: "This activity contains Flanker item.",
   items: [

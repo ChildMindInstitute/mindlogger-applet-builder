@@ -73,6 +73,12 @@
           @onRemove="onRemoveImage(0)"
           @onNotify="onEventNotify($event)"
         />
+        <p 
+          class="markdown-error ml-4" 
+          v-if="!buttons[0].name && !buttons[0].image"
+        >
+          *This is a required field
+        </p>
       </div>
 
       <div v-if="buttonCount==2" class="d-flex align-center">
@@ -95,6 +101,12 @@
           @onRemove="onRemoveImage(1)"
           @onNotify="onEventNotify($event)"
         />
+        <p 
+          class="markdown-error ml-4" 
+          v-if="!buttons[1].name && !buttons[1].image"
+        >
+          *This is a required field
+        </p>
       </div>
     </div>
 
@@ -253,11 +265,15 @@
             class="markdown-editor"
             v-model="markdown"
           />
+        <p class="mt-2 markdown-error" v-if="!markdown">
+          * This is a required field
+        </p>
         </v-card-text>
 
         <v-card-actions>
           <v-spacer />
           <v-btn
+            :disabled="!markdown"
             @click="onSaveInstructions"
           >
             OK
@@ -325,6 +341,12 @@
 
 .threshold {
   max-width: 50px;
+}
+
+.markdown-error {
+  color: red;
+  margin-bottom: 0;
+  font-size: 13px;
 }
 
 .button-name {

@@ -36,6 +36,7 @@
             class="stimulus-time"
             type="number"
             min="1"
+            @change="showCloseConfirmation = true"
             v-model="duration.practice"
           />
 
@@ -55,6 +56,7 @@
             class="stimulus-time"
             type="number"
             min="1"
+            @change="showCloseConfirmation = true"
             v-model="duration.test"
           />
 
@@ -160,7 +162,7 @@
             Save
           </v-btn>
 
-          <v-btn @click="$emit('input', false)">
+          <v-btn @click="onCloseStimulusScreen">
             Close
           </v-btn>
         </div>
@@ -177,6 +179,31 @@
             indeterminate
             :size="50"
           />
+        </v-card>
+      </v-dialog>
+
+      <v-dialog
+        v-model="deleteConfirmDialog"
+        width="600"
+        persistent
+      >
+        <v-card>
+          <v-card-title>
+            Close Stimulus Screen
+          </v-card-title>
+          <v-card-text class="pa-4">
+            Are you sure you want to close without saving? All changes will be lost.
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer />
+            <v-btn color="primary" @click="closeStimulusScreen">
+              Yes
+            </v-btn>
+
+            <v-btn @click="deleteConfirmDialog = false;">
+              No
+            </v-btn>
+          </v-card-actions>
         </v-card>
       </v-dialog>
 
@@ -341,7 +368,9 @@ export default {
       errorMessage: '',
       currentIndex: -1,
       deleteScreenDialog: false,
+      deleteConfirmDialog: false,
       activeScreenRemoved: false,
+      showCloseConfirmation: false,
     }
   },
 
@@ -371,6 +400,7 @@ export default {
 
     switchCorrectButton (index, value) {
       this.$set(this.correct, index, value);
+      this.showCloseConfirmation = true;
     },
 
     onDeleteStimulusScreen (index) {
@@ -385,6 +415,7 @@ export default {
     deleteStimulusScreen () {
       this.files.splice(this.currentIndex, 1);
       this.correct.splice(this.currentIndex, 1);
+      this.showCloseConfirmation = true;
       this.currentIndex = -1;
 
       if (this.deleteScreenDialog) {
@@ -394,9 +425,23 @@ export default {
       this.deleteScreenDialog = false;
     },
 
+    onCloseStimulusScreen() {
+      if (this.showCloseConfirmation) {
+        this.deleteConfirmDialog = this.showCloseConfirmation;
+      } else {
+        this.$emit('input', false);
+      }
+    },
+
+    closeStimulusScreen() {
+      this.$emit('input', false);
+      this.showCloseConfirmation = false;
+    },
+
     replaceStimulusScreen (index) {
       this.currentIndex = index;
       this.inputKey++;
+      this.showCloseConfirmation = true;
 
       setTimeout(() => {
         this.$refs.fileInput.click();

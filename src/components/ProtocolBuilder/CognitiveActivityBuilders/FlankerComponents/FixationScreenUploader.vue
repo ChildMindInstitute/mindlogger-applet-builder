@@ -48,6 +48,7 @@
           type="number"
           min="1"
           v-model="duration"
+          @change="showCloseConfirmation = true"
           :disabled="file === null"
         />
 
@@ -79,11 +80,35 @@
           Save
         </v-btn>
 
-        <v-btn @click="$emit('input', false)">
+        <v-btn @click="onCloseStimulusScreen">
           Close
         </v-btn>
       </v-card-actions>
     </v-card>
+    <v-dialog
+        v-model="deleteConfirmDialog"
+        width="600"
+        persistent
+      >
+        <v-card>
+          <v-card-title>
+            Close Fixation Screen
+          </v-card-title>
+          <v-card-text class="pa-4">
+            Are you sure you want to close without saving? All changes will be lost.
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer />
+            <v-btn color="primary" @click="closeStimulusScreen">
+              Yes
+            </v-btn>
+
+            <v-btn @click="deleteConfirmDialog = false;">
+              No
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
   </v-dialog>
 </template>
 
@@ -125,6 +150,8 @@ export default {
       file: !this.screen.name ? null : this.screen,
       imageURL: this.screen.image || '',
       duration: this.fixationDuration || '',
+      showCloseConfirmation: false,
+      deleteConfirmDialog: false,
       inputKey: 0,
       s3Uploader: new S3Uploader('image'),
       uploading: false,
@@ -136,6 +163,7 @@ export default {
     setFixationScreen (e) {
       if (e.target.files.length > 0) {
         this.file = e.target.files[0];
+        this.showCloseConfirmation = true;
         this.imageURL = URL.createObjectURL(this.file);
         this.inputKey++;
       }
@@ -164,10 +192,24 @@ export default {
       this.uploading = false;
     },
 
+    onCloseStimulusScreen() {
+      if (this.showCloseConfirmation) {
+        this.deleteConfirmDialog = this.showCloseConfirmation;
+      } else {
+        this.$emit('input', false);
+      }
+    },
+
+    closeStimulusScreen() {
+      this.$emit('input', false);
+      this.showCloseConfirmation = false;
+    },
+
     deleteImage () {
       this.file = null;
       this.imageURL = '';
       this.duration = '';
+      this.showCloseConfirmation = true;
     }
   }
 }

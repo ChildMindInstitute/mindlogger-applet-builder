@@ -423,6 +423,65 @@ const subScaleMutations = {
   }
 };
 
+const reportMutations = {
+  addReportSection (state, type) {
+    const currentActivity = state.currentActivity;
+    const report = {
+      prefLabel: '',
+      id: '',
+      dataType: type,
+      message: '',
+      showMessage: true,
+      printItems: [],
+      showItems: false,
+      jsExpression: '',
+      valid: false,
+      timestamp: Date.now(),
+      initialized: false
+    };
+
+    if (type == 'score') {
+      Object.assign(report, {
+        outputType: 'cumulative',
+        printItems: [],
+        conditionals: [],
+        minScore: 0,
+        maxScore: 0
+      })
+    } else {
+      Object.assign(report, {
+        conditionalItem: {
+          showValue: null,
+          conditions: [],
+          operation: "ALL",
+          valid: true
+        }
+      })
+    }
+
+    currentActivity.reports.push(report);
+  },
+
+  updateReportList (state, reports) {
+    if (state.currentActivity) {
+      state.currentActivity.reports = reports;
+    }
+  },
+
+  updateReportInfo (state, { index, obj }) {
+    const currentActivity = state.currentActivity;
+    Object.assign(currentActivity.reports[index], obj);
+
+    currentActivity.reports[index].valid = Activity.checkReportValidation(currentActivity.reports[index], currentActivity.reports);
+  },
+
+  deleteReportSection (state, index) {
+    if (state.currentActivity) {
+      state.currentActivity.reports.splice(index, 1);
+    }
+  },
+}
+
 const conditionalMutations = {
   addConditional (state) {
     if (state.currentActivity) {
@@ -453,6 +512,7 @@ const conditionalMutations = {
 export default {
   ...activityMutations,
   ...itemMutations,
+  ...reportMutations,
   ...subScaleMutations,
   ...conditionalMutations,
 

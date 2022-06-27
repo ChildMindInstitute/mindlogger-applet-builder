@@ -1,7 +1,7 @@
 
 import config from '../../../config';
 
-const baseImageURL = 'https://raw.githubusercontent.com/ChildMindInstitute/mindlogger-applet-builder/master/src/assets/icons/';
+const baseImageURL = 'https://raw.githubusercontent.com/ChildMindInstitute/mindlogger-applet-builder/dev-qa/src/assets/icons/';
 export const getInitialProtocol = () => ({
   id: null,
   description: '',
@@ -117,10 +117,6 @@ export default {
     {
       text: "tokenSummary",
       icon: baseImageURL + 'item-types/token-summary.png'
-    },
-    {
-      text: "cumulativeScore",
-      icon: baseImageURL + 'item-types/cumulative-icon.png',
     },
   ],
   templates: [],

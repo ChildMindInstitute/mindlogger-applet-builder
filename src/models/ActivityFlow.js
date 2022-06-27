@@ -16,6 +16,7 @@ export default class ActivityFlow {
       order: initialActivityData.orderList || [],
       isVis: initialActivityData.isVis || true,
       combineReports: initialActivityData.combineReports || false,
+      reportIncludeItem: initialActivityData.reportIncludeItem || '',
       showBadge: initialActivityData.showBadge || false,
       error: '',
       componentKey: 0,
@@ -184,6 +185,7 @@ export default class ActivityFlow {
       ['schema:name']: name,
       ['schema:description']: description,
       ['reprolib:terms/combineReports']: combineReports,
+      ['reprolib:terms/reportIncludeItem']: reportIncludeItem,
       ['reprolib:terms/showBadge']: showBadge,
       ['reprolib:terms/order']: orders,
     } = activityFlowObj;
@@ -196,6 +198,8 @@ export default class ActivityFlow {
         description && description[0] && description[0]['@value'],
       combineReports:
         combineReports && combineReports[0] && combineReports[0]['@value'],
+      reportIncludeItem:
+        reportIncludeItem && reportIncludeItem[0] && reportIncludeItem[0]['@value'],
       showBadge:
         showBadge && showBadge[0] && showBadge[0]['@value'],
       orderList: _.get(orders, '0.@list', []).map(order => order['@id'])

@@ -89,6 +89,7 @@ export default class Protocol {
       landingPageContent: this.ref.markdownData, //point to the readme of protocol
       landingPageType: this.ref.landingPageType,
       landingPage: "",
+      reportConfigs: this.getReportConfigs(),
       // variableMap: variableMap,
       ui: {
         addProperties: variableMap,
@@ -101,6 +102,42 @@ export default class Protocol {
       },
     };
     return schema;
+  }
+
+  getReportConfigs () {
+    const config = this.ref.reportConfigs;
+    return [
+      {
+        "schema:name": "serverIp",
+        "schema:value": config.serverIp,
+        "@type": "schema:Text"
+      },
+      {
+        "schema:name": "publicEncryptionKey",
+        "schema:value": config.publicEncryptionKey,
+        "@type": "schema:Text"
+      },
+      {
+        "schema:name": "emailRecipients",
+        "schema:value": config.emailRecipients,
+        "@type": "schema:List"
+      },
+      {
+        "schema:name": "includeUserId",
+        "schema:value": config.includeUserId,
+        "@type": "schema:Boolean"
+      },
+      {
+        "schema:name": "includeCaseId",
+        "schema:value": config.includeCaseId,
+        "@type": "schema:Boolean"
+      },
+      {
+        "schema:name": "emailBody",
+        "schema:value": config.emailBody,
+        "@type": "schema:Text"
+      }
+    ]
   }
 
   getContext(includeActivityPath = false) {
@@ -215,6 +252,34 @@ export default class Protocol {
           }
 
           return [];
+        }
+      },
+      'reportConfigs': {
+        updated: (field) => {
+          const oldOptions = _.get(oldValue, field, []).map(option => {
+            return { value: option['schema:value'], name: option['schema:name'] }
+          });
+
+          const newOptions = _.get(newValue, field, []).map(option => {
+            return { value: option['schema:value'], name: option['schema:name'] }
+          });
+
+          const removedOptions = oldOptions.filter(option => {
+            return newOptions.find(newOption => {
+              return JSON.stringify(option) === JSON.stringify(newOption)
+            }) ? false : true
+          });
+
+          const insertedOptions = newOptions.filter(newOption => {
+            return oldOptions.find(option => {
+              return JSON.stringify(option) === JSON.stringify(newOption)
+            }) ? false : true
+          });
+
+          return [
+            ...removedOptions.map(option => `${option.name} option was removed`),
+            ...insertedOptions.map(option => `${option.name} option was inserted`),
+          ];
         }
       }
     }
@@ -431,6 +496,31 @@ export default class Protocol {
       landingPageType: _.get(applet, ['reprolib:terms/landingPageType', 0, '@value'], 'markdown'),
       activityFlowOrder: _.get(applet, ['reprolib:terms/activityFlowOrder', 0, '@list']).map(orderItem => orderItem['@id']),
       order: _.get(applet, ['reprolib:terms/order', 0, '@list']).map(orderItem => orderItem['@id']),
+      reportConfigs: _.get(applet, ['reprolib:terms/reportConfigs', 0, '@list'], []).reduce((configs, option) => {
+        const name = _.get(option, ['schema:name', 0, '@value']);
+        const type = _.get(option, ['@type', 0]);
+
+        let value = _.get(option, ['schema:value'], []).map(item => item['@value']);
+        if (type != 'schema:List') {
+          value = value[0];
+        }
+
+        if (value !== undefined) {
+          return {
+            ...configs,
+            [name]: value
+          }
+        }
+
+        return configs;
+      }, {
+        serverIp: '',
+        publicEncryptionKey: '',
+        emailRecipients: [],
+        includeUserId: false,
+        includeCaseId: false,
+        emailBody: ''
+      })
     };
 
     const markdownData = _.get(applet, ["reprolib:terms/landingPage", 0, "@value"], "");

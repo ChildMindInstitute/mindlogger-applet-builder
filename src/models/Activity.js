@@ -79,6 +79,7 @@ export default class Activity {
         variableName: '',
         isAverageScore: null
       },
+      reportIncludeItem: initialActivityData.reportIncludeItem || '',
       allowEdit: true,
       isPrize: initialActivityData.isPrize || false,
       scoreOverview: initialActivityData.scoreOverview || '',
@@ -985,6 +986,7 @@ export default class Activity {
       ['reprolib:terms/isPrize']: isPrize,
       ['reprolib:terms/order']: orders,
       ['reprolib:terms/activityType']: activityType,
+      ['reprolib:terms/reportIncludeItem']: reportIncludeItem,
       ['_id']: id,
     } = activitiesObj;
 
@@ -1065,6 +1067,7 @@ export default class Activity {
         isOnePageAssessment[0] &&
         isOnePageAssessment[0]['@value'],
       shuffle: shuffle && shuffle[0] && shuffle[0]['@value'],
+      reportIncludeItem: _.get(reportIncludeItem, [0, '@value'], ''),
       visibilities,
       subScales: Array.isArray(subScales) && subScales.map((subScale, index) => {
         const jsExpression = subScale['reprolib:terms/jsExpression'];

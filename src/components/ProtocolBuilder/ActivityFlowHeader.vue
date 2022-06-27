@@ -42,6 +42,47 @@
         label="Activity Flow Description"
       />
 
+      <v-row
+        v-if="pdfConfigured"
+      >
+        <v-col
+        >
+          <div class="report-config-title">Report(s) will be sent to:</div>
+          <div class="d-flex align-center">
+            <v-combobox
+              class="email-list"
+              :value="protocol.reportConfigs.emailRecipients"
+              multiple
+              outlined
+              append-icon=""
+              hide-details
+              disabled
+            >
+              <template v-slot:selection="{ attrs, item, parent, selected }">
+                <v-chip
+                  v-bind="attrs"
+                  :input-value="selected"
+                  class="mx-2 my-0 py-0"
+                  color="indigo lighten-5"
+                  close
+                  disabled
+                >
+                  {{ item }}
+                </v-chip>
+              </template>
+            </v-combobox>
+
+            <div>
+              <v-btn icon @click="reportConfigDialog=true">
+                <v-icon>mdi-settings</v-icon>
+              </v-btn>
+
+              Configure Email
+            </div>
+          </div>
+        </v-col>
+      </v-row>
+
       <template>
         <v-row
           class="align-center"
@@ -71,6 +112,13 @@
     </div>
     <Notify :notify="notify" />
     <Loading :loading="loading" />
+
+    <ReportConfig
+      v-model="reportConfigDialog"
+      :current-activity-flow="currentActivityFlow"
+      :reportConfigs="protocol.reportConfigs"
+      @updateItemValue="updateItemValue"
+    />
   </v-card>
 </template>
 
@@ -89,11 +137,13 @@ import { mapGetters, mapMutations } from 'vuex';
 import config from '../../config';
 import Notify from './Additional/Notify.vue';
 import Loading from './Additional/Loading.vue';
+import ReportConfig from './ReportConfig.vue';
 
 export default {
   components: {
     Notify,
     Loading,
+    ReportConfig,
   },
   props: {
     headerExpanded: {
@@ -107,6 +157,7 @@ export default {
       isExpanded: true,
       loading: false,
       notify: {},
+      reportConfigDialog: false
     }
   },
   mounted() {
@@ -121,11 +172,24 @@ export default {
         this.$emit('onExpand');
       }
     },
+    updateItemValue (value) {
+      this.updateActivityFlowInfo({
+        reportIncludeItem: value
+      })
+    }
   },
   computed: {
     ...mapGetters(config.MODULE_NAME, [
-      'currentActivityFlow'
+      'currentActivityFlow',
+      'protocol',
     ]),
+
+    pdfConfigured () {
+      return this.protocol.reportConfigs.emailRecipients.length &&
+              this.protocol.reportConfigs.serverIp &&
+              this.protocol.reportConfigs.publicEncryptionKey;
+    },
+
     name: {
       get: function () {
         return this.currentActivityFlow && this.currentActivityFlow.name;
@@ -147,7 +211,7 @@ export default {
         return this.currentActivityFlow && this.currentActivityFlow.combineReports;
       },
       set: function (name) {
-        this.updateActivityFlowInfo({ combineReports });
+        this.updateActivityFlowInfo({ combineReports: name });
       }
     },
     showBadge: {

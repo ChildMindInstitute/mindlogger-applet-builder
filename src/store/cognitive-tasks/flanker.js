@@ -172,12 +172,12 @@ const getTrial = (lastPractice) => ({
     {
       "@type": "schema:Number",
       "schema:name": "trialDuration",
-      "schema:value": 1500
+      "schema:value": ''
     },
     {
       "@type": "schema:Number",
       "schema:name": "fixationDuration",
-      "schema:value": 500,
+      "schema:value": '',
     },
     {
       "@type": "schema:Text",
@@ -560,12 +560,12 @@ const getTest = (lastTest) => ({
     {
       "@type": "schema:Number",
       "schema:name": "trialDuration",
-      "schema:value": 1500
+      "schema:value": ''
     },
     {
       "@type": "schema:Number",
       "schema:name": "fixationDuration",
-      "schema:value": 500,
+      "schema:value": '',
     },
     {
       "@type": "schema:Text",
@@ -607,7 +607,7 @@ const nextInstructions = {
 }
 
 export default {
-  name: "Flanker_360",
+  name: "Simple & Choice Reaction Time Task Builder",
   activityType: "FLANKER",
   description: "This activity contains Flanker item.",
   items: [

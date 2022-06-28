@@ -4,11 +4,11 @@
   >
     <div class="mt-4">
       <v-btn class="mx-2" @click="onUploadStimulusScreen">
-        Upload Stimulus Screens
+        {{ stimulusScreens.length ? 'Edit' : 'Upload' }} Stimulus Screens
       </v-btn>
 
       <v-btn class="mx-2" @click="onUploadFixationScreen">
-        Upload Fixation Screen
+        {{ fixationScreen.name ? 'Edit' : 'Upload' }} Fixation Screen
       </v-btn>
     </div>
 
@@ -59,19 +59,26 @@
         </div>
 
         <v-text-field
-          class="button-name ml-2"
+          class="button-name ml-2 mt-4"
           v-model="buttons[0].name"
-          hide-details
+          :error-messages="buttons[0].name.length > 5 ? 'visibility decrease over 5 characters' : ''"
         />
         <Uploader
           :initialType="'image'"
           :initialAdditionalType="'small-circle'"
           :initialData="buttons[0].image"
+          :aspectRatio="2.5"
           @onAddFromUrl="onAddImageFromUrl($event, 0)"
           @onAddFromDevice="onAddImageFromDevice($event, 0)"
           @onRemove="onRemoveImage(0)"
           @onNotify="onEventNotify($event)"
         />
+        <p 
+          class="markdown-error ml-4" 
+          v-if="!buttons[0].name && !buttons[0].image"
+        >
+          *This is a required field
+        </p>
       </div>
 
       <div v-if="buttonCount==2" class="d-flex align-center">
@@ -80,19 +87,26 @@
         </div>
 
         <v-text-field
-          class="button-name ml-2"
+          class="button-name ml-2 mt-4"
           v-model="buttons[1].name"
-          hide-details
+          :error-messages="buttons[1].name.length > 5 ? 'visibility decrease over 5 characters' : ''"
         />
         <Uploader
           :initialType="'image'"
           :initialAdditionalType="'small-circle'"
           :initialData="buttons[1].image"
+          :aspectRatio="2.5"
           @onAddFromUrl="onAddImageFromUrl($event, 1)"
           @onAddFromDevice="onAddImageFromDevice($event, 1)"
           @onRemove="onRemoveImage(1)"
           @onNotify="onEventNotify($event)"
         />
+        <p 
+          class="markdown-error ml-4" 
+          v-if="!buttons[1].name && !buttons[1].image"
+        >
+          *This is a required field
+        </p>
       </div>
     </div>
 
@@ -113,8 +127,13 @@
 
       <div class="d-flex my-4">
         <div class="block-1 mx-4">
-          <v-btn class="upload-blocks" @click="onUploadBlockSequence('practice')">
-            Upload Block Sequences
+          <v-btn
+            class="upload-blocks"
+            :color="blocksPractice.length ? 'white' : 'red'"
+            :dark="blocksPractice.length ? false : true"
+            @click="onUploadBlockSequence('practice')"
+          >
+            {{ blocksPractice.length ? 'Edit' : 'Upload' }} Block Sequences
           </v-btn>
         </div>
 
@@ -173,8 +192,13 @@
 
       <div class="d-flex my-4">
         <div class="block-1 mx-4">
-          <v-btn class="upload-blocks" @click="onUploadBlockSequence('test')">
-            Upload Block Sequences
+          <v-btn
+            class="upload-blocks"
+            :color="blocksTest.length ? 'white' : 'red'"
+            :dark="blocksTest.length ? false : true"
+            @click="onUploadBlockSequence('test')"
+          >
+            {{ blocksTest.length ? 'Edit' : 'Upload' }} Block Sequences
           </v-btn>
         </div>
 
@@ -241,11 +265,15 @@
             class="markdown-editor"
             v-model="markdown"
           />
+        <p class="mt-2 markdown-error" v-if="!markdown">
+          * This is a required field
+        </p>
         </v-card-text>
 
         <v-card-actions>
           <v-spacer />
           <v-btn
+            :disabled="!markdown"
             @click="onSaveInstructions"
           >
             OK
@@ -270,6 +298,7 @@
       :button-count="buttonCount"
       :stimulus-duration-practice="stimulusDurationPractice"
       :stimulus-duration-test="stimulusDurationTest"
+      :active-screens="activeScreens"
       @save="saveStimulusScreens"
     />
 
@@ -312,6 +341,12 @@
 
 .threshold {
   max-width: 50px;
+}
+
+.markdown-error {
+  color: red;
+  margin-bottom: 0;
+  font-size: 13px;
 }
 
 .button-name {
@@ -391,6 +426,9 @@ export default {
       notify: {},
       loading: false,
 
+      practiceScreens: [2, 4, 6],
+      testScreens: [8, 10, 12],
+
       stimulusScreenDialog: {
         visible: false,
         key: 0
@@ -427,11 +465,13 @@ export default {
         return option['schema:value'];
       },
       set(value) {
-        this.updateInputOption('minimumAccuracy', {
-          'schema:name': 'minimumAccuracy',
-          'schema:value': value,
-          '@type': 'schema:Number',
-        })
+        for (const index of this.practiceScreens) {
+          this.updateInputOption('minimumAccuracy', {
+            'schema:name': 'minimumAccuracy',
+            'schema:value': value,
+            '@type': 'schema:Number',
+          }, index)
+        }
       }
     },
 
@@ -459,11 +499,11 @@ export default {
 
     showFeedbackTest: {
       get () {
-        const option = this.getInputOption('showFeedback', 4);
+        const option = this.getInputOption('showFeedback', this.testScreens[0]);
         return option['schema:value'];
       },
       set (value) {
-        for (const index of [4, 6, 8]) { // index for test screens
+        for (const index of this.testScreens) {
           this.updateInputOption('showFeedback', {
             'schema:name': 'showFeedback',
             'schema:value': value,
@@ -475,11 +515,11 @@ export default {
 
     showSummaryTest: {
       get () {
-        const option = this.getInputOption('showResults', 4);
+        const option = this.getInputOption('showResults', this.testScreens[0]);
         return option['schema:value'];
       },
       set (value) {
-        for (const index of [4, 6, 8]) { // index for test screens
+        for (const index of this.testScreens) {
           this.updateInputOption('showResults', {
             'schema:name': 'showResults',
             'schema:value': value,
@@ -491,83 +531,91 @@ export default {
 
     showFeedbackPractice: {
       get () {
-        const option = this.getInputOption('showFeedback', 2);
+        const option = this.getInputOption('showFeedback', this.practiceScreens[0]);
         return option['schema:value'];
       },
       set (value) {
-        this.updateInputOption('showFeedback', {
-          'schema:name': 'showFeedback',
-          'schema:value': value,
-          '@type': 'schema:Boolean',
-        }, 2); // index for practice screen
+        for (const index of this.practiceScreens) {
+          this.updateInputOption('showFeedback', {
+            'schema:name': 'showFeedback',
+            'schema:value': value,
+            '@type': 'schema:Boolean',
+          }, index); // index for practice screen
+        }
       }
     },
 
     showSummaryPractice: {
       get () {
-        const option = this.getInputOption('showResults', 2);
+        const option = this.getInputOption('showResults', this.practiceScreens[0]);
         return option['schema:value'];
       },
       set (value) {
-        this.updateInputOption('showResults', {
-          'schema:name': 'showResults',
-          'schema:value': value,
-          '@type': 'schema:Boolean',
-        }, 2); // index for practice screen
+        for (const index of this.practiceScreens) {
+          this.updateInputOption('showResults', {
+            'schema:name': 'showResults',
+            'schema:value': value,
+            '@type': 'schema:Boolean',
+          }, index);
+        }
       }
     },
 
     randomizeOrderPractice: {
       get () {
-        const option = this.getInputOption('samplingMethod', 2);
+        const option = this.getInputOption('samplingMethod', this.practiceScreens[0]);
         return option['schema:value'] == 'randomize-order';
       },
       set (value) {
-        this.updateInputOption('samplingMethod', {
-          'schema:name': 'samplingMethod',
-          'schema:value': value ? 'randomize-order' : 'fixed-order',
-          '@type': 'schema:Text'
-        }, 2)
+        for (const index of this.practiceScreens) {
+          this.updateInputOption('samplingMethod', {
+            'schema:name': 'samplingMethod',
+            'schema:value': value ? 'randomize-order' : 'fixed-order',
+            '@type': 'schema:Text'
+          }, index)
+        }
       }
     },
 
     randomizeOrderTest: {
       get () {
-        const option = this.getInputOption('samplingMethod', 4);
+        const option = this.getInputOption('samplingMethod', this.testScreens[0]);
         return option['schema:value'] == 'randomize-order';
       },
       set (value) {
-        for (const index of [4, 6, 8]) {
+        for (const index of this.testScreens) {
           this.updateInputOption('samplingMethod', {
             'schema:name': 'samplingMethod',
             'schema:value': value ? 'randomize-order' : 'fixed-order',
             '@type': 'schema:Text'
-          })
+          }, index)
         }
       }
     },
 
     stimulusDurationPractice: {
       get () {
-        const option = this.getInputOption('trialDuration', 2);
+        const option = this.getInputOption('trialDuration', this.practiceScreens[0]);
         return option['schema:value'];
       },
       set (value) {
-        this.updateInputOption('trialDuration', {
-          'schema:name': 'trialDuration',
-          'schema:value': value,
-          '@type': 'schema:Number'
-        }, 2)
+        for (const index of this.practiceScreens) {
+          this.updateInputOption('trialDuration', {
+            'schema:name': 'trialDuration',
+            'schema:value': value,
+            '@type': 'schema:Number'
+          }, index)
+        }
       }
     },
 
     stimulusDurationTest: {
       get () {
-        const option = this.getInputOption('trialDuration', 4);
+        const option = this.getInputOption('trialDuration', this.testScreens[0]);
         return option['schema:value'];
       },
       set (value) {
-        for (const index of [4, 6, 8]) {
+        for (const index of this.testScreens) {
           this.updateInputOption('trialDuration', {
             'schema:name': 'trialDuration',
             'schema:value': value,
@@ -579,23 +627,21 @@ export default {
 
     fixationDuration: {
       get () {
-        const option = this.getInputOption('fixationDuration', 2);
+        const option = this.getInputOption('fixationDuration', this.practiceScreens[0]);
         return option['schema:value'];
       },
       set (value) {
-        for (const index of [2, 4, 6, 8]) {
-          this.updateInputOption('fixationDuration', {
-            'schema:name': 'fixationDuration',
-            'schema:value': value,
-            '@type': 'schema:Number'
-          })
-        }
+        this.updateInputOption('fixationDuration', {
+          'schema:name': 'fixationDuration',
+          'schema:value': value,
+          '@type': 'schema:Number'
+        })
       }
     },
 
     stimulusScreens: {
       get () {
-        const option = this.getInputOption('trials', 2);
+        const option = this.getInputOption('trials', this.practiceScreens[0]);
         return option['schema:itemListElement'].map(item => ({
           id: item['@id'],
           name: item['schema:name'],
@@ -605,26 +651,24 @@ export default {
       },
 
       set (trials) {
-        for (const index of [2, 4, 6, 8]) {
-          this.updateInputOption('trials', {
-            "@type": "schema:ItemList",
-            "schema:name": "trials",
-            "schema:numberOfItems": trials.length,
-            'schema:itemListElement': trials.map(trial => ({
-              "@id": trial.id,
-              "@type": "schema:Property",
-              "schema:name": trial.name,
-              "schema:image": trial.image,
-              "schema:value": trial.value
-            }))
-          })
-        }
+        this.updateInputOption('trials', {
+          "@type": "schema:ItemList",
+          "schema:name": "trials",
+          "schema:numberOfItems": trials.length,
+          'schema:itemListElement': trials.map(trial => ({
+            "@id": trial.id,
+            "@type": "schema:Property",
+            "schema:name": trial.name,
+            "schema:image": trial.image,
+            "schema:value": trial.value
+          }))
+        })
       }
     },
 
     fixationScreen: {
       get () {
-        const option = this.getInputOption('fixationScreen', 2);
+        const option = this.getInputOption('fixationScreen', this.practiceScreens[0]);
         return {
           name: option['schema:value'],
           image: option['schema:image']
@@ -632,33 +676,45 @@ export default {
       },
 
       set (screen) {
-        for (const index of [2, 4, 6, 8]) {
-          this.updateInputOption('fixationScreen', {
-            "@type": "schema:Text",
-            "schema:name": "fixationScreen",
-            "schema:value": screen.name,
-            "schema:image": screen.image
-          }, index)
-        }
+        this.updateInputOption('fixationScreen', {
+          "@type": "schema:Text",
+          "schema:name": "fixationScreen",
+          "schema:value": screen.name,
+          "schema:image": screen.image
+        })
       }
     },
 
     blocksPractice: {
       get () {
-        return this.getBlocks(2);
+        return this.getBlocks(this.practiceScreens[0]);
       },
       set (blocks) {
-        this.setBlocks(blocks, [2])
+        this.setBlocks(blocks, this.practiceScreens)
       }
     },
 
     blocksTest: {
       get () {
-        return this.getBlocks(4);
+        return this.getBlocks(this.testScreens[0]);
       },
       set (blocks) {
-        this.setBlocks(blocks, [4, 6, 8]);
+        this.setBlocks(blocks, this.testScreens);
       }
+    },
+
+    activeScreens () {
+      const allBlocks = [...this.blocksPractice, ...this.blocksTest];
+      const activeScreens = [];
+      for (const block of allBlocks) {
+        for (const screen of block.screens) {
+          if (!activeScreens.includes(screen)) {
+            activeScreens.push(screen);
+          }
+        }
+      }
+
+      return activeScreens;
     }
   },
 
@@ -823,7 +879,7 @@ export default {
         case 'practice':
           return [1];
         case 'test':
-          return this.items.map((_, index) => index).filter(index => index >= 3 && index % 2 == 1);
+          return [7];
       }
       return [-1];
     },
@@ -839,8 +895,8 @@ export default {
       }
     },
 
-    saveStimulusScreens ({ screens, duration }) {
-      if (screens.length >= this.stimulusScreens.length) {
+    saveStimulusScreens ({ screens, duration, activeScreenRemoved }) {
+      if (screens.length >= this.stimulusScreens.length && !activeScreenRemoved) {
         const screenMapping = {};
         for (let i = 0; i < this.stimulusScreens.length; i++) {
           screenMapping[this.stimulusScreens[i].id] = screens[i].id;
@@ -868,8 +924,22 @@ export default {
     },
 
     saveFixationScreen ({ screen, duration }) {
-      this.fixationScreen = screen;
-      this.fixationDuration = duration;
+      this.updateInputOption('showFixation', {
+        "@type": "schema:Boolean",
+        "schema:name": "showFixation",
+        "schema:value": screen ? true : false
+      });
+
+      if (!screen) {
+        this.fixationScreen = {
+          name: '',
+          image: ''
+        };
+        this.fixationDuration = 0;
+      } else {
+        this.fixationScreen = screen;
+        this.fixationDuration = duration;
+      }
       this.fixationScreenDialog.visible = false;
     },
 

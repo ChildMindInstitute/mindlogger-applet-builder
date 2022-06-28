@@ -62,7 +62,6 @@
             v-for="(item, index) in currentActivity.items"
           >
             <div
-              v-if="item.inputType != 'cumulativeScore'"
               :key="`${item.timestamp}-${item.id || 0}`"
               class="d-flex align-center"
             >
@@ -85,20 +84,6 @@
           </template>
         </transition-group>
       </draggable>
-
-      <div
-        v-if="cumulativeItem"
-        :key="`${cumulativeItem.timestamp}-${cumulativeItem.id || 0}`"
-        class="d-flex align-center"
-      >
-        <ItemBuilder
-          :item-index="currentActivity.items.indexOf(cumulativeItem)"
-          :variablesItems="variablesItems"
-          :header="cumulativeItem.header"
-          :section="cumulativeItem.section"
-          class="ma-4 flex-grow-1 item-builder"
-        />
-      </div>
 
     </div>
 
@@ -358,10 +343,6 @@ export default {
         this.updateItemList(value);
       }
     },
-
-    cumulativeItem () {
-      return this.currentActivity.items.find(item => item.inputType == 'cumulativeScore')
-    }
   },
   methods: {
     ...mapMutations(config.MODULE_NAME,
@@ -506,34 +487,7 @@ export default {
     },
 
     confirmMovementOfItems () {
-      const cumulativeItem = this.currentActivity.items.find(({ name }) => name === "cumulatives");
-
       this.selectedItems.forEach(item => {
-        if (cumulativeItem) {
-          this.cumulativeData = cumulativeItem.cumulativeScores.map(score => {
-            let { jsExpression } = score.compute;
-            if (jsExpression.includes(item.name)) {
-              const values = jsExpression.split(' + ');
-              let scoreName = score.name;
-
-              if (!scoreName) {
-                scoreName = score.compute.variableName;
-              }
-
-              jsExpression = values.filter(value => value !== item.name).join(" + ");
-              this.errorMessages.push(`${item.name} is removed from ${scoreName}`);
-            }
-
-            return {
-              ...score,
-              compute: {
-                ...score.compute,
-                jsExpression
-              }
-            };
-          })
-        }
-
         this.currentActivity.subScales.forEach(subScale => {
           const currentSubScale = this.subScaleData.find(({ variableName }) => variableName === subScale.variableName);
           const items = currentSubScale
@@ -612,7 +566,7 @@ export default {
         items: this.selectedItems
       });
       this.removeScoresAndSubScals({
-        scores: this.cumulativeData,
+        scores: [],
         subScales: this.subScaleData,
       })
       this.movedItems = this.selectedItems;

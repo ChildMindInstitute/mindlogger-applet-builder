@@ -3,6 +3,7 @@
     max-width="800"
     :value="value"
     @input="$emit('input', $event)"
+    persistent
   >
     <v-card>
       <v-card-title class="dialog-title">
@@ -19,7 +20,9 @@
           @change="onCSVInput($event)"
         />
 
-        <v-simple-table class="block-sequences">
+        <v-simple-table
+          class="block-sequences"
+        >
           <template v-slot:default>
             <thead>
               <tr>
@@ -53,17 +56,27 @@
         <a @click="downloadTemplate">Download template (.csv)</a>
         <v-spacer />
 
-        <v-btn @click="$refs.fileInput.click()">
-          Upload
-        </v-btn>
+        <v-tooltip top>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              v-on="on"
+              v-bind="attrs"
+              @click="$refs.fileInput.click()"
+            >
+              Upload
+            </v-btn>
+          </template>
+
+          <span>Please make sure to use correct csv editor to build/edit csv file</span>
+        </v-tooltip>
 
         <v-btn @click="saveBlocks" color="primary">
           Save
         </v-btn>
       </v-card-actions>
-
+ 
       <v-dialog
-        v-model="csvError"
+        v-model="csvResultDialog"
         width="500"
       >
         <v-card>
@@ -72,7 +85,7 @@
           </v-card-title>
 
           <v-card-text class="pa-4">
-            Sorry, we were not able to process your csv file. Please double check your file and try again.
+            {{ message }}
           </v-card-text>
         </v-card>
       </v-dialog>
@@ -129,7 +142,8 @@ export default {
       blocks,
       templates: blocks.length ? blocks : templates,
       screenLength,
-      csvError: false,
+      csvResultDialog: false,
+      message: ''
     }
   },
 
@@ -165,7 +179,7 @@ export default {
     },
 
     getScreen (name) {
-      return this.screens.find(screen => screen.name == name);
+      return this.screens.find(screen => screen.name == name || screen.name.startsWith(name + '.'));
     },
 
     onCSVInput (e) {
@@ -175,7 +189,7 @@ export default {
       reader.onload = () => {
         csv().fromString(reader.result).then(sequences => {
           if (!sequences.length) {
-            this.csvError = true;
+            this.csvResultDialog = true;
             return ;
           }
 
@@ -192,7 +206,8 @@ export default {
               const screen = this.getScreen(sequence[blocks[i].name]);
 
               if (!screen) {
-                this.csvError = true;
+                this.csvResultDialog = true;
+                this.message = 'The uploaded table cannot be parsed. Please ensure stimulus screens have been uploaded prior to the block sequences and ensure the image name is the same as the file name uploaded.';
                 return ;
               }
 
@@ -206,6 +221,9 @@ export default {
       }
       reader.readAsText(file);
       this.inputKey++;
+
+      this.csvResultDialog = true;
+      this.message = 'Block sequences were uploaded succesfully.'
     },
 
     saveBlocks () {

@@ -470,7 +470,7 @@ export default {
     hasOnlyWebSupported() {
       for (let i = 0; i < this.currentActivity.items.length; i++) {
         const inputType = this.currentActivity.items[i].inputType;
-        if (!['radio', 'checkbox', 'slider', 'text', 'ageSelector', 'cumulativeScore'].includes(inputType)) {
+        if (!['radio', 'checkbox', 'slider', 'text', 'ageSelector'].includes(inputType)) {
           this.updateActivityMetaInfo({ isOnePageAssessment: false })
           return false;
         }

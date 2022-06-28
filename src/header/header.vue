@@ -89,6 +89,35 @@
         >
           <template v-slot:activator="{ on }">
             <v-btn
+              :color="currentScreen == config.REPORT_SCREEN ? 'primary' : ''"
+              class="mx-1"
+              :class="reportStatus ? '' : 'invalid'"
+              @click="viewReports"
+              v-on="on"
+            >
+              <img
+                v-show="currentScreen === config.REPORT_SCREEN"
+                height="25"
+                alt=""
+                :src="baseImageURL + 'header-icons/white/reports-icon.png'"
+              >
+              <img
+                v-show="currentScreen !== config.REPORT_SCREEN"
+                height="25"
+                alt=""
+                :src="baseImageURL + 'header-icons/black/reports-icon.png'"
+              >
+            </v-btn>
+          </template>
+          <span>Reports</span>
+        </v-tooltip>
+
+        <v-tooltip
+          v-if="currentActivity && currentActivity.activityType == 'NORMAL'"
+          bottom
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
               :color="currentScreen == config.CONDITIONAL_SCREEN ? 'primary' : ''"
               class="mx-1"
               :class="onePageAssessment ? 'disabled' : conditionalStatus ? '' : 'invalid'"
@@ -342,6 +371,9 @@ export default {
       'themeId',
       'originalThemeId'
     ]),
+    reportStatus () {
+      return this.currentActivity && (this.currentActivity.reports || []).every(report => report.valid);
+    },
     itemStatus () {
       return this.currentActivity && this.currentActivity.items.every(item => item.valid);
     },
@@ -512,6 +544,10 @@ export default {
       this.setCurrentScreen(config.ITEM_SCREEN);
     },
 
+    viewReports () {
+      this.setCurrentScreen(config.REPORT_SCREEN);
+    },
+
     appletStatus () {
       this.dataAlertDialog.message = '';
 
@@ -529,6 +565,7 @@ export default {
             || activity.items.some(item => !item.valid)
             || activity.subScales.some(subScale => !subScale.valid)
             || activity.conditionalItems.some(conditional => !conditional.valid)
+            || activity.reports.some(report => !report.valid)
             || (activity.items.length === 0)
         );
 

@@ -24,6 +24,11 @@
         v-if="currentScreen == config.CONDITIONAL_SCREEN"
         class="pb-2"
       />
+
+      <Reports
+        v-if="currentScreen == config.REPORT_SCREEN"
+        class="pb-2"
+      />
     </template>
 
     <template
@@ -49,6 +54,7 @@ import ActivityHeader from './ActivityHeader';
 import ItemList from './Items/ItemList';
 import SubScaleList from './SubScales/SubScaleList';
 import ConditionalList from './Conditionals/ConditionalList';
+import Reports from './Reports/Reports';
 import CSTBuilder from './CognitiveActivityBuilders/CSTBuilder';
 import FlankerBuilder from './CognitiveActivityBuilders/FlankerBuilder';
 
@@ -60,6 +66,7 @@ export default {
     ConditionalList,
     CSTBuilder,
     FlankerBuilder,
+    Reports,
   },
   data() {
     return {

@@ -172,12 +172,12 @@ const getTrial = (lastPractice) => ({
     {
       "@type": "schema:Number",
       "schema:name": "trialDuration",
-      "schema:value": ''
+      "schema:value": 1500
     },
     {
       "@type": "schema:Number",
       "schema:name": "fixationDuration",
-      "schema:value": '',
+      "schema:value": 500,
     },
     {
       "@type": "schema:Text",
@@ -565,12 +565,12 @@ const getTest = (lastTest, blockIndex) => ({
     {
       "@type": "schema:Number",
       "schema:name": "trialDuration",
-      "schema:value": ''
+      "schema:value": 1500
     },
     {
       "@type": "schema:Number",
       "schema:name": "fixationDuration",
-      "schema:value": '',
+      "schema:value": 500,
     },
     {
       "@type": "schema:Text",

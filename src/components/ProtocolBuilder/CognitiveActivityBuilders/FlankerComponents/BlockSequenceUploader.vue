@@ -3,6 +3,7 @@
     max-width="800"
     :value="value"
     @input="$emit('input', $event)"
+    persistent
   >
     <v-card>
       <v-card-title class="dialog-title">
@@ -73,7 +74,7 @@
           Save
         </v-btn>
       </v-card-actions>
-
+ 
       <v-dialog
         v-model="csvResultDialog"
         width="500"

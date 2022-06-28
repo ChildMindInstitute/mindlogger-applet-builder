@@ -1,13 +1,23 @@
 <template>
   <v-dialog
-    max-width="800"
+    max-width="900"
     :value="value"
     @input="$emit('input', $event)"
     persistent
   >
     <v-card>
-      <v-card-title class="dialog-title">
-        Please upload a table (.csv file formatted as below) containing the sequence of stimulus image files for each block
+      <v-card-title>
+        <div class="d-flex justify-space-between dialog-title">
+          <div>Please upload a table (.csv file formatted as below) containing the sequence of stimulus image files for each block</div>
+          <v-btn
+            class="close-button"
+            icon
+            x-large
+            @click="onClose"
+          >
+            <v-icon>mdi-close-circle-outline</v-icon>
+          </v-btn>
+        </div>
       </v-card-title>
 
       <v-card-text>
@@ -74,7 +84,7 @@
           Save
         </v-btn>
       </v-card-actions>
- 
+
       <v-dialog
         v-model="csvResultDialog"
         width="500"
@@ -89,6 +99,11 @@
           </v-card-text>
         </v-card>
       </v-dialog>
+
+      <ConfirmationDialog
+        v-model="closeConfirmationDialog"
+        @close="$emit('input', false)"
+      />
     </v-card>
   </v-dialog>
 </template>
@@ -96,6 +111,13 @@
 <style scoped>
 .dialog-title {
   font-size: 15px !important;
+  width: 100%;
+}
+
+.close-button {
+  position: relative;
+  top: -10px;
+  right: -10px;
 }
 
 .block-sequences th {
@@ -105,9 +127,13 @@
 
 <script>
 import csv from 'csvtojson';
+import ConfirmationDialog from './ConfirmationDialog';
 import ObjectToCSV from 'object-to-csv';
 
 export default {
+  components: {
+    ConfirmationDialog,
+  },
   props: {
     value: {
       type: Boolean,
@@ -143,7 +169,9 @@ export default {
       templates: blocks.length ? blocks : templates,
       screenLength,
       csvResultDialog: false,
-      message: ''
+      message: '',
+      closeConfirmationDialog: false,
+      csvUpdated: false,
     }
   },
 
@@ -217,6 +245,7 @@ export default {
 
           this.blocks = blocks;
           this.templates = blocks;
+          this.csvUpdated = true;
         })
       }
       reader.readAsText(file);
@@ -231,6 +260,14 @@ export default {
         name: block.name,
         screens: block.screens.map(screen => screen.id)
       })))
+    },
+
+    onClose () {
+      if (this.csvUpdated) {
+        this.closeConfirmationDialog = true;
+      } else {
+        this.$emit('input', false);
+      }
     }
   }
 }

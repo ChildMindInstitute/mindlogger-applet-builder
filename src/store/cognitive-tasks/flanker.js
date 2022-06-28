@@ -172,7 +172,7 @@ const getTrial = (lastPractice) => ({
     {
       "@type": "schema:Number",
       "schema:name": "trialDuration",
-      "schema:value": 1500
+      "schema:value": 3000
     },
     {
       "@type": "schema:Number",
@@ -565,7 +565,7 @@ const getTest = (lastTest, blockIndex) => ({
     {
       "@type": "schema:Number",
       "schema:name": "trialDuration",
-      "schema:value": 1500
+      "schema:value": 3000
     },
     {
       "@type": "schema:Number",

@@ -20,14 +20,19 @@
       <div class="mx-4">
         &#x2265;
         <v-text-field
-          v-model="threshold"
+          :value="threshold"
           class="mx-2 inline-element threshold"
           type="number"
-          :min="1"
-          :max="100"
+          @input="thresholdChange"
         />
         %
       </div>
+      <p
+          class="markdown-error ml-4"
+          v-if="!threshold"
+      >
+        *Please enter positive value
+      </p>
     </div>
 
     <div class="d-flex align-center">
@@ -459,20 +464,22 @@ export default {
       return this.currentActivity.items;
     },
 
-    threshold: {
-      get() {
-        const option = this.getInputOption('minimumAccuracy');
-        return option['schema:value'];
-      },
-      set(value) {
-        for (const index of this.practiceScreens) {
-          this.updateInputOption('minimumAccuracy', {
-            'schema:name': 'minimumAccuracy',
-            'schema:value': value,
-            '@type': 'schema:Number',
-          }, index)
-        }
-      }
+    threshold() {
+      const option = this.getInputOption('minimumAccuracy');
+      return option['schema:value'];
+      // get() {
+      //   const option = this.getInputOption('minimumAccuracy');
+      //   return option['schema:value'];
+      // },
+      // set(value) {
+      //   for (const index of this.practiceScreens) {
+      //     this.updateInputOption('minimumAccuracy', {
+      //       'schema:name': 'minimumAccuracy',
+      //       'schema:value': value,
+      //       '@type': 'schema:Number',
+      //     }, index)
+      //   }
+      // }
     },
 
     buttonCount: {
@@ -743,6 +750,32 @@ export default {
     ...mapMutations(config.MODULE_NAME, [
       'updateItemMetaInfo',
     ]),
+
+    thresholdChange (val){
+      let newVal = Number(val);
+
+      // let newVal = val;
+
+      if (Number.isInteger(newVal) && newVal > 0) {
+        for (const index of this.practiceScreens) {
+          this.updateInputOption('minimumAccuracy', {
+            'schema:name': 'minimumAccuracy',
+            'schema:value': newVal,
+            '@type': 'schema:Number',
+          }, index)
+        }
+
+      }else{
+        for (const index of this.practiceScreens) {
+          this.updateInputOption('minimumAccuracy', {
+            'schema:name': 'minimumAccuracy',
+            'schema:value': null,
+            '@type': 'schema:Number',
+          }, index)
+        }
+      }
+
+    },
 
     getBlocks (index) {
       const option = this.getInputOption('blocks', index);

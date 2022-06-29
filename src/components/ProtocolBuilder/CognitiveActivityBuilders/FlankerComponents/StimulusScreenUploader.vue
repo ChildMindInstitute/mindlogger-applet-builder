@@ -234,6 +234,7 @@
         </v-card>
       </v-dialog>
     </v-card>
+    <Notify :notify="notify" />
   </v-dialog>
 </template>
 
@@ -325,8 +326,12 @@ td:nth-child(2), th:nth-child(2) {
 
 <script>
 import { Uploader as S3Uploader } from '../../../../models/Uploader';
+import Notify from "../../Additional/Notify";
 
 export default {
+  components: {
+    Notify,
+  },
   props: {
     value: {
       type: Boolean,
@@ -371,6 +376,7 @@ export default {
       deleteConfirmDialog: false,
       activeScreenRemoved: false,
       showCloseConfirmation: false,
+      notify: {}
     }
   },
 
@@ -389,12 +395,24 @@ export default {
 
     addStimulusScreens (e) {
       for (const file of e.target.files) {
-        if (this.currentIndex >= 0) {
-          this.$set(this.files, this.currentIndex, file);
-        } else {
-          this.files.push(file);
-          this.correct.push(0);
+
+        if (this.isFileImage(file)){
+
+          if (this.currentIndex >= 0) {
+            this.$set(this.files, this.currentIndex, file);
+          } else {
+            this.files.push(file);
+            this.correct.push(0);
+          }
+
+        }else{
+          this.notify = {
+            type: 'warning',
+            message: 'Please check if you use correct image file!',
+            duration: 3000
+          }
         }
+
       }
     },
 
@@ -488,7 +506,12 @@ export default {
       }
 
       this.uploading = false;
+    },
+
+    isFileImage(file) {
+      return file && file['type'].split('/')[0] === 'image';
     }
+
   }
 }
 </script>

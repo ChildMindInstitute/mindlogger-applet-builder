@@ -141,6 +141,7 @@
             :color="blocksPractice.length ? 'white' : 'red'"
             :dark="blocksPractice.length ? false : true"
             @click="onUploadBlockSequence('practice')"
+            :disabled="stimulusScreens.length <= 0"
           >
             {{ blocksPractice.length ? 'Edit' : 'Upload' }} Block Sequences
           </v-btn>
@@ -206,6 +207,7 @@
             :color="blocksTest.length ? 'white' : 'red'"
             :dark="blocksTest.length ? false : true"
             @click="onUploadBlockSequence('test')"
+            :disabled="stimulusScreens.length <= 0"
           >
             {{ blocksTest.length ? 'Edit' : 'Upload' }} Block Sequences
           </v-btn>
@@ -423,8 +425,8 @@ export default {
   data() {
     return {
       buttons: [
-        { name: '<', value: 0, image: '' },
-        { name: '>', value: 1, image: '' }
+        { name: '', value: 0, image: '' },
+        { name: '', value: 1, image: '' }
       ],
 
       markdown: '',

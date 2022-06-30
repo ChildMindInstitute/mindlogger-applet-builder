@@ -12,6 +12,7 @@ export const getInitialProtocol = () => ({
   valid: false,
   prizeActivity: null,
   activities: [],
+  activityFlows: [],
   tokenPrizeModal: false
 });
 
@@ -124,6 +125,7 @@ export default {
   nodeEnv: null,
   original: null,
   currentScreen: config.PROTOCOL_SCREEN,
+  currentActivityFlow: null,
   currentActivity: null,
   themeId: null,
   originalThemeId: null

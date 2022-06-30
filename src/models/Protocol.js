@@ -1,6 +1,7 @@
 import api from '../utilities/api';
 import util from '../utilities/util';
 import Activity from './Activity';
+import ActivityFlow from './ActivityFlow';
 import Item from './Item';
 import _ from 'lodash';
 
@@ -38,6 +39,10 @@ export default class Protocol {
     return activityNamesArray;
   }
 
+  getActivityFlowOrder() {
+    return this.ref.activityFlows.map(actFlow => actFlow['@id']);
+  }
+
   getActivityDisplayNames() {
     const displayNamesObj = {};
     this.ref.activities.forEach(function(activity) {
@@ -57,6 +62,14 @@ export default class Protocol {
   getCompressedSchema(convertNames = false) {
     const variableMap = this.getVariableMap(convertNames);
     const activityOrder = this.getActivityOrder(convertNames);
+    const activityFlowProperties = this.ref.activityFlows.map(actFlow => {
+      return {
+        variableName: actFlow['@id'],
+        isAbout: actFlow.description,
+        prefLabel: actFlow.name,
+        isVis: true
+      }
+    })
     const schema = {
       "@context": [
         "https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json",
@@ -81,6 +94,10 @@ export default class Protocol {
         addProperties: variableMap,
         order: activityOrder,
         shuffle: false,
+      },
+      activityFlows: {
+        activityFlowProperties,
+        activityFlowOrder: this.getActivityFlowOrder(),
       },
     };
     return schema;
@@ -114,6 +131,7 @@ export default class Protocol {
     const protocol = {
       data: this.getCompressedSchema(),
       activities: {},
+      activityFlows: {}
     };
 
     this.ref.activities.forEach((activity) => {
@@ -125,6 +143,10 @@ export default class Protocol {
         protocol.activities[activity.name].items[item.name] = item;
       });
     });
+
+    this.ref.activityFlows.forEach((activityFlow) => {
+      protocol.activityFlows[activityFlow.name] = activityFlow;
+    })
 
     return Promise.all(
       protocol.data["@context"].map(
@@ -201,22 +223,24 @@ export default class Protocol {
   static getChangeInfo(old, current, getDataUpdates=false) {
     const {
       "data": oldData,
-      "activities": oldActivities
+      "activities": oldActivities,
+      "activityFlows": oldActivityFlows,
     } = old.protocol;
 
     const {
       "data": currentData,
-      "activities": currentActivities
+      "activities": currentActivities,
+      "activityFlows": currentActivityFlows,
     } = current.protocol;
 
     const logTemplates = Protocol.getHistoryTemplate(oldData, currentData);
     let versionUpgrade = '0.0.0';
-    let updates = { activities: {} };
-    let removed = {activities: [], items: []};
+    let updates = { activities: {}, activityFlows: {} };
+    let removed = { activities: [], items: [], activityFlows: [] };
 
     const metaInfoChanges = util.compareValues(oldData, currentData, Object.keys(logTemplates));
     const activityChanges = util.compareIDs(oldActivities, currentActivities, 'data._id');
-
+    const activityFlowChanges = util.compareIDs(oldActivityFlows, currentActivityFlows, '_id');
     const changeLog = [];
     Object.keys(metaInfoChanges).forEach(key => {
       let logs = logTemplates[key][metaInfoChanges[key]](key, activityChanges.keyReferences);
@@ -247,6 +271,7 @@ export default class Protocol {
     }
 
     const activityLogs = [];
+    const activityFlowLogs = [];
 
     if (activityChanges.inserted.length || activityChanges.removed.length) {
       versionUpgrade = '1.0.0';
@@ -274,6 +299,29 @@ export default class Protocol {
       }
     });
 
+    if (activityFlowChanges.inserted.length || activityFlowChanges.removed.length) {
+      versionUpgrade = '1.0.0';
+    }
+    /** display log for updated activity flows */
+    Object.entries(activityFlowChanges.keyReferences).forEach(entry => {
+      const changeLog = ActivityFlow.getChangeInfo(oldActivityFlows[entry[0]], currentActivityFlows[entry[1]], getDataUpdates);
+      if (versionUpgrade < changeLog.upgrade) {
+        versionUpgrade = changeLog.upgrade;
+      }
+
+      if (changeLog.upgrade !== '0.0.0') {
+        activityFlowLogs.push({
+          name: `Activity Flow ${currentActivityFlows[entry[1]]['name']} was updated`,
+          type: 'updated',
+          children: changeLog.log
+        });
+
+        if (getDataUpdates) {
+          updates.activityFlows[entry[1]] = changeLog.updates;
+        }
+      }
+    });
+
     /** display log for new activities */
     activityChanges.inserted.forEach(id => {
       const changeLog = Activity.getChangeInfo({ data: {}, items: {} }, currentActivities[id], getDataUpdates);
@@ -289,6 +337,21 @@ export default class Protocol {
       }
     });
 
+    /** display log for new activity flows */
+    activityFlowChanges.inserted.forEach(id => {
+      const changeLog = ActivityFlow.getChangeInfo({ data: {}, items: {} }, currentActivityFlows[id], getDataUpdates);
+
+      activityFlowLogs.push({
+        name: `Activity Flow ${currentActivityFlows[id]['name']} was inserted`,
+        type: 'inserted',
+        children: changeLog.log
+      });
+
+      if (getDataUpdates) {
+        updates.activityFlows[id] = changeLog.updates;
+      }
+    });
+
     /** display log for removed activities */
     activityChanges.removed.forEach(id => {
       activityLogs.push({
@@ -301,7 +364,20 @@ export default class Protocol {
         removed.activities.push(oldActivities[id].data._id);
         removed.items.push(...Object.values(oldActivities[id].items).map(item => item._id))
       }
-    })
+    });
+
+    /** display log for removed activities */
+    activityFlowChanges.removed.forEach(id => {
+      activityFlowLogs.push({
+        name: `activity ${oldActivityFlows[id]['name']} was removed`,
+        type: 'removed',
+        children: []
+      })
+
+      if (getDataUpdates) {
+        removed.activityFlows.push(oldActivityFlows[id]._id);
+      }
+    });
 
     if (versionUpgrade !== '0.0.0' && getDataUpdates) {
       updates.data = currentData;
@@ -353,7 +429,8 @@ export default class Protocol {
       description: applet['schema:description'][0]['@value'],
       protocolVersion: _.get(applet, 'schema:schemaVersion[0].@value', this.protocolVersion),
       landingPageType: _.get(applet, ['reprolib:terms/landingPageType', 0, '@value'], 'markdown'),
-      order: _.get(applet, ['reprolib:terms/order', 0, '@list']).map(orderItem => orderItem['@id'])
+      activityFlowOrder: _.get(applet, ['reprolib:terms/activityFlowOrder', 0, '@list']).map(orderItem => orderItem['@id']),
+      order: _.get(applet, ['reprolib:terms/order', 0, '@list']).map(orderItem => orderItem['@id']),
     };
 
     const markdownData = _.get(applet, ["reprolib:terms/landingPage", 0, "@value"], "");
@@ -371,16 +448,17 @@ export default class Protocol {
   }
 
   static async parseApplet(data) {
-    const { applet, activities, items, protocol } = data;
-
+    const { applet, activities, activityFlows, items, protocol } = data;
     let initialStoreData = {
       ... await Protocol.parseJSONLD(applet, protocol),
       valid: true,
       activities: [],
+      activityFlows: [],
       tokenPrizeModal: false,
     };
 
     const activityModel = new Activity();
+    const activityFlowModel = new ActivityFlow();
     const itemModel = new Item();
     const activityIds = Object.keys(activities);
 
@@ -399,10 +477,19 @@ export default class Protocol {
       builderData.index = initialStoreData.activities.length;
 
       initialStoreData.activities.push(builderData);
-    })
+    });
+
+    initialStoreData.activityFlowOrder.map((id, i) => {
+      const activityFlow = activityFlows[id];
+      const activityFlowInfo = ActivityFlow.parseJSONLD(activityFlow);
+      const builderData = activityFlowModel.getActivityFlowBuilderData({
+        ...activityFlowInfo
+      });
+
+      initialStoreData.activityFlows.push(builderData);
+    });
 
     initialStoreData.prizeActivity = initialStoreData.activities.find(activity => activity.isPrize);
-
     return initialStoreData;
   }
 
@@ -422,11 +509,21 @@ export default class Protocol {
       });
 
       return activityModel.getActivityData();
+    });
+    const activityFlows = protocol.activityFlows.map(activityFlow => {
+      const activityFlowModel = new ActivityFlow();
+
+      activityFlowModel.updateReferenceObject({
+        ...activityFlow
+      });
+
+      return activityFlowModel.getActivityFlowData();
     })
 
     protocolModel.updateReferenceObject({
       ...protocol,
-      activities
+      activities,
+      activityFlows
     });
 
     return protocolModel.getProtocolData();

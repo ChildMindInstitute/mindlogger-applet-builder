@@ -3,7 +3,7 @@
     <v-row>
       <v-btn
         icon
-        :disabled="currentScreen == config.PROTOCOL_SCREEN"
+        :disabled="currentScreen == config.PROTOCOL_SCREEN || currentScreen == config.ACTIVITY_FLOW_SCREEN"
         @click="onBackToProtocolScreen"
       >
         <v-icon>
@@ -16,6 +16,44 @@
       <small style="margin-right: 10px" v-if="nodeEnv != 'production'">v{{ version }}</small>
 
       <span :key="currentActivity && currentActivity.timestamp || 1">
+        <v-tooltip
+          v-if="!currentActivity"
+          bottom
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              class="mx-1"
+              @click="viewActivity"
+              v-on="on"
+            >
+              <img
+                height="25"
+                alt=""
+                :src="baseImageURL + 'header-icons/black/items.png'"
+              >
+            </v-btn>
+          </template>
+          <span>Activity List</span>
+        </v-tooltip>
+        <v-tooltip
+          v-if="!currentActivity"
+          bottom
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              class="mx-1"
+              @click="viewActivityFlow"
+              v-on="on"
+            >
+              <img
+                height="25"
+                alt=""
+                :src="baseImageURL + 'header-icons/black/activity-flow.png'"
+              >
+            </v-btn>
+          </template>
+          <span>Activity Flow List</span>
+        </v-tooltip>
         <v-tooltip
           v-if="currentActivity"
           bottom
@@ -353,12 +391,26 @@ export default {
     ...mapMutations(config.MODULE_NAME, [
       'setCurrentScreen',
       'setCurrentActivity',
+      'setCurrentActivityFlow',
       'resetProtocol',
     ]),
 
     onBackToProtocolScreen () {
+      if (this.currentScreen === config.FLOW_BUILDER_SCREEN) {
+        this.setCurrentScreen(config.ACTIVITY_FLOW_SCREEN);
+        this.setCurrentActivityFlow(-1);
+      } else {
+        this.setCurrentScreen(config.PROTOCOL_SCREEN);
+        this.setCurrentActivity(-1);
+      }
+    },
+
+    viewActivityFlow () {
+      this.setCurrentScreen(config.ACTIVITY_FLOW_SCREEN);
+    },
+
+    viewActivity () {
       this.setCurrentScreen(config.PROTOCOL_SCREEN);
-      this.setCurrentActivity(-1);
     },
 
     saveToDashboard () {

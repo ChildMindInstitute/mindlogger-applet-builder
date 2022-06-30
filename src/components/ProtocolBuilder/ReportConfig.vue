@@ -38,9 +38,10 @@
                 placeholder="Encryption server IP address (example: 127.0.0.1)"
               />
 
-              <v-text-field
+              <v-textarea
                 class="config-input"
                 v-model="publicEncryptionKey"
+                :rows="4"
                 label="Public Encryption Key"
                 placeholder="Encryption server-generated public key"
               />
@@ -252,6 +253,25 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+
+      <v-dialog
+        v-model="pdfServerError"
+        width="600"
+      >
+        <v-card>
+          <v-card-text class="pt-4">
+            Sorry, we were not able to verify server. please double check server ip and public key.
+          </v-card-text>
+
+          <v-card-actions>
+            <v-spacer />
+            <v-btn @click="pdfServerError = false">
+              OK
+            </v-btn>
+            <v-spacer />
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-card>
   </v-dialog>
 </template>
@@ -338,6 +358,7 @@
 import config from '../../config';
 import { mapGetters } from 'vuex';
 import MarkDownEditor from './MarkDownEditor.vue';
+import api from '../../utilities/api';
 
 export default {
   components: {
@@ -380,7 +401,9 @@ export default {
       reportAlert: false,
       itemValue: itemValue.split('/').pop() || '',
       activityValue: this.currentActivity ? this.currentActivity.name : itemValue.split('/').shift() || '',
-      includeItem: itemValue ? true : false
+      includeItem: itemValue ? true : false,
+      pdfServerError: false,
+      serverConfigured: this.reportConfigs.serverIp && this.reportConfigs.publicEncryptionKey ? true : false
     }
   },
 
@@ -394,7 +417,12 @@ export default {
         this.$emit('input', false);
       } else {
         if (this.serverIp && this.publicEncryptionKey) {
-          this.saveReport();
+          let token = this.pdfToken;
+          api.verifyPDFServer(this.serverIp, this.publicEncryptionKey, token).then(() => {
+            this.saveReport();
+          }).catch(e => {
+            this.pdfServerError = true;
+          });
         } else {
           this.reportAlert = true;
         }
@@ -402,6 +430,10 @@ export default {
     },
 
     saveReport () {
+      if (!this.publicEncryptionKey || !this.serverIp) {
+        this.serverConfigured = false;
+      }
+
       this.$emit('updateConfig', {
         serverIp: this.serverIp,
         publicEncryptionKey: this.publicEncryptionKey,
@@ -442,6 +474,7 @@ export default {
     [
       'protocol',
       'baseImageURL',
+      'pdfToken',
     ]),
 
     config () {
@@ -523,10 +556,6 @@ export default {
 
     name () {
       return this.protocol.name;
-    },
-
-    serverConfigured () {
-      return this.serverIp && this.publicEncryptionKey ? true : false;
     },
   }
 }

@@ -90,5 +90,9 @@ export default {
 
   nodeEnv (state) {
     return state.nodeEnv;
+  },
+
+  pdfToken (state) {
+    return state.pdfToken;
   }
 }

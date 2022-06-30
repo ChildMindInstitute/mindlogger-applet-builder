@@ -131,6 +131,7 @@ export default {
   templates: [],
   versions: null,
   nodeEnv: null,
+  pdfToken: '',
   original: null,
   currentScreen: config.PROTOCOL_SCREEN,
   currentActivityFlow: null,

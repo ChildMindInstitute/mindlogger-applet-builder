@@ -12,7 +12,7 @@
       <ProtocolBuilder
         v-if="currentScreen === config.PROTOCOL_SCREEN || currentScreen === config.ACTIVITY_FLOW_SCREEN"
       />
-      <ActivityFlowBuilder 
+      <ActivityFlowBuilder
         v-else-if="currentScreen === config.FLOW_BUILDER_SCREEN"
       />
       <ActivityBuilder
@@ -119,6 +119,11 @@ export default {
       type: Boolean,
       required: false,
       default: false
+    },
+    pdfServerToken: {
+      type: String,
+      required: false,
+      default: ''
     }
   },
   computed: {
@@ -216,6 +221,7 @@ export default {
       'updateTemplateRequestStatus',
       'setVersions',
       'setNodeEnv',
+      'setPDFToken',
       'resetProtocol',
     ]),
     ...mapGetters(config.MODULE_NAME, [

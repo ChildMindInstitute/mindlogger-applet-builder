@@ -693,4 +693,8 @@ export default {
   setNodeEnv (state, nodeEnv) {
     state.nodeEnv = nodeEnv;
   },
+
+  setPDFToken (state, token) {
+    state.pdfToken = token;
+  }
 }

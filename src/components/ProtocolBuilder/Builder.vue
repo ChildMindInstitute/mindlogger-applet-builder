@@ -164,7 +164,7 @@ export default {
 
     this.initThemes(this.themes);
     this.initThemeId(this.initialData);
-
+    this.setPDFToken(this.pdfServerToken);
     this.setVersions(this.versions);
     this.setNodeEnv(this.nodeEnv);
     this.setCurrentScreen(config.PROTOCOL_SCREEN);

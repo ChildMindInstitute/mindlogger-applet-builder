@@ -461,7 +461,7 @@ export default {
     pdfConfigured () {
       return this.protocol.reportConfigs.emailRecipients.length &&
               this.protocol.reportConfigs.serverIp &&
-              this.protocol.reportConfigs.publicEncryptionKey;
+              this.protocol.reportConfigs.publicEncryptionKey && true;
     },
 
     conditionals () {

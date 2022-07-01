@@ -82,8 +82,8 @@
           @onRemove="onRemoveImage(0)"
           @onNotify="onEventNotify($event)"
         />
-        <p 
-          class="markdown-error ml-4" 
+        <p
+          class="markdown-error ml-4"
           v-if="!buttons[0].name && !buttons[0].image"
         >
           *This is a required field
@@ -110,8 +110,8 @@
           @onRemove="onRemoveImage(1)"
           @onNotify="onEventNotify($event)"
         />
-        <p 
-          class="markdown-error ml-4" 
+        <p
+          class="markdown-error ml-4"
           v-if="!buttons[1].name && !buttons[1].image"
         >
           *This is a required field

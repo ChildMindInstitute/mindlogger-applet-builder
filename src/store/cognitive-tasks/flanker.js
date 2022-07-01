@@ -172,12 +172,12 @@ const getTrial = (lastPractice) => ({
     {
       "@type": "schema:Number",
       "schema:name": "trialDuration",
-      "schema:value": ''
+      "schema:value": 3000
     },
     {
       "@type": "schema:Number",
       "schema:name": "fixationDuration",
-      "schema:value": '',
+      "schema:value": 500,
     },
     {
       "@type": "schema:Text",
@@ -204,11 +204,16 @@ const getTrial = (lastPractice) => ({
       "@type": "schema:Boolean",
       "schema:name": "lastPractice",
       "schema:value": lastPractice
+    },
+    {
+      "@type": "schema:Number",
+      "schema:name": "blockIndex",
+      "schema:value": 0
     }
   ]
 })
 
-const getTest = (lastTest) => ({
+const getTest = (lastTest, blockIndex) => ({
   question: "",
   description: "Flanker practice",
   ui: {
@@ -560,12 +565,12 @@ const getTest = (lastTest) => ({
     {
       "@type": "schema:Number",
       "schema:name": "trialDuration",
-      "schema:value": ''
+      "schema:value": 3000
     },
     {
       "@type": "schema:Number",
       "schema:name": "fixationDuration",
-      "schema:value": '',
+      "schema:value": 500,
     },
     {
       "@type": "schema:Text",
@@ -582,7 +587,12 @@ const getTest = (lastTest) => ({
       "@type": "schema:Boolean",
       "schema:name": "lastTest",
       "schema:value": lastTest
-    }
+    },
+    {
+      "@type": "schema:Number",
+      "schema:name": "blockIndex",
+      "schema:value": blockIndex
+    },
   ]
 })
 
@@ -659,7 +669,7 @@ export default {
       }
     },
     {
-      ...getTest(false),
+      ...getTest(false, 1),
       name: "test1"
     },
     {
@@ -667,7 +677,7 @@ export default {
       name: "test2-instructions"
     },
     {
-      ...getTest(false),
+      ...getTest(false, 2),
       name: "test2"
     },
     {
@@ -675,7 +685,7 @@ export default {
       name: "test3-instructions"
     },
     {
-      ...getTest(true),
+      ...getTest(true, 3),
       name: "test3"
     },
   ]

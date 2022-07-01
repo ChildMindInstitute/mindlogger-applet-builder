@@ -182,30 +182,10 @@
         </v-card>
       </v-dialog>
 
-      <v-dialog
+      <ConfirmationDialog
         v-model="deleteConfirmDialog"
-        width="600"
-        persistent
-      >
-        <v-card>
-          <v-card-title>
-            Close Stimulus Screen
-          </v-card-title>
-          <v-card-text class="pa-4">
-            Are you sure you want to close without saving? All changes will be lost.
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer />
-            <v-btn color="primary" @click="closeStimulusScreen">
-              Yes
-            </v-btn>
-
-            <v-btn @click="deleteConfirmDialog = false;">
-              No
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+        @close="closeStimulusScreen"
+      />
 
       <v-dialog
         v-model="deleteScreenDialog"
@@ -326,10 +306,12 @@ td:nth-child(2), th:nth-child(2) {
 
 <script>
 import { Uploader as S3Uploader } from '../../../../models/Uploader';
+import ConfirmationDialog from './ConfirmationDialog';
 import Notify from "../../Additional/Notify";
 
 export default {
   components: {
+    ConfirmationDialog,
     Notify,
   },
   props: {

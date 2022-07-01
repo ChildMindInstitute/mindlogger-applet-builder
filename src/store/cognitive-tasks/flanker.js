@@ -13,48 +13,48 @@ const getTrial = (lastPractice) => ({
       "schema:name": "trials",
       "schema:numberOfItems": 6,
       "schema:itemListElement": [
-        {
-          "@id": "left-con",
-          "@type": "schema:Property",
-          "schema:name": "<<<<<",
-          "schema:image": "",
-          "schema:value": 0
-        },
-        {
-          "@id": "right-inc",
-          "@type": "schema:Property",
-          "schema:name": "<<><<",
-          "schema:image": "",
-          "schema:value": 1
-        },
-        {
-          "@id": "left-inc",
-          "@type": "schema:Property",
-          "schema:name": ">><>>",
-          "schema:image": "",
-          "schema:value": 0
-        },
-        {
-          "@id": "right-con",
-          "@type": "schema:Property",
-          "schema:name": ">>>>>",
-          "schema:image": "",
-          "schema:value": 1
-        },
-        {
-          "@id": "left-neut",
-          "@type": "schema:Property",
-          "schema:name": "--<--",
-          "schema:image": "",
-          "schema:value": 0
-        },
-        {
-          "@id": "right-neut",
-          "@type": "schema:Property",
-          "schema:name": "-->--",
-          "schema:image": "",
-          "schema:value": 1
-        }
+        // {
+        //   "@id": "left-con",
+        //   "@type": "schema:Property",
+        //   "schema:name": "<<<<<",
+        //   "schema:image": "",
+        //   "schema:value": 0
+        // },
+        // {
+        //   "@id": "right-inc",
+        //   "@type": "schema:Property",
+        //   "schema:name": "<<><<",
+        //   "schema:image": "",
+        //   "schema:value": 1
+        // },
+        // {
+        //   "@id": "left-inc",
+        //   "@type": "schema:Property",
+        //   "schema:name": ">><>>",
+        //   "schema:image": "",
+        //   "schema:value": 0
+        // },
+        // {
+        //   "@id": "right-con",
+        //   "@type": "schema:Property",
+        //   "schema:name": ">>>>>",
+        //   "schema:image": "",
+        //   "schema:value": 1
+        // },
+        // {
+        //   "@id": "left-neut",
+        //   "@type": "schema:Property",
+        //   "schema:name": "--<--",
+        //   "schema:image": "",
+        //   "schema:value": 0
+        // },
+        // {
+        //   "@id": "right-neut",
+        //   "@type": "schema:Property",
+        //   "schema:name": "-->--",
+        //   "schema:image": "",
+        //   "schema:value": 1
+        // }
       ]
     },
     {
@@ -128,12 +128,12 @@ const getTrial = (lastPractice) => ({
       "schema:name": "buttons",
       "schema:itemListElement": [
         {
-          "schema:name": "<",
+          "schema:name": "",
           "schema:value": 0,
           "schema:image": ""
         },
         {
-          "schema:name": ">",
+          "schema:name": "",
           "schema:value": 1,
           "schema:image": ""
         }
@@ -182,7 +182,7 @@ const getTrial = (lastPractice) => ({
     {
       "@type": "schema:Text",
       "schema:name": "fixationScreen",
-      "schema:value": "-----",
+      "schema:value": "",
       "schema:image": ""
     },
     {
@@ -226,48 +226,48 @@ const getTest = (lastTest, blockIndex) => ({
       "schema:name": "trials",
       "schema:numberOfItems": 6,
       "schema:itemListElement": [
-        {
-          "@id": "left-con",
-          "@type": "schema:Property",
-          "schema:name": "<<<<<",
-          "schema:image": "",
-          "schema:value": 0
-        },
-        {
-          "@id": "right-inc",
-          "@type": "schema:Property",
-          "schema:name": "<<><<",
-          "schema:image": "",
-          "schema:value": 1
-        },
-        {
-          "@id": "left-inc",
-          "@type": "schema:Property",
-          "schema:name": ">><>>",
-          "schema:image": "",
-          "schema:value": 0
-        },
-        {
-          "@id": "right-con",
-          "@type": "schema:Property",
-          "schema:name": ">>>>>",
-          "schema:image": "",
-          "schema:value": 1
-        },
-        {
-          "@id": "left-neut",
-          "@type": "schema:Property",
-          "schema:name": "--<--",
-          "schema:image": "",
-          "schema:value": 0
-        },
-        {
-          "@id": "right-neut",
-          "@type": "schema:Property",
-          "schema:name": "-->--",
-          "schema:image": "",
-          "schema:value": 1
-        }
+        // {
+        //   "@id": "left-con",
+        //   "@type": "schema:Property",
+        //   "schema:name": "<<<<<",
+        //   "schema:image": "",
+        //   "schema:value": 0
+        // },
+        // {
+        //   "@id": "right-inc",
+        //   "@type": "schema:Property",
+        //   "schema:name": "<<><<",
+        //   "schema:image": "",
+        //   "schema:value": 1
+        // },
+        // {
+        //   "@id": "left-inc",
+        //   "@type": "schema:Property",
+        //   "schema:name": ">><>>",
+        //   "schema:image": "",
+        //   "schema:value": 0
+        // },
+        // {
+        //   "@id": "right-con",
+        //   "@type": "schema:Property",
+        //   "schema:name": ">>>>>",
+        //   "schema:image": "",
+        //   "schema:value": 1
+        // },
+        // {
+        //   "@id": "left-neut",
+        //   "@type": "schema:Property",
+        //   "schema:name": "--<--",
+        //   "schema:image": "",
+        //   "schema:value": 0
+        // },
+        // {
+        //   "@id": "right-neut",
+        //   "@type": "schema:Property",
+        //   "schema:name": "-->--",
+        //   "schema:image": "",
+        //   "schema:value": 1
+        // }
       ]
     },
     {
@@ -521,12 +521,12 @@ const getTest = (lastTest, blockIndex) => ({
       "schema:name": "buttons",
       "schema:itemListElement": [
         {
-          "schema:name": "<",
+          "schema:name": "",
           "schema:value": 0,
           "schema:image": ""
         },
         {
-          "schema:name": ">",
+          "schema:name": "",
           "schema:value": 1,
           "schema:image": ""
         }
@@ -575,7 +575,7 @@ const getTest = (lastTest, blockIndex) => ({
     {
       "@type": "schema:Text",
       "schema:name": "fixationScreen",
-      "schema:value": "-----",
+      "schema:value": "",
       "schema:image": ""
     },
     {

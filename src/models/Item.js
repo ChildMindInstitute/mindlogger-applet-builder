@@ -305,6 +305,7 @@ export default class Item {
       }
 
       return {
+        ...this.ref.responseOptions,
         "removeBackOption": this.ref.options.removeBackOption,
       }
     }
@@ -908,6 +909,7 @@ export default class Item {
     };
 
     let responseOptions = item['reprolib:terms/responseOptions'];
+    let optionsObj = item['reprolib:terms/options'];
 
     let itemType = itemContent.ui.inputType;
 
@@ -1008,6 +1010,11 @@ export default class Item {
       if (removeBackOption) {
         itemContent.removeBackOption =
           _.get(removeBackOption, [0, '@value']);
+      }
+
+      if (!itemContent.removeBackOption && optionsObj) {
+        let removeBackObj = _.get(optionsObj, [0, 'reprolib:terms/removeBackOption']);
+        itemContent.removeBackOption = removeBackObj && _.get(removeBackObj, [0, '@value']);
       }
 
       if (removeUndoOption) {
@@ -1516,7 +1523,6 @@ export default class Item {
     }
 
     itemContent.valid = true;
-
 
     return itemContent;
   }

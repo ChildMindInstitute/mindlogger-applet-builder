@@ -85,7 +85,6 @@ export default class Protocol {
       "schema:schemaVersion": this.ref.protocolVersion,
       "schema:version": this.ref.protocolVersion,
       "streamEnabled": this.ref.streamEnabled,
-      "combineReports": this.ref.combineReports,
       landingPageContent: this.ref.markdownData, //point to the readme of protocol
       landingPageType: this.ref.landingPageType,
       landingPage: "",
@@ -228,11 +227,6 @@ export default class Protocol {
         updated: (field) => `streaming option was changed to ${_.get(newValue, field)}`,
         inserted: (field) => `streaming option was enabled`,
         removed: (field) => `streaming option was disabled`
-      },
-      'combineReports': {
-        updated: (field) => `combine reports was changed to ${_.get(newValue, field)}`,
-        inserted: (field) => `combine reports option was enabled`,
-        removed: (field) => `combine reports option was disabled`
       },
       'schema:description': {
         updated: (field) => `Applet description was changed to ${_.get(newValue, field)}`,
@@ -490,7 +484,6 @@ export default class Protocol {
       image: applet['schema:image'],
       watermark: _.get(applet, ['schema:watermark', 0, '@id']),
       streamEnabled: _.get(applet, ['reprolib:terms/streamEnabled', 0, '@value']),
-      combineReports: _.get(applet, ['reprolib:terms/combineReports', 0, '@value']),
       description: applet['schema:description'][0]['@value'],
       protocolVersion: _.get(applet, 'schema:schemaVersion[0].@value', this.protocolVersion),
       landingPageType: _.get(applet, ['reprolib:terms/landingPageType', 0, '@value'], 'markdown'),

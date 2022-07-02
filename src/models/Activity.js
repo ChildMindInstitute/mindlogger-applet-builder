@@ -519,6 +519,7 @@ export default class Activity {
     this.ref.isSkippable && allowed.push('skipped');
     this.ref.disableBack && allowed.push('disableBack');
     !this.ref.allowSummary && allowed.push('disableSummary');
+    this.ref.exportAvailable && allowed.push('allowExport');
 
     return {
       '@context': [
@@ -552,7 +553,6 @@ export default class Activity {
       },
       subScales: this.ref.subScales,
       reports,
-      exportAvailable: this.ref.exportAvailable,
       finalSubScale: (this.ref.finalSubScale.variableName ? [this.ref.finalSubScale] : []),
       hasResponseIdentifier: !!this.ref.items.find(item => item.options.isResponseIdentifier),
     };
@@ -1152,6 +1152,7 @@ export default class Activity {
       activityInfo.disableBack = true;
     }
     activityInfo.allowSummary = !allowList.some((item) => item.includes('disable_summary'))
+    activityInfo.exportAvailable = allowList.some(item => item.includes('allow_export'))
 
     activityInfo.valid = true;
 

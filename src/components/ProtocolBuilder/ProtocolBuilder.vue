@@ -188,21 +188,6 @@
               label="Enable streaming of response data"
             />
           </v-col>
-
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <v-col sm="4"
-                v-bind="attrs"
-                v-on="on"
-              >
-                <v-checkbox
-                  v-model="combineReports"
-                  label="Combine reports on last activity"
-                />
-              </v-col>
-            </template>
-            <span>This feature only impacts mobile and the web-app. The admin report will remain unchanged.</span>
-          </v-tooltip>
         </v-row>
 
         <div v-if="themes && themes.length">
@@ -676,15 +661,6 @@ export default {
       },
       set: function (streamEnabled) {
         this.updateProtocolMetaInfo({ streamEnabled })
-      }
-    },
-
-    combineReports: {
-      get: function () {
-        return this.protocol.combineReports;
-      },
-      set: function (combineReports) {
-        this.updateProtocolMetaInfo({ combineReports })
       }
     },
 

@@ -118,7 +118,7 @@
 
         <v-row>
           <v-col
-            v-if="!protocol.reportConfigs.emailRecipients.length"
+            v-if="!emailRecipients.length"
             class="d-flex align-center"
           >
             <v-btn

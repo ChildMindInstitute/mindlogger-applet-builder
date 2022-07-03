@@ -494,7 +494,7 @@ export default class Protocol {
         const type = _.get(option, ['@type', 0]);
 
         let value = _.get(option, ['schema:value'], []).map(item => item['@value']);
-        if (type != 'schema:List') {
+        if (type != 'http://schema.org/List') {
           value = value[0];
         }
 

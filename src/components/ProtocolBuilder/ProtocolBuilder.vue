@@ -350,6 +350,27 @@
                   </v-tooltip>
 
                   <v-tooltip
+                    top
+                  >
+                    <template v-slot:activator="{ on }">
+                      <v-btn
+                        icon
+                        v-on="on"
+                        @click="showOrHideActivity(activities.findIndex(act => act == activity))"
+                      >
+                        <v-icon v-if="activity.isVis" color="grey lighten-1">
+                          mdi-eye-off-outline
+                        </v-icon>
+                        <v-icon v-else color="grey lighten-1">
+                          mdi-eye-outline
+                        </v-icon>
+                      </v-btn>
+                    </template>
+
+                    <span>{{ activity.isVis ? 'Click to Show Activity' : 'Click to Hide Activity' }}</span>
+                  </v-tooltip>
+
+                  <v-tooltip
                     v-if="activity.activityType === 'NORMAL' || activity.activityType == 'CST_GYRO' || activity.activityType == 'CST_TOUCH' || activity.activityType == 'FLANKER'"
                     top
                   >

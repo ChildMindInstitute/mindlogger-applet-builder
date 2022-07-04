@@ -555,7 +555,7 @@ const getTest = (lastTest, blockIndex) => ({
     {
       "@type": "schema:Text",
       "schema:name": "nextButton",
-      "schema:value": "Continue",
+      "schema:value": lastTest ? "Finish" : "Continue",
     },
     {
       "@type": "schema:Number",

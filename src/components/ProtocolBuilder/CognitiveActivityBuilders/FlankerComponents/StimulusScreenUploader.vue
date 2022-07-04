@@ -404,13 +404,13 @@ export default {
     },
 
     onDeleteStimulusScreen (index) {
-      this.deleteScreenDialog = true;
-      // if (this.activeScreens.includes(this.files[index].id)) {
-      //   this.currentIndex = index;
-      //   this.deleteScreenDialog = true;
-      // } else {
-      //   this.deleteStimulusScreen();
-      // }
+      this.currentIndex = index;
+
+      if (this.activeScreens.includes(this.files[index].id)) {
+        this.deleteScreenDialog = true;
+      } else {
+        this.deleteStimulusScreen();
+      }
     },
 
     deleteStimulusScreen () {

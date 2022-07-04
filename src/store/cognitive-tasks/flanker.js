@@ -40,7 +40,7 @@ const getTrial = (lastPractice) => ({
     {
       "@type": "schema:Boolean",
       "schema:name": "showFixation",
-      "schema:value": true
+      "schema:value": false
     },
     {
       "@type": "schema:Boolean",
@@ -75,7 +75,7 @@ const getTrial = (lastPractice) => ({
     {
       "@type": "schema:Number",
       "schema:name": "fixationDuration",
-      "schema:value": 500,
+      "schema:value": 0,
     },
     {
       "@type": "schema:Text",
@@ -151,7 +151,7 @@ const getTest = (lastTest, blockIndex) => ({
     {
       "@type": "schema:Boolean",
       "schema:name": "showFixation",
-      "schema:value": true
+      "schema:value": false
     },
     {
       "@type": "schema:Boolean",
@@ -186,7 +186,7 @@ const getTest = (lastTest, blockIndex) => ({
     {
       "@type": "schema:Number",
       "schema:name": "fixationDuration",
-      "schema:value": 500,
+      "schema:value": 0,
     },
     {
       "@type": "schema:Text",

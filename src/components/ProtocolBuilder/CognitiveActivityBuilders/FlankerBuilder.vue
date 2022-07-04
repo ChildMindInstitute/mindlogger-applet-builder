@@ -9,9 +9,7 @@
         {{ stimulusScreens.length ? 'Edit' : 'Upload' }} Stimulus Screens
       </v-btn>
 
-      <v-btn class="mx-2" @click="onUploadFixationScreen"
-             :style="[!isFixationValid && {'background': 'red', 'color': 'white'}]"
-      >
+      <v-btn class="mx-2" @click="onUploadFixationScreen">
         {{ fixationScreen.name ? 'Edit' : 'Upload' }} Fixation Screen
       </v-btn>
     </div>
@@ -475,26 +473,9 @@ export default {
       this.stimulusDurationTest >= 1 && this.stimulusDurationTest % 1 == 0;
     },
 
-    isFixationValid(){
-      return this.fixationDuration >= 1 && this.fixationDuration % 1 == 0 && this.fixationScreen !== null;
-    },
-
     threshold() {
       const option = this.getInputOption('minimumAccuracy');
       return option['schema:value'];
-      // get() {
-      //   const option = this.getInputOption('minimumAccuracy');
-      //   return option['schema:value'];
-      // },
-      // set(value) {
-      //   for (const index of this.practiceScreens) {
-      //     this.updateInputOption('minimumAccuracy', {
-      //       'schema:name': 'minimumAccuracy',
-      //       'schema:value': value,
-      //       '@type': 'schema:Number',
-      //     }, index)
-      //   }
-      // }
     },
 
     buttonCount: {

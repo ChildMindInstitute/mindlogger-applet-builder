@@ -27,7 +27,7 @@
                 mdi-lock-plus
               </v-icon>
 
-              For security, you must configure the IP address and public encryption key to generate and email reports (<a>see here for directions</a>):
+              For security, you must configure the IP address and public encryption key to generate and email reports (<a href="https://github.com/ChildMindInstitute/mindlogger-report-server" target="_blank">see here for directions</a>):
             </div>
 
             <div class="px-2">
@@ -351,6 +351,10 @@
   opacity: 0.05;
   width: 100%;
   height: 100%;
+}
+
+a {
+  text-decoration: none;
 }
 </style>
 

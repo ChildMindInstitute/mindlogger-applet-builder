@@ -607,7 +607,8 @@ export default {
         percentage: 'percentScore_',
       };
 
-      return scorePrefix[outputType] + title.toLowerCase().replace(/\s/g, '_').replace(/[()/]/g, '');
+      // return scorePrefix[outputType] + title.toLowerCase().replace(/\s/g, '_').replace(/[()/]/g, '');
+      return scorePrefix[outputType] + title.replace(/\s/g, '_').replace(/[()/]/g, '');
     },
 
     onUpdateScoreRange () {

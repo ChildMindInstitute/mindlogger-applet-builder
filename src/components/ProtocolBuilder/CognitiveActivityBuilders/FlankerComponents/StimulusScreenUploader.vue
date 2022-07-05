@@ -182,30 +182,10 @@
         </v-card>
       </v-dialog>
 
-      <v-dialog
+      <ConfirmationDialog
         v-model="deleteConfirmDialog"
-        width="600"
-        persistent
-      >
-        <v-card>
-          <v-card-title>
-            Close Stimulus Screen
-          </v-card-title>
-          <v-card-text class="pa-4">
-            Are you sure you want to close without saving? All changes will be lost.
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer />
-            <v-btn color="primary" @click="closeStimulusScreen">
-              Yes
-            </v-btn>
-
-            <v-btn @click="deleteConfirmDialog = false;">
-              No
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+        @close="closeStimulusScreen"
+      />
 
       <v-dialog
         v-model="deleteScreenDialog"
@@ -234,6 +214,7 @@
         </v-card>
       </v-dialog>
     </v-card>
+    <Notify :notify="notify" />
   </v-dialog>
 </template>
 
@@ -325,8 +306,14 @@ td:nth-child(2), th:nth-child(2) {
 
 <script>
 import { Uploader as S3Uploader } from '../../../../models/Uploader';
+import ConfirmationDialog from './ConfirmationDialog';
+import Notify from "../../Additional/Notify";
 
 export default {
+  components: {
+    ConfirmationDialog,
+    Notify,
+  },
   props: {
     value: {
       type: Boolean,
@@ -371,6 +358,7 @@ export default {
       deleteConfirmDialog: false,
       activeScreenRemoved: false,
       showCloseConfirmation: false,
+      notify: {}
     }
   },
 
@@ -389,12 +377,24 @@ export default {
 
     addStimulusScreens (e) {
       for (const file of e.target.files) {
-        if (this.currentIndex >= 0) {
-          this.$set(this.files, this.currentIndex, file);
-        } else {
-          this.files.push(file);
-          this.correct.push(0);
+
+        if (this.isFileImage(file)){
+
+          if (this.currentIndex >= 0) {
+            this.$set(this.files, this.currentIndex, file);
+          } else {
+            this.files.push(file);
+            this.correct.push(0);
+          }
+
+        }else{
+          this.notify = {
+            type: 'warning',
+            message: 'Please check if you use correct image file!',
+            duration: 3000
+          }
         }
+
       }
     },
 
@@ -404,8 +404,9 @@ export default {
     },
 
     onDeleteStimulusScreen (index) {
+      this.currentIndex = index;
+
       if (this.activeScreens.includes(this.files[index].id)) {
-        this.currentIndex = index;
         this.deleteScreenDialog = true;
       } else {
         this.deleteStimulusScreen();
@@ -488,7 +489,12 @@ export default {
       }
 
       this.uploading = false;
+    },
+
+    isFileImage(file) {
+      return file && file['type'].split('/')[0] === 'image';
     }
+
   }
 }
 </script>

@@ -11,50 +11,8 @@ const getTrial = (lastPractice) => ({
     {
       "@type": "schema:ItemList",
       "schema:name": "trials",
-      "schema:numberOfItems": 6,
+      "schema:numberOfItems": 0,
       "schema:itemListElement": [
-        {
-          "@id": "left-con",
-          "@type": "schema:Property",
-          "schema:name": "<<<<<",
-          "schema:image": "",
-          "schema:value": 0
-        },
-        {
-          "@id": "right-inc",
-          "@type": "schema:Property",
-          "schema:name": "<<><<",
-          "schema:image": "",
-          "schema:value": 1
-        },
-        {
-          "@id": "left-inc",
-          "@type": "schema:Property",
-          "schema:name": ">><>>",
-          "schema:image": "",
-          "schema:value": 0
-        },
-        {
-          "@id": "right-con",
-          "@type": "schema:Property",
-          "schema:name": ">>>>>",
-          "schema:image": "",
-          "schema:value": 1
-        },
-        {
-          "@id": "left-neut",
-          "@type": "schema:Property",
-          "schema:name": "--<--",
-          "schema:image": "",
-          "schema:value": 0
-        },
-        {
-          "@id": "right-neut",
-          "@type": "schema:Property",
-          "schema:name": "-->--",
-          "schema:image": "",
-          "schema:value": 1
-        }
       ]
     },
     {
@@ -62,78 +20,18 @@ const getTrial = (lastPractice) => ({
       "schema:name": "blocks",
       "schema:numberOfItems": 5,
       "schema:itemListElement": [
-        {
-          "schema:name": "Block 1",
-          "schema:value": 0,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        },
-        {
-          "schema:name": "Block 2",
-          "schema:value": 1,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        },
-        {
-          "schema:name": "Block 3",
-          "schema:value": 1,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        },
-        {
-          "schema:name": "Block 4",
-          "schema:value": 1,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        },
-        {
-          "schema:name": "Block 5",
-          "schema:value": 1,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        }
       ]
     },
     {
       "schema:name": "buttons",
       "schema:itemListElement": [
         {
-          "schema:name": "<",
+          "schema:name": "",
           "schema:value": 0,
           "schema:image": ""
         },
         {
-          "schema:name": ">",
+          "schema:name": "",
           "schema:value": 1,
           "schema:image": ""
         }
@@ -142,7 +40,7 @@ const getTrial = (lastPractice) => ({
     {
       "@type": "schema:Boolean",
       "schema:name": "showFixation",
-      "schema:value": true
+      "schema:value": false
     },
     {
       "@type": "schema:Boolean",
@@ -172,17 +70,17 @@ const getTrial = (lastPractice) => ({
     {
       "@type": "schema:Number",
       "schema:name": "trialDuration",
-      "schema:value": ''
+      "schema:value": 3000
     },
     {
       "@type": "schema:Number",
       "schema:name": "fixationDuration",
-      "schema:value": '',
+      "schema:value": 0,
     },
     {
       "@type": "schema:Text",
       "schema:name": "fixationScreen",
-      "schema:value": "-----",
+      "schema:value": "",
       "schema:image": ""
     },
     {
@@ -204,11 +102,16 @@ const getTrial = (lastPractice) => ({
       "@type": "schema:Boolean",
       "schema:name": "lastPractice",
       "schema:value": lastPractice
+    },
+    {
+      "@type": "schema:Number",
+      "schema:name": "blockIndex",
+      "schema:value": 0
     }
   ]
 })
 
-const getTest = (lastTest) => ({
+const getTest = (lastTest, blockIndex) => ({
   question: "",
   description: "Flanker practice",
   ui: {
@@ -219,309 +122,27 @@ const getTest = (lastTest) => ({
     {
       "@type": "schema:ItemList",
       "schema:name": "trials",
-      "schema:numberOfItems": 6,
+      "schema:numberOfItems": 0,
       "schema:itemListElement": [
-        {
-          "@id": "left-con",
-          "@type": "schema:Property",
-          "schema:name": "<<<<<",
-          "schema:image": "",
-          "schema:value": 0
-        },
-        {
-          "@id": "right-inc",
-          "@type": "schema:Property",
-          "schema:name": "<<><<",
-          "schema:image": "",
-          "schema:value": 1
-        },
-        {
-          "@id": "left-inc",
-          "@type": "schema:Property",
-          "schema:name": ">><>>",
-          "schema:image": "",
-          "schema:value": 0
-        },
-        {
-          "@id": "right-con",
-          "@type": "schema:Property",
-          "schema:name": ">>>>>",
-          "schema:image": "",
-          "schema:value": 1
-        },
-        {
-          "@id": "left-neut",
-          "@type": "schema:Property",
-          "schema:name": "--<--",
-          "schema:image": "",
-          "schema:value": 0
-        },
-        {
-          "@id": "right-neut",
-          "@type": "schema:Property",
-          "schema:name": "-->--",
-          "schema:image": "",
-          "schema:value": 1
-        }
       ]
     },
     {
       "@type": "schema:ItemList",
       "schema:name": "blocks",
-      "schema:numberOfItems": 20,
+      "schema:numberOfItems": 0,
       "schema:itemListElement": [
-        {
-          "schema:name": "Block 1",
-          "schema:value": 0,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        },
-        {
-          "schema:name": "Block 2",
-          "schema:value": 1,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        },
-        {
-          "schema:name": "Block 3",
-          "schema:value": 2,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        },
-        {
-          "schema:name": "Block 4",
-          "schema:value": 3,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        },
-        {
-          "schema:name": "Block 5",
-          "schema:value": 4,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        },
-        {
-          "schema:name": "Block 6",
-          "schema:value": 5,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        },
-        {
-          "schema:name": "Block 7",
-          "schema:value": 6,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        },
-        {
-          "schema:name": "Block 8",
-          "schema:value": 7,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        },
-        {
-          "schema:name": "Block 9",
-          "schema:value": 8,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        },
-        {
-          "schema:name": "Block 10",
-          "schema:value": 9,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        },
-        {
-          "schema:name": "Block 11",
-          "schema:value": 10,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        },
-        {
-          "schema:name": "Block 12",
-          "schema:value": 11,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        },
-        {
-          "schema:name": "Block 13",
-          "schema:value": 12,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        },
-        {
-          "schema:name": "Block 14",
-          "schema:value": 13,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        },
-        {
-          "schema:name": "Block 15",
-          "schema:value": 14,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        },
-        {
-          "schema:name": "Block 16",
-          "schema:value": 15,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        },
-        {
-          "schema:name": "Block 17",
-          "schema:value": 16,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        },
-        {
-          "schema:name": "Block 18",
-          "schema:value": 17,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        },
-        {
-          "schema:name": "Block 19",
-          "schema:value": 18,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        },
-        {
-          "schema:name": "Block 20",
-          "schema:value": 19,
-          "order": [
-            "left-con",
-            "right-con",
-            "left-inc",
-            "right-inc",
-            "left-neut",
-            "right-neut"
-          ]
-        }
       ]
     },
     {
       "schema:name": "buttons",
       "schema:itemListElement": [
         {
-          "schema:name": "<",
+          "schema:name": "",
           "schema:value": 0,
           "schema:image": ""
         },
         {
-          "schema:name": ">",
+          "schema:name": "",
           "schema:value": 1,
           "schema:image": ""
         }
@@ -530,7 +151,7 @@ const getTest = (lastTest) => ({
     {
       "@type": "schema:Boolean",
       "schema:name": "showFixation",
-      "schema:value": true
+      "schema:value": false
     },
     {
       "@type": "schema:Boolean",
@@ -560,17 +181,17 @@ const getTest = (lastTest) => ({
     {
       "@type": "schema:Number",
       "schema:name": "trialDuration",
-      "schema:value": ''
+      "schema:value": 3000
     },
     {
       "@type": "schema:Number",
       "schema:name": "fixationDuration",
-      "schema:value": '',
+      "schema:value": 0,
     },
     {
       "@type": "schema:Text",
       "schema:name": "fixationScreen",
-      "schema:value": "-----",
+      "schema:value": "",
       "schema:image": ""
     },
     {
@@ -582,7 +203,12 @@ const getTest = (lastTest) => ({
       "@type": "schema:Boolean",
       "schema:name": "lastTest",
       "schema:value": lastTest
-    }
+    },
+    {
+      "@type": "schema:Number",
+      "schema:name": "blockIndex",
+      "schema:value": blockIndex
+    },
   ]
 })
 
@@ -659,7 +285,7 @@ export default {
       }
     },
     {
-      ...getTest(false),
+      ...getTest(false, 1),
       name: "test1"
     },
     {
@@ -667,7 +293,7 @@ export default {
       name: "test2-instructions"
     },
     {
-      ...getTest(false),
+      ...getTest(false, 2),
       name: "test2"
     },
     {
@@ -675,7 +301,7 @@ export default {
       name: "test3-instructions"
     },
     {
-      ...getTest(true),
+      ...getTest(true, 3),
       name: "test3"
     },
   ]

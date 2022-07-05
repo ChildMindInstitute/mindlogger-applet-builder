@@ -992,11 +992,11 @@ export default class Item {
       if (removeBackOption) {
         itemContent.removeBackOption =
           _.get(removeBackOption, [0, '@value']);
-        
-        if (!itemContent.removeBackOption && optionsObj) {
-          let removeBackObj = _.get(optionsObj, [0, 'reprolib:terms/removeBackOption']);
-          itemContent.removeBackOption = removeBackObj && _.get(removeBackObj, [0, '@value']);
-        }
+      }
+
+      if (!itemContent.removeBackOption && optionsObj) {
+        let removeBackObj = _.get(optionsObj, [0, 'reprolib:terms/removeBackOption']);
+        itemContent.removeBackOption = removeBackObj && _.get(removeBackObj, [0, '@value']);
       }
 
       if (removeUndoOption) {

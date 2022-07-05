@@ -3,7 +3,9 @@
     class="pa-4"
   >
     <div class="mt-4">
-      <v-btn class="mx-2" @click="onUploadStimulusScreen">
+      <v-btn class="mx-2" @click="onUploadStimulusScreen"
+             :style="[!isStimulusValid && {'background': 'red', 'color': 'white'}]"
+      >
         {{ stimulusScreens.length ? 'Edit' : 'Upload' }} Stimulus Screens
       </v-btn>
 
@@ -20,14 +22,19 @@
       <div class="mx-4">
         &#x2265;
         <v-text-field
-          v-model="threshold"
+          :value="threshold"
           class="mx-2 inline-element threshold"
           type="number"
-          :min="1"
-          :max="100"
+          @input="thresholdChange"
         />
         %
       </div>
+      <p
+          class="markdown-error ml-4"
+          v-if="!threshold"
+      >
+        *Please enter positive value
+      </p>
     </div>
 
     <div class="d-flex align-center">
@@ -73,8 +80,8 @@
           @onRemove="onRemoveImage(0)"
           @onNotify="onEventNotify($event)"
         />
-        <p 
-          class="markdown-error ml-4" 
+        <p
+          class="markdown-error ml-4"
           v-if="!buttons[0].name && !buttons[0].image"
         >
           *This is a required field
@@ -101,8 +108,8 @@
           @onRemove="onRemoveImage(1)"
           @onNotify="onEventNotify($event)"
         />
-        <p 
-          class="markdown-error ml-4" 
+        <p
+          class="markdown-error ml-4"
           v-if="!buttons[1].name && !buttons[1].image"
         >
           *This is a required field
@@ -132,6 +139,7 @@
             :color="blocksPractice.length ? 'white' : 'red'"
             :dark="blocksPractice.length ? false : true"
             @click="onUploadBlockSequence('practice')"
+            :disabled="stimulusScreens.length <= 0"
           >
             {{ blocksPractice.length ? 'Edit' : 'Upload' }} Block Sequences
           </v-btn>
@@ -197,6 +205,7 @@
             :color="blocksTest.length ? 'white' : 'red'"
             :dark="blocksTest.length ? false : true"
             @click="onUploadBlockSequence('test')"
+            :disabled="stimulusScreens.length <= 0"
           >
             {{ blocksTest.length ? 'Edit' : 'Upload' }} Block Sequences
           </v-btn>
@@ -414,8 +423,8 @@ export default {
   data() {
     return {
       buttons: [
-        { name: '<', value: 0, image: '' },
-        { name: '>', value: 1, image: '' }
+        { name: '', value: 0, image: '' },
+        { name: '', value: 1, image: '' }
       ],
 
       markdown: '',
@@ -459,20 +468,14 @@ export default {
       return this.currentActivity.items;
     },
 
-    threshold: {
-      get() {
-        const option = this.getInputOption('minimumAccuracy');
-        return option['schema:value'];
-      },
-      set(value) {
-        for (const index of this.practiceScreens) {
-          this.updateInputOption('minimumAccuracy', {
-            'schema:name': 'minimumAccuracy',
-            'schema:value': value,
-            '@type': 'schema:Number',
-          }, index)
-        }
-      }
+    isStimulusValid(){
+      return this.stimulusScreens.length > 0 && this.stimulusDurationPractice >= 1 && this.stimulusDurationPractice % 1 == 0 &&
+      this.stimulusDurationTest >= 1 && this.stimulusDurationTest % 1 == 0;
+    },
+
+    threshold() {
+      const option = this.getInputOption('minimumAccuracy');
+      return option['schema:value'];
     },
 
     buttonCount: {
@@ -743,6 +746,32 @@ export default {
     ...mapMutations(config.MODULE_NAME, [
       'updateItemMetaInfo',
     ]),
+
+    thresholdChange (val){
+      let newVal = Number(val);
+
+      // let newVal = val;
+
+      if (Number.isInteger(newVal) && newVal > 0) {
+        for (const index of this.practiceScreens) {
+          this.updateInputOption('minimumAccuracy', {
+            'schema:name': 'minimumAccuracy',
+            'schema:value': newVal,
+            '@type': 'schema:Number',
+          }, index)
+        }
+
+      }else{
+        for (const index of this.practiceScreens) {
+          this.updateInputOption('minimumAccuracy', {
+            'schema:name': 'minimumAccuracy',
+            'schema:value': null,
+            '@type': 'schema:Number',
+          }, index)
+        }
+      }
+
+    },
 
     getBlocks (index) {
       const option = this.getInputOption('blocks', index);

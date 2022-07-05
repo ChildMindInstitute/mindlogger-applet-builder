@@ -144,7 +144,11 @@
 
         <div class="selected-items px-4">
           <div class="label my-4">
-            Items Selected:
+            <span>Items Selected:</span>
+            <span
+              v-if="!selectedItemCount"
+              class="ml-2 error-text"
+            >This is a required field</span>
           </div>
 
           <v-card class="item-list">
@@ -289,6 +293,10 @@
   height: 20px;
   margin: 5px 0px;
   color: rgba(0, 0, 0, 0.6);
+}
+
+.error-text {
+  color: #FF0000;
 }
 
 .score-label {
@@ -457,6 +465,19 @@ export default {
 
     printItemList () {
       return this.currentActivity.items.filter(item => ['radio', 'checkbox', 'prize', 'slider', 'text'].includes(item.inputType))
+    },
+
+    selectedItemCount () {
+      let count = 0;
+      for (let i = 0; i < this.items.length; i++) {
+        const id = this.items[i].identifier;
+
+        if (this.selection[id]) {
+          count++;
+        }
+      }
+
+      return count;
     }
   },
 

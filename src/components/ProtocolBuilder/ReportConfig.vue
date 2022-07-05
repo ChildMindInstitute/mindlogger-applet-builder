@@ -2,15 +2,23 @@
   <v-dialog
     max-width="1250"
     :value="value"
-    @input="$emit('input', $event)"
+    persistent
   >
     <v-card class="pb-2 config-card">
-      <div :class="editingChildLevel ? 'pa-4' : 'px-4 py-8'">
+      <div class="d-flex justify-end pt-4 px-2">
+        <v-btn icon @click="$emit('input', false)">
+          <v-icon color="grey lighten-1">
+            mdi-close
+          </v-icon>
+        </v-btn>
+      </div>
+
+      <div :class="editingChildLevel ? 'pa-4' : 'px-4 pb-8'">
         <div
           v-if="!editingChildLevel"
         >
           <div class="config-title">
-            <v-icon class="mr-2">mdi-security</v-icon>
+            <v-icon class="mr-2" color="primary">mdi-security</v-icon>
             Security Configuration
           </div>
 
@@ -54,7 +62,7 @@
             class="config-title"
             v-if="!editingChildLevel"
           >
-            <v-icon class="mr-2">mdi-email</v-icon>
+            <v-icon class="mr-2" color="primary">mdi-email</v-icon>
             Email Configuration
           </div>
 

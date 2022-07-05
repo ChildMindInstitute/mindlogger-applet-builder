@@ -270,6 +270,7 @@ export default {
         { name: "GREATER THAN", val: ">" },
         { name: "LESS THAN", val: "<" },
         { name: "EQUAL TO", val: "==" },
+        { name: "IS NOT EQUAL TO", val: "!=" },
         { name: "BETWEEN", val: "between" },
         { name: "OUTSIDE OF", val: "outsideof" }
       ];

@@ -11,37 +11,6 @@
         <v-card-title class="d-flex">
           <span>Edit Flow</span>
           <div class="flex-grow-1" />
-          <v-menu
-            top
-          >
-            <template
-              v-slot:activator="{ on, attrs }"
-            >
-              <v-btn
-                v-bind="attrs"
-                color="primary"
-                class="mr-2"
-                rounded
-                v-on="on"
-              >
-                <v-icon>
-                  add
-                </v-icon>
-                Add Activity
-              </v-btn>
-            </template>
-
-            <v-list>
-              <v-list-item
-                v-for="(activity, index) in activities"
-                @click="addActivity(activity, index)"
-                :key="index"
-              >
-                <v-list-item-title>{{ activity.name }}</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-
           <v-btn
             rounded
             @click="confirmResetDlg"
@@ -53,7 +22,7 @@
           </v-btn>
         </v-card-title>
 
-        <div class="pb-4">
+        <div class="pb-2">
           <draggable
             v-model="draggableFlowItems"
             handle=".dragging-handle"
@@ -119,6 +88,38 @@
               </template>
             </transition-group>
           </draggable>
+          <div class="d-flex justify-center">
+            <v-menu
+              top
+            >
+              <template
+                v-slot:activator="{ on, attrs }"
+              >
+                <v-btn
+                  v-bind="attrs"
+                  color="primary"
+                  class="mr-2"
+                  rounded
+                  v-on="on"
+                >
+                  <v-icon>
+                    add
+                  </v-icon>
+                  Add Activity
+                </v-btn>
+              </template>
+
+              <v-list>
+                <v-list-item
+                  v-for="(activity, index) in activities"
+                  @click="addActivity(activity, index)"
+                  :key="index"
+                >
+                  <v-list-item-title>{{ activity.name }}</v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+          </div>
         </div>
 
         <v-dialog

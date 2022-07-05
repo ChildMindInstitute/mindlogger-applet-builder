@@ -31,6 +31,12 @@
             class="py-0"
             :class="activityFlow.valid ? '' : 'invalid'"
           >
+            <img 
+              class="mr-2"
+              width="18"
+              height="15"
+              :src="require('@/assets/icons/activity-flow.svg')" 
+            />
             {{ activityFlow.name }}
             <v-spacer />
             <v-card-actions>

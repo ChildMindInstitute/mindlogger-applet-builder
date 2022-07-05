@@ -4,6 +4,12 @@
       class="px-2 py-0"
       :class="name ? '' : 'invalid'"
     >
+      <img 
+        class="mr-2"
+        width="18"
+        height="15"
+        :src="require('@/assets/icons/activity-flow.svg')" 
+      />
       <span class="activity-flow-name">{{ name }}</span>
       <v-spacer />
       <v-card-actions>

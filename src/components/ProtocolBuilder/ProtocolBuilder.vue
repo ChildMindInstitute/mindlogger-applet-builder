@@ -116,6 +116,71 @@
           </v-col>
         </v-row>
 
+        <v-row>
+          <v-col
+            v-if="!emailRecipients.length"
+            class="d-flex align-center"
+          >
+            <v-btn
+              class="configure-reports"
+              @click="reportConfigDialog=true"
+            >
+              <img
+                height="25"
+                alt=""
+                :src="baseImageURL + 'report_icon.png'"
+              >
+
+              Generate, encrypt, and email report(s)
+            </v-btn>
+
+            <div
+              v-if="!protocol.reportConfigs.serverIp || !protocol.reportConfigs.publicEncryptionKey"
+              class="server-unconfigured mx-4"
+            >
+              Server status: Not configured
+            </div>
+          </v-col>
+
+          <v-col
+            v-else
+          >
+            <div class="report-config-title">Report(s) will be sent to:</div>
+            <div class="d-flex align-center">
+              <v-combobox
+                class="email-list"
+                v-model="emailRecipients"
+                multiple
+                outlined
+                required
+                append-icon=""
+                hide-details
+              >
+                <template v-slot:selection="{ attrs, item, parent, selected }">
+                  <v-chip
+                    v-bind="attrs"
+                    :input-value="selected"
+                    class="mx-2 my-0 py-0"
+                    color="indigo lighten-5"
+                    close
+                    @click:close="parent.selectItem(item)"
+                  >
+                    {{ item }}
+                  </v-chip>
+                </template>
+              </v-combobox>
+
+              <div>
+                <v-btn icon @click="reportConfigDialog=true">
+                  <v-icon>mdi-settings</v-icon>
+                </v-btn>
+
+                Configure Email
+              </div>
+            </div>
+          </v-col>
+        </v-row>
+
         <v-row class="mx-2">
           <v-col sm="4">
             <v-checkbox
@@ -123,21 +188,6 @@
               label="Enable streaming of response data"
             />
           </v-col>
-
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <v-col sm="4"
-                v-bind="attrs"
-                v-on="on"
-              >
-                <v-checkbox
-                  v-model="combineReports"
-                  label="Combine reports on last activity"
-                />
-              </v-col>
-            </template>
-            <span>This feature only impacts mobile and the web-app. The admin report will remain unchanged.</span>
-          </v-tooltip>
         </v-row>
 
         <div v-if="themes && themes.length">
@@ -416,6 +466,12 @@
       @submit="onSubmitEditor"
     />
 
+    <ReportConfig
+      v-model="reportConfigDialog"
+      :reportConfigs="protocol.reportConfigs"
+      @updateConfig="updateReportConfig"
+    />
+
     <v-dialog
       v-model="validFileDlg"
       width="400"
@@ -462,6 +518,26 @@
   .move-icon {
     cursor: move;
   }
+
+  .configure-reports /deep/ .v-btn__content {
+    text-transform: none;
+  }
+
+  .email-list {
+    width: 70%;
+  }
+
+  .email-list /deep/ .v-input__slot {
+    min-height: 48px;
+  }
+
+  .report-config-title {
+    color: #757575;
+  }
+
+  .server-unconfigured {
+    color: #FF0000;
+  }
 </style>
 
 <script>
@@ -472,6 +548,7 @@ import Protocol from '../../models/Protocol';
 import Activity from '../../models/Protocol';
 import Item from '../../models/Protocol';
 import Notify from './Additional/Notify.vue';
+import ReportConfig from './ReportConfig.vue';
 import config from '../../config';
 import draggable from 'vuedraggable'
 
@@ -484,6 +561,7 @@ export default {
     Notify,
     Uploader,
     draggable,
+    ReportConfig,
   },
   data () {
     return {
@@ -496,6 +574,7 @@ export default {
       fileSuccessMsg: '',
       notify: {},
       textRules: [(v) => !!v.trim() || "This field is required"],
+      reportConfigDialog: false,
     }
   },
   computed: {
@@ -510,6 +589,19 @@ export default {
     ]),
     config() {
       return config;
+    },
+    emailRecipients: {
+      get: function () {
+        return this.protocol.reportConfigs.emailRecipients;
+      },
+      set: function(value) {
+        this.updateProtocolMetaInfo({
+          reportConfigs: {
+            ...this.protocol.reportConfigs,
+            emailRecipients: value
+          }
+        })
+      }
     },
     name: {
       get: function () {
@@ -572,15 +664,6 @@ export default {
       }
     },
 
-    combineReports: {
-      get: function () {
-        return this.protocol.combineReports;
-      },
-      set: function (combineReports) {
-        this.updateProtocolMetaInfo({ combineReports })
-      }
-    },
-
     selectedTheme: {
       get: function () {
         return this.themeId
@@ -631,6 +714,11 @@ export default {
         'updateActivityList'
       ]
     ),
+    updateReportConfig (configs) {
+      this.updateProtocolMetaInfo({
+        reportConfigs: configs
+      })
+    },
     openLandingPageEditor (pageType) {
       this.landingPageInputType = pageType;
       this.markdownDialog = true;

@@ -13,7 +13,15 @@ export const getInitialProtocol = () => ({
   prizeActivity: null,
   activities: [],
   activityFlows: [],
-  tokenPrizeModal: false
+  tokenPrizeModal: false,
+  reportConfigs: {
+    serverIp: '',
+    publicEncryptionKey: '',
+    emailRecipients: [],
+    includeUserId: false,
+    includeCaseId: false,
+    emailBody: ''
+  }
 });
 
 export default {
@@ -123,6 +131,7 @@ export default {
   templates: [],
   versions: null,
   nodeEnv: null,
+  pdfToken: '',
   original: null,
   currentScreen: config.PROTOCOL_SCREEN,
   currentActivityFlow: null,

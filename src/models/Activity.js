@@ -79,6 +79,7 @@ export default class Activity {
         variableName: '',
         isAverageScore: null
       },
+      reportIncludeItem: initialActivityData.reportIncludeItem || '',
       allowEdit: true,
       isPrize: initialActivityData.isPrize || false,
       scoreOverview: initialActivityData.scoreOverview || '',
@@ -518,6 +519,7 @@ export default class Activity {
     this.ref.isSkippable && allowed.push('skipped');
     this.ref.disableBack && allowed.push('disableBack');
     !this.ref.allowSummary && allowed.push('disableSummary');
+    this.ref.exportAvailable && allowed.push('allowExport');
 
     return {
       '@context': [
@@ -551,7 +553,6 @@ export default class Activity {
       },
       subScales: this.ref.subScales,
       reports,
-      exportAvailable: this.ref.exportAvailable,
       finalSubScale: (this.ref.finalSubScale.variableName ? [this.ref.finalSubScale] : []),
       hasResponseIdentifier: !!this.ref.items.find(item => item.options.isResponseIdentifier),
     };
@@ -985,6 +986,7 @@ export default class Activity {
       ['reprolib:terms/isPrize']: isPrize,
       ['reprolib:terms/order']: orders,
       ['reprolib:terms/activityType']: activityType,
+      ['reprolib:terms/reportIncludeItem']: reportIncludeItem,
       ['_id']: id,
     } = activitiesObj;
 
@@ -1065,6 +1067,7 @@ export default class Activity {
         isOnePageAssessment[0] &&
         isOnePageAssessment[0]['@value'],
       shuffle: shuffle && shuffle[0] && shuffle[0]['@value'],
+      reportIncludeItem: _.get(reportIncludeItem, [0, '@value'], ''),
       visibilities,
       subScales: Array.isArray(subScales) && subScales.map((subScale, index) => {
         const jsExpression = subScale['reprolib:terms/jsExpression'];
@@ -1088,7 +1091,7 @@ export default class Activity {
       reports: _.get(activitiesObj, ['reprolib:terms/reports', 0, '@list'], []).map((report, index) => {
         const dataType = _.get(report, ['schema:DataType', 0, '@id']);
         const message = _.get(report, ['reprolib:terms/message', 0, '@value']);
-        const printItems = _.get(report, ['reprolib:terms/printItems', 0, '@list']).map(item => item['@value']);
+        const printItems = _.get(report, ['reprolib:terms/printItems', 0, '@list'], []).map(item => item['@value']);
 
         const data = {
           id: report['@id'],
@@ -1108,7 +1111,7 @@ export default class Activity {
             jsExpression: _.get(report, ['reprolib:terms/jsExpression', 0, '@value']),
             conditionals: _.get(report, ['reprolib:terms/conditionals', 0, '@list'], []).map((conditional, index) => {
               const message = _.get(conditional, ['reprolib:terms/message', 0, '@value']);
-              const printItems = _.get(conditional, ['reprolib:terms/printItems', 0, '@list']).map(item => item['@value']);
+              const printItems = _.get(conditional, ['reprolib:terms/printItems', 0, '@list'], []).map(item => item['@value']);
 
               return {
                 prefLabel: _.get(conditional, ['http://www.w3.org/2004/02/skos/core#prefLabel', 0, '@value']),
@@ -1149,6 +1152,7 @@ export default class Activity {
       activityInfo.disableBack = true;
     }
     activityInfo.allowSummary = !allowList.some((item) => item.includes('disable_summary'))
+    activityInfo.exportAvailable = allowList.some(item => item.includes('allow_export'))
 
     activityInfo.valid = true;
 

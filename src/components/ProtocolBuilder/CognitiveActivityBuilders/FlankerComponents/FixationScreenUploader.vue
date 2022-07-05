@@ -76,7 +76,7 @@
       <v-card-actions>
         <v-spacer />
 
-        <v-btn class="mx-4" color="primary" :disabled="(duration <= 0 || duration % 1 != 0) && file === null" @click="onSave">
+        <v-btn class="mx-4" color="primary" :disabled="(duration <= 0 || duration % 1 != 0) && file !== null" @click="onSave">
           Save
         </v-btn>
 

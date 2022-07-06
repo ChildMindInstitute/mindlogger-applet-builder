@@ -14,7 +14,7 @@ export default class ActivityFlow {
       id: initialActivityData._id || null,
       textRules: [(v) => !!v || 'This field is required'],
       order: initialActivityData.orderList || [],
-      isVis: initialActivityData.isVis || true,
+      isVis: initialActivityData.isVis || false,
       combineReports: initialActivityData.combineReports || false,
       reportIncludeItem: initialActivityData.reportIncludeItem || '',
       showBadge: initialActivityData.showBadge || false,
@@ -78,6 +78,7 @@ export default class ActivityFlow {
       'combineReports': false,
       'showBadge': false,
       'order': this.ref.order,
+      'isVis': this.ref.isVis,
       '_id': this.ref.id,
     };
   }
@@ -103,6 +104,10 @@ export default class ActivityFlow {
       'showBadge': {
         updated: (field) =>
           `ActivityFlow showBadge was changed to ${_.get(newValue, field)}`,
+      },
+      'isVis': {
+        updated: (field) =>
+          `ActivityFlow visibility was changed to ${_.get(newValue, field)}`
       },
       'order': {
         updated: (field) => {

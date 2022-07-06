@@ -46,6 +46,98 @@
 
                       <v-spacer />
                       <v-card-actions class="pa-0">
+                        <v-menu
+                          top
+                        >
+                          <template
+                            v-slot:activator="{ on: menu }"
+                          >
+                            <v-tooltip
+                              top
+                            >
+                              <template v-slot:activator="{ on: tooltip }">
+                                <v-btn
+                                  icon
+                                  v-on="{ ...menu, ...tooltip }"
+                                >
+                                  <v-icon color="grey lighten-1">
+                                    edit
+                                  </v-icon>
+                                </v-btn>
+                              </template>
+
+                              <span>Edit Activity</span>
+                            </v-tooltip>
+                          </template>
+
+                          <v-list>
+                            <template
+                              v-for="(activity, i) in activities"
+                            >
+                              <v-list-item
+                                v-if="activity.name != flowItem.name"
+                                @click="updateActivity(index, activity)"
+                                :key="i"
+                              >
+                                <v-list-item-title>{{ activity.name }}</v-list-item-title>
+                              </v-list-item>
+                            </template>
+                          </v-list>
+                        </v-menu>
+
+                        <v-menu
+                          top
+                        >
+                          <template
+                            v-slot:activator="{ on: menu }"
+                          >
+                            <v-tooltip
+                              top
+                            >
+                              <template v-slot:activator="{ on: tooltip }">
+                                <v-btn
+                                  icon
+                                  v-on="{ ...menu, ...tooltip }"
+                                >
+                                  <v-icon color="grey lighten-1">
+                                    mdi-plus-circle-outline
+                                  </v-icon>
+                                </v-btn>
+                              </template>
+
+                              <span>Add Activity</span>
+                            </v-tooltip>
+                          </template>
+
+                          <v-list>
+                            <v-list-item
+                              v-for="(activity, i) in activities"
+                              @click="addActivity(index+1, activity)"
+                              :key="i"
+                            >
+                              <v-list-item-title>{{ activity.name }}</v-list-item-title>
+                            </v-list-item>
+                          </v-list>
+                        </v-menu>
+
+                        <v-tooltip
+                          top
+                        >
+                          <template v-slot:activator="{ on: tooltip }">
+                            <v-btn
+                              icon
+                              v-on="{ ...menu, ...tooltip }"
+                              @click="duplicateActivity(index)"
+                            >
+                              <v-icon color="grey lighten-1">
+                                content_copy
+                              </v-icon>
+                            </v-btn>
+                          </template>
+
+                          <span>Duplicate Activity</span>
+                        </v-tooltip>
+
                         <v-tooltip
                           top
                         >
@@ -70,9 +162,9 @@
                           class="ml-2 move-icon dragging-handle"
                           icon
                         >
-                          <img 
-                            class="px-2 pt-2 drag-indicator" 
-                            :src="baseImageURL + 'drag_indicator.png'" 
+                          <img
+                            class="px-2 pt-2 drag-indicator"
+                            :src="baseImageURL + 'drag_indicator.png'"
                           />
                         </v-btn>
                       </v-card-actions>
@@ -112,7 +204,7 @@
               <v-list>
                 <v-list-item
                   v-for="(activity, index) in activities"
-                  @click="addActivity(activity, index)"
+                  @click="addActivity(-1, activity)"
                   :key="index"
                 >
                   <v-list-item-title>{{ activity.name }}</v-list-item-title>
@@ -156,9 +248,6 @@
 </template>
 
 <style scoped>
-.flow-item-card {
-
-}
 
 .flow-card-title {
   padding-top: 0;
@@ -195,6 +284,7 @@ export default {
       dialogFlag: false,
       dialogMsg: '',
       flowItemIndex: -1,
+      menu: {}
     }
   },
   computed: {
@@ -237,9 +327,16 @@ export default {
       ...mapMutations(config.MODULE_NAME,
       [
         'updateActivityFlowInfo',
-        'updateActivityFlowOrder',
+        'addActivityToFlow',
       ]
     ),
+
+    duplicateActivity (index) {
+      this.addActivityToFlow({
+        name: this.draggableFlowItems[index].name,
+        index: index+1
+      })
+    },
 
     handleExpansion() {
       this.isExpanded = true;
@@ -261,8 +358,15 @@ export default {
       this.dialogMsg = 'Are you sure you want to reset?';
     },
 
-    addActivity(activity, index) {
-      this.updateActivityFlowOrder(activity.name);
+    addActivity(index, activity) {
+      this.addActivityToFlow({ name: activity.name, index });
+    },
+
+    updateActivity(index, activity) {
+      const order = this.draggableFlowItems.map(act => act.name);
+      order[index] = activity.name;
+
+      this.updateActivityFlowInfo({ order });
     },
 
     applyChanges() {

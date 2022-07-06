@@ -283,9 +283,12 @@ const activityFlowMutations = {
     }
   },
 
-  updateActivityFlowOrder(state, activity) {
-    const { order } = state.currentActivityFlow;
-    state.currentActivityFlow.order = [...order, activity];
+  addActivityToFlow(state, { name, index }) {
+    if (index < 0) {
+      state.currentActivityFlow.order.push(name);
+    } else {
+      state.currentActivityFlow.order.splice(index, 0, name);
+    }
   },
 
   updateActivityFlowInfo(state, obj) {

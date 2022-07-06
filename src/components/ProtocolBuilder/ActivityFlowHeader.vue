@@ -5,10 +5,11 @@
       :class="name ? '' : 'invalid'"
     >
       <img 
+        v-if="name"
         class="mr-2"
         width="18"
         height="15"
-        :src="require('@/assets/icons/activity-flow.svg')" 
+        :src="baseImageURL + 'activity-flow.svg'"
       />
       <span class="activity-flow-name">{{ name }}</span>
       <v-spacer />
@@ -187,6 +188,7 @@ export default {
   computed: {
     ...mapGetters(config.MODULE_NAME, [
       'currentActivityFlow',
+      'baseImageURL',
       'protocol',
     ]),
 

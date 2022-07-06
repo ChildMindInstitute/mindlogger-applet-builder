@@ -35,7 +35,7 @@
               class="mr-2"
               width="18"
               height="15"
-              :src="require('@/assets/icons/activity-flow.svg')" 
+              :src="baseImageURL + 'activity-flow.svg'"
             />
             {{ activityFlow.name }}
             <v-spacer />

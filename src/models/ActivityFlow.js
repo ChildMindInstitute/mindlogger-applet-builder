@@ -211,7 +211,11 @@ export default class ActivityFlow {
   }
 
   static checkValidation(activityFlow) {
-    if (!activityFlow.name) {
+    if (!activityFlow.name || !activityFlow.description) {
+      return false;
+    }
+
+    if (!activityFlow.order.length) {
       return false;
     }
 

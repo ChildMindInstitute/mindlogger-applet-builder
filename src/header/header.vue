@@ -559,6 +559,13 @@ export default {
         this.dataAlertDialog.message = 'Please add more than one activity.';
       }
 
+      for (let activityFlow of this.protocol.activityFlows) {
+        if (!activityFlow.valid) {
+          this.dataAlertDialog.message = 'Please fix errors in your activity flows.';
+          break;
+        }
+      }
+
       for (let activity of this.protocol.activities) {
         const valid = !(
           !activity.valid

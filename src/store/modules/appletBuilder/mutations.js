@@ -217,7 +217,7 @@ const activityFlowMutations = {
     const activityFlowModel = new ActivityFlow;
     const orderList = state.protocol.activities.map(activity => activity.name);
     const activityFlow = {
-      ...activityFlowModel.getActivityFlowBuilderData({ orderList }),
+      ...activityFlowModel.getActivityFlowBuilderData({ orderList, isVis: true }),
       index: index < 0 ? state.protocol.activities.length : index,
     };
 

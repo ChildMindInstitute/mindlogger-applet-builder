@@ -23,7 +23,7 @@
             Replace Fixation Screen
           </v-btn>
 
-          <v-btn class="mx-4" x-large icon @click="deleteImage">
+          <v-btn class="mx-4" x-large icon @click="deleteScreenDialog = true">
             <v-icon>mdi-delete</v-icon>
           </v-btn>
         </template>
@@ -86,10 +86,58 @@
       </v-card-actions>
     </v-card>
 
-    <ConfirmationDialog
+    <v-dialog
       v-model="deleteConfirmDialog"
-      @close="closeStimulusScreen"
-    />
+      width="600"
+      persistent
+    >
+      <v-card>
+        <v-card-title>
+          Close Fixation Screen
+        </v-card-title>
+        <v-card-text class="pa-4">
+          Are you sure you want to close without saving? All changes will be lost.
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="primary" @click="closeStimulusScreen">
+            Yes
+          </v-btn>
+
+          <v-btn @click="deleteConfirmDialog = false;">
+            No
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
+        v-model="deleteScreenDialog"
+        width="600"
+        persistent
+    >
+      <v-card>
+        <v-card-title>
+          Delete Fixation Screen Image
+        </v-card-title>
+
+        <v-card-text class="pa-4">
+          Are you sure you want to delete this image?
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="primary" @click="deleteFixationScreen">
+            OK
+          </v-btn>
+
+          <v-btn @click="deleteScreenDialog = false; currentIndex = -1;">
+            Cancel
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </v-dialog>
 </template>
 
@@ -142,6 +190,8 @@ export default {
       s3Uploader: new S3Uploader('image'),
       uploading: false,
       errorMessage: '',
+      deleteScreenDialog: false,
+      currentIndex: -1,
     }
   },
 
@@ -154,7 +204,10 @@ export default {
         this.inputKey++;
       }
     },
-
+    deleteFixationScreen () {
+      this.deleteImage();
+      this.deleteScreenDialog = false;
+    },
     async onSave () {
       this.uploading = true;
 

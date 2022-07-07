@@ -65,7 +65,7 @@
                     v-on="on"
                     @click="showOrHideActivityFlow(activityFlows.findIndex(act => act == activityFlow))"
                   >
-                    <v-icon v-if="activityFlow.isVis" color="grey lighten-1">
+                    <v-icon v-if="!activityFlow.isVis" color="grey lighten-1">
                       mdi-eye-off-outline
                     </v-icon>
                     <v-icon v-else color="grey lighten-1">
@@ -74,7 +74,7 @@
                   </v-btn>
                 </template>
 
-                <span>{{ activityFlow.isVis ? 'Click to Show activityFlow' : 'Click to Hide activityFlow' }}</span>
+                <span>{{ activityFlow.isVis ? 'Click to Hide activityFlow' : 'Click to Show activityFlow' }}</span>
               </v-tooltip>
 
               <v-tooltip

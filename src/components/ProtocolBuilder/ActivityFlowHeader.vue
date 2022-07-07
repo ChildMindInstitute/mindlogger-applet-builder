@@ -2,7 +2,7 @@
   <v-card>
     <v-card-title
       class="px-2 py-0"
-      :class="name ? '' : 'invalid'"
+      :class="currentActivityFlow.valid ? '' : 'invalid'"
     >
       <img 
         v-if="name"
@@ -47,6 +47,8 @@
         counter="230"
         maxlength="230"
         label="Activity Flow Description"
+        :rules="textRules"
+        required
       />
 
       <v-row

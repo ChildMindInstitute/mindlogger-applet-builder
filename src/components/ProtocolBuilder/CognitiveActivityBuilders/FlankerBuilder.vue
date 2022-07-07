@@ -473,6 +473,14 @@ export default {
       this.stimulusDurationTest >= 1 && this.stimulusDurationTest % 1 == 0;
     },
 
+    isFixationValid(){
+      return this.fixationDuration >= 1 && this.fixationDuration % 1 == 0 && this.fixationScreen !== null;
+    },
+
+    isActivityValid(){
+      return this.isStimulusValid && this.isFixationValid && (this.buttons[0].name != '') && (this.buttons[1].name != '') && !(!this.threshold)
+    },
+
     threshold() {
       const option = this.getInputOption('minimumAccuracy');
       return option['schema:value'];
@@ -731,6 +739,14 @@ export default {
         image: buttons[i]['schema:image']
       });
     }
+
+    if (this.isActivityValid)
+    {
+      this.updateActivityMetaInfo({ valid: true })
+    }else{
+      this.updateActivityMetaInfo({ valid: false })
+    }
+
   },
 
   watch: {
@@ -739,12 +755,22 @@ export default {
       handler () {
         this.saveButtons(this.buttonCount);
       }
+    },
+    isActivityValid(newVal) {
+      if (newVal)
+      {
+        this.updateActivityMetaInfo({ valid: true })
+      }else{
+        this.updateActivityMetaInfo({ valid: false })
+      }
+
     }
   },
 
   methods: {
     ...mapMutations(config.MODULE_NAME, [
       'updateItemMetaInfo',
+      'updateActivityMetaInfo',
     ]),
 
     thresholdChange (val){

@@ -2,13 +2,13 @@
   <v-card>
     <v-card-title
       class="px-2 py-0"
-      :class="name ? '' : 'invalid'"
+      :class="currentActivityFlow.valid ? '' : 'invalid'"
     >
-      <img 
+      <img
         class="mr-2"
         width="18"
         height="15"
-        :src="require('@/assets/icons/activity-flow.svg')" 
+        :src="require('@/assets/icons/activity-flow.svg')"
       />
       <span class="activity-flow-name">{{ name }}</span>
       <v-spacer />
@@ -46,6 +46,8 @@
         counter="230"
         maxlength="230"
         label="Activity Flow Description"
+        :rules="textRules"
+        required
       />
 
       <v-row

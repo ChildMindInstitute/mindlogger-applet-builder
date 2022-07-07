@@ -219,6 +219,7 @@ const activityFlowMutations = {
     const activityFlow = {
       ...activityFlowModel.getActivityFlowBuilderData({ orderList }),
       index: index < 0 ? state.protocol.activities.length : index,
+      valid: false
     };
 
     if (index >= 0) {
@@ -291,7 +292,7 @@ const activityFlowMutations = {
     if (obj.name && state.currentActivityFlow.valid) {
       for (const existing of state.protocol.activityFlows) {
         if (existing != state.currentActivityFlow && existing.name == state.currentActivityFlow.name) {
-          existing.valid = Activity.checkValidation(existing);
+          existing.valid = ActivityFlow.checkValidation(existing);
 
           if (existing.valid) {
             break;
@@ -303,7 +304,7 @@ const activityFlowMutations = {
     Object.assign(state.currentActivityFlow, obj);
 
     if (!obj.hasOwnProperty('valid')) {
-      state.currentActivityFlow.valid = Activity.checkValidation(state.currentActivityFlow);
+      state.currentActivityFlow.valid = ActivityFlow.checkValidation(state.currentActivityFlow);
     }
 
     for (const existing of state.protocol.activityFlows) {

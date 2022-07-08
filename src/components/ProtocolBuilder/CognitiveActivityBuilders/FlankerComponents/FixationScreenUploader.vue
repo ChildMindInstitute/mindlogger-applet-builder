@@ -157,11 +157,9 @@
 
 <script>
 import { Uploader as S3Uploader } from '../../../../models/Uploader';
-import ConfirmationDialog from './ConfirmationDialog.vue';
 
 export default {
   components: {
-    ConfirmationDialog,
   },
 
   props: {

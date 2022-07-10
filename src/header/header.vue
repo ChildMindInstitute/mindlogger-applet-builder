@@ -3,7 +3,7 @@
     <v-row>
       <v-btn
         icon
-        :disabled="currentScreen == config.PROTOCOL_SCREEN"
+        :disabled="currentScreen == config.PROTOCOL_SCREEN || currentScreen == config.ACTIVITY_FLOW_SCREEN"
         @click="onBackToProtocolScreen"
       >
         <v-icon>
@@ -16,6 +16,44 @@
       <small style="margin-right: 10px" v-if="nodeEnv != 'production'">v{{ version }}</small>
 
       <span :key="currentActivity && currentActivity.timestamp || 1">
+        <v-tooltip
+          v-if="!currentActivity"
+          bottom
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              class="mx-1"
+              @click="viewActivity"
+              v-on="on"
+            >
+              <img
+                height="25"
+                alt=""
+                :src="baseImageURL + 'header-icons/black/items.png'"
+              >
+            </v-btn>
+          </template>
+          <span>Activity List</span>
+        </v-tooltip>
+        <v-tooltip
+          v-if="!currentActivity"
+          bottom
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              class="mx-1"
+              @click="viewActivityFlow"
+              v-on="on"
+            >
+              <img
+                height="25"
+                alt=""
+                :src="baseImageURL + 'header-icons/black/activity-flow.png'"
+              >
+            </v-btn>
+          </template>
+          <span>Activity Flow List</span>
+        </v-tooltip>
         <v-tooltip
           v-if="currentActivity"
           bottom
@@ -43,6 +81,35 @@
             </v-btn>
           </template>
           <span>Item List</span>
+        </v-tooltip>
+
+        <v-tooltip
+          v-if="currentActivity && currentActivity.activityType == 'NORMAL'"
+          bottom
+        >
+          <template v-slot:activator="{ on }">
+            <v-btn
+              :color="currentScreen == config.REPORT_SCREEN ? 'primary' : ''"
+              class="mx-1"
+              :class="reportStatus ? '' : 'invalid'"
+              @click="viewReports"
+              v-on="on"
+            >
+              <img
+                v-show="currentScreen === config.REPORT_SCREEN"
+                height="25"
+                alt=""
+                :src="baseImageURL + 'header-icons/white/reports-icon.png'"
+              >
+              <img
+                v-show="currentScreen !== config.REPORT_SCREEN"
+                height="25"
+                alt=""
+                :src="baseImageURL + 'header-icons/black/reports-icon.png'"
+              >
+            </v-btn>
+          </template>
+          <span>Reports</span>
         </v-tooltip>
 
         <v-tooltip
@@ -304,6 +371,9 @@ export default {
       'themeId',
       'originalThemeId'
     ]),
+    reportStatus () {
+      return this.currentActivity && (this.currentActivity.reports || []).every(report => report.valid);
+    },
     itemStatus () {
       return this.currentActivity && this.currentActivity.items.every(item => item.valid);
     },
@@ -321,12 +391,26 @@ export default {
     ...mapMutations(config.MODULE_NAME, [
       'setCurrentScreen',
       'setCurrentActivity',
+      'setCurrentActivityFlow',
       'resetProtocol',
     ]),
 
     onBackToProtocolScreen () {
+      if (this.currentScreen === config.FLOW_BUILDER_SCREEN) {
+        this.setCurrentScreen(config.ACTIVITY_FLOW_SCREEN);
+        this.setCurrentActivityFlow(-1);
+      } else {
+        this.setCurrentScreen(config.PROTOCOL_SCREEN);
+        this.setCurrentActivity(-1);
+      }
+    },
+
+    viewActivityFlow () {
+      this.setCurrentScreen(config.ACTIVITY_FLOW_SCREEN);
+    },
+
+    viewActivity () {
       this.setCurrentScreen(config.PROTOCOL_SCREEN);
-      this.setCurrentActivity(-1);
     },
 
     saveToDashboard () {
@@ -460,6 +544,10 @@ export default {
       this.setCurrentScreen(config.ITEM_SCREEN);
     },
 
+    viewReports () {
+      this.setCurrentScreen(config.REPORT_SCREEN);
+    },
+
     appletStatus () {
       this.dataAlertDialog.message = '';
 
@@ -471,12 +559,20 @@ export default {
         this.dataAlertDialog.message = 'Please add more than one activity.';
       }
 
+      for (let activityFlow of this.protocol.activityFlows) {
+        if (!activityFlow.valid) {
+          this.dataAlertDialog.message = 'Please fix errors in your activity flows.';
+          break;
+        }
+      }
+
       for (let activity of this.protocol.activities) {
         const valid = !(
           !activity.valid
             || activity.items.some(item => !item.valid)
             || activity.subScales.some(subScale => !subScale.valid)
             || activity.conditionalItems.some(conditional => !conditional.valid)
+            || activity.reports.some(report => !report.valid)
             || (activity.items.length === 0)
         );
 

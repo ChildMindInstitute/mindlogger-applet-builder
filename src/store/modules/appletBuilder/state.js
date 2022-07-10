@@ -1,7 +1,7 @@
 
 import config from '../../../config';
 
-const baseImageURL = 'https://raw.githubusercontent.com/ChildMindInstitute/mindlogger-applet-builder/master/src/assets/icons/';
+const baseImageURL = 'https://raw.githubusercontent.com/ChildMindInstitute/mindlogger-applet-builder/dev-qa/src/assets/icons/';
 export const getInitialProtocol = () => ({
   id: null,
   description: '',
@@ -12,7 +12,16 @@ export const getInitialProtocol = () => ({
   valid: false,
   prizeActivity: null,
   activities: [],
-  tokenPrizeModal: false
+  activityFlows: [],
+  tokenPrizeModal: false,
+  reportConfigs: {
+    serverIp: '',
+    publicEncryptionKey: '',
+    emailRecipients: [],
+    includeUserId: false,
+    includeCaseId: false,
+    emailBody: ''
+  }
 });
 
 export default {
@@ -118,16 +127,14 @@ export default {
       text: "tokenSummary",
       icon: baseImageURL + 'item-types/token-summary.png'
     },
-    {
-      text: "cumulativeScore",
-      icon: baseImageURL + 'item-types/cumulative-icon.png',
-    },
   ],
   templates: [],
   versions: null,
   nodeEnv: null,
+  pdfToken: '',
   original: null,
   currentScreen: config.PROTOCOL_SCREEN,
+  currentActivityFlow: null,
   currentActivity: null,
   themeId: null,
   originalThemeId: null

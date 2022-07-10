@@ -47,7 +47,6 @@ export default class Item {
       section: initialItemData.section || "",
       inputOptions: initialItemData.inputOptions || [],
       media: initialItemData.media || {},
-      cumulativeScores: initialItemData.cumulativeScores  || [],
       allowEdit: initialItemData.allowEdit === undefined ? true : initialItemData.allowEdit,
       markdownText: (initialItemData.question || ''),
       valid: initialItemData.valid === undefined ? true : initialItemData.valid,
@@ -318,16 +317,8 @@ export default class Item {
     }
   }
 
-  getCumulativeScores() {
-    if (this.ref.inputType === 'cumulativeScore') {
-      return this.ref.cumulativeScores.map(({ compute, messages }) => ({ compute, messages }));
-    }
-    return [];
-  }
-
   getCompressedSchema() {
     const responseOptions = this.getResponseOptions();
-    const cumulativeScores = this.getCumulativeScores();
 
     const schema = {
         "@context": [
@@ -351,10 +342,6 @@ export default class Item {
     };
     if (Object.keys(responseOptions).length !== 0) {
       schema["responseOptions"] = responseOptions;
-    }
-
-    if (this.ref.inputType === 'cumulativeScore') {
-      schema['cumulativeScores'] = cumulativeScores;
     }
 
     if (this.ref.inputType === 'radio' || this.ref.inputType === 'checkbox' || this.ref.inputType === 'prize' || this.ref.inputType == 'stackedRadio' || this.ref.inputType == 'stackedCheckbox' || this.ref.inputType == 'dropdownList') {
@@ -386,11 +373,6 @@ export default class Item {
       schema["ui"] = {
         inputType: this.ref.inputType
       };
-
-      if (this.ref.inputType === "cumulativeScore") {
-        schema["ui"]["allow"] = schema["ui"]["allow"] || [];
-        schema["ui"]["allow"].push("disableBack");
-      }
     }
 
     if (this.ref.id) {
@@ -1569,7 +1551,6 @@ export default class Item {
       || (item.options && item.options.valid === false)
       || !item.question
       || (item.inputType !== "markdownMessage"
-        && item.inputType !== "cumulativeScore"
         && item.inputType !== "stabilityTracker"
         && item.inputType !== "visual-stimulus-response"
         && !item.question.text)) {
@@ -1633,13 +1614,6 @@ export default class Item {
       }
     }
 
-    if (item.cumulativeScores) {
-      for (let i = 0; i < item.cumulativeScores.length; i++) {
-        if (!item.cumulativeScores[i].valid) {
-          return false;
-        }
-      }
-    }
     if (item.options && Array.isArray(item.options.options)) {
       for (let option of item.options.options) {
         if (option.valid === false) {

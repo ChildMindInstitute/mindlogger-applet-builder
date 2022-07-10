@@ -28,7 +28,7 @@
             </v-btn>
           </template>
 
-          <v-list>
+          <v-list rounded>
             <v-list-item
               @click="$emit('onCreateLookupTable', subScaleIndex)"
             >

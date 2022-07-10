@@ -42,6 +42,47 @@
         label="Activity Description"
       />
 
+      <v-row
+        v-if="pdfConfigured"
+      >
+        <v-col
+        >
+          <div class="report-config-title">Report(s) will be sent to:</div>
+          <div class="d-flex align-center">
+            <v-combobox
+              class="email-list"
+              :value="protocol.reportConfigs.emailRecipients"
+              multiple
+              outlined
+              append-icon=""
+              hide-details
+              disabled
+            >
+              <template v-slot:selection="{ attrs, item, parent, selected }">
+                <v-chip
+                  v-bind="attrs"
+                  :input-value="selected"
+                  class="mx-2 my-0 py-0"
+                  color="indigo lighten-5"
+                  close
+                  disabled
+                >
+                  {{ item }}
+                </v-chip>
+              </template>
+            </v-combobox>
+
+            <div>
+              <v-btn icon @click="reportConfigDialog=true">
+                <v-icon>mdi-settings</v-icon>
+              </v-btn>
+
+              Configure Email
+            </div>
+          </div>
+        </v-col>
+      </v-row>
+
       <template
         v-if="currentActivity.activityType == 'NORMAL'"
       >
@@ -227,6 +268,13 @@
 
     <Notify :notify="notify" />
     <Loading :loading="loading" />
+
+    <ReportConfig
+      v-model="reportConfigDialog"
+      :current-activity="currentActivity"
+      :reportConfigs="protocol.reportConfigs"
+      @updateItemValue="updateItemValue"
+    />
   </v-card>
 </template>
 
@@ -238,6 +286,18 @@
 .invalid {
   background-color: #d44c4c;
 }
+
+.email-list {
+  width: 70%;
+}
+
+.email-list /deep/ .v-input__slot {
+  min-height: 48px;
+}
+
+.report-config-title {
+  color: #757575;
+}
 </style>
 ¸
 <script>
@@ -246,6 +306,7 @@ import config from '../../config';
 import Uploader from './Uploader.vue';
 import Notify from './Additional/Notify.vue';
 import Loading from './Additional/Loading.vue';
+import ReportConfig from './ReportConfig.vue';
 import { getTextBetweenBrackets } from '../../utilities/util';
 
 export default {
@@ -253,6 +314,7 @@ export default {
     Uploader,
     Notify,
     Loading,
+    ReportConfig,
   },
   props: {
     headerExpanded: {
@@ -269,7 +331,8 @@ export default {
       assessmentTypeConfirmationDlg: false,
       alertFlag: false,
       alertMsg: '',
-      show: false
+      show: false,
+      reportConfigDialog: false,
     }
   },
   mounted() {
@@ -279,6 +342,11 @@ export default {
       'updateActivityMetaInfo',
       'deleteConditionals'
     ]),
+    updateItemValue (value) {
+      this.updateActivityMetaInfo({
+        reportIncludeItem: value
+      });
+    },
     onSwitchAssessmentType () {
       if (this.currentActivity.hasVariable && this.isOnePageAssessment) {
         this.alertMsg = `This activity contains variables and cannot be a one page assessment.`;
@@ -386,8 +454,15 @@ export default {
   },
   computed: {
     ...mapGetters(config.MODULE_NAME, [
-      'currentActivity'
+      'currentActivity',
+      'protocol',
     ]),
+
+    pdfConfigured () {
+      return this.protocol.reportConfigs.emailRecipients.length &&
+              this.protocol.reportConfigs.serverIp &&
+              this.protocol.reportConfigs.publicEncryptionKey && true;
+    },
 
     conditionals () {
       return this.currentActivity.conditionalItems;
@@ -470,7 +545,7 @@ export default {
     hasOnlyWebSupported() {
       for (let i = 0; i < this.currentActivity.items.length; i++) {
         const inputType = this.currentActivity.items[i].inputType;
-        if (!['radio', 'checkbox', 'slider', 'text', 'ageSelector', 'cumulativeScore'].includes(inputType)) {
+        if (!['radio', 'checkbox', 'slider', 'text', 'ageSelector'].includes(inputType)) {
           this.updateActivityMetaInfo({ isOnePageAssessment: false })
           return false;
         }

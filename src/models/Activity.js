@@ -485,20 +485,11 @@ export default class Activity {
     itemOrder.forEach((item) => {
       const conditionalItem = this.ref.conditionalItems.find((cond) => cond.showValue && cond.showValue.name === item);
 
-      let isVis = true;
-
       addProperties.push({
         variableName: item,
         isAbout: item,
         isVis: this.compressConditional(conditionalItem),
       })
-
-      const property = {
-        variableName: item,
-        isAbout: item,
-        isVis,
-      };
-      addProperties.push(property);
     });
 
     return addProperties;

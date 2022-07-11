@@ -446,6 +446,18 @@ const activityMutations = {
       }
     }
 
+    if (obj.name) {
+      const originalName = state.currentActivity.name;
+
+      for (const flow of state.protocol.activityFlows) {
+        for (let i = 0; i < flow.order.length; i++) {
+          if (flow.order[i] === originalName) {
+            flow.order[i] = obj.name;
+          }
+        }
+      }
+    }
+
     Object.assign(state.currentActivity, obj);
 
     if (!obj.hasOwnProperty('valid'))

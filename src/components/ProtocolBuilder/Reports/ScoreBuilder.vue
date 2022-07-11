@@ -608,7 +608,7 @@ export default {
     },
 
     onConditionalNameChanged (conditional) {
-      this.$set(conditional, 'id', this.report.id + '_' + conditional.prefLabel);
+      this.$set(conditional, 'id', this.report.id + '_' + conditional.prefLabel.toLowerCase().replace(/\s/g, '_').replace(/[()/]/g, ''));
       this.$set(conditional, 'valid', this.checkConditionalValidation(conditional));
 
       this.update();
@@ -628,7 +628,7 @@ export default {
         percentage: 'percentScore_',
       };
 
-      return scorePrefix[outputType] + title.replace(/\s/g, '_').replace(/[()/]/g, '');
+      return scorePrefix[outputType] + title.toLowerCase().replace(/\s/g, '_').replace(/[()/]/g, '');
     },
 
     onUpdateScoreRange () {

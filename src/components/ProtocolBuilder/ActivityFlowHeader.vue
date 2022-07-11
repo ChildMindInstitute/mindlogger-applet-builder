@@ -229,7 +229,7 @@ export default {
         return this.currentActivityFlow && !this.currentActivityFlow.showBadge;
       },
       set: function (name) {
-        this.updateActivityFlowInfo({ showBadge: !showBadge });
+        this.updateActivityFlowInfo({ showBadge: !name });
       }
     },
   },

@@ -66,6 +66,7 @@
         color="primary"
         rounded
         @click="onPreviewReport"
+        :disabled="!valid"
       >
         Preview Report
       </v-btn>
@@ -199,7 +200,7 @@ export default {
     },
 
     onPreviewReport () {
-      if (!this.pdfServerConfigured || !this.valid) {
+      if (!this.pdfServerConfigured) {
         this.reportInvalidDialog = true;
 
         if (!this.pdfServerConfigured) {

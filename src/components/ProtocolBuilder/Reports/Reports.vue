@@ -10,12 +10,14 @@
           v-model="exportAvailable"
           label="Make Report available for Export"
           hide-details
+          :disabled="this.currentActivity.reports.length < 1"
         />
 
         <v-checkbox
           v-model="allowSummary"
           label="Show report at the end of the activity"
           hide-details
+          :disabled="this.currentActivity.reports.length < 1"
         />
       </div>
 
@@ -180,6 +182,10 @@ export default {
 
       return true;
     }
+  },
+
+  beforeMount() {
+    this.updateActivityMetaInfo({ allowSummary: false });
   },
 
   methods: {

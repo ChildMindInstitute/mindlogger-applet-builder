@@ -4,7 +4,7 @@
       class="px-2 py-0"
       :class="currentActivityFlow.valid ? '' : 'invalid'"
     >
-      <img 
+      <img
         v-if="name"
         class="mr-2"
         width="18"
@@ -83,7 +83,11 @@
 
             <div>
               <v-btn icon @click="reportConfigDialog=true">
-                <v-icon>mdi-settings</v-icon>
+                <img
+                  height="25"
+                  alt=""
+                  :src="baseImageURL + 'settings.png'"
+                >
               </v-btn>
 
               Configure Email

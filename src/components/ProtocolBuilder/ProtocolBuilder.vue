@@ -116,6 +116,24 @@
           </v-col>
         </v-row>
 
+        <div v-if="themes && themes.length">
+          <v-subheader class="ml-10">
+            Theme
+          </v-subheader>
+
+          <v-select
+              v-model="selectedTheme"
+              :items="themes"
+              :label="'Select theme'"
+              item-text="name"
+              item-value="_id"
+              hide-details
+              single-line
+              outlined
+              dense
+          />
+        </div>
+
         <v-row>
           <v-col
             v-if="!emailRecipients.length"
@@ -172,7 +190,11 @@
 
               <div>
                 <v-btn icon @click="reportConfigDialog=true">
-                  <v-icon>mdi-settings</v-icon>
+                  <img
+                    height="25"
+                    alt=""
+                    :src="baseImageURL + 'settings.png'"
+                  >
                 </v-btn>
 
                 Configure Email
@@ -189,24 +211,6 @@
             />
           </v-col>
         </v-row>
-
-        <div v-if="themes && themes.length">
-          <v-subheader class="ml-10">
-            Theme
-          </v-subheader>
-
-          <v-select
-              v-model="selectedTheme"
-              :items="themes"
-              :label="'Select theme'"
-              item-text="name"
-              item-value="_id"
-              hide-details
-              single-line
-              outlined
-              dense
-          />
-        </div>
       </v-card>
       <ActivityFlow v-if="currentScreen === config.ACTIVITY_FLOW_SCREEN" />
       <v-card v-else class="pb-2">

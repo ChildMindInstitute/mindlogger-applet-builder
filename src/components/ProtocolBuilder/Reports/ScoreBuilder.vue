@@ -440,7 +440,7 @@ export default {
         return 'This is a required field';
       }
 
-      if (!this.name.match(/^[a-zA-Z_]+$/)) {
+      if (!this.name.match(/^[a-zA-Z_0-9 ]+$/)) {
         return 'Letters and underscores are only allowed. Please fix.';
       }
 
@@ -580,7 +580,7 @@ export default {
         return 'This is a required field';
       }
 
-      if (!conditional.prefLabel.match(/^[a-zA-Z_]+$/)) {
+      if (!conditional.prefLabel.match(/^[a-zA-Z_0-9 ]+$/)) {
         return 'Letters and underscores are only allowed. Please fix.';
       }
 

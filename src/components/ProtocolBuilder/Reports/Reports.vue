@@ -66,7 +66,7 @@
         color="primary"
         rounded
         @click="onPreviewReport"
-        :disabled="!valid"
+        :disabled="!valid || !draggableReports.length"
       >
         Preview Report
       </v-btn>

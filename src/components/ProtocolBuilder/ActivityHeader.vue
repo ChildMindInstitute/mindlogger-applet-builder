@@ -74,7 +74,11 @@
 
             <div>
               <v-btn icon @click="reportConfigDialog=true">
-                <v-icon>mdi-settings</v-icon>
+                <img
+                  height="25"
+                  alt=""
+                  :src="baseImageURL + 'settings.png'"
+                >
               </v-btn>
 
               Configure Email
@@ -456,6 +460,7 @@ export default {
     ...mapGetters(config.MODULE_NAME, [
       'currentActivity',
       'protocol',
+      'baseImageURL',
     ]),
 
     pdfConfigured () {

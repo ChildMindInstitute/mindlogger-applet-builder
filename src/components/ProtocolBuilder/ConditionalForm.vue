@@ -49,7 +49,7 @@
           <v-text-field
             v-model="condition.minValue"
             class="ds-select-box"
-            label="Min value"
+            label="Value"
             :min="getMinValue(condition.ifValue)"
             :max="getMaxValue(condition.ifValue)"
             type="number"
@@ -63,7 +63,7 @@
             "
             v-model="condition.maxValue"
             class="ds-select-box"
-            label="Max value"
+            label="Value"
             :min="getMinValue(condition.ifValue)"
             :max="getMaxValue(condition.ifValue)"
             type="number"
@@ -77,7 +77,7 @@
             class="ds-select-box"
             item-text="name"
             :items="answerItems(condition.ifValue)"
-            label="Answer"
+            label="Value"
             return-object
             @input="onUpdate"
           />

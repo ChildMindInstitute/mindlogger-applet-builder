@@ -474,7 +474,7 @@ export default {
     },
 
     isFixationValid(){
-      return this.fixationDuration >= 1 && this.fixationDuration % 1 == 0 && this.fixationScreen !== null;
+      return this.fixationDuration >= 1 && this.fixationDuration % 1 == 0 || this.fixationScreen === null || !this.fixationScreen.name;
     },
 
     isActivityValid(){

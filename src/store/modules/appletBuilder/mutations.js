@@ -369,6 +369,7 @@ const activityMutations = {
         timestamp: Date.now() + index
       })),
       finalSubScale: { ...activity.finalSubScale },
+      reports: JSON.parse(JSON.stringify(activity.reports)),
       subScales: [...activity.subScales],
       conditionalItems,
       index: index+1,

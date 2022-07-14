@@ -138,6 +138,12 @@
                   <v-list-item-title>{{ item.name }}: {{ getQuestion(item.question.text) }}</v-list-item-title>
                 </v-list-item>
               </template>
+
+              <v-list-item
+                v-if="!filteredItemsCount && searchText"
+              >
+                <v-list-item-title>No results found</v-list-item-title>
+              </v-list-item>
             </v-list>
           </v-card>
         </div>
@@ -449,6 +455,10 @@ export default {
       }
 
       return '';
+    },
+
+    filteredItemsCount () {
+      return this.items.filter(item => item.name.includes(this.searchText)).length;
     },
 
     items () {

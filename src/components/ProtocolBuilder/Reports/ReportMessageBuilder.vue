@@ -48,7 +48,7 @@
           :key="index"
           @click="invertSelection(index)"
         >
-          <v-list-item-action>
+          <v-list-item-action class="mr-4">
             <v-checkbox
               v-model="selection[getIdentifier(item)]"
               color="primary"

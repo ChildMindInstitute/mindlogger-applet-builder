@@ -127,7 +127,7 @@
                   :key="item.identifier"
                   @click="invertSelection(index)"
                 >
-                  <v-list-item-action>
+                  <v-list-item-action class="mr-4">
                     <v-checkbox
                       v-model="selection[item.identifier]"
                       color="primary"
@@ -135,7 +135,7 @@
                     />
                   </v-list-item-action>
 
-                  <v-list-item-title>{{ item.name }}</v-list-item-title>
+                  <v-list-item-title>{{ item.name }}: {{ getQuestion(item.question.text) }}</v-list-item-title>
                 </v-list-item>
               </template>
             </v-list>
@@ -160,7 +160,7 @@
                   v-if="selection[item.identifier]"
                   :key="item.identifier"
                 >
-                  <v-list-item-title>{{ item.name }}</v-list-item-title>
+                  <v-list-item-title>{{ item.name }}: {{ getQuestion(item.question.text) }}</v-list-item-title>
                 </v-list-item>
               </template>
             </v-list>
@@ -683,6 +683,10 @@ export default {
 
       this.$emit('update', updates);
     },
+
+    getQuestion (text) {
+      return text.replace(/[#*]/g, '').replace(/\!\[.*?\]\(.*?\)/g, '');
+    }
   }
 }
 </script>

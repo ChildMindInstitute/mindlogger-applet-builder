@@ -79,6 +79,33 @@
         @update="onUpdate"
       />
     </div>
+    <v-dialog
+      v-model="deleteConditionalDlg"
+      persistent
+      width="500"
+    >
+      <v-card>
+        <v-card-text class="pt-4">
+          Are you sure you remove all logical conditions
+        </v-card-text>
+
+        <v-card-actions
+          class="justify-space-around"
+        >
+          <v-btn
+            @click="deleteAllConditions"
+          >
+            Yes
+          </v-btn>
+
+          <v-btn
+            @click="deleteConditionalDlg = false;"
+          >
+            No
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-card>
 </template>
 
@@ -127,6 +154,7 @@ export default {
     return {
       isExpanded: !this.current.stateValue,
       valid: this.current.valid || false,
+      deleteConditionalDlg: false,
     }
   },
 
@@ -160,7 +188,11 @@ export default {
     ),
 
     onDeleteConditional () {
-      this.deleteConditional(this.conditionalIndex);
+      if (this.current.conditions.length > 1) {
+        this.deleteConditionalDlg = true;
+      } else {
+        this.deleteConditional(this.conditionalIndex);
+      }
     },
 
     onUpdate ({ conditions, operation, showValue, valid }) {
@@ -188,6 +220,10 @@ export default {
           valid: this.valid,
         }
       });
+    },
+
+    deleteAllConditions () {
+      this.deleteConditional(this.conditionalIndex);
     }
   },
 }

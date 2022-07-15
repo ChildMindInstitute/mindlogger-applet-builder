@@ -448,6 +448,8 @@ export default {
 
       if (!this.name.match(/^[a-zA-Z_0-9 ]+$/)) {
         return 'Letters and underscores are only allowed. Please fix.';
+      }else if(this.name.match(/^\s+|\s+$/g)){
+        return 'Spaces are not allowed at end or beginning. Please fix.';
       }
 
       if (this.currentActivity.reports.find(score => score.dataType == this.report.dataType && score.prefLabel == this.name && score != this.report)) {
@@ -592,6 +594,8 @@ export default {
 
       if (!conditional.prefLabel.match(/^[a-zA-Z_0-9 ]+$/)) {
         return 'Letters and underscores are only allowed. Please fix.';
+      }else if(conditional.prefLabel.match(/^\s+|\s+$/g)){
+        return 'Spaces are not allowed at end or beginning. Please fix.';
       }
 
       if (this.conditionals.find(d => d.prefLabel == conditional.prefLabel && d !== conditional)) {

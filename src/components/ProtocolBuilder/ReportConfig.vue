@@ -463,7 +463,18 @@ export default {
     },
 
     getAttachmentName (activity) {
-      let title = `REPORT_${this.name || 'Example Applet'}_`;
+      let subject = 'REPORT_';
+
+      if (this.includeUserId) {
+        subject += 'user123_';
+      }
+
+      if (this.includeCaseId) {
+        subject += 'case123_';
+      }
+      subject += `${this.name || 'Example Applet'}_`
+      
+      let title = subject;
 
       if (activity) {
         if (this.currentActivityFlow && this.currentActivityFlow.combineReports) {

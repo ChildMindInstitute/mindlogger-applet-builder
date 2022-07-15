@@ -304,5 +304,6 @@ export default {
       ...getTest(true, 3),
       name: "test3"
     },
-  ]
+  ],
+  allowSummary: false,
 }

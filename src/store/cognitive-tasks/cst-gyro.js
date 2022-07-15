@@ -260,5 +260,6 @@ export default {
         }
       ]
     }
-  ]
+  ],
+  allowSummary: false,
 }

@@ -185,10 +185,6 @@ export default {
     }
   },
 
-  beforeMount() {
-    this.updateActivityMetaInfo({ allowSummary: false });
-  },
-
   methods: {
     ...mapMutations(config.MODULE_NAME, [
       'addReportSection',

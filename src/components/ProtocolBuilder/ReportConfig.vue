@@ -473,7 +473,7 @@ export default {
         subject += 'case123_';
       }
       subject += `${this.name || 'Example Applet'}_`
-      
+
       let title = subject;
 
       if (activity) {

@@ -405,7 +405,6 @@ const activityMutations = {
       const itemModel = new Item();
 
       content = JSON.parse(JSON.stringify(CognitiveTasks[type]));
-      content.valid = true;
       content.items = content.items.map(item => itemModel.getItemBuilderData(item))
 
       const names = state.protocol.activities.map(activity => activity.name);

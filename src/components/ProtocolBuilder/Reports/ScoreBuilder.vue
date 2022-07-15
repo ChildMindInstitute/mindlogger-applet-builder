@@ -508,10 +508,9 @@ export default {
         for (let i = 0; i < scores.length; i++) {
           if (scores[i] > 0) {
             maxScore += scores[i];
-          } else {
-            minScore += scores[i];
           }
         }
+        minScore = Math.min(...scores);
       }
 
       return { maxScore, minScore }

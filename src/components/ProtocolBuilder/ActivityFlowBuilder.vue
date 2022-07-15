@@ -37,7 +37,7 @@
                 <div
                   :key="`${flowItem.name + index}`"
                 >
-                  <v-card class="ma-4">
+                  <v-card class="ma-4 activity-card-br">
                     <p class="flow-card-description">
                       {{ index + 1 }} out of {{draggableFlowItems.length}}
                     </p>
@@ -252,6 +252,10 @@
 .flow-card-title {
   padding-top: 0;
   padding-bottom: 0;
+}
+
+.activity-card-br{
+  border-radius: 24px;
 }
 
 .flow-card-description {

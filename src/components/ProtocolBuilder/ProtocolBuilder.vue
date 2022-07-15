@@ -299,7 +299,7 @@
             <v-card
               v-for="(activity, index) in withoutPrize"
               :key="`${activity.timestamp}-${activity.id || 0}`"
-              class="ma-4 activity-card-br"
+              class="ma-4"
             >
               <v-card-title
                 class="py-0"
@@ -538,10 +538,6 @@
 
   .sortable-chosen {
     border: 2px solid gray;
-  }
-
-  .activity-card-br{
-    border-radius: 24px;
   }
 
   .move-icon {

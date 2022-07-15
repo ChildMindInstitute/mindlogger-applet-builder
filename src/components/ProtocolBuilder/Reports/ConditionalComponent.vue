@@ -54,8 +54,9 @@
 
         <v-btn
           icon
-          @click="onDeleteConditional()"
-          :disabled="!blank"
+          @click="() => {
+            this.conditionalItem.conditions.length > 1 ? this.removeConditionDialog = true : onDeleteConditional();
+          }"
         >
           <v-icon
             class="header-icon"
@@ -95,6 +96,42 @@
         @update="update"
       />
     </div>
+
+    <template>
+      <v-dialog
+          :value="removeConditionDialog"
+          width="500"
+          persistent
+      >
+        <v-card>
+          <v-card-text class="pt-4">
+            Are you sure you want to remove conditions?
+          </v-card-text>
+
+          <v-card-actions>
+            <v-spacer />
+
+            <v-btn
+                class="mx-2"
+                color="primary"
+                @click="() => {
+                  onDeleteConditional();
+                  this.removeConditionDialog = false;
+                }"
+            >
+              Yes
+            </v-btn>
+
+            <v-btn
+                @click="() => this.removeConditionDialog = false"
+            >
+              No
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </template>
+
   </v-card>
 </template>
 
@@ -169,7 +206,8 @@ export default {
   data () {
     return {
       isBlankConditional: this.blank && !this.conditionalItem.conditions.length,
-      isExpanded: !this.conditionalItem.stateValue
+      isExpanded: !this.conditionalItem.stateValue,
+      removeConditionDialog: false
     }
   },
 

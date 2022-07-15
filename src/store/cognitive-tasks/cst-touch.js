@@ -257,5 +257,6 @@ export default {
         }
       ]
     }
-  ]
+  ],
+  allowSummary: false,
 }

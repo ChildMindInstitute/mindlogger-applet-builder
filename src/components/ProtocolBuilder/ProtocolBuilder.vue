@@ -502,6 +502,8 @@
       v-model="reportConfigDialog.visible"
       :key="`report-config-${reportConfigDialog.key}`"
       :reportConfigs="protocol.reportConfigs"
+      :updatePDFPassword="updatePDFPassword"
+      :isEditing="isEditing"
       @updateConfig="updateReportConfig"
     />
 
@@ -599,6 +601,18 @@ export default {
     Uploader,
     draggable,
     ReportConfig,
+  },
+  props: {
+    updatePDFPassword: {
+      type: Function,
+      required: false,
+      default: null
+    },
+    isEditing: {
+      type: Boolean,
+      required: false,
+      default: false,
+    }
   },
   data () {
     return {

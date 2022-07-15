@@ -396,6 +396,16 @@ export default {
       type: Object,
       required: false,
       default: () => null
+    },
+    updatePDFPassword: {
+      type: Function,
+      required: false,
+      default: null
+    },
+    isEditing: {
+      type: Boolean,
+      required: false,
+      default: false
     }
   },
 
@@ -419,6 +429,7 @@ export default {
       activityValue: this.currentActivity ? this.currentActivity.name : itemValue.split('/').shift() || '',
       includeItem: itemValue ? true : false,
       pdfServerError: false,
+      serverAppletId: this.reportConfigs.serverAppletId || '',
       serverConfigured: this.reportConfigs.serverIp && this.reportConfigs.publicEncryptionKey ? true : false
     }
   },
@@ -432,11 +443,40 @@ export default {
         this.$emit('updateItemValue', this.includeItem ? `${this.activityValue}/${this.itemValue}` : '');
         this.$emit('input', false);
       } else {
-        if (this.serverIp && this.publicEncryptionKey) {
-          let token = this.pdfToken;
-          api.verifyPDFServer(this.serverIp, this.publicEncryptionKey, token).then(() => {
+        if (
+          this.serverIp && this.publicEncryptionKey
+        ) {
+          if (this.serverIp == this.reportConfigs.serverIp && this.publicEncryptionKey == this.reportConfigs.publicEncryptionKey) {
             this.saveReport();
-          }).catch(e => {
+            return ;
+          }
+
+          let token = this.pdfToken;
+
+          api.verifyPDFServer(this.serverIp, this.publicEncryptionKey, token, this.serverAppletId).then((resp) => new Promise(
+            (resolve, reject) => {
+              this.serverAppletId = resp.data.serverAppletId;
+
+              if (this.isEditing) {
+                this.updatePDFPassword(
+                  (success) => {
+                    if (success) {
+                      this.saveReport();
+                    }
+                    resolve()
+                  },
+                  {
+                    publicKey: this.publicEncryptionKey,
+                    serverIp: this.serverIp,
+                    serverAppletId: this.serverAppletId
+                  }
+                )
+              } else {
+                this.saveReport();
+                resolve();
+              }
+            }
+          )).catch(e => {
             this.pdfServerError = true;
           });
         } else {
@@ -457,6 +497,7 @@ export default {
         includeCaseId: this.includeCaseId,
         emailBody: this.emailBody,
         emailRecipients: this.emailRecipients,
+        serverAppletId: this.serverAppletId,
       })
 
       this.$emit('input', false)

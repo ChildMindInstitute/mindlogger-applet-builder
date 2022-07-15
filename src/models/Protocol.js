@@ -67,7 +67,7 @@ export default class Protocol {
         variableName: actFlow['@id'],
         isAbout: actFlow.description,
         prefLabel: actFlow.name,
-        isVis: true
+        isVis: actFlow.isVis
       }
     })
     const schema = {
@@ -488,6 +488,10 @@ export default class Protocol {
       protocolVersion: _.get(applet, 'schema:schemaVersion[0].@value', this.protocolVersion),
       landingPageType: _.get(applet, ['reprolib:terms/landingPageType', 0, '@value'], 'markdown'),
       activityFlowOrder: _.get(applet, ['reprolib:terms/activityFlowOrder', 0, '@list']).map(orderItem => orderItem['@id']),
+      activityFlowProperties: _.get(applet, ['reprolib:terms/activityFlowProperties'], []).map(property => ({
+        variableName: _.get(property, ['reprolib:terms/variableName', 0, '@value']),
+        isVis: _.get(property, ['reprolib:terms/isVis', 0, '@value']),
+      })),
       order: _.get(applet, ['reprolib:terms/order', 0, '@list']).map(orderItem => orderItem['@id']),
       reportConfigs: _.get(applet, ['reprolib:terms/reportConfigs', 0, '@list'], []).reduce((configs, option) => {
         const name = _.get(option, ['schema:name', 0, '@value']);
@@ -566,7 +570,8 @@ export default class Protocol {
       const activityFlow = activityFlows[id];
       const activityFlowInfo = ActivityFlow.parseJSONLD(activityFlow);
       const builderData = activityFlowModel.getActivityFlowBuilderData({
-        ...activityFlowInfo
+        ...activityFlowInfo,
+        isVis: initialStoreData.activityFlowProperties[i].isVis
       });
 
       initialStoreData.activityFlows.push(builderData);

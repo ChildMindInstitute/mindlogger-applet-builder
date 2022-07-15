@@ -217,8 +217,9 @@ const activityFlowMutations = {
     const activityFlowModel = new ActivityFlow;
     const orderList = state.protocol.activities.map(activity => activity.name);
     const activityFlow = {
-      ...activityFlowModel.getActivityFlowBuilderData({ orderList }),
+      ...activityFlowModel.getActivityFlowBuilderData({ orderList, isVis: true }),
       index: index < 0 ? state.protocol.activities.length : index,
+      valid: false
     };
 
     if (index >= 0) {
@@ -282,16 +283,19 @@ const activityFlowMutations = {
     }
   },
 
-  updateActivityFlowOrder(state, activity) {
-    const { order } = state.currentActivityFlow;
-    state.currentActivityFlow.order = [...order, activity];
+  addActivityToFlow(state, { name, index }) {
+    if (index < 0) {
+      state.currentActivityFlow.order.push(name);
+    } else {
+      state.currentActivityFlow.order.splice(index, 0, name);
+    }
   },
 
   updateActivityFlowInfo(state, obj) {
     if (obj.name && state.currentActivityFlow.valid) {
       for (const existing of state.protocol.activityFlows) {
         if (existing != state.currentActivityFlow && existing.name == state.currentActivityFlow.name) {
-          existing.valid = Activity.checkValidation(existing);
+          existing.valid = ActivityFlow.checkValidation(existing);
 
           if (existing.valid) {
             break;
@@ -303,7 +307,7 @@ const activityFlowMutations = {
     Object.assign(state.currentActivityFlow, obj);
 
     if (!obj.hasOwnProperty('valid')) {
-      state.currentActivityFlow.valid = Activity.checkValidation(state.currentActivityFlow);
+      state.currentActivityFlow.valid = ActivityFlow.checkValidation(state.currentActivityFlow);
     }
 
     for (const existing of state.protocol.activityFlows) {
@@ -365,6 +369,7 @@ const activityMutations = {
         timestamp: Date.now() + index
       })),
       finalSubScale: { ...activity.finalSubScale },
+      reports: JSON.parse(JSON.stringify(activity.reports)),
       subScales: [...activity.subScales],
       conditionalItems,
       index: index+1,
@@ -437,6 +442,18 @@ const activityMutations = {
 
           if (existing.valid) {
             break;
+          }
+        }
+      }
+    }
+
+    if (obj.name) {
+      const originalName = state.currentActivity.name;
+
+      for (const flow of state.protocol.activityFlows) {
+        for (let i = 0; i < flow.order.length; i++) {
+          if (flow.order[i] === originalName) {
+            flow.order[i] = obj.name;
           }
         }
       }

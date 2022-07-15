@@ -10,12 +10,14 @@
           v-model="exportAvailable"
           label="Make Report available for Export"
           hide-details
+          :disabled="this.currentActivity.reports.length < 1"
         />
 
         <v-checkbox
           v-model="allowSummary"
           label="Show report at the end of the activity"
           hide-details
+          :disabled="this.currentActivity.reports.length < 1"
         />
       </div>
 
@@ -66,6 +68,7 @@
         color="primary"
         rounded
         @click="onPreviewReport"
+        :disabled="!valid || !draggableReports.length"
       >
         Preview Report
       </v-btn>
@@ -199,7 +202,7 @@ export default {
     },
 
     onPreviewReport () {
-      if (!this.pdfServerConfigured || !this.valid) {
+      if (!this.pdfServerConfigured) {
         this.reportInvalidDialog = true;
 
         if (!this.pdfServerConfigured) {

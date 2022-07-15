@@ -189,6 +189,8 @@ export default class Activity {
 
         const options = itemModel.getResponseOptions();
         itemChoices.push(options.choices);
+      } else {
+        itemChoices.push([]);
       }
     }
 
@@ -331,6 +333,7 @@ export default class Activity {
         if (itemIndex !== -1) {
           const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == notEqualToValues[2]);
 
+
           if (option) {
             conditionalItem.conditions.push({
               ifValue: items[itemIndex],
@@ -338,6 +341,15 @@ export default class Activity {
                 name: option['schema:name'],
                 value: option['schema:value']
               },
+              stateValue: {
+                name: 'IS NOT EQUAL TO',
+                val: '!=',
+              }
+            });
+          } else {
+            conditionalItem.conditions.push({
+              ifValue: items[itemIndex],
+              minValue: notEqualToValues[2],
               stateValue: {
                 name: 'IS NOT EQUAL TO',
                 val: '!=',
@@ -485,20 +497,11 @@ export default class Activity {
     itemOrder.forEach((item) => {
       const conditionalItem = this.ref.conditionalItems.find((cond) => cond.showValue && cond.showValue.name === item);
 
-      let isVis = true;
-
       addProperties.push({
         variableName: item,
         isAbout: item,
         isVis: this.compressConditional(conditionalItem),
       })
-
-      const property = {
-        variableName: item,
-        isAbout: item,
-        isVis,
-      };
-      addProperties.push(property);
     });
 
     return addProperties;

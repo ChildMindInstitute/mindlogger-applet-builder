@@ -127,7 +127,7 @@
                   :key="item.identifier"
                   @click="invertSelection(index)"
                 >
-                  <v-list-item-action>
+                  <v-list-item-action class="mr-4">
                     <v-checkbox
                       v-model="selection[item.identifier]"
                       color="primary"
@@ -135,9 +135,15 @@
                     />
                   </v-list-item-action>
 
-                  <v-list-item-title>{{ item.name }}</v-list-item-title>
+                  <v-list-item-title>{{ item.name }}: {{ getQuestion(item.question.text) }}</v-list-item-title>
                 </v-list-item>
               </template>
+
+              <v-list-item
+                v-if="!filteredItemsCount && searchText"
+              >
+                <v-list-item-title>No results found</v-list-item-title>
+              </v-list-item>
             </v-list>
           </v-card>
         </div>
@@ -160,7 +166,7 @@
                   v-if="selection[item.identifier]"
                   :key="item.identifier"
                 >
-                  <v-list-item-title>{{ item.name }}</v-list-item-title>
+                  <v-list-item-title>{{ item.name }}: {{ getQuestion(item.question.text) }}</v-list-item-title>
                 </v-list-item>
               </template>
             </v-list>
@@ -453,6 +459,10 @@ export default {
       return '';
     },
 
+    filteredItemsCount () {
+      return this.items.filter(item => item.name.includes(this.searchText)).length;
+    },
+
     items () {
       return this.currentActivity.items.filter(item =>
           (item.inputType == 'radio' || item.inputType == 'prize' || item.inputType == 'slider' || item.inputType == 'checkbox')
@@ -687,6 +697,10 @@ export default {
 
       this.$emit('update', updates);
     },
+
+    getQuestion (text) {
+      return text.replace(/[#*]/g, '').replace(/\!\[.*?\]\(.*?\)/g, '');
+    }
   }
 }
 </script>

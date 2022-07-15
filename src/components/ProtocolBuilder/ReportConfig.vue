@@ -220,6 +220,7 @@
           rounded
           class="px-8"
           small
+          :disabled="!reportConfigChanged"
           @click="onSaveReport"
         >
           Save
@@ -402,13 +403,16 @@ export default {
     const itemValue = this.currentActivity && this.currentActivity.reportIncludeItem ||
             this.currentActivityFlow && this.currentActivityFlow.reportIncludeItem ||
             '';
+    const defaultEmail = 'Please see the report attached to this email.';
+
     return {
+      defaultEmail,
       serverIp: this.reportConfigs.serverIp || '',
       publicEncryptionKey: this.reportConfigs.publicEncryptionKey || '',
       emailRecipients: this.reportConfigs.emailRecipients || [],
       includeUserId: this.reportConfigs.includeUserId || false,
       includeCaseId: this.reportConfigs.includeCaseId || false,
-      emailBody: this.reportConfigs.emailBody || 'Please see the report attached to this email.',
+      emailBody: this.reportConfigs.emailBody || defaultEmail,
       emailInput: '',
       reportAlert: false,
       itemValue: itemValue.split('/').pop() || '',
@@ -491,6 +495,37 @@ export default {
 
     config () {
       return config;
+    },
+
+    reportConfigChanged () {
+      if (
+        this.serverIp != (this.reportConfigs.serverIp || '') ||
+        this.publicEncryptionKey != (this.reportConfigs.publicEncryptionKey || '') ||
+        this.includeUserId != (this.reportConfigs.includeUserId || false) ||
+        this.includeCaseId != (this.reportConfigs.includeCaseId || false) ||
+        this.emailBody != (this.reportConfigs.emailBody || '') && this.emailBody != this.defaultEmail ||
+        JSON.stringify(this.emailRecipients) != JSON.stringify(this.reportConfigs.emailRecipients || [])
+      ) {
+        return true;
+      }
+
+      if (this.currentActivity) {
+        const itemValue = this.includeItem ? this.itemValue : '';
+
+        if (this.currentActivity.reportIncludeItem != itemValue) {
+          return true;
+        }
+      }
+
+      if (this.currentActivityFlow) {
+        const itemValue = this.includeItem ? `${this.activityValue}/${this.itemValue}` : '';
+
+        if (this.currentActivityFlow.reportIncludeItem != itemValue) {
+          return true;
+        }
+      }
+
+      return false;
     },
 
     emailSubject () {

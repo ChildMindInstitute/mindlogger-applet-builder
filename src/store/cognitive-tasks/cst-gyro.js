@@ -262,4 +262,5 @@ export default {
     }
   ],
   allowSummary: false,
+  valid: true,
 }

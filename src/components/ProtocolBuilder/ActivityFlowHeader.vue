@@ -230,10 +230,10 @@ export default {
     },
     showBadge: {
       get: function () {
-        return this.currentActivityFlow && !this.currentActivityFlow.showBadge;
+        return this.currentActivityFlow && this.currentActivityFlow.showBadge;
       },
       set: function (name) {
-        this.updateActivityFlowInfo({ showBadge: !name });
+        this.updateActivityFlowInfo({ showBadge: name });
       }
     },
   },

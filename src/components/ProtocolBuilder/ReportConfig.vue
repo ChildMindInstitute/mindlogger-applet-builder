@@ -403,7 +403,7 @@ export default {
     const itemValue = this.currentActivity && this.currentActivity.reportIncludeItem ||
             this.currentActivityFlow && this.currentActivityFlow.reportIncludeItem ||
             '';
-    const defaultEmail = 'Please see the report attached to this email.';
+    const defaultEmail = 'Please click this link to download the report.';
 
     return {
       defaultEmail,

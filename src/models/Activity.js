@@ -1124,6 +1124,7 @@ export default class Activity {
                 showItems: printItems.length > 0,
                 printItems,
                 isVis: _.get(conditional, ['reprolib:terms/isVis', 0, '@value']),
+                flagScore: _.get(conditional, ['reprolib:terms/flagScore', 0, '@value']),
                 expanded: false,
                 timestamp: Date.now() - index * 10,
                 valid: true

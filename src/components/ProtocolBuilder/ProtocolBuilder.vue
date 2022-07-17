@@ -476,6 +476,13 @@
                 class="px-4"
                 disabled
               />
+
+              <div
+                v-if="activity.activityType === 'FLANKER'"
+                class="warning-message px-4 pb-2"
+              >
+                *The timestamps collected for an android are not as accurate as iOS devices.
+              </div>
             </v-card>
           </transition-group>
         </draggable>
@@ -562,6 +569,10 @@
 
   .server-unconfigured {
     color: #FF0000;
+  }
+
+  .warning-message {
+    color: #FF4346;
   }
 </style>
 

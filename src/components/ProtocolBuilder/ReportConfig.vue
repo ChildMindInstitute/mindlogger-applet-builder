@@ -173,7 +173,7 @@
               </div>
             </div>
 
-            <div class="my-4">
+            <!-- <div class="my-4">
               <div class="my-2">Attachment(s):</div>
               <div
                 v-for="(activity, index) in activityList"
@@ -195,7 +195,7 @@
                 >
                 <span>{{ getAttachmentName(activity) }}</span>
               </div>
-            </div>
+            </div> -->
 
             <div class="my-4">
               <div class="my-1">Body:</div>

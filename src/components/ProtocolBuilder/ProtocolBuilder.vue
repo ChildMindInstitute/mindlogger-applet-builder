@@ -141,7 +141,7 @@
           >
             <v-btn
               class="configure-reports"
-              @click="reportConfigDialog=true"
+              @click="onShowReportConfig"
             >
               <img
                 height="25"
@@ -189,7 +189,7 @@
               </v-combobox>
 
               <div>
-                <v-btn icon @click="reportConfigDialog=true">
+                <v-btn icon @click="onShowReportConfig">
                   <img
                     height="25"
                     alt=""
@@ -492,7 +492,8 @@
     />
 
     <ReportConfig
-      v-model="reportConfigDialog"
+      v-model="reportConfigDialog.visible"
+      :key="`report-config-${reportConfigDialog.key}`"
       :reportConfigs="protocol.reportConfigs"
       @updateConfig="updateReportConfig"
     />
@@ -599,7 +600,10 @@ export default {
       fileSuccessMsg: '',
       notify: {},
       textRules: [(v) => !!v.trim() || "This field is required"],
-      reportConfigDialog: false,
+      reportConfigDialog: {
+        visible: false,
+        key: 0
+      }
     }
   },
   computed: {
@@ -739,6 +743,12 @@ export default {
         'updateActivityList'
       ]
     ),
+
+    onShowReportConfig () {
+      this.reportConfigDialog.visible = true;
+      this.reportConfigDialog.key++;
+    },
+
     updateReportConfig (configs) {
       this.updateProtocolMetaInfo({
         reportConfigs: configs

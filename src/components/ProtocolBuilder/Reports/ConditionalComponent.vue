@@ -222,7 +222,16 @@ export default {
     ),
 
     ifOptions () {
-      return this.items.concat(this.scores);
+      const conditions = [];
+      for (const score of this.scores) {
+        conditions.push(score);
+
+        for (const conditional of score.conditionals) {
+          conditions.push(conditional);
+        }
+      }
+
+      return this.items.concat(conditions);
     },
 
     valid () {

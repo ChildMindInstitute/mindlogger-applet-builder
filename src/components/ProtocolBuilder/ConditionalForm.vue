@@ -73,12 +73,22 @@
 
         <template v-else>
           <v-select
+            v-if="!condition.ifValue || !condition.ifValue.isConditional"
             v-model="condition.answerValue"
             class="ds-select-box"
             item-text="name"
             :items="answerItems(condition.ifValue)"
             label="Value"
             return-object
+            @input="onUpdate"
+          />
+
+          <v-select
+            v-else
+            v-model="condition.answerValue"
+            class="ds-select-box"
+            :items="answerItems(condition.ifValue)"
+            label="Value"
             @input="onUpdate"
           />
         </template>
@@ -266,6 +276,11 @@ export default {
             ]
       }
 
+      if ( ifValue.isConditional ) {
+        return [
+          { name: "IS EQUAL TO", val: "==" },
+        ]
+      }
       return [
         { name: "GREATER THAN", val: ">" },
         { name: "LESS THAN", val: "<" },
@@ -288,6 +303,8 @@ export default {
 
     answerItems (ifValue) {
       if (!ifValue || typeof ifValue != 'object') return [];
+
+      if (ifValue.isConditional) return ['True', 'False'];
 
       return ifValue.inputType !== 'slider' && ifValue.options && ifValue.options.options || [];
     },

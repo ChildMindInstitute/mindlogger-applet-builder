@@ -93,15 +93,10 @@ export default class Activity {
   }
 
   parseReportConditionals (reports, items) {
+    const conditionals = [];
+
     for (const report of reports) {
-      if (report.dataType == 'section') {
-        report.conditionalItem = this.parseConditionalExpression({
-          showValue: null,
-          conditions: [],
-          operation: "ALL",
-          valid: true,
-        }, report.isVis.replace(/\s/g, ''), [...reports, ...items]);
-      } else {
+      if (report.dataType == 'score') {
         for (const conditional of report.conditionals) {
           conditional.conditionalItem = this.parseConditionalExpression({
             showValue: null,
@@ -111,7 +106,21 @@ export default class Activity {
           }, conditional.isVis.replace(/\s/g, ''), [report]);
 
           conditional.conditionalItem.conditions.forEach(condition => condition.ifValue = null);
+          conditional.isConditional = true;
+
+          conditionals.push(conditional);
         }
+      }
+    }
+
+    for (const report of reports) {
+      if (report.dataType == 'section') {
+        report.conditionalItem = this.parseConditionalExpression({
+          showValue: null,
+          conditions: [],
+          operation: "ALL",
+          valid: true,
+        }, report.isVis.replace(/\s/g, ''), [...reports, ...conditionals,...items]);
       }
     }
 
@@ -207,9 +216,9 @@ export default class Activity {
       const lessThanValues = isVis.match(lessThanRegExp);
       const greaterThanRegExp = /(\w+)>(\d+)/;
       const greaterThanValues = isVis.match(greaterThanRegExp);
-      const equalToRegExp = /(\w+)==(\d+)/;
+      const equalToRegExp = /(\w+)==(\d+|true|false)/;
       const equalToValues = isVis.match(equalToRegExp);
-      const notEqualToRegExp = /(\w+)!=(\d+)/;
+      const notEqualToRegExp = /(\w+)!=(\d+|true|false)/;
       const notEqualToValues = isVis.match(notEqualToRegExp);
       const activityRegExp = /(\!?)isActivityShownFirstTime\("(.*?)"\)/;
       const activityValues = isVis.match(activityRegExp);
@@ -346,6 +355,15 @@ export default class Activity {
                 val: '!=',
               }
             });
+          } else if (item.isConditional) {
+            conditionalItem.conditions.push({
+              ifValue: items[itemIndex],
+              answerValue: notEqualToValues[2] == 'true' ? 'True' : 'False',
+              stateValue: {
+                name: 'IS NOT EQUAL TO',
+                val: '!=',
+              }
+            });
           } else {
             conditionalItem.conditions.push({
               ifValue: items[itemIndex],
@@ -380,6 +398,15 @@ export default class Activity {
                 }
               });
             }
+          } else if (item.isConditional) {
+            conditionalItem.conditions.push({
+              ifValue: item,
+              answerValue: equalToValues[2] == 'true' ? 'True' : 'False',
+              stateValue: {
+                name: 'IS EQUAL TO',
+                val: '==',
+              }
+            });
           } else {
             conditionalItem.conditions.push({
               ifValue: item,
@@ -450,7 +477,8 @@ export default class Activity {
       } else if (!cond.answerValue) {
         return `${ifValue} ${cond.stateValue.val} ${cond.minValue}`;
       } else {
-        return `${ifValue} ${cond.stateValue.val} ${cond.answerValue.value}`;
+        const answer = cond.answerValue.value || cond.answerValue;
+        return `${ifValue} ${cond.stateValue.val} ${answer.toLowerCase()}`;
       }
     });
 

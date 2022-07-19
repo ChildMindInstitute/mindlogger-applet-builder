@@ -627,6 +627,7 @@ export default {
         printItems: [],
         expanded: true,
         timestamp: Date.now(),
+        isConditional: true,
 
         conditionalItem: {
           showValue: null,

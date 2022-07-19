@@ -129,7 +129,7 @@
                 v-for="(item, index) in items"
               >
                 <v-list-item
-                  v-if="item.questionText.includes(searchText)"
+                  v-if="item.questionText.includes(searchText) || item.name.includes(searchText)"
                   :key="item.identifier"
                   @click="invertSelection(index)"
                 >
@@ -141,7 +141,7 @@
                     />
                   </v-list-item-action>
 
-                  <v-list-item-title>q{{ index+1 }}: {{ item.questionText }}</v-list-item-title>
+                  <v-list-item-title>{{ item.name }}: {{ item.questionText }}</v-list-item-title>
                 </v-list-item>
               </template>
 
@@ -166,13 +166,13 @@
           <v-card class="item-list">
             <v-list>
               <template
-                v-for="(item, index) in items"
+                v-for="(item) in items"
               >
                 <v-list-item
                   v-if="selection[item.identifier]"
                   :key="item.identifier"
                 >
-                  <v-list-item-title>q{{ index+1 }}: {{ item.questionText }}</v-list-item-title>
+                  <v-list-item-title>{{ item.name }}: {{ item.questionText }}</v-list-item-title>
                 </v-list-item>
               </template>
             </v-list>
@@ -493,7 +493,7 @@ export default {
     },
 
     filteredItemsCount () {
-      return this.items.filter(item => item.questionText.includes(this.searchText)).length;
+      return this.items.filter(item => item.questionText.includes(this.searchText) || item.name.includes(this.searchText)).length;
     },
 
     items () {

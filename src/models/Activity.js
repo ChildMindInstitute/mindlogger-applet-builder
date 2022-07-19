@@ -49,7 +49,7 @@ export default class Activity {
       isVis: initialActivityData.isVis || false,
       items: items || [],
       disableBack: initialActivityData.disableBack || false,
-      allowSummary: initialActivityData.allowSummary !== undefined ? initialActivityData.allowSummary : true,
+      allowSummary: initialActivityData.allowSummary !== undefined ? initialActivityData.allowSummary : false,
       exportAvailable: initialActivityData.exportAvailable || false,
       isReviewerActivity: initialActivityData.isReviewerActivity || false,
       isOnePageAssessment: initialActivityData.isOnePageAssessment || false,

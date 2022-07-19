@@ -15,12 +15,13 @@ const attachURL = (origin, resource) => {
   return origin + '/' + resource;
 }
 
-const verifyPDFServer = (url, publicKey, token) => axios({
+const verifyPDFServer = (url, publicKey, token, serverAppletId) => axios({
   method: 'PUT',
   url: attachURL(url, 'verify'),
   headers: { token },
   data: {
-    publicKey
+    publicKey,
+    serverAppletId,
   }
 })
 

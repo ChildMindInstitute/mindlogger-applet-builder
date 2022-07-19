@@ -11,6 +11,8 @@
       />
       <ProtocolBuilder
         v-if="currentScreen === config.PROTOCOL_SCREEN || currentScreen === config.ACTIVITY_FLOW_SCREEN"
+        :updatePDFPassword="updatePDFPassword"
+        :isEditing="!!formattedOriginalProtocol"
       />
       <ActivityFlowBuilder
         v-else-if="currentScreen === config.FLOW_BUILDER_SCREEN"
@@ -100,6 +102,11 @@ export default {
       required: false,
       default: null,
     },
+    updatePDFPassword: {
+      type: Function,
+      required: false,
+      default: null,
+    },
     cacheData: {
       type: Object,
       required: false,
@@ -133,7 +140,8 @@ export default {
       'activities',
       'prizeActivity',
       'templateUpdateRequest',
-      'themeId'
+      'themeId',
+      'formattedOriginalProtocol'
     ]),
     config() {
       return config;

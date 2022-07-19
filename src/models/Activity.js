@@ -542,6 +542,7 @@ export default class Activity {
       preamble: this.ref.preamble,
       isReviewerActivity: this.ref.isReviewerActivity,
       isOnePageAssessment: this.ref.isOnePageAssessment,
+      reportIncludeItem: this.ref.reportIncludeItem,
       scoringLogic: {},
       'repronim:timeUnit': 'yearmonthdate',
       isPrize: this.ref.isPrize,
@@ -606,6 +607,7 @@ export default class Activity {
       preamble: this.ref.preamble,
       isReviewerActivity: this.ref.isReviewerActivity,
       isOnePageAssessment: this.ref.isOnePageAssessment,
+      reportIncludeItem: this.ref.reportIncludeItem,
       shuffle: this.ref.shuffleActivityOrder,
       isSkippable: this.ref.isSkippable,
       disableBack: this.ref.disableBack,
@@ -737,6 +739,10 @@ export default class Activity {
       'isOnePageAssessment': {
         updated: (field) =>
           `Show all questions at once option was ${_.get(newValue, field) ? 'enabled' : 'disabled'}`
+      },
+      'reportIncludeItem': {
+        updated: (field) =>
+          `Item value option is updated in activity report`
       },
       'subScales': {
         updated: (field) => {

@@ -686,13 +686,12 @@ export default {
 
     onConditionalNameChanged (conditional) {
       if (conditional.prefLabel.length > 0 && !conditional.prefLabel.match(/^[a-zA-Z_0-9]+$/) || this.nameErrorMsg.length > 0) {
-
+        this.$set(conditional, 'valid', this.checkConditionalValidation(conditional));
       }else{
         this.$set(conditional, 'id', this.report.id + '_' + conditional.prefLabel.toLowerCase().replace(/\s/g, '_').replace(/[()/]/g, ''));
         this.$set(conditional, 'valid', this.checkConditionalValidation(conditional));
-
-        this.update();
       }
+      this.update();
 
     },
 

@@ -1226,6 +1226,12 @@ export default class Activity {
         }
       }
 
+      for (const conditional of report.conditionals) {
+        if (!conditional.valid) {
+          return false;
+        }
+      }
+
       if (!report.jsExpression) {
         return false;
       }

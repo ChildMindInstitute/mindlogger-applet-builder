@@ -1189,7 +1189,7 @@ export default class Activity {
     if (allowList.some((item) => item.includes('disable_back'))) {
       activityInfo.disableBack = true;
     }
-    activityInfo.allowSummary = !allowList.some((item) => item.includes('disable_summary'))
+    activityInfo.allowSummary = allowList.length ? !allowList.some((item) => item.includes('disable_summary')) : false;
     activityInfo.exportAvailable = allowList.some(item => item.includes('allow_export'))
 
     activityInfo.valid = true;

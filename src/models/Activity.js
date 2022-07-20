@@ -355,7 +355,7 @@ export default class Activity {
                 val: '!=',
               }
             });
-          } else if (item.isConditional) {
+          } else if (items[itemIndex].isConditional) {
             conditionalItem.conditions.push({
               ifValue: items[itemIndex],
               answerValue: notEqualToValues[2] == 'true' ? 'True' : 'False',
@@ -398,7 +398,7 @@ export default class Activity {
                 }
               });
             }
-          } else if (item.isConditional) {
+          } else if (items[itemIndex].isConditional) {
             conditionalItem.conditions.push({
               ifValue: item,
               answerValue: equalToValues[2] == 'true' ? 'True' : 'False',

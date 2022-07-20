@@ -129,7 +129,7 @@
                 v-for="(item, index) in items"
               >
                 <v-list-item
-                  v-if="item.questionText.includes(searchText) || item.name.includes(searchText)"
+                  v-if="(item.name + ':' + item.questionText).toLowerCase().includes(searchText.toLowerCase())"
                   :key="item.identifier"
                   @click="invertSelection(index)"
                 >
@@ -491,7 +491,9 @@ export default {
     },
 
     filteredItemsCount () {
-      return this.items.filter(item => item.questionText.includes(this.searchText) || item.name.includes(this.searchText)).length;
+      return this.items.filter(
+        item => (item.name + ':' + item.questionText).toLowerCase().includes(this.searchText.toLowerCase())
+      ).length;
     },
 
     items () {

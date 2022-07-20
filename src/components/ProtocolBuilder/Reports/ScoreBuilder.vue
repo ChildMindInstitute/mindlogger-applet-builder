@@ -43,6 +43,7 @@
             class="pt-0 mt-0"
             :value="report.id"
             hide-details
+            :error-messages="nameErrorMsg"
             readonly
           />
         </v-col>
@@ -246,6 +247,7 @@
                     :value="conditional.id"
                     hide-details
                     readonly
+                    :error-messages="nameErrorMsg || getConditionalNameError(conditional)"
                   />
                 </v-col>
               </v-row>
@@ -538,7 +540,13 @@ export default {
   methods: {
     onScoreTitleChange(value){
       let message = this.report.message;
-      let scoreId = this.getScoreId(value, this.outputType.value);
+
+      let scoreId = '';
+      if (value.length > 0 && !value.match(/^[a-zA-Z_0-9]+$/)) {
+        scoreId = this.report.id;
+      }else{
+        scoreId = this.getScoreId(value, this.outputType.value);
+      }
 
       if (!this.report.initialized) {
         message = this.messageTemplate.replace('{score_id}', scoreId).replace('{score_title}', value);
@@ -677,10 +685,15 @@ export default {
     },
 
     onConditionalNameChanged (conditional) {
-      this.$set(conditional, 'id', this.report.id + '_' + conditional.prefLabel.toLowerCase().replace(/\s/g, '_').replace(/[()/]/g, ''));
-      this.$set(conditional, 'valid', this.checkConditionalValidation(conditional));
+      if (conditional.prefLabel.length > 0 && !conditional.prefLabel.match(/^[a-zA-Z_0-9]+$/) || this.nameErrorMsg.length > 0) {
 
-      this.update();
+      }else{
+        this.$set(conditional, 'id', this.report.id + '_' + conditional.prefLabel.toLowerCase().replace(/\s/g, '_').replace(/[()/]/g, ''));
+        this.$set(conditional, 'valid', this.checkConditionalValidation(conditional));
+
+        this.update();
+      }
+
     },
 
     onUpdateConditional (conditional, updates) {

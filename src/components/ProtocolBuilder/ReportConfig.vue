@@ -650,7 +650,7 @@ export default {
         items = activity.items;
       }
 
-      return items.map(item => item.name);
+      return items.filter(item => ['radio', 'checkbox', 'slider', 'text', 'date'].includes(item.inputType)).map(item => item.name);
     },
 
     name () {

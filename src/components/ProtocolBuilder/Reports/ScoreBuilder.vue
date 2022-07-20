@@ -16,7 +16,7 @@
       <v-row>
         <v-col>
           <v-text-field
-            v-model="name"
+            v-model.lazy="name"
             class="mr-6"
             label="Score Title"
             :error-messages="nameErrorMsg"
@@ -76,6 +76,12 @@
           >
             {{ minScore }} ~ {{ maxScore }}
           </div>
+          <div
+            v-show="!(minScore || maxScore)"
+            class="empty-score-range mt-3"
+          >
+             --
+          </div>
         </div>
       </div>
 
@@ -123,7 +129,7 @@
                 v-for="(item, index) in items"
               >
                 <v-list-item
-                  v-if="item.name.includes(searchText)"
+                  v-if="item.questionText.includes(searchText) || item.name.includes(searchText)"
                   :key="item.identifier"
                   @click="invertSelection(index)"
                 >
@@ -135,7 +141,7 @@
                     />
                   </v-list-item-action>
 
-                  <v-list-item-title>{{ item.name }}: {{ getQuestion(item.question.text) }}</v-list-item-title>
+                  <v-list-item-title>{{ item.name }}: {{ item.questionText }}</v-list-item-title>
                 </v-list-item>
               </template>
 
@@ -160,13 +166,13 @@
           <v-card class="item-list">
             <v-list>
               <template
-                v-for="item in items"
+                v-for="(item) in items"
               >
                 <v-list-item
                   v-if="selection[item.identifier]"
                   :key="item.identifier"
                 >
-                  <v-list-item-title>{{ item.name }}: {{ getQuestion(item.question.text) }}</v-list-item-title>
+                  <v-list-item-title>{{ item.name }}: {{ item.questionText }}</v-list-item-title>
                 </v-list-item>
               </template>
             </v-list>
@@ -289,6 +295,43 @@
       </v-btn>
       <v-spacer />
     </v-card-actions>
+
+    <template>
+      <v-dialog
+          :value="showScoreTitleVariableWarning"
+          width="500"
+          persistent
+      >
+        <v-card>
+          <v-card-text class="pt-4">
+            You are using this variable scoreID. Are you sure you want make changes to this scoreID?
+          </v-card-text>
+
+          <v-card-actions>
+            <v-spacer />
+
+            <v-btn
+                class="mx-2"
+                color="primary"
+                @click="() => {
+                  this.onScoreTitleChange(this.scoreTitleValue);
+                  this.showScoreTitleVariableWarning = false;
+                }"
+            >
+              Yes
+            </v-btn>
+
+            <v-btn
+                @click="() => this.showScoreTitleVariableWarning = false"
+            >
+              No
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </template>
+
+
   </v-card>
 </template>
 
@@ -316,6 +359,10 @@
   font-weight: 500;
   font-size: 16px;
   text-align: center;
+}
+
+.empty-score-range {
+  font-weight: bold
 }
 
 .output-type {
@@ -394,7 +441,9 @@ export default {
       conditionals: this.report.conditionals.map(conditional => ({ ...conditional })),
       minScore: this.report.minScore,
       maxScore: this.report.maxScore,
-      timerId: null
+      timerId: null,
+      showScoreTitleVariableWarning: false,
+      scoreTitleValue: this.report.prefLabel
     }
   },
 
@@ -408,30 +457,14 @@ export default {
         return this.report.prefLabel
       },
       set (value) {
+
         let message = this.report.message;
-        let scoreId = this.getScoreId(value, this.outputType.value);
-
-        if (!this.report.initialized) {
-          message = this.messageTemplate.replace('{score_id}', scoreId).replace('{score_title}', value);
-
-          clearTimeout(this.timerId);
-          this.timerId = setTimeout(() => {
-            this.update({
-              initialized: true,
-            })
-          }, 500)
+        if (message.length > 0 && message.includes(`[[${this.report.id}]]`)){
+          this.scoreTitleValue = value;
+          this.showScoreTitleVariableWarning = true;
+        }else{
+          this.onScoreTitleChange(value);
         }
-
-        for (const conditional of this.conditionals) {
-          this.$set(conditional, 'id', scoreId + '_' + conditional.prefLabel);
-        }
-
-        this.update({
-          prefLabel: value,
-          id: scoreId,
-          message,
-          conditionals: this.conditionals.map(conditional => ({ ...conditional })),
-        })
       }
     },
 
@@ -458,7 +491,7 @@ export default {
     },
 
     filteredItemsCount () {
-      return this.items.filter(item => item.name.includes(this.searchText)).length;
+      return this.items.filter(item => item.questionText.includes(this.searchText) || item.name.includes(this.searchText)).length;
     },
 
     items () {
@@ -469,6 +502,7 @@ export default {
       ).map((item) => ({
         ...item,
         identifier: `${item.timestamp}-${item.id || 0}`,
+        questionText: this.getQuestion(item.question.text),
         ...this.getScoreRange(item)
       }))
     },
@@ -502,6 +536,32 @@ export default {
   },
 
   methods: {
+    onScoreTitleChange(value){
+      let message = this.report.message;
+      let scoreId = this.getScoreId(value, this.outputType.value);
+
+      if (!this.report.initialized) {
+        message = this.messageTemplate.replace('{score_id}', scoreId).replace('{score_title}', value);
+
+        clearTimeout(this.timerId);
+        this.timerId = setTimeout(() => {
+          this.update({
+            initialized: true,
+          })
+        }, 500)
+      }
+
+      for (const conditional of this.conditionals) {
+        this.$set(conditional, 'id', scoreId + '_' + conditional.prefLabel);
+      }
+
+      this.update({
+        prefLabel: value,
+        id: scoreId,
+        message,
+        conditionals: this.conditionals.map(conditional => ({ ...conditional })),
+      })
+    },
     getScoreRange (item) {
       let scores = [];
       if (item.inputType == 'radio' || item.inputType == 'checkbox' || item.inputType == 'prize') {
@@ -518,10 +578,9 @@ export default {
         for (let i = 0; i < scores.length; i++) {
           if (scores[i] > 0) {
             maxScore += scores[i];
-          } else {
-            minScore += scores[i];
           }
         }
+        minScore = Math.min(...scores);
       }
 
       return { maxScore, minScore }
@@ -566,6 +625,7 @@ export default {
         printItems: [],
         expanded: true,
         timestamp: Date.now(),
+        isConditional: true,
 
         conditionalItem: {
           showValue: null,

@@ -17,7 +17,7 @@ export default class ActivityFlow {
       isVis: initialActivityData.isVis || false,
       combineReports: initialActivityData.combineReports || false,
       reportIncludeItem: initialActivityData.reportIncludeItem || '',
-      showBadge: initialActivityData.showBadge || false,
+      showBadge: initialActivityData.showBadge || true,
       error: '',
       componentKey: 0,
       isItemEditable: true,
@@ -114,7 +114,7 @@ export default class ActivityFlow {
           const oldOrder = _.get(oldValue, field, []);
           const newOrder = _.get(newValue, field, []);
 
-          if (oldOrder.length == newOrder.length && JSON.stringify(oldOrder) != JSON.stringify(newOrder)) {
+          if (JSON.stringify(oldOrder) != JSON.stringify(newOrder)) {
             return ['order of activities has been updated']
           }
 

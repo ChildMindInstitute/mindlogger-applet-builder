@@ -478,7 +478,7 @@ export default {
     },
 
     isActivityValid(){
-      return this.isStimulusValid && this.isFixationValid && (this.buttons[0].name != '') && (this.buttons[1].name != '') && !(!this.threshold)
+      return this.isStimulusValid && this.isFixationValid && (this.buttons[0].name != '') && (this.buttons[1].name != '' || this.buttonCount == 1) && !(!this.threshold)
     },
 
     threshold() {

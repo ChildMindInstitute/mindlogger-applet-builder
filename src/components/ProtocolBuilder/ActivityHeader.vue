@@ -73,7 +73,7 @@
             </v-combobox>
 
             <div>
-              <v-btn icon @click="reportConfigDialog=true">
+              <v-btn icon @click="onShowReportConfig">
                 <img
                   height="25"
                   alt=""
@@ -274,7 +274,8 @@
     <Loading :loading="loading" />
 
     <ReportConfig
-      v-model="reportConfigDialog"
+      v-model="reportConfigDialog.visible"
+      :key="`report-config-${reportConfigDialog.key}`"
       :current-activity="currentActivity"
       :reportConfigs="protocol.reportConfigs"
       @updateItemValue="updateItemValue"
@@ -336,7 +337,10 @@ export default {
       alertFlag: false,
       alertMsg: '',
       show: false,
-      reportConfigDialog: false,
+      reportConfigDialog: {
+        visible: false,
+        key: 0,
+      },
     }
   },
   mounted() {
@@ -346,6 +350,12 @@ export default {
       'updateActivityMetaInfo',
       'deleteConditionals'
     ]),
+
+    onShowReportConfig () {
+      this.reportConfigDialog.visible = true;
+      this.reportConfigDialog.key++;
+    },
+
     updateItemValue (value) {
       this.updateActivityMetaInfo({
         reportIncludeItem: value

@@ -44,5 +44,7 @@ export default {
         allow:[]
       }
     }
-  ]
+  ],
+  allowSummary: false,
+  valid: true,
 }

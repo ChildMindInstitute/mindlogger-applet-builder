@@ -105,7 +105,7 @@ export default class Protocol {
 
   getReportConfigs () {
     const config = this.ref.reportConfigs;
-    return [
+    const data = [
       {
         "schema:name": "serverIp",
         "schema:value": config.serverIp,
@@ -135,8 +135,15 @@ export default class Protocol {
         "schema:name": "emailBody",
         "schema:value": config.emailBody,
         "@type": "schema:Text"
+      },
+      {
+        "schema:name": "serverAppletId",
+        "schema:value": config.serverAppletId,
+        "@type": "schema:Text"
       }
     ]
+
+    return data;
   }
 
   getContext(includeActivityPath = false) {
@@ -516,7 +523,8 @@ export default class Protocol {
         emailRecipients: [],
         includeUserId: false,
         includeCaseId: false,
-        emailBody: ''
+        emailBody: '',
+        serverAppletId: ''
       })
     };
 

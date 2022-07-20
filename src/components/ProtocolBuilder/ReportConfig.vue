@@ -173,7 +173,7 @@
               </div>
             </div>
 
-            <div class="my-4">
+            <!-- <div class="my-4">
               <div class="my-2">Attachment(s):</div>
               <div
                 v-for="(activity, index) in activityList"
@@ -195,7 +195,7 @@
                 >
                 <span>{{ getAttachmentName(activity) }}</span>
               </div>
-            </div>
+            </div> -->
 
             <div class="my-4">
               <div class="my-1">Body:</div>
@@ -396,6 +396,16 @@ export default {
       type: Object,
       required: false,
       default: () => null
+    },
+    updatePDFPassword: {
+      type: Function,
+      required: false,
+      default: null
+    },
+    isEditing: {
+      type: Boolean,
+      required: false,
+      default: false
     }
   },
 
@@ -403,7 +413,7 @@ export default {
     const itemValue = this.currentActivity && this.currentActivity.reportIncludeItem ||
             this.currentActivityFlow && this.currentActivityFlow.reportIncludeItem ||
             '';
-    const defaultEmail = 'Please see the report attached to this email.';
+    const defaultEmail = 'Please click this link to download the report.';
 
     return {
       defaultEmail,
@@ -419,6 +429,7 @@ export default {
       activityValue: this.currentActivity ? this.currentActivity.name : itemValue.split('/').shift() || '',
       includeItem: itemValue ? true : false,
       pdfServerError: false,
+      serverAppletId: this.reportConfigs.serverAppletId || '',
       serverConfigured: this.reportConfigs.serverIp && this.reportConfigs.publicEncryptionKey ? true : false
     }
   },
@@ -432,11 +443,40 @@ export default {
         this.$emit('updateItemValue', this.includeItem ? `${this.activityValue}/${this.itemValue}` : '');
         this.$emit('input', false);
       } else {
-        if (this.serverIp && this.publicEncryptionKey) {
-          let token = this.pdfToken;
-          api.verifyPDFServer(this.serverIp, this.publicEncryptionKey, token).then(() => {
+        if (
+          this.serverIp && this.publicEncryptionKey
+        ) {
+          if (this.serverIp == this.reportConfigs.serverIp && this.publicEncryptionKey == this.reportConfigs.publicEncryptionKey) {
             this.saveReport();
-          }).catch(e => {
+            return ;
+          }
+
+          let token = this.pdfToken;
+
+          api.verifyPDFServer(this.serverIp, this.publicEncryptionKey, token, this.serverAppletId).then((resp) => new Promise(
+            (resolve, reject) => {
+              this.serverAppletId = resp.data.serverAppletId;
+
+              if (this.isEditing) {
+                this.updatePDFPassword(
+                  (success) => {
+                    if (success) {
+                      this.saveReport();
+                    }
+                    resolve()
+                  },
+                  {
+                    publicKey: this.publicEncryptionKey,
+                    serverIp: this.serverIp,
+                    serverAppletId: this.serverAppletId
+                  }
+                )
+              } else {
+                this.saveReport();
+                resolve();
+              }
+            }
+          )).catch(e => {
             this.pdfServerError = true;
           });
         } else {
@@ -457,13 +497,25 @@ export default {
         includeCaseId: this.includeCaseId,
         emailBody: this.emailBody,
         emailRecipients: this.emailRecipients,
+        serverAppletId: this.serverAppletId,
       })
 
       this.$emit('input', false)
     },
 
     getAttachmentName (activity) {
-      let title = `REPORT_${this.name || 'Example Applet'}_`;
+      let subject = 'REPORT_';
+
+      if (this.includeUserId) {
+        subject += 'user123_';
+      }
+
+      if (this.includeCaseId) {
+        subject += 'case123_';
+      }
+      subject += `${this.name || 'Example Applet'}_`
+
+      let title = subject;
 
       if (activity) {
         if (this.currentActivityFlow && this.currentActivityFlow.combineReports) {
@@ -598,7 +650,7 @@ export default {
         items = activity.items;
       }
 
-      return items.map(item => item.name);
+      return items.filter(item => ['radio', 'checkbox', 'slider', 'text', 'date'].includes(item.inputType)).map(item => item.name);
     },
 
     name () {

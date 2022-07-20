@@ -141,7 +141,7 @@
           >
             <v-btn
               class="configure-reports"
-              @click="reportConfigDialog=true"
+              @click="onShowReportConfig"
             >
               <img
                 height="25"
@@ -189,7 +189,7 @@
               </v-combobox>
 
               <div>
-                <v-btn icon @click="reportConfigDialog=true">
+                <v-btn icon @click="onShowReportConfig">
                   <img
                     height="25"
                     alt=""
@@ -476,6 +476,13 @@
                 class="px-4"
                 disabled
               />
+
+              <div
+                v-if="activity.activityType === 'FLANKER'"
+                class="warning-message px-4 pb-2"
+              >
+                *The timestamps collected for an android are not as accurate as iOS devices.
+              </div>
             </v-card>
           </transition-group>
         </draggable>
@@ -492,8 +499,11 @@
     />
 
     <ReportConfig
-      v-model="reportConfigDialog"
+      v-model="reportConfigDialog.visible"
+      :key="`report-config-${reportConfigDialog.key}`"
       :reportConfigs="protocol.reportConfigs"
+      :updatePDFPassword="updatePDFPassword"
+      :isEditing="isEditing"
       @updateConfig="updateReportConfig"
     />
 
@@ -563,6 +573,10 @@
   .server-unconfigured {
     color: #FF0000;
   }
+
+  .warning-message {
+    color: #FF4346;
+  }
 </style>
 
 <script>
@@ -588,6 +602,18 @@ export default {
     draggable,
     ReportConfig,
   },
+  props: {
+    updatePDFPassword: {
+      type: Function,
+      required: false,
+      default: null
+    },
+    isEditing: {
+      type: Boolean,
+      required: false,
+      default: false,
+    }
+  },
   data () {
     return {
       markdownDialog: false,
@@ -599,7 +625,10 @@ export default {
       fileSuccessMsg: '',
       notify: {},
       textRules: [(v) => !!v.trim() || "This field is required"],
-      reportConfigDialog: false,
+      reportConfigDialog: {
+        visible: false,
+        key: 0
+      }
     }
   },
   computed: {
@@ -739,6 +768,12 @@ export default {
         'updateActivityList'
       ]
     ),
+
+    onShowReportConfig () {
+      this.reportConfigDialog.visible = true;
+      this.reportConfigDialog.key++;
+    },
+
     updateReportConfig (configs) {
       this.updateProtocolMetaInfo({
         reportConfigs: configs

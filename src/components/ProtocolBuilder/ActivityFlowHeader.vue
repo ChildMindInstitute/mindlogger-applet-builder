@@ -82,7 +82,7 @@
             </v-combobox>
 
             <div>
-              <v-btn icon @click="reportConfigDialog=true">
+              <v-btn icon @click="onShowReportConfig">
                 <img
                   height="25"
                   alt=""
@@ -127,7 +127,8 @@
     <Loading :loading="loading" />
 
     <ReportConfig
-      v-model="reportConfigDialog"
+      v-model="reportConfigDialog.visible"
+      :key="`report-config-${reportConfigDialog.key}`"
       :current-activity-flow="currentActivityFlow"
       :reportConfigs="protocol.reportConfigs"
       @updateItemValue="updateItemValue"
@@ -170,7 +171,10 @@ export default {
       isExpanded: true,
       loading: false,
       notify: {},
-      reportConfigDialog: false
+      reportConfigDialog: {
+        visible: false,
+        key: 0
+      }
     }
   },
   mounted() {
@@ -179,6 +183,11 @@ export default {
     ...mapMutations(config.MODULE_NAME, [
       'updateActivityFlowInfo',
     ]),
+    onShowReportConfig () {
+      this.reportConfigDialog.visible = true;
+      this.reportConfigDialog.key++;
+    },
+
     editActivtiyFlow () {
       this.isExpanded = !this.isExpanded;
       if (this.isExpanded) {
@@ -230,10 +239,10 @@ export default {
     },
     showBadge: {
       get: function () {
-        return this.currentActivityFlow && !this.currentActivityFlow.showBadge;
+        return this.currentActivityFlow && this.currentActivityFlow.showBadge;
       },
       set: function (name) {
-        this.updateActivityFlowInfo({ showBadge: !name });
+        this.updateActivityFlowInfo({ showBadge: name });
       }
     },
   },

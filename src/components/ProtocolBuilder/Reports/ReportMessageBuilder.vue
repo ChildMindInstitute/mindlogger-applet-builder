@@ -164,7 +164,11 @@ export default {
     },
 
     getQuestion (text) {
-      return text.replace(/[#*]/g, '').replace(/\!\[.*?\]\(.*?\)/g, '');
+      return text.replace(/[#*]/g, '')
+                .replace(/<\/?(div|span|a|img|b|h[\d]).*?>/g, '')
+                .replace(/\!\[.*?\]\(.*?\)/g, '')
+                .replace(/\+\+|\=\=|:::(\shljs-\S+)?|\*\*|[#-]/g, '')
+                .replace(/\|/g, '')
     }
   }
 }

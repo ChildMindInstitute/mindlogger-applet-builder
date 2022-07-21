@@ -549,7 +549,9 @@
           class="cropper"
           :src="cropper.src"
           :stencil-props="{
-            aspectRatio
+            aspectRatio,
+            minAspectRatio,
+            maxAspectRatio
           }"
         />
 
@@ -598,6 +600,14 @@ export default {
       default: '',
     },
     aspectRatio: {
+      type: Number,
+      default: 0
+    },
+    minAspectRatio: {
+      type: Number,
+      default: 0
+    },
+    maxAspectRatio: {
       type: Number,
       default: 0
     },

@@ -6,7 +6,7 @@ export default {
   items: [
     {
       name: "instructions",
-      question: "In this task, you will see a disc that will drift either to the left or right side of the screen.\n Your job will be to keep the disc in the middle of the screen.\n If the disc is moving to the right, tap left side of control bar to bring it back to the center.\n If the disc is moving to the left, tap right side of control bar to bring the disc back to center.\n Do not let the disc touch the walls to the far left or right of the screen.\n There will be two phases to this task, a Challenge Phase, and a Focus Phase.",
+      question: "In this task, you will see a disc that will drift either to the left or right side of the screen.\n Your job will be to keep the disc in the middle of the screen.\n If the disc is moving to the right, swipe left of control bar to bring it back to the center.\n If the disc is moving to the left, swipe right of control bar to bring the disc back to center.\n Do not let the disc touch the walls to the far left or right of the screen.\n There will be two phases to this task, a Challenge Phase, and a Focus Phase.",
       description: "Instructions for Stability Tracker",
       ui: {
         inputType: "markdownMessage",
@@ -257,5 +257,7 @@ export default {
         }
       ]
     }
-  ]
+  ],
+  allowSummary: false,
+  valid: true,
 }

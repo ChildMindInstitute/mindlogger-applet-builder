@@ -10,7 +10,12 @@
         @switchToLibrary="onSwitchToLibrary"
       />
       <ProtocolBuilder
-        v-if="currentScreen == config.PROTOCOL_SCREEN"
+        v-if="currentScreen === config.PROTOCOL_SCREEN || currentScreen === config.ACTIVITY_FLOW_SCREEN"
+        :updatePDFPassword="updatePDFPassword"
+        :isEditing="!!formattedOriginalProtocol"
+      />
+      <ActivityFlowBuilder
+        v-else-if="currentScreen === config.FLOW_BUILDER_SCREEN"
       />
       <ActivityBuilder
         v-else
@@ -47,8 +52,10 @@ import config from '../../config';
 
 import ProtocolBuilder from './ProtocolBuilder';
 import ActivityBuilder from './ActivityBuilder';
+import ActivityFlowBuilder from './ActivityFlowBuilder';
 
 import Protocol from '../../models/Protocol';
+import ActivityFlow from '../../models/ActivityFlow';
 import Activity from '../../models/Activity';
 import Item from '../../models/Item';
 import PrizeActivityBuilder from './PrizeActivity/PrizeActivityBuilder.vue';
@@ -63,6 +70,7 @@ export default {
     ProtocolBuilder,
     ActivityBuilder,
     PrizeActivityBuilder,
+    ActivityFlowBuilder,
   },
   props: {
     exportButton: {
@@ -95,6 +103,11 @@ export default {
       required: false,
       default: null,
     },
+    updatePDFPassword: {
+      type: Function,
+      required: false,
+      default: null,
+    },
     cacheData: {
       type: Object,
       required: false,
@@ -114,6 +127,11 @@ export default {
       type: Boolean,
       required: false,
       default: false
+    },
+    pdfServerToken: {
+      type: String,
+      required: false,
+      default: ''
     }
   },
   computed: {
@@ -123,7 +141,8 @@ export default {
       'activities',
       'prizeActivity',
       'templateUpdateRequest',
-      'themeId'
+      'themeId',
+      'formattedOriginalProtocol'
     ]),
     config() {
       return config;
@@ -154,7 +173,7 @@ export default {
 
     this.initThemes(this.themes);
     this.initThemeId(this.initialData);
-
+    this.setPDFToken(this.pdfServerToken);
     this.setVersions(this.versions);
     this.setNodeEnv(this.nodeEnv);
     this.setCurrentScreen(config.PROTOCOL_SCREEN);
@@ -211,6 +230,7 @@ export default {
       'updateTemplateRequestStatus',
       'setVersions',
       'setNodeEnv',
+      'setPDFToken',
       'resetProtocol',
     ]),
     ...mapGetters(config.MODULE_NAME, [
@@ -234,6 +254,7 @@ export default {
     async mergeStoreDataWithBasketApplets(storeData, basketApplets) {
       const activityModel = new Activity();
       const itemModel = new Item();
+      const activityFlowModel = new ActivityFlow();
 
       if (!storeData.id) {
         if (Object.entries(basketApplets).length === 1) {
@@ -242,20 +263,21 @@ export default {
             ... await Protocol.parseJSONLD(appletData.applet, appletData.protocol),
             valid: true,
             activities: [],
+            activityFlows: [],
             tokenPrizeModal: false,
           };
         }
       }
 
       Object.entries(basketApplets).map(([appletId, appletData]) => {
-        const { applet, activities, items, protocol } = appletData;
+        const { applet, activities, activityFlows = {}, items, protocol } = appletData;
 
-        let orders = _.get(applet, ['reprolib:terms/order', 0, '@list'], []).map(orderItem => orderItem['@id']);
-        if (!orders.length) {
-          orders = Object.keys(activities);
+        let activityOrders = _.get(applet, ['reprolib:terms/order', 0, '@list'], []).map(orderItem => orderItem['@id']);
+        if (!activityOrders.length) {
+          activityOrders = Object.keys(activities);
         }
 
-        orders.forEach((key) => {
+        activityOrders.forEach((key) => {
           const act = activities[key];
 
           if (!act || act.isPrize) {
@@ -289,6 +311,27 @@ export default {
 
           storeData.activities.push(activityBuilderData);
         });
+
+        let flowOrders = _.get(applet, ['reprolib:terms/activityFlowOrder', 0, '@list']).map(orderItem => orderItem['@id'])
+        let flowProperties = _.get(applet, ['reprolib:terms/activityFlowProperties'], []).map(property => ({
+          variableName: _.get(property, ['reprolib:terms/variableName', 0, '@value']),
+          isVis: _.get(property, ['reprolib:terms/isVis', 0, '@value']),
+        }))
+        if (!flowOrders.length) {
+          flowOrders = Object.keys(activityFlows);
+        }
+
+        flowOrders.forEach((key, index) => {
+          const flow = activityFlows[key];
+
+          const activityFlowInfo = ActivityFlow.parseJSONLD(flow);
+          const builderData = activityFlowModel.getActivityFlowBuilderData({
+            ...activityFlowInfo,
+            isVis: flowProperties[index].isVis
+          });
+
+          storeData.activityFlows.push(builderData);
+        })
       });
       return storeData;
     },

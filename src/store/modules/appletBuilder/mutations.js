@@ -1,5 +1,6 @@
 import Protocol from '../../../models/Protocol';
 import Activity from '../../../models/Activity';
+import ActivityFlow from '../../../models/ActivityFlow';
 import Item from '../../../models/Item';
 import CognitiveTasks from '../../cognitive-tasks';
 import { getInitialProtocol } from './state';
@@ -211,6 +212,113 @@ const itemMutations = {
   }
 };
 
+const activityFlowMutations = {
+  addActivityFlow(state, index) {
+    const activityFlowModel = new ActivityFlow;
+    const orderList = state.protocol.activities.map(activity => activity.name);
+    const activityFlow = {
+      ...activityFlowModel.getActivityFlowBuilderData({ orderList, isVis: true }),
+      index: index < 0 ? state.protocol.activities.length : index,
+      valid: false
+    };
+
+    if (index >= 0) {
+      state.protocol.activityFlows.splice(index, 0, activityFlow);
+
+      for (let i = index + 1; i < state.protocol.activityFlows.length; i++) {
+        state.protocol.activityFlows[i].index = i;
+      }
+    } else {
+      state.protocol.activityFlows.push(activityFlow);
+    }
+  },
+
+  deleteActivityFlow(state, index) {
+    state.protocol.activityFlows.splice(index, 1);
+  },
+
+  duplicateActivityFlow(state, index) {
+    const activityFlows = state.protocol.activityFlows;
+    const names = activityFlows.map((activityFlow) => activityFlow.name);
+    const activityFlow = activityFlows[index];
+
+    let suffix = 1;
+    while (names.includes(`${activityFlow.name} (${suffix})`)) {
+      suffix++;
+    }
+
+    const newActivityFlow = {
+      ...activityFlow,
+      id: null,
+      name: `${activityFlow.name} (${suffix})`,
+      index: index + 1,
+      timestamp: Date.now()
+    };
+
+    activityFlows.splice(index + 1, 0, newActivityFlow);
+
+    for (let i = index + 1; i < activityFlows.length; i += 1) {
+      activityFlows[i].index = i;
+    }
+  },
+
+  setCurrentActivityFlow(state, index) {
+    if (index < 0) {
+      state.currentActivityFlow = null;
+      return;
+    }
+    state.currentActivityFlow = state.protocol.activityFlows[index];
+  },
+
+  showOrHideActivityFlow(state, index) {
+    const isVis = !!state.protocol.activityFlows[index].isVis;
+    state.protocol.activityFlows[index].isVis = !isVis;
+  },
+
+  updateActivityFlowList(state, activityFlows) {
+    state.protocol.activityFlows = activityFlows;
+
+    for (let i = 0; i < state.protocol.activityFlows.length; i++) {
+      state.protocol.activityFlows[i].index = i;
+    }
+  },
+
+  addActivityToFlow(state, { name, index }) {
+    if (index < 0) {
+      state.currentActivityFlow.order.push(name);
+    } else {
+      state.currentActivityFlow.order.splice(index, 0, name);
+    }
+  },
+
+  updateActivityFlowInfo(state, obj) {
+    if (obj.name && state.currentActivityFlow.valid) {
+      for (const existing of state.protocol.activityFlows) {
+        if (existing != state.currentActivityFlow && existing.name == state.currentActivityFlow.name) {
+          existing.valid = ActivityFlow.checkValidation(existing);
+
+          if (existing.valid) {
+            break;
+          }
+        }
+      }
+    }
+
+    Object.assign(state.currentActivityFlow, obj);
+
+    if (!obj.hasOwnProperty('valid')) {
+      state.currentActivityFlow.valid = ActivityFlow.checkValidation(state.currentActivityFlow);
+    }
+
+    for (const existing of state.protocol.activityFlows) {
+      if (existing != state.currentActivityFlow && existing.name == state.currentActivityFlow.name && existing.valid) {
+        state.currentActivityFlow.valid = false;
+        break;
+      }
+    }
+  },
+}
+
 const activityMutations = {
   setCurrentActivity (state, index) {
     if (index < 0) {
@@ -261,6 +369,7 @@ const activityMutations = {
         timestamp: Date.now() + index
       })),
       finalSubScale: { ...activity.finalSubScale },
+      reports: JSON.parse(JSON.stringify(activity.reports)),
       subScales: [...activity.subScales],
       conditionalItems,
       index: index+1,
@@ -296,7 +405,6 @@ const activityMutations = {
       const itemModel = new Item();
 
       content = JSON.parse(JSON.stringify(CognitiveTasks[type]));
-      content.valid = true;
       content.items = content.items.map(item => itemModel.getItemBuilderData(item))
 
       const names = state.protocol.activities.map(activity => activity.name);
@@ -333,6 +441,18 @@ const activityMutations = {
 
           if (existing.valid) {
             break;
+          }
+        }
+      }
+    }
+
+    if (obj.name) {
+      const originalName = state.currentActivity.name;
+
+      for (const flow of state.protocol.activityFlows) {
+        for (let i = 0; i < flow.order.length; i++) {
+          if (flow.order[i] === originalName) {
+            flow.order[i] = obj.name;
           }
         }
       }
@@ -382,7 +502,7 @@ const activityMutations = {
     for (let i = 0; i < state.protocol.activities.length; i++) {
       state.protocol.activities[i].index = i;
     }
-  }
+  },
 };
 
 const subScaleMutations = {
@@ -423,6 +543,65 @@ const subScaleMutations = {
   }
 };
 
+const reportMutations = {
+  addReportSection (state, type) {
+    const currentActivity = state.currentActivity;
+    const report = {
+      prefLabel: '',
+      id: '',
+      dataType: type,
+      message: '',
+      showMessage: true,
+      printItems: [],
+      showItems: false,
+      jsExpression: '',
+      valid: false,
+      timestamp: Date.now(),
+      initialized: false
+    };
+
+    if (type == 'score') {
+      Object.assign(report, {
+        outputType: 'cumulative',
+        printItems: [],
+        conditionals: [],
+        minScore: 0,
+        maxScore: 0
+      })
+    } else {
+      Object.assign(report, {
+        conditionalItem: {
+          showValue: null,
+          conditions: [],
+          operation: "ALL",
+          valid: true
+        }
+      })
+    }
+
+    currentActivity.reports.push(report);
+  },
+
+  updateReportList (state, reports) {
+    if (state.currentActivity) {
+      state.currentActivity.reports = reports;
+    }
+  },
+
+  updateReportInfo (state, { index, obj }) {
+    const currentActivity = state.currentActivity;
+    Object.assign(currentActivity.reports[index], obj);
+
+    currentActivity.reports[index].valid = Activity.checkReportValidation(currentActivity.reports[index], currentActivity.reports);
+  },
+
+  deleteReportSection (state, index) {
+    if (state.currentActivity) {
+      state.currentActivity.reports.splice(index, 1);
+    }
+  },
+}
+
 const conditionalMutations = {
   addConditional (state) {
     if (state.currentActivity) {
@@ -452,7 +631,9 @@ const conditionalMutations = {
 
 export default {
   ...activityMutations,
+  ...activityFlowMutations,
   ...itemMutations,
+  ...reportMutations,
   ...subScaleMutations,
   ...conditionalMutations,
 
@@ -486,7 +667,7 @@ export default {
     state.originalThemeId = themeId;
   },
 
-  setCurrentScreen (state, screen) {
+  setCurrentScreen(state, screen) {
     state.currentScreen = screen;
   },
 
@@ -528,4 +709,8 @@ export default {
   setNodeEnv (state, nodeEnv) {
     state.nodeEnv = nodeEnv;
   },
+
+  setPDFToken (state, token) {
+    state.pdfToken = token;
+  }
 }

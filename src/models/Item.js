@@ -47,7 +47,6 @@ export default class Item {
       section: initialItemData.section || "",
       inputOptions: initialItemData.inputOptions || [],
       media: initialItemData.media || {},
-      cumulativeScores: initialItemData.cumulativeScores  || [],
       allowEdit: initialItemData.allowEdit === undefined ? true : initialItemData.allowEdit,
       markdownText: (initialItemData.question || ''),
       valid: initialItemData.valid === undefined ? true : initialItemData.valid,
@@ -305,6 +304,7 @@ export default class Item {
       }
 
       return {
+        ...this.ref.responseOptions,
         "removeBackOption": this.ref.options.removeBackOption,
       }
     }
@@ -317,16 +317,8 @@ export default class Item {
     }
   }
 
-  getCumulativeScores() {
-    if (this.ref.inputType === 'cumulativeScore') {
-      return this.ref.cumulativeScores.map(({ compute, messages }) => ({ compute, messages }));
-    }
-    return [];
-  }
-
   getCompressedSchema() {
     const responseOptions = this.getResponseOptions();
-    const cumulativeScores = this.getCumulativeScores();
 
     const schema = {
         "@context": [
@@ -350,10 +342,6 @@ export default class Item {
     };
     if (Object.keys(responseOptions).length !== 0) {
       schema["responseOptions"] = responseOptions;
-    }
-
-    if (this.ref.inputType === 'cumulativeScore') {
-      schema['cumulativeScores'] = cumulativeScores;
     }
 
     if (this.ref.inputType === 'radio' || this.ref.inputType === 'checkbox' || this.ref.inputType === 'prize' || this.ref.inputType == 'stackedRadio' || this.ref.inputType == 'stackedCheckbox' || this.ref.inputType == 'dropdownList') {
@@ -385,11 +373,6 @@ export default class Item {
       schema["ui"] = {
         inputType: this.ref.inputType
       };
-
-      if (this.ref.inputType === "cumulativeScore") {
-        schema["ui"]["allow"] = schema["ui"]["allow"] || [];
-        schema["ui"]["allow"].push("disableBack");
-      }
     }
 
     if (this.ref.id) {
@@ -575,28 +558,28 @@ export default class Item {
     const inputOptionsListUpdate = (field) => {
 
       const oldOptions = _.get(oldValue, field, []).map(option => {
-        return { value: option['schema:value'], name: option['schema:name'] }
+        return { value: option['schema:value'], name: option['schema:name'], items: option['schema:itemListElement'] || [], image: option['schema:image'] }
       });
 
       const newOptions = _.get(newValue, field, []).map(option => {
-        return { value: option['schema:value'], name: option['schema:name'] }
+        return { value: option['schema:value'], name: option['schema:name'], items: option['schema:itemListElement'] || [], image: option['schema:image'] }
       });
 
       const removedOptions = oldOptions.filter(option => {
         return newOptions.find(newOption => {
-          return option.value === newOption.value
+          return JSON.stringify(option) === JSON.stringify(newOption)
         }) ? false : true
       });
 
       const insertedOptions = newOptions.filter(newOption => {
         return oldOptions.find(option => {
-          return option.value === newOption.value
+          return JSON.stringify(option) === JSON.stringify(newOption)
         }) ? false : true
       });
 
       return [
-        ...removedOptions.map(option => `${option.name}: ${option.value} option was removed`),
-        ...insertedOptions.map(option => `${option.name}: ${option.value} option was inserted`),
+        ...removedOptions.map(option => `${option.name} option was removed`),
+        ...insertedOptions.map(option => `${option.name} option was inserted`),
       ];
     };
 
@@ -908,6 +891,7 @@ export default class Item {
     };
 
     let responseOptions = item['reprolib:terms/responseOptions'];
+    let optionsObj = item['reprolib:terms/options'];
 
     let itemType = itemContent.ui.inputType;
 
@@ -1008,6 +992,11 @@ export default class Item {
       if (removeBackOption) {
         itemContent.removeBackOption =
           _.get(removeBackOption, [0, '@value']);
+      }
+
+      if (!itemContent.removeBackOption && optionsObj) {
+        let removeBackObj = _.get(optionsObj, [0, 'reprolib:terms/removeBackOption']);
+        itemContent.removeBackOption = removeBackObj && _.get(removeBackObj, [0, '@value']);
       }
 
       if (removeUndoOption) {
@@ -1393,6 +1382,8 @@ export default class Item {
             _.get(responseOptions, [0, 'schema:maxValue', 0, '@value']),
           'schema:minValue':
             _.get(responseOptions, [0, 'schema:minValue', 0, '@value']),
+          'schema:image':
+            _.get(responseOptions, [0, 'schema:image']),
         };
       }
       if (itemType === 'drawing') {
@@ -1439,11 +1430,14 @@ export default class Item {
         const type = _.get(option, [TYPE, 0]);
         const name = _.get(option, [NAME, 0, '@value']);
         const value = _.get(option, [VALUE, 0, '@value']);
+        const image = _.get(option, [IMAGE]);
         const itemList = _.get(option, [ITEM_LIST]);
 
         const contentUrl = option[CONTENT_URL];
 
         if (name) modifiedOption[NAME] = name;
+
+        if (image) modifiedOption[IMAGE] = image;
 
         if (value !== undefined) modifiedOption[VALUE] = value;
 
@@ -1452,19 +1446,18 @@ export default class Item {
         if (type) modifiedOption[TYPE] = type;
 
         if (itemList) {
-          modifiedOption[ITEM_LIST] = itemList.map(item => ({
-            [NAME]: _.get(item, [NAME, 0, '@value']),
-            [VALUE]: _.get(item, [VALUE, 0, '@value']),
-            [IMAGE]: _.get(item, [IMAGE]),
-            [TYPE]: _.get(item, [TYPE, 0]),
-            responseOptions: {
-              [TYPE]: "xsd:anyURI",
-              choices: _.get(item, ['reprolib:terms/responseOptions', 0, 'schema:itemListElement'], []).map(choice => ({
-                [NAME]: _.get(choice, [NAME, 0, '@value']),
-                [VALUE]: _.get(choice, [VALUE, 0, '@value'])
-              }))
+          modifiedOption[ITEM_LIST] = itemList.map(item => {
+            const order = _.get(item, ['reprolib:terms/order', 0, '@list'], []).map(item => item['@id']);
+
+            return {
+              [NAME]: _.get(item, [NAME, 0, '@value']),
+              [VALUE]: _.get(item, [VALUE, 0, '@value']),
+              [IMAGE]: _.get(item, [IMAGE]),
+              [TYPE]: _.get(item, [TYPE, 0]),
+              order: order.length ? order : undefined,
+              '@id': _.get(item, ['@id']),
             }
-          }))
+          })
         }
 
         if(!_.isEmpty(modifiedOption))
@@ -1513,7 +1506,6 @@ export default class Item {
 
     itemContent.valid = true;
 
-
     return itemContent;
   }
 
@@ -1559,8 +1551,8 @@ export default class Item {
       || (item.options && item.options.valid === false)
       || !item.question
       || (item.inputType !== "markdownMessage"
-        && item.inputType !== "cumulativeScore"
         && item.inputType !== "stabilityTracker"
+        && item.inputType !== "visual-stimulus-response"
         && !item.question.text)) {
       return false;
     }
@@ -1568,16 +1560,16 @@ export default class Item {
       return false;
     }
 
-    if (item.inputType == "stabilityTracker") {
-      const getInputOption = (name) => {
-        const inputOption = item.inputOptions.find(option => option['schema:name'] == name);
-        if (inputOption) {
-          return inputOption['schema:value'];
-        }
-
-        return '';
+    const getInputOption = (name, returnValue = true) => {
+      const inputOption = item.inputOptions.find(option => option['schema:name'] == name);
+      if (inputOption) {
+        return returnValue ? inputOption['schema:value'] : inputOption;
       }
 
+      return '';
+    }
+
+    if (item.inputType == "stabilityTracker") {
       const phaseType = getInputOption('phaseType');
       const durationMins = getInputOption('durationMins');
       const lambdaSlope = getInputOption('lambdaSlope');
@@ -1596,6 +1588,18 @@ export default class Item {
       }
     }
 
+    if (item.inputType == "visual-stimulus-response") {
+      const blocks = getInputOption('blocks', false);
+      if (!blocks['schema:itemListElement'].length) {
+        return false;
+      }
+
+      const trials = getInputOption('trials', false);
+      if (!trials['schema:itemListElement'].length) {
+        return false;
+      }
+    }
+
     if (item.inputType === "ageSelector"
       && (item.options.minAge === "" || item.options.maxAge === "")) {
       return false;
@@ -1610,13 +1614,6 @@ export default class Item {
       }
     }
 
-    if (item.cumulativeScores) {
-      for (let i = 0; i < item.cumulativeScores.length; i++) {
-        if (!item.cumulativeScores[i].valid) {
-          return false;
-        }
-      }
-    }
     if (item.options && Array.isArray(item.options.options)) {
       for (let option of item.options.options) {
         if (option.valid === false) {

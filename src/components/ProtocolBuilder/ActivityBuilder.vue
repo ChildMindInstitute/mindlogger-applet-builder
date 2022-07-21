@@ -24,12 +24,24 @@
         v-if="currentScreen == config.CONDITIONAL_SCREEN"
         class="pb-2"
       />
+
+      <Reports
+        v-if="currentScreen == config.REPORT_SCREEN"
+        class="pb-2"
+      />
     </template>
 
     <template
       v-else-if="currentActivity.activityType == 'CST_GYRO' || currentActivity.activityType == 'CST_TOUCH'"
     >
       <CSTBuilder
+      />
+    </template>
+
+    <template
+      v-else-if="currentActivity.activityType == 'FLANKER'"
+    >
+      <FlankerBuilder
       />
     </template>
   </div>
@@ -42,7 +54,9 @@ import ActivityHeader from './ActivityHeader';
 import ItemList from './Items/ItemList';
 import SubScaleList from './SubScales/SubScaleList';
 import ConditionalList from './Conditionals/ConditionalList';
+import Reports from './Reports/Reports';
 import CSTBuilder from './CognitiveActivityBuilders/CSTBuilder';
+import FlankerBuilder from './CognitiveActivityBuilders/FlankerBuilder';
 
 export default {
   components: {
@@ -51,6 +65,8 @@ export default {
     SubScaleList,
     ConditionalList,
     CSTBuilder,
+    FlankerBuilder,
+    Reports,
   },
   data() {
     return {

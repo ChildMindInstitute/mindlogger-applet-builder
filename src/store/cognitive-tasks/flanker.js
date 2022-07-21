@@ -1,6 +1,239 @@
 
+const getTrial = (lastPractice) => ({
+  name: "trial",
+  question: "",
+  description: "Flanker practice",
+  ui: {
+    inputType: "visual-stimulus-response",
+    allow: ["disableBack"]
+  },
+  inputOptions: [
+    {
+      "@type": "schema:ItemList",
+      "schema:name": "trials",
+      "schema:numberOfItems": 0,
+      "schema:itemListElement": [
+      ]
+    },
+    {
+      "@type": "schema:ItemList",
+      "schema:name": "blocks",
+      "schema:numberOfItems": 5,
+      "schema:itemListElement": [
+      ]
+    },
+    {
+      "schema:name": "buttons",
+      "schema:itemListElement": [
+        {
+          "schema:name": "",
+          "schema:value": 0,
+          "schema:image": ""
+        },
+        {
+          "schema:name": "",
+          "schema:value": 1,
+          "schema:image": ""
+        }
+      ]
+    },
+    {
+      "@type": "schema:Boolean",
+      "schema:name": "showFixation",
+      "schema:value": false
+    },
+    {
+      "@type": "schema:Boolean",
+      "schema:name": "showFeedback",
+      "schema:value": true
+    },
+    {
+      "@type": "schema:Boolean",
+      "schema:name": "showResults",
+      "schema:value": true
+    },
+    {
+      "@type": "schema:Text",
+      "schema:name": "samplingMethod",
+      "schema:value": "randomize-order"
+    },
+    {
+      "@type": "schema:Text",
+      "schema:name": "nextButton",
+      "schema:value": "OK",
+    },
+    {
+      "@type": "schema:Number",
+      "schema:name": "sampleSize",
+      "schema:value": 1
+    },
+    {
+      "@type": "schema:Number",
+      "schema:name": "trialDuration",
+      "schema:value": 3000
+    },
+    {
+      "@type": "schema:Number",
+      "schema:name": "fixationDuration",
+      "schema:value": 0,
+    },
+    {
+      "@type": "schema:Text",
+      "schema:name": "fixationScreen",
+      "schema:value": "",
+      "schema:image": ""
+    },
+    {
+      "@type": "schema:Number",
+      "schema:name": "minimumAccuracy",
+      "schema:value": 75
+    },
+    {
+      "@type": "schema:Number",
+      "schema:name": "maxRetryCount",
+      "schema:value": 3
+    },
+    {
+      "@type": "schema:Text",
+      "schema:name": "blockType",
+      "schema:value": "practice"
+    },
+    {
+      "@type": "schema:Boolean",
+      "schema:name": "lastPractice",
+      "schema:value": lastPractice
+    },
+    {
+      "@type": "schema:Number",
+      "schema:name": "blockIndex",
+      "schema:value": 0
+    }
+  ]
+})
+
+const getTest = (lastTest, blockIndex) => ({
+  question: "",
+  description: "Flanker practice",
+  ui: {
+    inputType: "visual-stimulus-response",
+    allow: ["disableBack"]
+  },
+  inputOptions: [
+    {
+      "@type": "schema:ItemList",
+      "schema:name": "trials",
+      "schema:numberOfItems": 0,
+      "schema:itemListElement": [
+      ]
+    },
+    {
+      "@type": "schema:ItemList",
+      "schema:name": "blocks",
+      "schema:numberOfItems": 0,
+      "schema:itemListElement": [
+      ]
+    },
+    {
+      "schema:name": "buttons",
+      "schema:itemListElement": [
+        {
+          "schema:name": "",
+          "schema:value": 0,
+          "schema:image": ""
+        },
+        {
+          "schema:name": "",
+          "schema:value": 1,
+          "schema:image": ""
+        }
+      ]
+    },
+    {
+      "@type": "schema:Boolean",
+      "schema:name": "showFixation",
+      "schema:value": false
+    },
+    {
+      "@type": "schema:Boolean",
+      "schema:name": "showFeedback",
+      "schema:value": false
+    },
+    {
+      "@type": "schema:Boolean",
+      "schema:name": "showResults",
+      "schema:value": true
+    },
+    {
+      "@type": "schema:Text",
+      "schema:name": "samplingMethod",
+      "schema:value": "randomize-order"
+    },
+    {
+      "@type": "schema:Text",
+      "schema:name": "nextButton",
+      "schema:value": "Continue",
+    },
+    {
+      "@type": "schema:Number",
+      "schema:name": "sampleSize",
+      "schema:value": 1
+    },
+    {
+      "@type": "schema:Number",
+      "schema:name": "trialDuration",
+      "schema:value": 3000
+    },
+    {
+      "@type": "schema:Number",
+      "schema:name": "fixationDuration",
+      "schema:value": 0,
+    },
+    {
+      "@type": "schema:Text",
+      "schema:name": "fixationScreen",
+      "schema:value": "",
+      "schema:image": ""
+    },
+    {
+      "@type": "schema:Text",
+      "schema:name": "blockType",
+      "schema:value": "test"
+    },
+    {
+      "@type": "schema:Boolean",
+      "schema:name": "lastTest",
+      "schema:value": lastTest
+    },
+    {
+      "@type": "schema:Number",
+      "schema:name": "blockIndex",
+      "schema:value": blockIndex
+    },
+  ]
+})
+
+const restartInstructions = {
+  question: "## Instructions\nPress the Next button to restart block.",
+  description: "Instructions for the Practice Phase",
+  options: {options: []},
+  ui: {
+    inputType: "markdownMessage",
+    allow: ["disableBack"]
+  }
+}
+
+const nextInstructions = {
+  question: "## Instructions\nPress the Next button to start next block.",
+  description: "Instructions for the Practice Phase",
+  options: {options: []},
+  ui: {
+    inputType: "markdownMessage",
+    allow: ["disableBack"]
+  }
+}
+
 export default {
-  name: "Flanker_360",
+  name: "Simple & Choice Reaction Time Task Builder",
   activityType: "FLANKER",
   description: "This activity contains Flanker item.",
   items: [
@@ -23,186 +256,24 @@ export default {
       }
     },
     {
+      ...getTrial(false),
       name: "trial",
-      question: "",
-      description: "Flanker practice",
-      ui: {
-        inputType: "visual-stimulus-response",
-        allow: ["disableBack"]
-      },
-      inputOptions: [
-        {
-          "@type": "schema:ItemList",
-          "schema:name": "trials",
-          "schema:numberOfItems": 6,
-          "schema:itemListElement": [
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<<<<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<><<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">><>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">>>>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "--<--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "-->--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
-            }
-          ]
-        },
-        {
-          "@type": "schema:Boolean",
-          "schema:name": "showFixation",
-          "schema:value": true
-        },
-        {
-          "@type": "schema:Boolean",
-          "schema:name": "showFeedback",
-          "schema:value": true
-        },
-        {
-          "@type": "schema:Boolean",
-          "schema:name": "showResults",
-          "schema:value": true
-        },
-        {
-          "@type": "schema:Text",
-          "schema:name": "samplingMethod",
-          "schema:value": "randomize-order"
-        },
-        {
-          "@type": "schema:Text",
-          "schema:name": "nextButton",
-          "schema:value": "OK",
-        },
-        {
-          "@type": "schema:Number",
-          "schema:name": "sampleSize",
-          "schema:value": 5
-        },
-        {
-          "@type": "schema:Number",
-          "schema:name": "trialDuration",
-          "schema:value": 3000
-        },
-        {
-          "@type": "schema:Number",
-          "schema:name": "minimumAccuracy",
-          "schema:value": 75
-        },
-        {
-          "@type": "schema:Number",
-          "schema:name": "maxRetryCount",
-          "schema:value": 3
-        },
-        {
-          "@type": "schema:Number",
-          "schema:name": "blockIndex",
-          "schema:value": 0
-        }
-      ]
+    },
+    {
+      ...restartInstructions,
+      name: "trial2-instructions"
+    },
+    {
+      ...getTrial(false),
+      name: "trial2",
+    },
+    {
+      ...restartInstructions,
+      name: "trial3-instructions"
+    },
+    {
+      ...getTrial(true),
+      name: "trial3",
     },
     {
       name: "test-instructions",
@@ -214,887 +285,26 @@ export default {
       }
     },
     {
-      name: "test1",
-      question: "",
-      description: "Flanker practice",
-      ui: {
-        inputType: "visual-stimulus-response",
-        allow: ["disableBack"]
-      },
-      inputOptions: [
-        {
-          "@type": "schema:ItemList",
-          "schema:name": "trials",
-          "schema:numberOfItems": 12,
-          "schema:itemListElement": [
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<<<<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<><<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">><>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">>>>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "--<--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "-->--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<<<<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<><<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">><>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">>>>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "--<--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "-->--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
-            }
-          ]
-        },
-        {
-          "@type": "schema:Boolean",
-          "schema:name": "showFixation",
-          "schema:value": true
-        },
-        {
-          "@type": "schema:Boolean",
-          "schema:name": "showFeedback",
-          "schema:value": false
-        },
-        {
-          "@type": "schema:Boolean",
-          "schema:name": "showResults",
-          "schema:value": true
-        },
-        {
-          "@type": "schema:Text",
-          "schema:name": "samplingMethod",
-          "schema:value": "randomize-order"
-        },
-        {
-          "@type": "schema:Text",
-          "schema:name": "nextButton",
-          "schema:value": "Continue",
-        },
-        {
-          "@type": "schema:Number",
-          "schema:name": "sampleSize",
-          "schema:value": 10
-        },
-        {
-          "@type": "schema:Number",
-          "schema:name": "trialDuration",
-          "schema:value": 3000
-        },
-        {
-          "@type": "schema:Number",
-          "schema:name": "blockIndex",
-          "schema:value": 1
-        }
-      ]
+      ...getTest(false, 1),
+      name: "test1"
     },
     {
-      name: "test2-instructions",
-      question: "## Instructions\nPress the Next button to start next block.",
-      description: "Instructions for the Practice Phase",
-      options: {options: []},
-      ui: {
-        inputType: "markdownMessage",
-        allow: ["disableBack"]
-      }
+      ...nextInstructions,
+      name: "test2-instructions"
     },
     {
-      name: "test2",
-      question: "",
-      description: "Flanker practice",
-      ui: {
-        inputType: "visual-stimulus-response",
-        allow: ["disableBack"]
-      },
-      inputOptions: [
-        {
-          "@type": "schema:ItemList",
-          "schema:name": "trials",
-          "schema:numberOfItems": 12,
-          "schema:itemListElement": [
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<<<<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<><<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">><>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">>>>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "--<--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "-->--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<<<<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<><<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">><>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">>>>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "--<--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "-->--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
-            }
-          ]
-        },
-        {
-          "@type": "schema:Boolean",
-          "schema:name": "showFixation",
-          "schema:value": true
-        },
-        {
-          "@type": "schema:Boolean",
-          "schema:name": "showFeedback",
-          "schema:value": false
-        },
-        {
-          "@type": "schema:Boolean",
-          "schema:name": "showResults",
-          "schema:value": true
-        },
-        {
-          "@type": "schema:Text",
-          "schema:name": "samplingMethod",
-          "schema:value": "randomize-order"
-        },
-        {
-          "@type": "schema:Text",
-          "schema:name": "nextButton",
-          "schema:value": "Continue",
-        },
-        {
-          "@type": "schema:Number",
-          "schema:name": "sampleSize",
-          "schema:value": 10
-        },
-        {
-          "@type": "schema:Number",
-          "schema:name": "trialDuration",
-          "schema:value": 3000
-        },
-        {
-          "@type": "schema:Number",
-          "schema:name": "blockIndex",
-          "schema:value": 2
-        }
-      ]
+      ...getTest(false, 2),
+      name: "test2"
     },
     {
-      name: "test3-instructions",
-      question: "## Instructions\nPress the Next button to start next block.",
-      description: "Instructions for the Practice Phase",
-      options: {options: []},
-      ui: {
-        inputType: "markdownMessage",
-        allow: ["disableBack"]
-      }
+      ...nextInstructions,
+      name: "test3-instructions"
     },
     {
-      name: "test3",
-      question: "",
-      description: "Flanker practice",
-      ui: {
-        inputType: "visual-stimulus-response",
-        allow: ["disableBack"]
-      },
-      inputOptions: [
-        {
-          "@type": "schema:ItemList",
-          "schema:name": "trials",
-          "schema:numberOfItems": 12,
-          "schema:itemListElement": [
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<<<<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<><<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">><>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">>>>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "--<--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "-->--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<<<<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "<<><<",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">><>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": ">>>>>",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "--<--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 0
-            },
-            {
-              "@type": "schema:Property",
-              "schema:name": "q1",
-              "schema:image": "-->--",
-              "responseOptions": {
-                "@type": "xsd:anyURI",
-                "choices": [
-                  {
-                    "schema:name": "<",
-                    "schema:value": 0
-                  },
-                  {
-                    "schema:name": ">",
-                    "schema:value": 1
-                  }
-                ]
-              },
-              "schema:value": 1
-            }
-          ]
-        },
-        {
-          "@type": "schema:Boolean",
-          "schema:name": "showFixation",
-          "schema:value": true
-        },
-        {
-          "@type": "schema:Boolean",
-          "schema:name": "showFeedback",
-          "schema:value": false
-        },
-        {
-          "@type": "schema:Boolean",
-          "schema:name": "showResults",
-          "schema:value": true
-        },
-        {
-          "@type": "schema:Text",
-          "schema:name": "samplingMethod",
-          "schema:value": "randomize-order"
-        },
-        {
-          "@type": "schema:Text",
-          "schema:name": "nextButton",
-          "schema:value": "Finish",
-        },
-        {
-          "@type": "schema:Boolean",
-          "schema:name": "lastScreen",
-          "schema:value": true
-        },
-        {
-          "@type": "schema:Number",
-          "schema:name": "sampleSize",
-          "schema:value": 10
-        },
-        {
-          "@type": "schema:Number",
-          "schema:name": "trialDuration",
-          "schema:value": 3000
-        },
-        {
-          "@type": "schema:Number",
-          "schema:name": "blockIndex",
-          "schema:value": 3
-        }
-      ]
+      ...getTest(true, 3),
+      name: "test3"
     },
-  ]
+  ],
+  allowSummary: false,
+  valid: false,
 }

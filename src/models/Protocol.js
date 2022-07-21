@@ -457,6 +457,13 @@ export default class Protocol {
       });
     }
 
+    if (activityFlowLogs.length) {
+      result.push({
+        name: 'activity flows',
+        children: activityFlowLogs
+      })
+    }
+
     /** insert id in the result data */
     const que = [result];
     let id = 0;

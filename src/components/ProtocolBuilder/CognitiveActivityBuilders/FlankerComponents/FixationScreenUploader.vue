@@ -161,7 +161,7 @@ import ConfirmationDialog from './ConfirmationDialog.vue';
 
 export default {
   components: {
-    ConfirmationDialog,
+    // ConfirmationDialog,
   },
 
   props: {

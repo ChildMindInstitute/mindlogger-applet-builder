@@ -1206,7 +1206,7 @@ export default class Activity {
   }
 
   static checkReportValidation (report, allReports) {
-    if (!report.prefLabel || !report.prefLabel.match(/^[a-zA-Z_]+$/)) {
+    if (!report.prefLabel || !report.prefLabel.match(/^[a-zA-Z_0-9 ]+$/) || report.prefLabel.match(/^\s+|\s+$/g)) {
       return false;
     }
 

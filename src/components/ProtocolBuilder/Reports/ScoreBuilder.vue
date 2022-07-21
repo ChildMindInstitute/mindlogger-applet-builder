@@ -16,10 +16,13 @@
       <v-row>
         <v-col>
           <v-text-field
-            v-model.lazy="name"
+            v-model="name"
             class="mr-6"
             label="Score Title"
-            :error-messages="nameErrorMsg"
+            :error-messages="showTitleError ? nameErrorMsg : ''"
+            @blur="() => showTitleError=true"
+            @click="() => showTitleError=false"
+            @hide-details="showTitleError"
           />
         </v-col>
 
@@ -43,7 +46,6 @@
             class="pt-0 mt-0"
             :value="report.id"
             hide-details
-            :error-messages="nameErrorMsg"
             readonly
           />
         </v-col>
@@ -222,7 +224,10 @@
                     v-model="conditional.prefLabel"
                     @input="onConditionalNameChanged(conditional)"
                     label="Score Condition Name"
-                    :error-messages="getConditionalNameError(conditional)"
+                    :error-messages="showConditionalError ? getConditionalNameError(conditional) : ''"
+                    @blur="() => showConditionalError=true"
+                    @click="() => showConditionalError=false"
+                    @hide-details="showConditionalError"
                   />
                 </v-col>
 
@@ -247,7 +252,6 @@
                     :value="conditional.id"
                     hide-details
                     readonly
-                    :error-messages="nameErrorMsg || getConditionalNameError(conditional)"
                   />
                 </v-col>
               </v-row>
@@ -445,7 +449,9 @@ export default {
       maxScore: this.report.maxScore,
       timerId: null,
       showScoreTitleVariableWarning: false,
-      scoreTitleValue: this.report.prefLabel
+      scoreTitleValue: this.report.prefLabel,
+      showTitleError: false,
+      showConditionalError: false
     }
   },
 
@@ -481,7 +487,7 @@ export default {
         return 'This is a required field';
       }
 
-      if (!this.name.match(/^[a-zA-Z_0-9]+$/)) {
+      if (!this.name.match(/^[a-zA-Z_0-9 ]+$/) || this.name.match(/^\s+|\s+$/g)) {
         return 'Letters and underscores are only allowed. Please fix.';
       }
 
@@ -540,13 +546,7 @@ export default {
   methods: {
     onScoreTitleChange(value){
       let message = this.report.message;
-
-      let scoreId = '';
-      if (value.length > 0 && !value.match(/^[a-zA-Z_0-9]+$/)) {
-        scoreId = this.report.id;
-      }else{
-        scoreId = this.getScoreId(value, this.outputType.value);
-      }
+      let scoreId = this.getScoreId(value, this.outputType.value);
 
       if (!this.report.initialized) {
         message = this.messageTemplate.replace('{score_id}', scoreId).replace('{score_title}', value);
@@ -658,9 +658,11 @@ export default {
         return 'This is a required field';
       }
 
-      if (!conditional.prefLabel.match(/^[a-zA-Z_0-9]+$/)) {
+
+      if (!conditional.prefLabel.match(/^[a-zA-Z_0-9 ]+$/) || conditional.prefLabel.match(/^\s+|\s+$/g)) {
         return 'Letters and underscores are only allowed. Please fix.';
       }
+
       if (this.conditionals.find(d => d.prefLabel == conditional.prefLabel && d !== conditional)) {
         return 'That title is already in use. Please use a different title.';
       }
@@ -685,14 +687,10 @@ export default {
     },
 
     onConditionalNameChanged (conditional) {
-      if (conditional.prefLabel.length > 0 && !conditional.prefLabel.match(/^[a-zA-Z_0-9]+$/) || this.nameErrorMsg.length > 0) {
-        this.$set(conditional, 'valid', this.checkConditionalValidation(conditional));
-      }else{
-        this.$set(conditional, 'id', this.report.id + '_' + conditional.prefLabel.toLowerCase().replace(/\s/g, '_').replace(/[()/]/g, ''));
-        this.$set(conditional, 'valid', this.checkConditionalValidation(conditional));
-      }
-      this.update();
+      this.$set(conditional, 'id', this.report.id + '_' + conditional.prefLabel.toLowerCase().replace(/\s/g, '_').replace(/[()/]/g, ''));
+      this.$set(conditional, 'valid', this.checkConditionalValidation(conditional));
 
+      this.update();
     },
 
     onUpdateConditional (conditional, updates) {

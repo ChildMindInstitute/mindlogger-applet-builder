@@ -76,6 +76,7 @@ export default class ActivityFlow {
       'name': this.ref.name,
       'description': this.ref.description,
       'combineReports': this.ref.combineReports,
+      'reportIncludeItem': this.ref.reportIncludeItem,
       'showBadge': this.ref.showBadge,
       'order': this.ref.order,
       'isVis': this.ref.isVis,
@@ -104,6 +105,10 @@ export default class ActivityFlow {
       'showBadge': {
         updated: (field) =>
           `ActivityFlow showBadge was changed to ${_.get(newValue, field)}`,
+      },
+      'reportIncludeItem': {
+        updated: (field) =>
+          `Item value option is updated in activity report`
       },
       'isVis': {
         updated: (field) =>

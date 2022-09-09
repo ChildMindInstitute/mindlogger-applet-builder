@@ -53,7 +53,7 @@ export default class ActivityFlow {
   // getCompressedSchema() {
   //   return {
   //     '@context': [
-  //       'https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json',
+  //       'https://raw.githubusercontent.com/ChildMindInstitute/reproschema-context/master/context.json',
   //     ],
   //     _id: this.ref.id,
   //     '@id': this.ref.name,
@@ -69,7 +69,7 @@ export default class ActivityFlow {
   getActivityFlowData() {
     return {
       '@context': [
-        'https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json'
+        'https://raw.githubusercontent.com/ChildMindInstitute/reproschema-context/master/context.json'
       ],
       '@id': this.ref.name.replace(/\s/g, '_'),
       '@type': 'reproschema:ActivityFlow',

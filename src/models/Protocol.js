@@ -72,7 +72,7 @@ export default class Protocol {
     })
     const schema = {
       "@context": [
-        "https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json",
+        "https://raw.githubusercontent.com/ChildMindInstitute/reproschema-context/master/context.json",
         "https://raw.githubusercontent.com/YOUR-PROTOCOL-CONTEXT-FILE",
       ],
       "@type": "reproschema:Protocol",

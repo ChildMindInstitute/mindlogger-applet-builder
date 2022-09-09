@@ -322,7 +322,7 @@ export default class Item {
 
     const schema = {
         "@context": [
-          "https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json"
+          "https://raw.githubusercontent.com/ChildMindInstitute/reproschema-context/master/context.json"
         ],
         "@type": "reproschema:Field",
         "@id": this.ref.name,

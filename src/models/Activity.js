@@ -554,7 +554,7 @@ export default class Activity {
 
     return {
       '@context': [
-        'https://raw.githubusercontent.com/jj105/reproschema-context/master/context.json',
+        'https://raw.githubusercontent.com/ChildMindInstitute/reproschema-context/master/context.json',
       ],
       _id: this.ref.id,
       '@id': this.ref.name,

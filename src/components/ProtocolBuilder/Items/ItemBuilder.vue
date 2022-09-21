@@ -247,6 +247,7 @@
           <v-container v-if="isTextExpanded" class="pa-0">
             <MarkDownEditor
               v-model="largeText"
+              @change="handleChange($event)"
             />
           </v-container>
 
@@ -254,7 +255,7 @@
             * This field is required
           </div>
           <div v-if="invalidLargeText" class="error--text text-body-2 mt-2 ml-4">
-            {{errorMsg}}
+            {{ errorMsg }}
           </div>
           <div class="d-flex mt-2" :class="largeText.length > 75 ? 'justify-space-between' : 'justify-end'">
             <div
@@ -264,7 +265,7 @@
               Visibility decreases over 75 characters
             </div>
             <div v-if="isTextExpanded" class="text-right mr-4">
-              {{largeText.length}} / 75
+              {{ largeText.length }} / 75
             </div>
           </div>
         </div>
@@ -660,7 +661,7 @@
           width="15"
           :src="itemInputTypes.find(({ text }) => text === item.inputType).icon"
         >
-        <span v-if="!isExpanded" class="ml-1">{{largeText.replace(/[^0-9A-Za-z ]/g, '')}}</span>
+        <span v-if="!isExpanded" class="ml-1">{{ displayedText }}</span>
       </div>
     </div>
 
@@ -1053,6 +1054,7 @@ export default {
       hasScoringItem: false,
       removeDialog: false,
       valid: false,
+      displayedText: '',
       largeText: '',
       headerImage: '',
       isExpanded: false,
@@ -1155,11 +1157,12 @@ export default {
   watch: {
     item: function(newItem) {
       this.largeText = newItem.question.text;
+      this.displayedText = newItem.question.displayedText || this.largeText;
     },
     largeText: function(text) {
       this.updateItemMetaInfo({
         index: this.itemIndex,
-        obj: { question: { text, image: this.headerImage } },
+        obj: { question: { text, displayedText: this.displayedText, image: this.headerImage } },
       });
 
       this.debounce(function() {
@@ -1222,6 +1225,7 @@ export default {
       valid: this.item.name && this.item.name.length > 0,
       hasScoringItem: this.currentActivity.items.some((item) => item.options.hasScoreValue),
       largeText: this.item.question.text,
+      displayedText: this.item.question.displayedText || this.item.question.text,
       headerImage: this.item.question.image,
       isExpanded: !this.item.name.length
     });
@@ -1249,6 +1253,10 @@ export default {
         'updateActivityMetaInfo',
       ],
     ),
+
+    handleChange(event) {
+      this.displayedText = event[1].replace(/<[^>]*>/g, '')
+    },
 
     debounce (func, delay) {
       const context = this;

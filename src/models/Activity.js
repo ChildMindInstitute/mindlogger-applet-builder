@@ -477,7 +477,9 @@ export default class Activity {
       } else if (!cond.answerValue) {
         return `${ifValue} ${cond.stateValue.val} ${cond.minValue}`;
       } else {
-        const answer = 'value' in cond.answerValue ? cond.answerValue.value : cond.answerValue;
+        const answer = typeof cond.answerValue === 'string' 
+          ? cond.answerValue 
+          : 'value' in cond.answerValue ? cond.answerValue.value : cond.answerValue;
         return `${ifValue} ${cond.stateValue.val} ${String(answer).toLowerCase()}`;
       }
     });

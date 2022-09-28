@@ -242,12 +242,19 @@ export default {
   methods: {
     update ({ conditions, operation, showValue, valid }) {
       this.$emit('update', {
-        conditions: conditions.map(({ ifValue, ...restValues }) => {
-          if (this.ifValue == ifValue) {
-            return restValues;
-          }
+        conditions: conditions.map((condition) => {
+          if (condition.ifValue && condition.ifValue.isActivity) {
+              return {
+                ...condition,
+                ifValue: condition.ifValue.name.replaceAll(' ', '_'),
+                activityCondition: true
+              }
+            }
 
-          return { ifValue, ...restValues };
+            return {
+              ...condition,
+              activityCondition: false
+            };
         }),
         operation,
         showValue,

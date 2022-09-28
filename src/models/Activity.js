@@ -340,24 +340,27 @@ export default class Activity {
         const itemIndex = findItemIndex(notEqualToValues[1]);
 
         if (itemIndex !== -1) {
-          const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == notEqualToValues[2]);
+          const item = items[itemIndex];
 
-
-          if (option) {
-            conditionalItem.conditions.push({
-              ifValue: items[itemIndex],
-              answerValue: {
-                name: option['schema:name'],
-                value: option['schema:value']
-              },
-              stateValue: {
-                name: 'IS NOT EQUAL TO',
-                val: '!=',
-              }
-            });
+          if (item.inputType === 'radio') {
+            const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == notEqualToValues[2]);
+            
+            if (option) {
+              conditionalItem.conditions.push({
+                ifValue: item,
+                answerValue: {
+                  name: option['schema:name'],
+                  value: option['schema:value']
+                },
+                stateValue: {
+                  name: 'IS NOT EQUAL TO',
+                  val: '!=',
+                }
+              });
+            } 
           } else if (items[itemIndex].isConditional) {
             conditionalItem.conditions.push({
-              ifValue: items[itemIndex],
+              ifValue: item,
               answerValue: notEqualToValues[2] == 'true' ? 'True' : 'False',
               stateValue: {
                 name: 'IS NOT EQUAL TO',
@@ -366,7 +369,7 @@ export default class Activity {
             });
           } else {
             conditionalItem.conditions.push({
-              ifValue: items[itemIndex],
+              ifValue: item,
               minValue: notEqualToValues[2],
               stateValue: {
                 name: 'IS NOT EQUAL TO',

@@ -75,6 +75,7 @@
         ref="form"
         :current="current"
         :items="filteredItems"
+        :showItems="items"
         :activity="currentActivity"
         @update="onUpdate"
       />
@@ -150,7 +151,7 @@ export default {
       required: true,
     }
   },
-  data () {
+  data() {
     return {
       isExpanded: !this.current.stateValue,
       valid: this.current.valid || false,
@@ -159,23 +160,18 @@ export default {
   },
 
   computed: {
-    config () {
+    config() {
       return config;
     },
-    ...mapGetters(config.MODULE_NAME,
-      [
-        'currentActivity',
-      ]
-    ),
+    
+    ...mapGetters(config.MODULE_NAME, ['currentActivity',]),
 
-    items () {
+    items() {
       return this.currentActivity.items;
     },
 
-    filteredItems () {
-      return this.items.filter(item =>
-        (item.inputType == 'radio' || item.inputType == 'checkbox' || item.inputType == 'slider' || item.inputType == 'prize') && item.allowEdit
-      )
+    filteredItems() {
+      return this.items.filter(item => item.allowEdit && ['radio', 'checkbox', 'slider', 'prize'].includes(item.inputType));
     },
   },
 
@@ -187,7 +183,7 @@ export default {
       ]
     ),
 
-    onDeleteConditional () {
+    onDeleteConditional() {
       if (this.current.conditions.length > 1) {
         this.deleteConditionalDlg = true;
       } else {
@@ -195,7 +191,7 @@ export default {
       }
     },
 
-    onUpdate ({ conditions, operation, showValue, valid }) {
+    onUpdate({ conditions, operation, showValue, valid }) {
       this.valid = valid;
 
       this.updateConditionalData({
@@ -222,7 +218,7 @@ export default {
       });
     },
 
-    deleteAllConditions () {
+    deleteAllConditions() {
       this.deleteConditional(this.conditionalIndex);
     }
   },

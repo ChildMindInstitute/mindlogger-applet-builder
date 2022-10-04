@@ -17,7 +17,7 @@ export default class ActivityFlow {
       isVis: initialActivityData.isVis || false,
       combineReports: initialActivityData.combineReports || false,
       reportIncludeItem: initialActivityData.reportIncludeItem || '',
-      showBadge: 'showBadge' in initialActivityData ? initialActivityData.showBadge : true,
+      showBadge: 'showBadge' in initialActivityData ? initialActivityData.showBadge : false,
       error: '',
       componentKey: 0,
       isItemEditable: true,

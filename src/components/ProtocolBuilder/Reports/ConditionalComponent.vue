@@ -166,6 +166,7 @@
 import ConditionalForm from '../ConditionalForm';
 import config from '../../../config';
 import { mapGetters } from 'vuex';
+import { cloneDeep } from 'lodash';
 
 export default {
   components: {
@@ -242,19 +243,26 @@ export default {
   methods: {
     update ({ conditions, operation, showValue, valid }) {
       this.$emit('update', {
-        conditions: conditions.map((condition) => {
-          if (condition.ifValue && condition.ifValue.isActivity) {
-              return {
-                ...condition,
-                ifValue: condition.ifValue.name.replaceAll(' ', '_'),
-                activityCondition: true
-              }
-            }
+        conditions: conditions.map(({ ifValue, ...restValues }) => {
+          if (this.ifValue == ifValue) {
+            return restValues;
+          }
+
+          if (ifValue && ifValue.isActivity) {
+            const activityValue = ifValue.name.replaceAll(' ', '_');
 
             return {
-              ...condition,
-              activityCondition: false
-            };
+              ...restValues,
+              ifValue: activityValue,
+              activityCondition: true
+            }
+          }
+
+          return {
+            ...restValues,
+            ifValue,
+            activityCondition: false
+          };
         }),
         operation,
         showValue,

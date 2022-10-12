@@ -8,7 +8,7 @@
     <v-card>
       <v-card-title>
         <div class="d-flex justify-space-between dialog-title">
-          <div>Please upload a table (.csv file formatted as below) containing the sequence of stimulus image files for each block</div>
+          <div>Please upload a table (.csv, .xlsx, .xls, .ods file formatted as below) containing the sequence of stimulus image files for each block</div>
           <v-btn
             class="close-button"
             icon
@@ -26,8 +26,8 @@
           v-show="false"
           ref="fileInput"
           type="file"
-          accept=".csv"
-          @change="onCSVInput($event)"
+          accept=".csv, .xlsx, .xls, .ods"
+          @change="onFileInput($event)"
         />
 
         <v-simple-table
@@ -63,22 +63,15 @@
       </v-card-text>
 
       <v-card-actions class="mx-4">
-        <a @click="downloadTemplate">Download template (.csv)</a>
+        <template>
+          <a @click="downloadTemplate('csv')">Download template (.csv)</a> <br/>
+          <a @click="downloadTemplate('xlsx')">Download template (.xlsx)</a>
+        </template>
         <v-spacer />
 
-        <v-tooltip top>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              v-on="on"
-              v-bind="attrs"
-              @click="$refs.fileInput.click()"
-            >
-              Upload
-            </v-btn>
-          </template>
-
-          <span>Please make sure to use correct csv editor to build/edit csv file</span>
-        </v-tooltip>
+        <v-btn @click="$refs.fileInput.click()">
+          Upload
+        </v-btn>
 
         <v-btn @click="saveBlocks" color="primary">
           Save
@@ -86,7 +79,7 @@
       </v-card-actions>
 
       <v-dialog
-        v-model="csvResultDialog"
+        v-model="fileUploadDialog"
         width="500"
       >
         <v-card>
@@ -123,12 +116,17 @@
 .block-sequences th {
   min-width: 90px;
 }
+
+.v-card__actions a:first-child {
+  margin-right: 25px;
+}
 </style>
 
 <script>
 import csv from 'csvtojson';
 import ConfirmationDialog from './ConfirmationDialog';
 import ObjectToCSV from 'object-to-csv';
+import * as XLSX from 'xlsx';
 
 export default {
   components: {
@@ -168,15 +166,15 @@ export default {
       blocks,
       templates: blocks.length ? blocks : templates,
       screenLength,
-      csvResultDialog: false,
+      fileUploadDialog: false,
       message: '',
       closeConfirmationDialog: false,
-      csvUpdated: false,
+      fileUpdated: false,
     }
   },
 
   methods: {
-    downloadTemplate () {
+    downloadTemplate(type) {
       const data = [];
 
       for (let i = 0; i < this.screenLength; i++) {
@@ -188,17 +186,19 @@ export default {
         data.push(obj);
       }
 
-      this.downloadFile({
-        name: 'template.csv',
-        content: new ObjectToCSV({
-          keys: this.templates.map(column => ({ key: column.name, as: column.name })),
-          data
-        }).getCSV(),
-        type: 'text/csv;charset=utf-8'
-      });
+      type === 'xlsx' 
+        ? this.downloadXLSX(data)
+        : this.downloadCSV({
+          name: 'template.csv',
+          content: new ObjectToCSV({
+            keys: this.templates.map(column => ({ key: column.name, as: column.name })),
+            data
+          }).getCSV(),
+          type: 'text/csv;charset=utf-8'
+        });
     },
 
-    downloadFile({ name, content, type }) {
+    downloadCSV({ name, content, type }) {
       const file = new Blob([content], { type })
       return new Promise(resolve => {
         saveAs(file, name)
@@ -206,64 +206,91 @@ export default {
       })
     },
 
-    getScreen (name) {
+    downloadXLSX(data) {
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'template');
+      XLSX.writeFile(workbook, 'template.xlsx', { compression: true });
+    },
+
+    getScreen(name) {
       return this.screens.find(screen => screen.name == name || screen.name.startsWith(name + '.'));
     },
 
-    onCSVInput (e) {
-      const file = e.target.files[0];
+    onFileInput(e) {
+      const files = e.target.files || e.dataTransfer.files;
+      if (!files.length) {
+        return;
+      }
+      
+      files[0].type === 'text/csv' ? this.uploadCSV(files[0]) : this.uploadTable(files[0])
+    }, 
+
+    uploadCSV(file) {
       let reader = new FileReader();
 
       reader.onload = () => {
-        csv().fromString(reader.result).then(sequences => {
-          if (!sequences.length) {
-            this.csvResultDialog = true;
-            return ;
-          }
-
-          const blocks = [];
-          for (const blockName in sequences[0]) {
-            blocks.push({
-              name: blockName,
-              screens: []
-            })
-          }
-
-          for (const sequence of sequences) {
-            for (let i = 0; i < blocks.length; i++) {
-              const screen = this.getScreen(sequence[blocks[i].name]);
-
-              if (!screen) {
-                this.csvResultDialog = true;
-                this.message = 'The uploaded table cannot be parsed. Please ensure stimulus screens have been uploaded prior to the block sequences and ensure the image name is the same as the file name uploaded.';
-                return ;
-              }
-
-              blocks[i].screens.push(screen);
-            }
-          }
-
-          this.blocks = blocks;
-          this.templates = blocks;
-          this.csvUpdated = true;
-        })
+        csv().fromString(reader.result).then(sequences => this.processImportedData(sequences))
       }
       reader.readAsText(file);
-      this.inputKey++;
-
-      this.csvResultDialog = true;
-      this.message = 'Block sequences were uploaded succesfully.'
     },
 
-    saveBlocks () {
+    async uploadTable(file) {
+      const fileBuffer = await file.arrayBuffer();
+      const workbook = XLSX.read(fileBuffer);
+      const worksheet = Object.values(workbook.Sheets)[0]
+      const data = XLSX.utils.sheet_to_json(worksheet)
+
+      this.processImportedData(data)
+    },
+
+    processImportedData(sequences) {
+      if (!sequences.length) {
+        this.fileUploadDialog = true;
+        return ;
+      }
+
+      const blocks = [];
+      for (const blockName in sequences[0]) {
+        blocks.push({
+          name: blockName,
+          screens: []
+        })
+      }
+
+      for (const sequence of sequences) {
+        for (let i = 0; i < blocks.length; i++) {
+          const screen = this.getScreen(sequence[blocks[i].name]);
+
+          if (!screen) {
+            this.fileUploadDialog = true;
+            this.message = 'The uploaded table cannot be parsed. Please ensure stimulus screens have been uploaded prior to the block sequences and ensure the image name is the same as the file name uploaded.';
+            return;
+          }
+
+          blocks[i].screens.push(screen);
+        }
+      }
+
+      this.blocks = blocks;
+      this.templates = blocks;
+
+      this.fileUpdated = true;
+      this.inputKey++;
+
+      this.fileUploadDialog = true;
+      this.message = 'Block sequences were uploaded successfully.'
+    },
+
+    saveBlocks() {
       this.$emit('save', this.blocks.map(block => ({
         name: block.name,
         screens: block.screens.map(screen => screen.id)
       })))
     },
 
-    onClose () {
-      if (this.csvUpdated) {
+    onClose() {
+      if (this.fileUpdated) {
         this.closeConfirmationDialog = true;
       } else {
         this.$emit('input', false);

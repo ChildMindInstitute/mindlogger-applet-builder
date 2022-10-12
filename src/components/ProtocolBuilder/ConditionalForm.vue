@@ -140,7 +140,7 @@
           v-model="showValue"
           class="ds-select-box ds-show-value"
           item-text="name"
-          :items="items"
+          :items="filteredItemsToShow"
           return-object
           dense
           outlined
@@ -187,6 +187,11 @@ export default {
       type: Array,
       required: true
     },
+    showItems: {
+      type: Array,
+      required: false,
+      default: () => []
+    },
     current: {
       type: Object,
       required: true,
@@ -224,6 +229,13 @@ export default {
         name: this.activity.name,
         isActivity: true
       });
+    },
+    filteredItemsToShow() {
+      const items = this.conditions.find((condition) => condition.ifValue && condition.ifValue.isActivity) 
+        ? this.showItems 
+        : this.showItems.filter((item) => item.allowEdit && ['radio', 'checkbox', 'slider', 'prize', 'text'].includes(item.inputType))
+
+      return items
     },
   },
 

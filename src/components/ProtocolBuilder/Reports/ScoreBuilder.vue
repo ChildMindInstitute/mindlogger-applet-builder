@@ -795,6 +795,12 @@ export default {
           break;
       }
 
+      this.report.id = this.getScoreId(this.report.prefLabel, this.outputType.value);
+      this.conditionals.forEach(conditional => {
+        if(!conditional.id) return;
+        conditional.id = this.report.id + '_' + conditional.prefLabel.toLowerCase().replace(/\s/g, '_').replace(/[()/]/g, '');
+      })
+
       this.update();
     },
 

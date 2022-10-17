@@ -24,7 +24,10 @@
         </v-col>
 
         <v-col class="pl-6">
-          <div class="label score-label">
+          <div 
+            class="label score-label"
+            :class="{ 'invalid-score-label': reportIdErrorMsg }"
+          >
             Score ID
 
             <v-tooltip bottom>
@@ -42,8 +45,8 @@
           <v-text-field
             class="pt-0 mt-0"
             :value="report.id"
-            hide-details
             readonly
+            :error-messages="reportIdErrorMsg"
           />
         </v-col>
       </v-row>
@@ -226,7 +229,10 @@
                 </v-col>
 
                 <v-col class="pl-6">
-                  <div class="label score-label">
+                  <div 
+                    class="label score-label"
+                    :class="{ 'invalid-score-label': getConditionalIdError(conditional) }"
+                  >
                     Score Condition ID
 
                     <v-tooltip bottom>
@@ -244,8 +250,8 @@
                   <v-text-field
                     class="pt-0 mt-0"
                     :value="conditional.id"
-                    hide-details
                     readonly
+                    :error-messages="getConditionalIdError(conditional)"
                   />
                 </v-col>
               </v-row>
@@ -352,6 +358,14 @@
   margin: 0px;
   font-size: 12px;
   transform: translateY(5px);
+}
+
+.invalid-score-label {
+  color: #FF0000;
+}
+
+.invalid-score-label .v-icon {
+    color: #FF0000;
 }
 
 .score-range {
@@ -479,12 +493,16 @@ export default {
         return 'This is a required field';
       }
 
-      if (!this.name.match(/^[a-zA-Z_0-9]+$/)) {
-        return 'Letters and underscores are only allowed. Please fix.';
-      }
-
       if (this.currentActivity.reports.find(score => score.dataType == this.report.dataType && score.prefLabel == this.name && score != this.report)) {
         return 'That score title is already in use. Please use a different title.';
+      }
+
+      return '';
+    },
+
+    reportIdErrorMsg() {
+      if (!this.nameErrorMsg && this.currentActivity.reports.find(score => score.dataType == this.report.dataType && score.id == this.report.id && score != this.report)) {
+        return 'That score ID is already in use. Please use a different title.';
       }
 
       return '';
@@ -652,9 +670,6 @@ export default {
         return 'This is a required field';
       }
 
-      if (!conditional.prefLabel.match(/^[a-zA-Z_0-9]+$/)) {
-        return 'Letters and underscores are only allowed. Please fix.';
-      }
       if (this.conditionals.find(d => d.prefLabel == conditional.prefLabel && d !== conditional)) {
         return 'That title is already in use. Please use a different title.';
       }
@@ -662,8 +677,18 @@ export default {
       return '';
     },
 
+    getConditionalIdError(conditional) {
+      if (!this.getConditionalNameError(conditional) 
+        && this.conditionals.find(cond => cond.id == conditional.id && cond !== conditional)
+      ) {
+        return 'That score condition ID is already in use. Please use a different title.';
+      }
+
+      return '';
+    },
+
     checkConditionalValidation (conditional) {
-      if (!conditional.conditionalItem.valid || this.getConditionalNameError(conditional)) {
+      if (!conditional.conditionalItem.valid || this.getConditionalNameError(conditional) || this.getConditionalIdError(conditional)) {
         return false;
       }
 
@@ -679,7 +704,14 @@ export default {
     },
 
     onConditionalNameChanged (conditional) {
-      this.$set(conditional, 'id', this.report.id + '_' + conditional.prefLabel.toLowerCase().replace(/\s/g, '_').replace(/[()/]/g, ''));
+      this.$set(
+        conditional, 
+        'id', 
+        this.report.id + '_' + conditional.prefLabel
+          .toLowerCase()
+          .replace(/[^a-zA-Z0-9]/g,'_')
+          .replace(/[^\w\s]|(_)(?=\1)/g, '')
+      );
       this.$set(conditional, 'valid', this.checkConditionalValidation(conditional));
 
       this.update();
@@ -699,7 +731,10 @@ export default {
         percentage: 'percentScore_',
       };
 
-      return scorePrefix[outputType] + title.toLowerCase().replace(/\s/g, '_').replace(/[()/]/g, '');
+      return scorePrefix[outputType] + title
+        .toLowerCase()
+        .replace(/[^a-zA-Z0-9]/g,'_')
+        .replace(/[^\w\s]|(_)(?=\1)/g, '');
     },
 
     onUpdateScoreRange () {

@@ -339,9 +339,18 @@ const activityMutations = {
       suffix++;
     }
 
+    const items = activity.items.map((item, index) => ({
+      ...item,
+      id: null,
+      timestamp: Date.now() + index
+    }))
+
     const conditionalItems = activity.conditionalItems.map(conditionalItem => {
       const conditions = conditionalItem.conditions.map(condition => {
         let { ifValue } = condition;
+        const item = items.find(item => item.name === ifValue.name)
+
+        !!item && (ifValue = item)
 
         if (typeof ifValue == 'string' && ifValue.replace(/ /g, '_') === activity.name.replace(/ /g, '_')) {
           ifValue = `${activity.name} (${suffix})`;
@@ -363,11 +372,7 @@ const activityMutations = {
       ...activity,
       id: null,
       name: `${activity.name} (${suffix})`,
-      items: activity.items.map((item, index) => ({
-        ...item,
-        id: null,
-        timestamp: Date.now() + index
-      })),
+      items,
       finalSubScale: { ...activity.finalSubScale },
       reports: JSON.parse(JSON.stringify(activity.reports)),
       subScales: [...activity.subScales],

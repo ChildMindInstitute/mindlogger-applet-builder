@@ -655,6 +655,14 @@
       />
     </v-form>
 
+    <!-- Needed to process largeText and convert it to displayedText (converts to html and removes all tags) -->
+    <MarkDownEditor
+      v-if="!isExpanded"
+      v-model="largeText"
+      class="hidden-editor"
+      @change="handleChange($event)"
+    /> 
+
     <div class="px-2 pt-2">
       <div class="item-quiz">
         <img
@@ -961,6 +969,9 @@
     color: grey;
   }
 
+  .hidden-editor {
+    display: none;
+  }
 </style>
 
 <script>
@@ -997,7 +1008,7 @@ import Loading from '../Additional/Loading.vue';
 
 import { mapMutations, mapGetters } from 'vuex';
 import config from '../../../config';
-import { checkItemVariableName, checkItemVariableNameIndex, getTextBetweenBrackets } from '../../../utilities/util';
+import { checkItemVariableName, checkItemVariableNameIndex } from '../../../utilities/util';
 
 export default {
   components: {
@@ -1189,7 +1200,7 @@ export default {
               this.largeText = text;
               this.updateItemMetaInfo({
                 index: this.itemIndex,
-                obj: { question: { text, image: this.headerImage } },
+                obj: { question: { text, displayedText: this.displayedText, image: this.headerImage } },
               });
             }, 200);
           }
@@ -1215,7 +1226,7 @@ export default {
     headerImage: function(image) {
       this.updateItemMetaInfo({
         index: this.itemIndex,
-        obj: { question: { text: this.largeText, image } }
+        obj: { question: { text: this.largeText, displayedText: this.displayedText, image } },
       });
     },
   },
@@ -1256,6 +1267,11 @@ export default {
 
     handleChange(event) {
       this.displayedText = event[1].replace(/<[^>]*>/g, '')
+
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { question: { text: this.largeText, displayedText: this.displayedText, image: this.headerImage } },
+      });
     },
 
     debounce (func, delay) {

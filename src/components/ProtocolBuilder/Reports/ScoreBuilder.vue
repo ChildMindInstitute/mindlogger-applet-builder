@@ -522,7 +522,7 @@ export default {
       ).map((item) => ({
         ...item,
         identifier: `${item.timestamp}-${item.id || 0}`,
-        questionText: this.getQuestion(item.question.text),
+        questionText: this.getQuestion(item.question.displayedText),
         ...this.getScoreRange(item)
       }))
     },

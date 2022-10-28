@@ -247,6 +247,7 @@
           <v-container v-if="isTextExpanded" class="pa-0">
             <MarkDownEditor
               v-model="largeText"
+              @change="handleChange($event)"
             />
           </v-container>
 
@@ -254,7 +255,7 @@
             * This field is required
           </div>
           <div v-if="invalidLargeText" class="error--text text-body-2 mt-2 ml-4">
-            {{errorMsg}}
+            {{ errorMsg }}
           </div>
           <div class="d-flex mt-2" :class="largeText.length > 75 ? 'justify-space-between' : 'justify-end'">
             <div
@@ -264,7 +265,7 @@
               Visibility decreases over 75 characters
             </div>
             <div v-if="isTextExpanded" class="text-right mr-4">
-              {{largeText.length}} / 75
+              {{ largeText.length }} / 75
             </div>
           </div>
         </div>
@@ -654,13 +655,21 @@
       />
     </v-form>
 
+    <!-- Needed to process largeText and convert it to displayedText (converts to html and removes all tags) -->
+    <MarkDownEditor
+      v-if="!isExpanded"
+      v-model="largeText"
+      class="hidden-editor"
+      @change="handleChange($event)"
+    /> 
+
     <div class="px-2 pt-2">
       <div class="item-quiz">
         <img
           width="15"
           :src="itemInputTypes.find(({ text }) => text === item.inputType).icon"
         >
-        <span v-if="!isExpanded" class="ml-1">{{largeText.replace(/[^0-9A-Za-z ]/g, '')}}</span>
+        <span v-if="!isExpanded" class="ml-1">{{ displayedText }}</span>
       </div>
     </div>
 
@@ -960,6 +969,9 @@
     color: grey;
   }
 
+  .hidden-editor {
+    display: none;
+  }
 </style>
 
 <script>
@@ -996,7 +1008,7 @@ import Loading from '../Additional/Loading.vue';
 
 import { mapMutations, mapGetters } from 'vuex';
 import config from '../../../config';
-import { checkItemVariableName, checkItemVariableNameIndex, getTextBetweenBrackets } from '../../../utilities/util';
+import { checkItemVariableName, checkItemVariableNameIndex } from '../../../utilities/util';
 
 export default {
   components: {
@@ -1053,6 +1065,7 @@ export default {
       hasScoringItem: false,
       removeDialog: false,
       valid: false,
+      displayedText: '',
       largeText: '',
       headerImage: '',
       isExpanded: false,
@@ -1155,11 +1168,12 @@ export default {
   watch: {
     item: function(newItem) {
       this.largeText = newItem.question.text;
+      this.displayedText = newItem.question.displayedText || this.largeText;
     },
     largeText: function(text) {
       this.updateItemMetaInfo({
         index: this.itemIndex,
-        obj: { question: { text, image: this.headerImage } },
+        obj: { question: { text, displayedText: this.displayedText, image: this.headerImage } },
       });
 
       this.debounce(function() {
@@ -1186,7 +1200,7 @@ export default {
               this.largeText = text;
               this.updateItemMetaInfo({
                 index: this.itemIndex,
-                obj: { question: { text, image: this.headerImage } },
+                obj: { question: { text, displayedText: this.displayedText, image: this.headerImage } },
               });
             }, 200);
           }
@@ -1212,7 +1226,7 @@ export default {
     headerImage: function(image) {
       this.updateItemMetaInfo({
         index: this.itemIndex,
-        obj: { question: { text: this.largeText, image } }
+        obj: { question: { text: this.largeText, displayedText: this.displayedText, image } },
       });
     },
   },
@@ -1222,6 +1236,7 @@ export default {
       valid: this.item.name && this.item.name.length > 0,
       hasScoringItem: this.currentActivity.items.some((item) => item.options.hasScoreValue),
       largeText: this.item.question.text,
+      displayedText: this.item.question.displayedText || this.item.question.text,
       headerImage: this.item.question.image,
       isExpanded: !this.item.name.length
     });
@@ -1249,6 +1264,15 @@ export default {
         'updateActivityMetaInfo',
       ],
     ),
+
+    handleChange(event) {
+      this.displayedText = event[1].replace(/<[^>]*>/g, '')
+
+      this.updateItemMetaInfo({
+        index: this.itemIndex,
+        obj: { question: { text: this.largeText, displayedText: this.displayedText, image: this.headerImage } },
+      });
+    },
 
     debounce (func, delay) {
       const context = this;

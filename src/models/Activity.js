@@ -340,24 +340,27 @@ export default class Activity {
         const itemIndex = findItemIndex(notEqualToValues[1]);
 
         if (itemIndex !== -1) {
-          const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == notEqualToValues[2]);
+          const item = items[itemIndex];
 
-
-          if (option) {
-            conditionalItem.conditions.push({
-              ifValue: items[itemIndex],
-              answerValue: {
-                name: option['schema:name'],
-                value: option['schema:value']
-              },
-              stateValue: {
-                name: 'IS NOT EQUAL TO',
-                val: '!=',
-              }
-            });
+          if (item.inputType === 'radio') {
+            const option = itemChoices[itemIndex].find(choice => choice['schema:value'] == notEqualToValues[2]);
+            
+            if (option) {
+              conditionalItem.conditions.push({
+                ifValue: item,
+                answerValue: {
+                  name: option['schema:name'],
+                  value: option['schema:value']
+                },
+                stateValue: {
+                  name: 'IS NOT EQUAL TO',
+                  val: '!=',
+                }
+              });
+            } 
           } else if (items[itemIndex].isConditional) {
             conditionalItem.conditions.push({
-              ifValue: items[itemIndex],
+              ifValue: item,
               answerValue: notEqualToValues[2] == 'true' ? 'True' : 'False',
               stateValue: {
                 name: 'IS NOT EQUAL TO',
@@ -366,7 +369,7 @@ export default class Activity {
             });
           } else {
             conditionalItem.conditions.push({
-              ifValue: items[itemIndex],
+              ifValue: item,
               minValue: notEqualToValues[2],
               stateValue: {
                 name: 'IS NOT EQUAL TO',
@@ -477,8 +480,10 @@ export default class Activity {
       } else if (!cond.answerValue) {
         return `${ifValue} ${cond.stateValue.val} ${cond.minValue}`;
       } else {
-        const answer = cond.answerValue.value || cond.answerValue;
-        return `${ifValue} ${cond.stateValue.val} ${answer.toLowerCase()}`;
+        const answer = typeof cond.answerValue === 'string' 
+          ? cond.answerValue 
+          : 'value' in cond.answerValue ? cond.answerValue.value : cond.answerValue;
+        return `${ifValue} ${cond.stateValue.val} ${String(answer).toLowerCase()}`;
       }
     });
 
@@ -823,14 +828,20 @@ export default class Activity {
           const updates = [];
           let newReports = _.get(newValue, field, []);
           let oldReports = _.get(oldValue, field, []);
+          let orderChanges = false
 
-          newReports.forEach(newReport => {
-            const oldReport = oldReports.find(report => report.dataType == newReport.dataType && report.prefLabel == newReport.prefLabel);
+          newReports.forEach((newReport, index) => {
+            const exactReport = (report) => (report.dataType == newReport.dataType && report.prefLabel == newReport.prefLabel)
+            const oldReport = oldReports.find(exactReport);
+            const oldReportIndex = oldReports.findIndex(exactReport);
 
             if (!oldReport) {
               updates.push(`The ${newReport.dataType} ${newReport.prefLabel} was added.`);
             } else if (JSON.stringify(oldReport) != JSON.stringify(newReport)) {
               updates.push(`The ${newReport.dataType} ${newReport.prefLabel} was updated.`);
+            } else if (index !== oldReportIndex && !orderChanges) {
+              orderChanges = true;
+              updates.push('Reports order was changed.')
             }
           })
 
@@ -1206,11 +1217,15 @@ export default class Activity {
   }
 
   static checkReportValidation (report, allReports) {
-    if (!report.prefLabel || !report.prefLabel.match(/^[a-zA-Z_]+$/)) {
+    if (!report.prefLabel) {
       return false;
     }
 
     if (allReports.find(section => section.dataType == report.dataType && section.prefLabel == report.prefLabel && section != report)) {
+      return false;
+    }
+
+    if (allReports.find(section => section.dataType == report.dataType && section.id == report.id && section != report)) {
       return false;
     }
 

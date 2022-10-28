@@ -114,11 +114,7 @@ export default {
       if (!this.name) {
         return 'This is a required field';
       }
-
-      if (!this.name.match(/^[a-zA-Z_]+$/)) {
-        return 'Letters and underscores are only allowed. Please fix.';
-      }
-
+      
       if (this.currentActivity.reports.find(section => section.dataType == 'section' && section.prefLabel == this.name && section != this.report)) {
         return 'That section title is already in use. Please use a different title.';
       }

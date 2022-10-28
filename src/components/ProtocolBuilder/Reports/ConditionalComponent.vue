@@ -166,6 +166,7 @@
 import ConditionalForm from '../ConditionalForm';
 import config from '../../../config';
 import { mapGetters } from 'vuex';
+import { cloneDeep } from 'lodash';
 
 export default {
   components: {
@@ -247,7 +248,21 @@ export default {
             return restValues;
           }
 
-          return { ifValue, ...restValues };
+          if (ifValue && ifValue.isActivity) {
+            const activityValue = ifValue.name.replaceAll(' ', '_');
+
+            return {
+              ...restValues,
+              ifValue: activityValue,
+              activityCondition: true
+            }
+          }
+
+          return {
+            ...restValues,
+            ifValue,
+            activityCondition: false
+          };
         }),
         operation,
         showValue,

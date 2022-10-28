@@ -305,7 +305,7 @@
       >
         <v-card>
           <v-card-text class="pt-4">
-            You are using this variable scoreID. Are you sure you want make changes to this scoreID?
+            You are using this variable scoreID. Do you want to change it everywhere in markdown?
           </v-card-text>
 
           <v-card-actions>

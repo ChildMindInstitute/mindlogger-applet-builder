@@ -828,14 +828,20 @@ export default class Activity {
           const updates = [];
           let newReports = _.get(newValue, field, []);
           let oldReports = _.get(oldValue, field, []);
+          let orderChanges = false
 
-          newReports.forEach(newReport => {
-            const oldReport = oldReports.find(report => report.dataType == newReport.dataType && report.prefLabel == newReport.prefLabel);
+          newReports.forEach((newReport, index) => {
+            const exactReport = (report) => (report.dataType == newReport.dataType && report.prefLabel == newReport.prefLabel)
+            const oldReport = oldReports.find(exactReport);
+            const oldReportIndex = oldReports.findIndex(exactReport);
 
             if (!oldReport) {
               updates.push(`The ${newReport.dataType} ${newReport.prefLabel} was added.`);
             } else if (JSON.stringify(oldReport) != JSON.stringify(newReport)) {
               updates.push(`The ${newReport.dataType} ${newReport.prefLabel} was updated.`);
+            } else if (index !== oldReportIndex && !orderChanges) {
+              orderChanges = true;
+              updates.push('Reports order was changed.')
             }
           })
 

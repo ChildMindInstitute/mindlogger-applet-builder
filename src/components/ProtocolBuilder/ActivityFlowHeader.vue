@@ -16,7 +16,7 @@
       <v-card-actions>
         <v-btn
           icon
-          @click="editActivtiyFlow"
+          @click="editActivityFlow"
         >
           <v-icon
             v-if="!isExpanded"
@@ -51,12 +51,11 @@
         required
       />
 
-      <v-row
-        v-if="pdfConfigured"
-      >
-        <v-col
-        >
-          <div class="report-config-title">Report(s) will be sent to:</div>
+      <v-row v-if="pdfConfigured">
+        <v-col>
+          <div class="report-config-title">
+            Report(s) will be sent to:
+          </div>
           <div class="d-flex align-center">
             <v-combobox
               class="email-list"
@@ -82,7 +81,10 @@
             </v-combobox>
 
             <div>
-              <v-btn icon @click="onShowReportConfig">
+              <v-btn 
+                icon 
+                @click="onShowReportConfig"
+              >
                 <img
                   height="25"
                   alt=""
@@ -127,8 +129,8 @@
     <Loading :loading="loading" />
 
     <ReportConfig
-      v-model="reportConfigDialog.visible"
       :key="`report-config-${reportConfigDialog.key}`"
+      v-model="reportConfigDialog.visible"
       :current-activity-flow="currentActivityFlow"
       :reportConfigs="protocol.reportConfigs"
       @updateItemValue="updateItemValue"
@@ -145,7 +147,7 @@
   background-color: #d44c4c;
 }
 </style>
-¸
+
 <script>
 import { mapGetters, mapMutations } from 'vuex';
 import config from '../../config';
@@ -177,29 +179,6 @@ export default {
       }
     }
   },
-  mounted() {
-  },
-  methods: {
-    ...mapMutations(config.MODULE_NAME, [
-      'updateActivityFlowInfo',
-    ]),
-    onShowReportConfig () {
-      this.reportConfigDialog.visible = true;
-      this.reportConfigDialog.key++;
-    },
-
-    editActivtiyFlow () {
-      this.isExpanded = !this.isExpanded;
-      if (this.isExpanded) {
-        this.$emit('onExpand');
-      }
-    },
-    updateItemValue (value) {
-      this.updateActivityFlowInfo({
-        reportIncludeItem: value
-      })
-    }
-  },
   computed: {
     ...mapGetters(config.MODULE_NAME, [
       'currentActivityFlow',
@@ -207,52 +186,74 @@ export default {
       'protocol',
     ]),
 
-    pdfConfigured () {
-      return this.protocol.reportConfigs.emailRecipients.length &&
-              this.protocol.reportConfigs.serverIp &&
-              this.protocol.reportConfigs.publicEncryptionKey && true;
+    pdfConfigured() {
+      const { emailRecipients, serverIp, publicEncryptionKey } = this.protocol.reportConfigs
+      return emailRecipients.length && serverIp && publicEncryptionKey;
     },
 
     name: {
-      get: function () {
+      get() {
         return this.currentActivityFlow && this.currentActivityFlow.name;
       },
-      set: function (name) {
+      set(name) {
         this.updateActivityFlowInfo({ name });
       }
     },
     description: {
-      get: function () {
+      get() {
         return this.currentActivityFlow && this.currentActivityFlow.description;
       },
-      set: function (description) {
+      set(description) {
         this.updateActivityFlowInfo({ description });
       }
     },
     combineReports: {
-      get: function () {
+      get() {
         return this.currentActivityFlow && this.currentActivityFlow.combineReports;
       },
-      set: function (name) {
-        this.updateActivityFlowInfo({ combineReports: name });
+      set(combineReports) {
+        this.updateActivityFlowInfo({ combineReports });
       }
     },
     showBadge: {
-      get: function () {
+      get() {
         return this.currentActivityFlow && !this.currentActivityFlow.showBadge;
       },
-      set: function (name) {
-        this.updateActivityFlowInfo({ showBadge: name });
+      set(value) {
+        this.updateActivityFlowInfo({ showBadge: !value });
       }
     },
   },
   watch: {
     headerExpanded: {
-      handler () {
+      handler() {
         if (!this.headerExpanded) {
           this.isExpanded = false;
         }
       }
+    }
+  },
+  methods: {
+    ...mapMutations(config.MODULE_NAME, [
+      'updateActivityFlowInfo',
+    ]),
+
+    onShowReportConfig() {
+      this.reportConfigDialog.visible = true;
+      this.reportConfigDialog.key++;
+    },
+
+    editActivityFlow() {
+      this.isExpanded = !this.isExpanded;
+      if (this.isExpanded) {
+        this.$emit('onExpand');
+      }
+    },
+    
+    updateItemValue(value) {
+      this.updateActivityFlowInfo({
+        reportIncludeItem: value
+      })
     }
   },
 }

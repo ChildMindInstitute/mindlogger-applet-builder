@@ -1217,11 +1217,15 @@ export default class Activity {
   }
 
   static checkReportValidation (report, allReports) {
-    if (!report.prefLabel || !report.prefLabel.match(/^[a-zA-Z_]+$/)) {
+    if (!report.prefLabel) {
       return false;
     }
 
     if (allReports.find(section => section.dataType == report.dataType && section.prefLabel == report.prefLabel && section != report)) {
+      return false;
+    }
+
+    if (allReports.find(section => section.dataType == report.dataType && section.id == report.id && section != report)) {
       return false;
     }
 

@@ -563,11 +563,6 @@ export default {
         }, 500)
       }
 
-      if(this.firstEdit && !message.length) {
-        message = this.messageTemplate.replace('score_id', scoreId).replaceAll('score_title', value);
-        this.firstEdit = false;
-      } 
-
       if(!this.reportMessageIncludesId && !this.conditionalMessageIncludesId) {
         this.scoreIdInMessage = scoreId;
       }
@@ -585,6 +580,17 @@ export default {
     },
 
     onScoreTitleBlur() {
+      let message = this.report.message;
+
+      if(this.firstEdit && !message.length && this.report.prefLabel) {
+        message = this.messageTemplate.replace('score_id', this.scoreId).replaceAll('score_title', this.report.prefLabel);
+        this.firstEdit = false;
+
+        this.update({
+          message,
+        })
+      } 
+
       if (this.scoreIdInMessage !== this.scoreId && (this.reportMessageIncludesId || this.conditionalMessageIncludesId)) {
         this.showScoreTitleVariableWarning = true;
       }

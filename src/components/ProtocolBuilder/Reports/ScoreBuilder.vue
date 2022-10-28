@@ -785,6 +785,10 @@ export default {
           break;
       }
 
+      if (this.scoreIdInMessage !== this.scoreId && (this.reportMessageIncludesId || this.conditionalMessageIncludesId)) {
+        this.showScoreTitleVariableWarning = true;
+      }
+
       this.update();
     },
 

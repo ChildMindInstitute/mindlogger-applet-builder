@@ -564,7 +564,7 @@ export default {
       }
 
       if(this.firstEdit && !message.length) {
-        (message = this.messageTemplate.replace('score_id', scoreId).replaceAll('score_title', value));
+        message = this.messageTemplate.replace('score_id', scoreId).replaceAll('score_title', value);
         this.firstEdit = false;
       } 
 

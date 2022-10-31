@@ -25,7 +25,10 @@
         </v-col>
 
         <v-col class="pl-6">
-          <div class="label score-label">
+          <div 
+            class="label score-label"
+            :class="{ 'invalid-score-label': reportIdErrorMsg }"
+          >
             Score ID
 
             <v-tooltip bottom>
@@ -43,8 +46,8 @@
           <v-text-field
             class="pt-0 mt-0"
             :value="report.id"
-            hide-details
             readonly
+            :error-messages="reportIdErrorMsg"
           />
         </v-col>
       </v-row>
@@ -227,7 +230,10 @@
                 </v-col>
 
                 <v-col class="pl-6">
-                  <div class="label score-label">
+                  <div 
+                    class="label score-label"
+                    :class="{ 'invalid-score-label': getConditionalIdError(conditional) }"
+                  >
                     Score Condition ID
 
                     <v-tooltip bottom>
@@ -245,8 +251,8 @@
                   <v-text-field
                     class="pt-0 mt-0"
                     :value="conditional.id"
-                    hide-details
                     readonly
+                    :error-messages="getConditionalIdError(conditional)"
                   />
                 </v-col>
               </v-row>
@@ -355,6 +361,14 @@
   margin: 0px;
   font-size: 12px;
   transform: translateY(5px);
+}
+
+.invalid-score-label {
+  color: #FF0000;
+}
+
+.invalid-score-label .v-icon {
+    color: #FF0000;
 }
 
 .score-range {
@@ -486,10 +500,6 @@ export default {
         return 'This is a required field';
       }
 
-      if (!this.name.match(/^[a-zA-Z_0-9]+$/)) {
-        return 'Letters and underscores are only allowed. Please fix.';
-      }
-
       if (this.currentActivity.reports.find(score => score.dataType == this.report.dataType && score.prefLabel == this.name && score != this.report)) {
         return 'That score title is already in use. Please use a different title.';
       }
@@ -497,7 +507,7 @@ export default {
       return '';
     },
 
-    filteredItemsCount() {
+    filteredItemsCount () {
       return this.items.filter(
         item => (item.name + ': ' + item.questionText).toLowerCase().includes(this.searchText.toLowerCase())
       ).length;
@@ -511,7 +521,7 @@ export default {
       ).map((item) => ({
         ...item,
         identifier: `${item.timestamp}-${item.id || 0}`,
-        questionText: this.getQuestion(item.question.text),
+        questionText: this.getQuestion(item.question.displayedText),
         ...this.getScoreRange(item)
       }))
     },
@@ -709,9 +719,6 @@ export default {
         return 'This is a required field';
       }
 
-      if (!conditional.prefLabel.match(/^[a-zA-Z_0-9]+$/)) {
-        return 'Letters and underscores are only allowed. Please fix.';
-      }
       if (this.conditionals.find(d => d.prefLabel == conditional.prefLabel && d !== conditional)) {
         return 'That title is already in use. Please use a different title.';
       }
@@ -719,7 +726,7 @@ export default {
       return '';
     },
 
-    checkConditionalValidation(conditional) {
+    checkConditionalValidation (conditional) {
       if (!conditional.conditionalItem.valid || this.getConditionalNameError(conditional)) {
         return false;
       }
@@ -735,7 +742,7 @@ export default {
       return true;
     },
 
-    onConditionalNameChanged(conditional) {
+    onConditionalNameChanged (conditional) {
       this.$set(conditional, 'id', this.report.id + '_' + conditional.prefLabel.toLowerCase().replace(/\s/g, '_').replace(/[()/]/g, ''));
       this.$set(conditional, 'valid', this.checkConditionalValidation(conditional));
 
@@ -756,7 +763,10 @@ export default {
         percentage: 'percentScore_',
       };
 
-      return scorePrefix[outputType] + title.toLowerCase().replace(/\s/g, '_').replace(/[()/]/g, '');
+      return scorePrefix[outputType] + title
+        .toLowerCase()
+        .replace(/[^a-zA-Z0-9]/g,'_')
+        .replace(/[^\w\s]|(_)(?=\1)/g, '');
     },
 
     onUpdateScoreRange() {
@@ -783,10 +793,6 @@ export default {
           this.minScore = totalMaxScore ? totalMinScore / totalMaxScore * 100 : 0;
           this.maxScore = 100;
           break;
-      }
-
-      if (this.scoreIdInMessage !== this.scoreId && (this.reportMessageIncludesId || this.conditionalMessageIncludesId)) {
-        this.showScoreTitleVariableWarning = true;
       }
 
       this.update();

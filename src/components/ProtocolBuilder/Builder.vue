@@ -132,6 +132,11 @@ export default {
       type: String,
       required: false,
       default: ''
+    },
+    appletCreated: {
+      type: Boolean,
+      required: false,
+      default: null
     }
   },
   computed: {
@@ -166,53 +171,13 @@ export default {
           this.updateTemplateRequestStatus(false);
         }
       }
+    },
+    appletCreated() {
+      this.initApplet()
     }
   },
   async beforeMount() {
-    this.setTemplates(this.templates);
-
-    this.initThemes(this.themes);
-    this.initThemeId(this.initialData);
-    this.setPDFToken(this.pdfServerToken);
-    this.setVersions(this.versions);
-    this.setNodeEnv(this.nodeEnv);
-    this.setCurrentScreen(config.PROTOCOL_SCREEN);
-    this.setCurrentActivity(-1);
-
-    let initialStoreData = await this.fillStoreWithAppletData();
-    if (this.basketApplets) {
-      initialStoreData = await this.mergeStoreDataWithBasketApplets(initialStoreData, this.basketApplets);
-    }
-
-    this.initProtocolData(initialStoreData);
-
-    if (this.initialData || (this.cacheData && this.cacheData.original)) {
-      if (!this.versions.length) {
-        this.$emit('setLoading', true);
-      }
-
-      const original = this.cacheData && this.cacheData.original ? this.cacheData.original : await this.formattedProtocol();
-
-      if (!this.versions.length) {
-        /** upload first version */
-
-        original.protocol.data[
-          'schema:schemaVersion'
-        ] = original.protocol.data['schema:version'] = util.upgradeVersion(
-          original.protocol.data['schema:version'],
-          '0.0.1'
-        );
-
-        this.$emit('prepareApplet', original);
-        return;
-      }
-
-      this.setFormattedOriginalProtocol(JSON.parse(JSON.stringify(original)));
-    } else {
-      this.setFormattedOriginalProtocol(null);
-    }
-
-    this.$emit("setLoading", false);
+    await this.initApplet()
   },
   methods: {
     ...mapMutations(config.MODULE_NAME, [
@@ -236,6 +201,53 @@ export default {
     ...mapGetters(config.MODULE_NAME, [
       'formattedProtocol'
     ]),
+    async initApplet() {
+      this.setTemplates(this.templates);
+
+      this.initThemes(this.themes);
+      this.initThemeId(this.initialData);
+      this.setPDFToken(this.pdfServerToken);
+      this.setVersions(this.versions);
+      this.setNodeEnv(this.nodeEnv);
+      this.setCurrentScreen(config.PROTOCOL_SCREEN);
+      this.setCurrentActivity(-1);
+
+      let initialStoreData = await this.fillStoreWithAppletData();
+      if (this.basketApplets) {
+        initialStoreData = await this.mergeStoreDataWithBasketApplets(initialStoreData, this.basketApplets);
+      }
+
+      this.initProtocolData(initialStoreData);
+
+      if (this.initialData || (this.cacheData && this.cacheData.original)) {
+        if (!this.versions.length) {
+          this.$emit('setLoading', true);
+        }
+
+        const original = this.cacheData && this.cacheData.original ? this.cacheData.original : await this.formattedProtocol();
+
+        if (!this.versions.length) {
+          /** upload first version */
+
+          original.protocol.data[
+            'schema:schemaVersion'
+          ] = original.protocol.data['schema:version'] = util.upgradeVersion(
+            original.protocol.data['schema:version'],
+            '0.0.1'
+          );
+
+          this.$emit('prepareApplet', original);
+          return;
+        }
+
+        this.setFormattedOriginalProtocol(JSON.parse(JSON.stringify(original)));
+      } else {
+        this.setFormattedOriginalProtocol(null);
+      }
+
+      this.$emit("setLoading", false);
+    },
+
     async fillStoreWithAppletData () {
       let initialStoreData = null;
 

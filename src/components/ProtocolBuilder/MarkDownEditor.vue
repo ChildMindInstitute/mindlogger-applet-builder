@@ -8,6 +8,7 @@
       :toolbars="toolbars"
       @input="$emit('input', $event)"
       @imgAdd="$imgAdd"
+      @change="(...args)=>handleChange([...args])"
     >
       <template slot="left-toolbar-after">
         <!-- <div
@@ -364,7 +365,7 @@
 
 <script>
 import ImageUploader from '../../models/ImageUploader';
-import {toolbar_left_addlink} from 'mavon-editor/src/lib/toolbar_left_click.js'
+import { toolbar_left_addlink } from 'mavon-editor/src/lib/toolbar_left_click.js'
 import { CONFIG } from 'mavon-editor/src/lib/config.js';
 
 export default {
@@ -399,6 +400,9 @@ export default {
     }
   },
   methods: {
+    handleChange(args) {
+      this.$emit('change', [...args])
+    },
     $imgAdd(pos, $file) {
       this.isUploading = true;
       const ret = this.imageUploader.uploadImage($file).then(ret => {

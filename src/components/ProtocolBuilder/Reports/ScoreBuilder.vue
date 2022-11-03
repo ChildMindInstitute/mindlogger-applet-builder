@@ -507,6 +507,14 @@ export default {
       return '';
     },
 
+    reportIdErrorMsg() {
+      if (!this.nameErrorMsg && this.currentActivity.reports.find(score => score.dataType == this.report.dataType && score.id == this.report.id && score != this.report)) {
+        return 'That score ID is already in use. Please use a different title.';
+      }
+
+      return '';
+    },
+
     filteredItemsCount () {
       return this.items.filter(
         item => (item.name + ': ' + item.questionText).toLowerCase().includes(this.searchText.toLowerCase())
@@ -726,8 +734,18 @@ export default {
       return '';
     },
 
+    getConditionalIdError(conditional) {
+      if (!this.getConditionalNameError(conditional) 
+        && this.conditionals.find(cond => cond.id == conditional.id && cond !== conditional)
+      ) {
+        return 'That score condition ID is already in use. Please use a different title.';
+      }
+
+      return '';
+    },
+
     checkConditionalValidation (conditional) {
-      if (!conditional.conditionalItem.valid || this.getConditionalNameError(conditional)) {
+      if (!conditional.conditionalItem.valid || this.getConditionalNameError(conditional) || this.getConditionalIdError(conditional)) {
         return false;
       }
 

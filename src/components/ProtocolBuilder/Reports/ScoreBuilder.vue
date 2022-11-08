@@ -20,11 +20,15 @@
             class="mr-6"
             label="Score Title"
             :error-messages="nameErrorMsg"
+            @blur="onScoreTitleBlur"
           />
         </v-col>
 
         <v-col class="pl-6">
-          <div class="label score-label">
+          <div 
+            class="label score-label"
+            :class="{ 'invalid-score-label': reportIdErrorMsg }"
+          >
             Score ID
 
             <v-tooltip bottom>
@@ -42,8 +46,8 @@
           <v-text-field
             class="pt-0 mt-0"
             :value="report.id"
-            hide-details
             readonly
+            :error-messages="reportIdErrorMsg"
           />
         </v-col>
       </v-row>
@@ -226,7 +230,10 @@
                 </v-col>
 
                 <v-col class="pl-6">
-                  <div class="label score-label">
+                  <div 
+                    class="label score-label"
+                    :class="{ 'invalid-score-label': getConditionalIdError(conditional) }"
+                  >
                     Score Condition ID
 
                     <v-tooltip bottom>
@@ -244,8 +251,8 @@
                   <v-text-field
                     class="pt-0 mt-0"
                     :value="conditional.id"
-                    hide-details
                     readonly
+                    :error-messages="getConditionalIdError(conditional)"
                   />
                 </v-col>
               </v-row>
@@ -304,7 +311,7 @@
       >
         <v-card>
           <v-card-text class="pt-4">
-            You are using this variable scoreID. Are you sure you want make changes to this scoreID?
+            You are using this variable scoreID. Do you want to change it everywhere in markdown?
           </v-card-text>
 
           <v-card-actions>
@@ -314,15 +321,17 @@
                 class="mx-2"
                 color="primary"
                 @click="() => {
-                  this.onScoreTitleChange(this.scoreTitleValue);
-                  this.showScoreTitleVariableWarning = false;
+                  replaceVariablesInMarkdown();
+                  showScoreTitleVariableWarning = false;
                 }"
             >
               Yes
             </v-btn>
 
             <v-btn
-                @click="() => this.showScoreTitleVariableWarning = false"
+                @click="() => {
+                  showScoreTitleVariableWarning = false
+                }"
             >
               No
             </v-btn>
@@ -352,6 +361,14 @@
   margin: 0px;
   font-size: 12px;
   transform: translateY(5px);
+}
+
+.invalid-score-label {
+  color: #FF0000;
+}
+
+.invalid-score-label .v-icon {
+    color: #FF0000;
 }
 
 .score-range {
@@ -395,7 +412,7 @@ import CardHeader from './CardHeader';
 import ReportMessageBuilder from './ReportMessageBuilder';
 import ConditionalComponent from './ConditionalComponent';
 import draggable from 'vuedraggable';
-import { mapGetters, mapMutations } from 'vuex';
+import { mapGetters } from 'vuex';
 import config from '../../../config';
 
 export default {
@@ -413,7 +430,7 @@ export default {
     }
   },
 
-  data () {
+  data() {
     const outputTypes = [
       {
         name: 'Sum',
@@ -431,9 +448,8 @@ export default {
 
     return {
       expanded: this.report.initialized ? false : true,
-      messageTemplate: `
-        <h3 style="color:#0067a0"> {score_title} </h3> The subject’s score on the **{Score Title}** subscale was [[{score_id}]].
-      `,
+      messageTemplate: `<h3 style="color:#0067a0"> score_title </h3> \nThe subject’s score on the <strong>score_title</strong> subscale was [[score_id]].`,
+      scoreIdInMessage: '',
       outputTypes,
       outputType: outputTypes.find(type => type.value == this.report.outputType),
       searchText: '',
@@ -443,28 +459,21 @@ export default {
       maxScore: this.report.maxScore,
       timerId: null,
       showScoreTitleVariableWarning: false,
-      scoreTitleValue: this.report.prefLabel
+      firstEdit: false,
     }
   },
 
   computed: {
-    config () {
+    config() {
       return config;
     },
 
     name: {
-      get () {
+      get() {
         return this.report.prefLabel
       },
-      set (value) {
-
-        let message = this.report.message;
-        if (message.length > 0 && message.includes(`[[${this.report.id}]]`)){
-          this.scoreTitleValue = value;
-          this.showScoreTitleVariableWarning = true;
-        }else{
-          this.onScoreTitleChange(value);
-        }
+      set(value) {
+        this.onScoreTitleChange(value);
       }
     },
 
@@ -474,17 +483,33 @@ export default {
       ]
     ),
 
-    nameErrorMsg () {
+    scoreId() {
+      return this.getScoreId(this.report.prefLabel, this.outputType.value);
+    },
+
+    reportMessageIncludesId() {
+      return this.includesScoreId(this.report.message);
+    },
+
+    conditionalMessageIncludesId() {
+      return this.conditionals && !!this.conditionals.find(conditional => conditional.showMessage && this.includesScoreId(conditional.message));
+    },
+
+    nameErrorMsg() {
       if (!this.name) {
         return 'This is a required field';
       }
 
-      if (!this.name.match(/^[a-zA-Z_0-9]+$/)) {
-        return 'Letters and underscores are only allowed. Please fix.';
-      }
-
       if (this.currentActivity.reports.find(score => score.dataType == this.report.dataType && score.prefLabel == this.name && score != this.report)) {
         return 'That score title is already in use. Please use a different title.';
+      }
+
+      return '';
+    },
+
+    reportIdErrorMsg() {
+      if (!this.nameErrorMsg && this.currentActivity.reports.find(score => score.dataType == this.report.dataType && score.id == this.report.id && score != this.report)) {
+        return 'That score ID is already in use. Please use a different title.';
       }
 
       return '';
@@ -496,7 +521,7 @@ export default {
       ).length;
     },
 
-    items () {
+    items() {
       return this.currentActivity.items.filter(item =>
           (item.inputType == 'radio' || item.inputType == 'prize' || item.inputType == 'slider' || item.inputType == 'checkbox')
             &&
@@ -504,16 +529,16 @@ export default {
       ).map((item) => ({
         ...item,
         identifier: `${item.timestamp}-${item.id || 0}`,
-        questionText: this.getQuestion(item.question.text),
+        questionText: this.getQuestion(item.question.displayedText),
         ...this.getScoreRange(item)
       }))
     },
 
-    printItemList () {
+    printItemList() {
       return this.currentActivity.items.filter(item => ['radio', 'checkbox', 'prize', 'slider', 'text'].includes(item.inputType))
     },
 
-    selectedItemCount () {
+    selectedItemCount() {
       let count = 0;
       for (let i = 0; i < this.items.length; i++) {
         const id = this.items[i].identifier;
@@ -527,8 +552,13 @@ export default {
     }
   },
 
-  beforeMount () {
+  beforeMount() {
     const selectedItems = this.report.jsExpression.split('+').map(name => name.trim());
+    this.firstEdit = !this.report.initialized
+
+    if (this.report.message.length > 0 && this.report.message.includes(`[[${this.scoreId}]]`)) {
+      this.scoreIdInMessage = this.scoreId
+    }
 
     for (const item of this.items) {
       this.$set(this.selection, item.identifier, selectedItems.includes(item.name));
@@ -538,19 +568,21 @@ export default {
   },
 
   methods: {
-    onScoreTitleChange(value){
+    onScoreTitleChange(value) {
       let message = this.report.message;
       let scoreId = this.getScoreId(value, this.outputType.value);
 
       if (!this.report.initialized) {
-        message = this.messageTemplate.replace('{score_id}', scoreId).replace('{score_title}', value);
-
         clearTimeout(this.timerId);
         this.timerId = setTimeout(() => {
           this.update({
             initialized: true,
           })
         }, 500)
+      }
+
+      if(!this.reportMessageIncludesId && !this.conditionalMessageIncludesId) {
+        this.scoreIdInMessage = scoreId;
       }
 
       for (const conditional of this.conditionals) {
@@ -564,7 +596,50 @@ export default {
         conditionals: this.conditionals.map(conditional => ({ ...conditional })),
       })
     },
-    getScoreRange (item) {
+
+    onScoreTitleBlur() {
+      let message = this.report.message;
+
+      if(this.firstEdit && !message.length && this.report.prefLabel) {
+        message = this.messageTemplate.replace('score_id', this.scoreId).replaceAll('score_title', this.report.prefLabel);
+        this.firstEdit = false;
+
+        this.update({
+          message,
+        })
+      } 
+
+      if (this.scoreIdInMessage !== this.scoreId && (this.reportMessageIncludesId || this.conditionalMessageIncludesId)) {
+        this.showScoreTitleVariableWarning = true;
+      }
+    },
+
+    replaceVariablesInMarkdown() {
+      let message = this.report.message;  
+      this.conditionals && !!this.conditionals.find(conditional => conditional.showMessage && this.includesScoreId(conditional.message))
+
+      if(this.reportMessageIncludesId) {
+        message = message.replaceAll(`[[${this.scoreIdInMessage}]]`, `[[${this.scoreId}]]`)
+      }
+
+      if(this.conditionalMessageIncludesId) {
+        this.conditionals.forEach(conditional => {
+          if(!conditional.showMessage || !conditional.message) {
+            return
+          }
+          
+          conditional.message = conditional.message.replaceAll(`[[${this.scoreIdInMessage}]]`, `[[${this.scoreId}]]`)
+        })
+      }      
+
+      this.scoreIdInMessage = this.scoreId;
+      this.update({
+        message,
+        conditionals: this.conditionals.map(conditional => ({ ...conditional })),
+      })
+    },
+
+    getScoreRange(item) {
       let scores = [];
       if (item.inputType == 'radio' || item.inputType == 'checkbox' || item.inputType == 'prize') {
         scores = item.options.options.filter(option => !option.isVis).map(option => option.score);
@@ -588,7 +663,7 @@ export default {
       return { maxScore, minScore }
     },
 
-    invertSelection (index) {
+    invertSelection(index) {
       const id = this.items[index].identifier;
       const value = !this.selection[id];
 
@@ -596,7 +671,7 @@ export default {
       this.onUpdateScoreRange();
     },
 
-    onSelectAll () {
+    onSelectAll() {
       for (const item of this.items) {
         if (item.name.includes(this.searchText)) {
           this.$set(this.selection, item.identifier, true);
@@ -606,7 +681,7 @@ export default {
       this.onUpdateScoreRange();
     },
 
-    onDeselectAll () {
+    onDeselectAll() {
       for (const item of this.items) {
         if (item.name.includes(this.searchText)) {
           this.$set(this.selection, item.identifier, false);
@@ -616,7 +691,7 @@ export default {
       this.onUpdateScoreRange();
     },
 
-    onAddScoreCondition () {
+    onAddScoreCondition() {
       this.conditionals.push({
         prefLabel: '',
         id: '',
@@ -642,19 +717,16 @@ export default {
       this.update();
     },
 
-    deleteScoreCondition (conditional) {
+    deleteScoreCondition(conditional) {
       this.conditionals.splice(this.conditionals.indexOf(conditional), 1);
       this.update();
     },
 
-    getConditionalNameError (conditional) {
+    getConditionalNameError(conditional) {
       if (!conditional.prefLabel) {
         return 'This is a required field';
       }
 
-      if (!conditional.prefLabel.match(/^[a-zA-Z_0-9]+$/)) {
-        return 'Letters and underscores are only allowed. Please fix.';
-      }
       if (this.conditionals.find(d => d.prefLabel == conditional.prefLabel && d !== conditional)) {
         return 'That title is already in use. Please use a different title.';
       }
@@ -662,8 +734,18 @@ export default {
       return '';
     },
 
+    getConditionalIdError(conditional) {
+      if (!this.getConditionalNameError(conditional) 
+        && this.conditionals.find(cond => cond.id == conditional.id && cond !== conditional)
+      ) {
+        return 'That score condition ID is already in use. Please use a different title.';
+      }
+
+      return '';
+    },
+
     checkConditionalValidation (conditional) {
-      if (!conditional.conditionalItem.valid || this.getConditionalNameError(conditional)) {
+      if (!conditional.conditionalItem.valid || this.getConditionalNameError(conditional) || this.getConditionalIdError(conditional)) {
         return false;
       }
 
@@ -685,24 +767,27 @@ export default {
       this.update();
     },
 
-    onUpdateConditional (conditional, updates) {
+    onUpdateConditional(conditional, updates) {
       Object.assign(conditional, updates);
       this.$set(conditional, 'valid', this.checkConditionalValidation(conditional));
 
       this.update();
     },
 
-    getScoreId (title, outputType) {
+    getScoreId(title, outputType) {
       const scorePrefix = {
         cumulative: 'sumScore_',
         average: 'averageScore_',
         percentage: 'percentScore_',
       };
 
-      return scorePrefix[outputType] + title.toLowerCase().replace(/\s/g, '_').replace(/[()/]/g, '');
+      return scorePrefix[outputType] + title
+        .toLowerCase()
+        .replace(/[^a-zA-Z0-9]/g,'_')
+        .replace(/[^\w\s]|(_)(?=\1)/g, '');
     },
 
-    onUpdateScoreRange () {
+    onUpdateScoreRange() {
       let totalMinScore = 0, totalMaxScore = 0, count = 0;
 
       for (const item of this.items) {
@@ -728,10 +813,16 @@ export default {
           break;
       }
 
+      this.report.id = this.getScoreId(this.report.prefLabel, this.outputType.value);
+      this.conditionals.forEach(conditional => {
+        if(!conditional.id) return;
+        conditional.id = this.report.id + '_' + conditional.prefLabel.toLowerCase().replace(/\s/g, '_').replace(/[()/]/g, '');
+      })
+
       this.update();
     },
 
-    update (newOptions = null) {
+    update(newOptions = null) {
       const updates = {
         conditionals: this.conditionals.map(conditional => ({ ...conditional })),
         outputType: this.outputType.value,
@@ -745,7 +836,7 @@ export default {
         minScore: this.minScore,
         maxScore: this.maxScore,
 
-        id: this.getScoreId(this.report.prefLabel, this.outputType.value),
+        id: this.scoreId,
       };
 
       if (newOptions) {
@@ -755,12 +846,16 @@ export default {
       this.$emit('update', updates);
     },
 
-    getQuestion (text) {
+    getQuestion(text) {
       return text.replace(/[#*]/g, '')
                 .replace(/<\/?(div|span|a|img|b|h[\d]).*?>/g, '')
                 .replace(/\!\[.*?\]\(.*?\)/g, '')
                 .replace(/\+\+|\=\=|:::(\shljs-\S+)?|\*\*|[#-]/g, '')
                 .replace(/\|/g, '')
+    },
+
+    includesScoreId(message) {
+      return message.length > 0 && message.includes(`[[${this.scoreIdInMessage}]]`)
     }
   }
 }

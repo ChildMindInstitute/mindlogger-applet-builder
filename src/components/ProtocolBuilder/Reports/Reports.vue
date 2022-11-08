@@ -8,16 +8,16 @@
       <div class="px-4 pb-6">
         <v-checkbox
           v-model="exportAvailable"
-          label="Make Report available for Export"
+          label="Generate Report"
           hide-details
-          :disabled="this.currentActivity.reports.length < 1"
+          :disabled="currentActivity.reports.length < 1"
         />
 
         <v-checkbox
           v-model="allowSummary"
-          label="Show report at the end of the activity"
+          label="Show Score Summary"
           hide-details
-          :disabled="this.currentActivity.reports.length < 1"
+          :disabled="currentActivity.reports.length < 1"
         />
       </div>
 

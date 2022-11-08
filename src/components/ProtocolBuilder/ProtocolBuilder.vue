@@ -365,7 +365,7 @@
                           class="ml-4"
                           @click="newActivity(index+1, 'FLANKER')"
                         >
-                          <v-list-item-title>Flanker</v-list-item-title>
+                          <v-list-item-title>Simple & Choice Reaction Time Task Builder</v-list-item-title>
                         </v-list-item>
 
                         <v-list-item

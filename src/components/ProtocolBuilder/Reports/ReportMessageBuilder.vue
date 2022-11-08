@@ -25,9 +25,8 @@
 
     <MarkDownEditor
       v-if="showMessage"
-      class="my-4"
       v-model="message"
-      @input="onChangeMessage"
+      class="my-4"
     />
 
     <v-switch
@@ -101,16 +100,29 @@ export default {
       type: String,
       required: false,
       default: ''
-    }
+    },
   },
 
   data () {
     return {
-      message: this.container.message,
       showMessage: this.container.showMessage,
       showItems: this.container.showItems,
       printItems: this.container.printItems,
-      selection: {}
+      selection: {},
+    }
+  },
+
+  computed: {
+    message: {
+      get() {
+        return this.container.message
+      },
+      set(message) {
+        this.$emit('update', {
+        message,
+        initialized: true
+      });
+      }
     }
   },
 
@@ -139,13 +151,6 @@ export default {
 
       this.$set(this.selection, id, value);
       this.$emit('update', this.getChanges(false, this.showMessage, this.showItems));
-    },
-
-    onChangeMessage () {
-      this.$emit('update', {
-        message: this.message,
-        initialized: true
-      });
     },
 
     getChanges (messageInitialized, showMessage, showItems) {
